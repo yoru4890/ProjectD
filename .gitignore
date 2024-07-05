@@ -74,10 +74,7 @@ Plugins/*/Intermediate/*
 DerivedDataCache/*
 
 # Custom
-Content/__ExternalActors__
-Content/__ExternalObjects__
-Content/StarterContent
-Content/Characters
-Content/LevelPrototyping
-Content/ThirdPerson
+Content/*
+!Content/0000
+
 
