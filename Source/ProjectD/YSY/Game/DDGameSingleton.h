@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
+#include "YSY/GameData/DDEnemyData.h"
 #include "DDGameSingleton.generated.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogDDGameSingleton, Error, All);
@@ -19,4 +20,6 @@ class PROJECTD_API UDDGameSingleton : public UObject
 public:
 	UDDGameSingleton();
 	static UDDGameSingleton& Get();
+
+private:
 };

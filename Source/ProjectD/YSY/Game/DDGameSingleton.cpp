@@ -7,6 +7,15 @@ DEFINE_LOG_CATEGORY(LogDDGameSingleton);
 
 UDDGameSingleton::UDDGameSingleton()
 {
+	static ConstructorHelpers::FObjectFinder<UDataTable> EnemyDataTableRef(TEXT("/Script/Engine.DataTable'/Game/0000/YSY/Data/DT_EnemyData.DT_EnemyData'"));
+	if (EnemyDataTableRef.Object)
+	{
+		const UDataTable* DataTable = EnemyDataTableRef.Object;
+		check(DataTable->GetRowMap().Num() > 0);
+
+		DataTable->GetRowNames();
+	}
+
 }
 
 UDDGameSingleton& UDDGameSingleton::Get()
