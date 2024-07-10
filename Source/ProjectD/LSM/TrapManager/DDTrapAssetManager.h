@@ -20,10 +20,10 @@ public:
 
     // 저장된 TrapAsset을 불러오는 함수
     TObjectPtr<UStaticMesh> GetLoadedTrapMesh(const FName& TowerName) const;
-
-private:
     // TrapAsset을 비동기로 불러오는 함수
     void LoadTrapAssetsAsync();
+
+private:
 
     // Asset이 로드되면 실행될 콜백함수
     void OnTrapAssetsLoaded();

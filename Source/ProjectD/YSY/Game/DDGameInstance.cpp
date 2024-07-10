@@ -10,4 +10,5 @@ void UDDGameInstance::Init()
 	Super::Init();
 	TrapAssetManager = NewObject<UDDTrapAssetManager>(this);
 	TrapManager = NewObject<UDDTrapManager>(this);
+	TrapAssetManager->LoadTrapAssetsAsync();
 }

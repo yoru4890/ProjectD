@@ -8,8 +8,10 @@ UDDTrapManager::UDDTrapManager()
 	static ConstructorHelpers::FObjectFinder<UDataTable> TrapDataTableRef(TEXT("/Script/Engine.DataTable'/Game/0000/LSM/Data/LSM_DT_Trap.LSM_DT_Trap'"));
 	if (TrapDataTableRef.Succeeded())
 	{
+		UE_LOG(LogTemp, Warning, TEXT("TrapDataTableSuccess"));
 		TrapDataTable = TrapDataTableRef.Object;
 	}
+	UE_LOG(LogTemp, Warning, TEXT("TrapDataTableFail"));
 }
 
 

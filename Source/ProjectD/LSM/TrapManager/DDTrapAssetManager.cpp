@@ -33,51 +33,47 @@ void UDDTrapAssetManager::LoadTrapAssetsAsync()
     {
         if (TrapStruct)
         {
-            TrapAssetsToLoad.Add(TrapStruct->TrapName, TrapStruct->TrapMesh.ToSoftObjectPath());
-
-            if (TrapStruct->TrapMesh)
+            FSoftObjectPath TrapMeshPath = TrapStruct->TrapMesh.ToSoftObjectPath();
+            if (TrapMeshPath.IsValid())
             {
-                UE_LOG(LogTemp, Log, TEXT("Trap Mesh is valid"));
+                TrapAssetsToLoad.Add(TrapStruct->TrapName, TrapMeshPath);
+                UE_LOG(LogTemp, Log, TEXT("Trap Mesh is valid for %s"), *TrapStruct->TrapName.ToString());
             }
             else
             {
-                UE_LOG(LogTemp, Warning, TEXT("Trap Mesh is null"));
+                UE_LOG(LogTemp, Warning, TEXT("Trap Mesh path is invalid for %s"), *TrapStruct->TrapName.ToString());
             }
         }
     }
-   // // 로드할 트랩 자산 경로 설정
-   // TrapAssetsToLoad = {
-   //     FSoftObjectPath(TEXT("StaticMesh'/Game/Path/To/Mesh1.Mesh1'")),
-   //     FSoftObjectPath(TEXT("StaticMesh'/Game/Path/To/Mesh2.Mesh2'")),
-   //     // 필요한 만큼 추가
-   // };
 
-   // // 비동기 로드 시작
-   ///StreamableManager.RequestAsyncLoad(TrapAssetsToLoad, FStreamableDelegate::CreateUObject(this, &UDDTrapAssetManager::OnTrapAssetsLoaded));
+    // 비동기 로드 시작
+    TArray<FSoftObjectPath> AssetsToLoad;
+    TrapAssetsToLoad.GenerateValueArray(AssetsToLoad);
+    StreamableManager.RequestAsyncLoad(AssetsToLoad, FStreamableDelegate::CreateUObject(this, &UDDTrapAssetManager::OnTrapAssetsLoaded));
 }
 
 void UDDTrapAssetManager::OnTrapAssetsLoaded()
 {
-    //for (const FSoftObjectPath& AssetPath : TrapAssetsToLoad)
-    //{
-    //    UObject* LoadedAsset = StreamableManager.LoadSynchronous(AssetPath);
-    //    // 로드된 자산 사용
-    //    UStaticMesh* LoadedMesh = Cast<UStaticMesh>(LoadedAsset);
-    //    if (LoadedMesh)
-    //    {
-    //        LoadedTrapMeshes.Add(LoadedMesh);
-    //    }
-    //}
+    for (const TPair<FName, FSoftObjectPath>& AssetPair : TrapAssetsToLoad)
+    {
+        UObject* LoadedAsset = StreamableManager.LoadSynchronous(AssetPair.Value);
+        // 로드된 자산 사용
+        UStaticMesh* LoadedMesh = Cast<UStaticMesh>(LoadedAsset);
+        if (LoadedMesh)
+        {
+            LoadedTrapMeshes.Add(AssetPair.Key, LoadedMesh);
+        }
+    }
 
-    //// 로드 완료 처리
-    //TrapAssetsToLoad.Empty();
+    // 로드 완료 처리
+    TrapAssetsToLoad.Empty();
 }
 
-TObjectPtr<UStaticMesh> UDDTrapAssetManager::GetLoadedTrapMesh(const FName& TowerName) const
+TObjectPtr<UStaticMesh> UDDTrapAssetManager::GetLoadedTrapMesh(const FName& TrapName) const
 {
-    //if (LoadedTrapMeshes.IsValidIndex(Index))
-    //{
-    //    return LoadedTrapMeshes[Index];
-    //}
+    if (LoadedTrapMeshes.Contains(TrapName))
+    {
+        return LoadedTrapMeshes[TrapName];
+    }
     return nullptr;
 }
