@@ -4,23 +4,23 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "DDTowerBase.generated.h"
+#include "DDTrapBase.generated.h"
 
 UCLASS()
-class PROJECTD_API ADDTowerBase : public AActor
+class PROJECTD_API ADDTrapBase : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	ADDTowerBase();
+	ADDTrapBase();
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 protected:
-	UPROPERTY(VisibleAnywhere, Category = Tower)
+	UPROPERTY(VisibleAnywhere, Category = Trap)
 	TObjectPtr<class UStaticMeshComponent> Mesh;
 
 public:	

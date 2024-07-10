@@ -1,10 +1,10 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "LSM/Tower/DDTowerBase.h"
+#include "LSM/Trap/DDTrapBase.h"
 
 // Sets default values
-ADDTowerBase::ADDTowerBase()
+ADDTrapBase::ADDTrapBase()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -12,22 +12,22 @@ ADDTowerBase::ADDTowerBase()
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	RootComponent = Mesh;
 
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> TowerMeshRef(TEXT("/Script/Engine.StaticMesh'/Engine/BasicShapes/Cube.Cube'"));
-	if (TowerMeshRef.Object) {
-		Mesh->SetStaticMesh(TowerMeshRef.Object);
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> TrapMeshRef(TEXT("/Script/Engine.StaticMesh'/Engine/BasicShapes/Cube.Cube'"));
+	if (TrapMeshRef.Object) {
+		Mesh->SetStaticMesh(TrapMeshRef.Object);
 	}
 
 }
 
 // Called when the game starts or when spawned
-void ADDTowerBase::BeginPlay()
+void ADDTrapBase::BeginPlay()
 {
 	Super::BeginPlay();
 	
 }
 
 // Called every frame
-void ADDTowerBase::Tick(float DeltaTime)
+void ADDTrapBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
