@@ -13,9 +13,12 @@ UDDGameSingleton::UDDGameSingleton()
 		const UDataTable* DataTable = EnemyDataTableRef.Object;
 		check(DataTable->GetRowMap().Num() > 0);
 
-		DataTable->GetRowNames();
+		TMap<FName, uint8*> TempEnemyDataMap = DataTable->GetRowMap();
+		for (auto& [EnemyName, EnemyData] : TempEnemyDataMap)
+		{
+			EnemyDataTable.Add(EnemyName, *reinterpret_cast<FDDEnemyData*>(EnemyData));
+		}
 	}
-
 }
 
 UDDGameSingleton& UDDGameSingleton::Get()
@@ -28,4 +31,15 @@ UDDGameSingleton& UDDGameSingleton::Get()
 
 	UE_LOG(LogDDGameSingleton, Error, TEXT("Invalid Game Singleton"));
 	return *NewObject<UDDGameSingleton>();
+}
+
+FDDEnemyData UDDGameSingleton::GetEnemyData(const FName& EnemyName) const
+{
+	const FDDEnemyData* EnemyData = EnemyDataTable.Find(EnemyName);
+	if (EnemyData)
+	{
+		return *EnemyData;
+	}
+
+	return FDDEnemyData();
 }

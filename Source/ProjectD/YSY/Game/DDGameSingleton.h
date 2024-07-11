@@ -21,5 +21,8 @@ public:
 	UDDGameSingleton();
 	static UDDGameSingleton& Get();
 
+	FDDEnemyData GetEnemyData(const FName& EnemyName) const;
+
 private:
+	TMap<FName, FDDEnemyData> EnemyDataTable;
 };
