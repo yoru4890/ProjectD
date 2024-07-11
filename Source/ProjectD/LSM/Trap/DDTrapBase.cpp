@@ -1,6 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "LSM/Trap/DDTrapBase.h"
 
 // Sets default values
@@ -9,13 +8,13 @@ ADDTrapBase::ADDTrapBase()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
-	RootComponent = Mesh;
+	//Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
+	//RootComponent = Mesh;
 
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> TrapMeshRef(TEXT("/Script/Engine.StaticMesh'/Engine/BasicShapes/Cube.Cube'"));
-	if (TrapMeshRef.Object) {
-		Mesh->SetStaticMesh(TrapMeshRef.Object);
-	}
+	//static ConstructorHelpers::FObjectFinder<UStaticMesh> TrapMeshRef(TEXT("/Script/Engine.StaticMesh'/Engine/BasicShapes/Cube.Cube'"));
+	//if (TrapMeshRef.Object) {
+	//	Mesh->SetStaticMesh(TrapMeshRef.Object);
+	//}
 
 }
 

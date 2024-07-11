@@ -19,7 +19,9 @@ public:
     UDDTrapAssetManager();
 
     // 저장된 TrapAsset을 불러오는 함수
-    TObjectPtr<UStaticMesh> GetLoadedTrapMesh(const FName& TowerName) const;
+    TObjectPtr<UStaticMesh> GetLoadedTrapStaticMesh(const FName& TowerName) const;
+
+    TObjectPtr<USkeletalMesh> GetLoadedTrapSkeletalMesh(const FName& TowerName) const;
     // TrapAsset을 비동기로 불러오는 함수
     void LoadTrapAssetsAsync();
 
@@ -34,7 +36,10 @@ private:
 
     // TrapAsset이 담겨있는 Mesh
     UPROPERTY()
-    TMap<FName,UStaticMesh*> LoadedTrapMeshes;
+    TMap<FName, TObjectPtr<UStaticMesh>> LoadedTrapStaticMeshes;
+
+    UPROPERTY()
+    TMap<FName, TObjectPtr<USkeletalMesh>> LoadedTrapSkeletalMeshes;
 
     UPROPERTY()
     TObjectPtr<UGameInstance> GameInstance;

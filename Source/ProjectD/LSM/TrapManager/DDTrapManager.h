@@ -9,6 +9,22 @@
 /**
  * 
  */
+UENUM(BlueprintType)
+enum class ETrapMeshType : uint8
+{
+	StaticMesh,
+	SkeletalMesh,
+	Unknown
+};
+
+UENUM(BlueprintType)
+enum class ETrapType : uint8
+{
+	ThornTrap,
+	IceTrap,
+	Unknown
+};
+
 USTRUCT(BlueprintType)
 struct FTrapStruct : public FTableRowBase
 {
@@ -46,7 +62,13 @@ public:
 	bool bIsTrapUnlocked; // 트랩이 언락되었는지 여부
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSoftObjectPtr<UStaticMesh> TrapMesh; // 트랩의 메쉬
+	ETrapMeshType TrapMeshType; // 트랩의 메쉬 타입
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSoftObjectPtr<UStaticMesh> TrapStaticMesh; // 트랩의 스태틱 메쉬
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSoftObjectPtr<USkeletalMesh> TrapSkeletalMesh; // 트랩의 스켈레톤 메쉬
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSoftObjectPtr<UParticleSystem> TrapEffect; // 트랩의 공격 이펙트

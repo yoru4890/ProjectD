@@ -33,7 +33,14 @@ void UDDTrapAssetManager::LoadTrapAssetsAsync()
     {
         if (TrapStruct)
         {
-            FSoftObjectPath TrapMeshPath = TrapStruct->TrapMesh.ToSoftObjectPath();
+            FSoftObjectPath TrapMeshPath;
+            if (TrapStruct->TrapMeshType == ETrapMeshType::StaticMesh) {
+                TrapMeshPath = TrapStruct->TrapStaticMesh.ToSoftObjectPath();
+            }
+            else {
+                TrapMeshPath = TrapStruct->TrapSkeletalMesh.ToSoftObjectPath();
+            }
+            
             if (TrapMeshPath.IsValid())
             {
                 TrapAssetsToLoad.Add(TrapStruct->TrapName, TrapMeshPath);
@@ -57,23 +64,40 @@ void UDDTrapAssetManager::OnTrapAssetsLoaded()
     for (const TPair<FName, FSoftObjectPath>& AssetPair : TrapAssetsToLoad)
     {
         UObject* LoadedAsset = StreamableManager.LoadSynchronous(AssetPair.Value);
-        // 로드된 자산 사용
-        UStaticMesh* LoadedMesh = Cast<UStaticMesh>(LoadedAsset);
-        if (LoadedMesh)
+
+        if (UStaticMesh* LoadedStaticMesh = Cast<UStaticMesh>(LoadedAsset))
         {
-            LoadedTrapMeshes.Add(AssetPair.Key, LoadedMesh);
+            LoadedTrapStaticMeshes.Add(AssetPair.Key, LoadedStaticMesh);
+        }
+        else if (USkeletalMesh* LoadedSkeletalMesh = Cast<USkeletalMesh>(LoadedAsset))
+        {
+            LoadedTrapSkeletalMeshes.Add(AssetPair.Key, LoadedSkeletalMesh);
+        }
+        else
+        {
+            UE_LOG(LogTemp, Warning, TEXT("Unsupported asset type loaded: %s"), *AssetPair.Key.ToString());
         }
     }
+
 
     // 로드 완료 처리
     TrapAssetsToLoad.Empty();
 }
 
-TObjectPtr<UStaticMesh> UDDTrapAssetManager::GetLoadedTrapMesh(const FName& TrapName) const
+TObjectPtr<UStaticMesh> UDDTrapAssetManager::GetLoadedTrapStaticMesh(const FName& TrapName) const
 {
-    if (LoadedTrapMeshes.Contains(TrapName))
+    if (LoadedTrapStaticMeshes.Contains(TrapName))
     {
-        return LoadedTrapMeshes[TrapName];
+        return LoadedTrapStaticMeshes[TrapName];
+    }
+    return nullptr;
+}
+
+TObjectPtr<USkeletalMesh> UDDTrapAssetManager::GetLoadedTrapSkeletalMesh(const FName& TrapName) const
+{
+    if (LoadedTrapSkeletalMeshes.Contains(TrapName))
+    {
+        return LoadedTrapSkeletalMeshes[TrapName];
     }
     return nullptr;
 }
