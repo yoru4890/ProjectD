@@ -26,10 +26,10 @@ void UDDTrapAssetManager::LoadTrapAssetsAsync()
 
     // 데이터 테이블의 모든 행을 순회
     static const FString ContextString(TEXT("GENERAL"));
-    TArray<FTrapStruct*> AllTrapData;
+    TArray<FDDTrapStruct*> AllTrapData;
     TrapDataTable->GetAllRows(ContextString, AllTrapData);
 
-    for (FTrapStruct* TrapStruct : AllTrapData)
+    for (FDDTrapStruct* TrapStruct : AllTrapData)
     {
         if (TrapStruct)
         {

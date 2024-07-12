@@ -3,24 +3,33 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
-#include "LSM/TrapManager/DDTrapManager.h"
-#include "DDTrapBase.generated.h"
+#include "DDTrapStruct.generated.h"
 
-UCLASS()
-class PROJECTD_API ADDTrapBase : public AActor
+/**
+ *
+ */
+UENUM(BlueprintType)
+enum class ETrapMeshType : uint8
+{
+	StaticMesh,
+	SkeletalMesh,
+	Unknown
+};
+
+UENUM(BlueprintType)
+enum class ETrapType : uint8
+{
+	ThornTrap,
+	IceTrap,
+	Unknown
+};
+
+USTRUCT(BlueprintType)
+struct FDDTrapStruct : public FTableRowBase
 {
 	GENERATED_BODY()
-	
-public:	
-	// Sets default values for this actor's properties
-	ADDTrapBase();
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-protected:
+public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName TrapName; // 트랩의 이름
 
@@ -58,16 +67,16 @@ protected:
 	ETrapMeshType TrapMeshType; // 트랩의 메쉬 타입
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "TrapMeshType == ETrapMeshType::StaticMesh"))
-	TObjectPtr<UStaticMesh> TrapStaticMesh; // 트랩의 스태틱 메쉬
+	TSoftObjectPtr<UStaticMesh> TrapStaticMesh; // 트랩의 스태틱 메쉬
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "TrapMeshType == ETrapMeshType::SkeletalMesh"))
-	TObjectPtr<USkeletalMesh> TrapSkeletalMesh; // 트랩의 스켈레톤 메쉬
+	TSoftObjectPtr<USkeletalMesh> TrapSkeletalMesh; // 트랩의 스켈레톤 메쉬
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "TrapMeshType == ETrapMeshType::SkeletalMesh"))
-	TObjectPtr<UAnimBlueprint> TrapAnimBlueprint; // 트랩의 애니메이션 블루프린트
+	TSoftObjectPtr<UAnimBlueprint> TrapAnimBlueprint; // 트랩의 애니메이션 블루프린트
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TObjectPtr<UParticleSystem> TrapEffect; // 트랩의 공격 이펙트
+	TSoftObjectPtr<UParticleSystem> TrapEffect; // 트랩의 공격 이펙트
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsDotTrap; // 도트 공격 트랩 여부
@@ -89,10 +98,5 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bIsSlowTrap"))
 	float SlowDuration; // 이동 속도 감소 지속 시간
-
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-	void InitFromDataTable(const FDDTrapStruct& TrapData);
 
 };

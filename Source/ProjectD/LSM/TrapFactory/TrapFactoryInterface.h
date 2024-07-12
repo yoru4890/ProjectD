@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
+#include "LSM/Trap/DDTrapBase.h"
 #include "TrapFactoryInterface.generated.h"
 
 // This class does not need to be modified.
@@ -22,4 +23,5 @@ class PROJECTD_API ITrapFactoryInterface
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
+	virtual ADDTrapBase* CreateTrap(const FVector& Location, const FDDTrapStruct& TrapData, UWorld* World) = 0;
 };

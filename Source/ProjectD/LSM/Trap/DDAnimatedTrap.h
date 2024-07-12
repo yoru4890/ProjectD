@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/NoExportTypes.h"
-#include "ThornTrapFactory.generated.h"
+#include "LSM/Trap/DDTrapBase.h"
+#include "DDAnimatedTrap.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class PROJECTD_API UThornTrapFactory : public UObject
+class PROJECTD_API ADDAnimatedTrap : public ADDTrapBase
 {
 	GENERATED_BODY()
 	

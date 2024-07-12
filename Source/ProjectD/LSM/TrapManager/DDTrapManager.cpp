@@ -30,13 +30,13 @@ void UDDTrapManager::UnlockTower(const FName& TowerName)
 	UnlockedTowers.Add(TowerName);
 }
 
-FTrapStruct* UDDTrapManager::GetTrapData(const FName& TrapName) const
+FDDTrapStruct* UDDTrapManager::GetTrapData(const FName& TrapName) const
 {
-	FTrapStruct* TrapData = nullptr;
+	FDDTrapStruct* TrapData = nullptr;
 	if (TrapDataTable)
 	{
 		static const FString ContextString(TEXT("Trap Data Context"));
-		TrapData = TrapDataTable->FindRow<FTrapStruct>(TrapName, ContextString);
+		TrapData = TrapDataTable->FindRow<FDDTrapStruct>(TrapName, ContextString);
 	}
 	return TrapData;
 }

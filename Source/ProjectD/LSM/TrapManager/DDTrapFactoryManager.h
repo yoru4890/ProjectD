@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "LSM/Trap/DDTrapStruct.h"
 #include "UObject/NoExportTypes.h"
 #include "DDTrapFactoryManager.generated.h"
 
@@ -16,5 +17,5 @@ class PROJECTD_API UDDTrapFactoryManager : public UObject
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "Trap")
-	static ADDTrapBase* CreateTrap(ETrapType TrapType, const FVector& Location, const FTrapStruct& TrapData, UWorld* World);
+	static ADDTrapBase* CreateTrap(ETrapType TrapType, const FVector& Location, const FDDTrapStruct& TrapData, UWorld* World);
 };

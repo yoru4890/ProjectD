@@ -32,3 +32,30 @@ void ADDTrapBase::Tick(float DeltaTime)
 
 }
 
+void ADDTrapBase::InitFromDataTable(const FDDTrapStruct& TrapData)
+{
+	TrapName = TrapData.TrapName;
+	TrapType = TrapData.TrapType;
+	TrapBuildCost = TrapData.TrapBuildCost;
+	TrapUpgradeCost = TrapData.TrapUpgradeCost;
+	TrapUnlockCost = TrapData.TrapUnlockCost;
+	TrapCoolTime = TrapData.TrapCoolTime;
+	TrapDamage = TrapData.TrapDamage;
+	TrapLevel = TrapData.TrapLevel;
+	TrapParentName = TrapData.TrapParentName;
+	TrapChildNames = TrapData.TrapChildNames;
+	bIsTrapUnlocked = TrapData.bIsTrapUnlocked;
+	TrapMeshType = TrapData.TrapMeshType;
+	TrapStaticMesh = TrapData.TrapStaticMesh.LoadSynchronous();
+	TrapSkeletalMesh = TrapData.TrapSkeletalMesh.LoadSynchronous();
+	TrapAnimBlueprint = TrapData.TrapAnimBlueprint.LoadSynchronous();
+	TrapEffect = TrapData.TrapEffect.LoadSynchronous();
+	bIsDotTrap = TrapData.bIsDotTrap;
+	DotDamage = TrapData.DotDamage;
+	DotDuration = TrapData.DotDuration;
+	DotInterval = TrapData.DotInterval;
+	bIsSlowTrap = TrapData.bIsSlowTrap;
+	SlowAmount = TrapData.SlowAmount;
+	SlowDuration = TrapData.SlowDuration;
+}
+

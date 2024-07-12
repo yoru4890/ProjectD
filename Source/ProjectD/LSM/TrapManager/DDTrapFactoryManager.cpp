@@ -3,7 +3,7 @@
 
 #include "LSM/TrapManager/DDTrapFactoryManager.h"
 
-ADDTrapBase* UDDTrapFactoryManager::CreateTrap(ETrapType TrapType, const FVector& Location, const FTrapStruct& TrapData, UWorld* World)
+ADDTrapBase* UDDTrapFactoryManager::CreateTrap(ETrapType TrapType, const FVector& Location, const FDDTrapStruct& TrapData, UWorld* World)
 {
 	return nullptr;
 }
