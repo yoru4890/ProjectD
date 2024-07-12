@@ -6,6 +6,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "DDCharacterControlData.h"
 
+
 // Sets default values
 ADDCharacterBase::ADDCharacterBase()
 {
@@ -28,11 +29,20 @@ ADDCharacterBase::ADDCharacterBase()
 
 	// Mesh
 	GetMesh()->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -100.0f), FRotator(0.0f, -90.0f, 0.0f));
-	
+	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
+
+	//Skeletal Mesh
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> CharacterMeshRef(TEXT("/Script/Engine.SkeletalMesh'/Game/Characters/Mannequins/Meshes/SKM_Manny.SKM_Manny'"));
-	if (CharacterMeshRef.Object) 
+	if (CharacterMeshRef.Object)
 	{
 		GetMesh()->SetSkeletalMesh(CharacterMeshRef.Object);
+	}
+	
+	//ABP
+	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimInstanceClassRef(TEXT(""));
+	if (AnimInstanceClassRef.Class)
+	{
+		GetMesh()->SetAnimInstanceClass(AnimInstanceClassRef.Class);
 	}
 
 }

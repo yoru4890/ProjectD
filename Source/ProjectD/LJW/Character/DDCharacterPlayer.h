@@ -29,6 +29,9 @@ protected:
 	void SetCharacterControl();
 	virtual void SetCharacterControlData(const class UDDCharacterControlData* CharacterControlData) override;
 
+	UPROPERTY(EditAnywhere, Category = Character)
+	float MouseSpeed;
+
 //Camera Section
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, Meta = (AllowPrivateAccess = "true"))
@@ -36,6 +39,8 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UCameraComponent> FollowCamera;
+
+
 	
 
 //Input Section
