@@ -34,7 +34,7 @@ public:
 	FName TrapName; // 트랩의 이름
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	ETrapType TrapType; // 트랩의 메쉬 타입
+	ETrapType TrapType; // 트랩의 타입
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 TrapBuildCost; // 트랩의 설치비용
@@ -99,4 +99,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bIsSlowTrap"))
 	float SlowDuration; // 이동 속도 감소 지속 시간
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<class ADDTrapBase> TrapClass; // 트랩 클래스
 };

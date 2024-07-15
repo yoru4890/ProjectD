@@ -8,7 +8,10 @@
 void UDDGameInstance::Init()
 {
 	Super::Init();
-	TrapAssetManager = NewObject<UDDTrapAssetManager>(this);
+	TrapFactoryManager = NewObject<UDDTrapFactoryManager>(this);
 	TrapManager = NewObject<UDDTrapManager>(this);
+	TrapAssetManager = NewObject<UDDTrapAssetManager>(this);
+
 	TrapAssetManager->LoadTrapAssetsAsync();
+
 }

@@ -46,10 +46,10 @@ void ADDTrapBase::InitFromDataTable(const FDDTrapStruct& TrapData)
 	TrapChildNames = TrapData.TrapChildNames;
 	bIsTrapUnlocked = TrapData.bIsTrapUnlocked;
 	TrapMeshType = TrapData.TrapMeshType;
-	TrapStaticMesh = TrapData.TrapStaticMesh.LoadSynchronous();
-	TrapSkeletalMesh = TrapData.TrapSkeletalMesh.LoadSynchronous();
-	TrapAnimBlueprint = TrapData.TrapAnimBlueprint.LoadSynchronous();
-	TrapEffect = TrapData.TrapEffect.LoadSynchronous();
+	//TrapStaticMesh = TrapData.TrapStaticMesh.LoadSynchronous();
+	//TrapSkeletalMesh = TrapData.TrapSkeletalMesh.LoadSynchronous();
+	//TrapAnimBlueprint = TrapData.TrapAnimBlueprint.LoadSynchronous();
+	//TrapEffect = TrapData.TrapEffect.LoadSynchronous();
 	bIsDotTrap = TrapData.bIsDotTrap;
 	DotDamage = TrapData.DotDamage;
 	DotDuration = TrapData.DotDuration;

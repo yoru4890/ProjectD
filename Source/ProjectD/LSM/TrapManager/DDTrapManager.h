@@ -15,24 +15,30 @@ class PROJECTD_API UDDTrapManager : public UObject
 public:
 	UDDTrapManager();
 
+	void SetTrapFactoryManager(class UDDTrapFactoryManager* InTrapFactoryManager);
+
 	// 함정이 해금이 되었는지 체크하는 메서드
 	UFUNCTION(BlueprintCallable)
-	bool IsTowerUnlocked(const FName& TowerName) const;
+	bool IsTowerUnlocked(const FName& TrapName) const;
 
 	// 함정을 해금하는 메서드
 	UFUNCTION(BlueprintCallable)
-	void UnlockTower(const FName& TowerName);
+	void UnlockTower(const FName& TrapName);
 
-	FDDTrapStruct* GetTrapData(const FName& TrapName) const;
+	const FDDTrapStruct* GetTrapData(const FName& TrapName) const;
 
-	FORCEINLINE TObjectPtr<UDataTable> GetTrapDataTable() const { return TrapDataTable; }
+	FDDTrapStruct* GetTrapData(const FName& TrapName);
+
+	TMap<FName, FDDTrapStruct>& GetTrapDataTable();
+
+	const TMap<FName, FDDTrapStruct>& GetTrapDataTable() const;
+
+	// 트랩 스폰 메서드
+	UFUNCTION(BlueprintCallable)
+	class ADDTrapBase* SpawnTrap(const UWorld* World, const FName& TrapName, const FVector& Location, const FRotator& Rotation);
 
 private:
-	// 해금된 함정 집합
-	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
-	TArray<FName> UnlockedTowers;
-	
-	// 함정 정보
-	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UDataTable> TrapDataTable;
+	UPROPERTY()
+	// TrapFactoryManager 참조
+	TObjectPtr<UDDTrapFactoryManager> TrapFactoryManager;
 };

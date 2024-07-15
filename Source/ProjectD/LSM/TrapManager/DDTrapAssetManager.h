@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
-#include "Engine/StreamableManager.h"
 #include "DDTrapAssetManager.generated.h"
 
 /**
@@ -17,11 +16,6 @@ class PROJECTD_API UDDTrapAssetManager : public UObject
 
 public:
     UDDTrapAssetManager();
-
-    // 저장된 TrapAsset을 불러오는 함수
-    TObjectPtr<UStaticMesh> GetLoadedTrapStaticMesh(const FName& TowerName) const;
-
-    TObjectPtr<USkeletalMesh> GetLoadedTrapSkeletalMesh(const FName& TowerName) const;
     // TrapAsset을 비동기로 불러오는 함수
     void LoadTrapAssetsAsync();
 
@@ -34,16 +28,14 @@ private:
     UPROPERTY()
     TMap<FName, FSoftObjectPath> TrapAssetsToLoad;
 
+    UPROPERTY()
+    TObjectPtr<UGameInstance> GameInstance;
+
     // TrapAsset이 담겨있는 Mesh
     UPROPERTY()
     TMap<FName, TObjectPtr<UStaticMesh>> LoadedTrapStaticMeshes;
 
     UPROPERTY()
     TMap<FName, TObjectPtr<USkeletalMesh>> LoadedTrapSkeletalMeshes;
-
-    UPROPERTY()
-    TObjectPtr<UGameInstance> GameInstance;
-
-    FStreamableManager StreamableManager;
 	
 };

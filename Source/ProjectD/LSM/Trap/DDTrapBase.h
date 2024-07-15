@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "LSM/TrapManager/DDTrapManager.h"
+#include "DDTrapStruct.h"
 #include "DDTrapBase.generated.h"
 
 UCLASS()

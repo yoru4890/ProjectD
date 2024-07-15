@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
+#include "Engine/StreamableManager.h"
 #include "DDGameInstance.generated.h"
 
 /**
@@ -21,12 +22,21 @@ public:
 
 	FORCEINLINE TObjectPtr<class UDDTrapManager>  GetTrapManager() const { return TrapManager; }
 
+	FORCEINLINE TObjectPtr<class UDDTrapFactoryManager>  GetTrapFactoryManager() const { return TrapFactoryManager; }
+
+	FORCEINLINE FStreamableManager& GetStreamableManager() { return StreamableManager; }
+
 private:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UDDTrapAssetManager> TrapAssetManager;
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UDDTrapManager> TrapManager;
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<class UDDTrapFactoryManager> TrapFactoryManager;
+
+	FStreamableManager StreamableManager;
 
 	
 };

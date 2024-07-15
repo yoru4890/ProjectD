@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "YSY/GameData/DDEnemyData.h"
+#include "LSM/Trap/DDTrapStruct.h"
 #include "DDGameSingleton.generated.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogDDGameSingleton, Error, All);
@@ -21,8 +22,13 @@ public:
 	UDDGameSingleton();
 	static UDDGameSingleton& Get();
 
-	FDDEnemyData GetEnemyData(const FName& EnemyName) const;
+	FORCEINLINE TMap<FName, FDDEnemyData>& GetEnemyDataTable() { return EnemyDataTable; }
+	FORCEINLINE TMap<FName, FDDTrapStruct>& GetTrapDataTable() { return TrapDataTable; }
 
 private:
 	TMap<FName, FDDEnemyData> EnemyDataTable;
+	TMap<FName, FDDTrapStruct> TrapDataTable;
+
+	template<typename T>
+	void LoadDataTable(TMap<FName, T>& DataTable, const FString& Path);
 };

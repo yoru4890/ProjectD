@@ -2,7 +2,8 @@
 
 
 #include "LSM/TrapManager/DDTrapAssetManager.h"
-#include "LSM/TrapManager/DDTrapManager.h"
+#include "Engine/StreamableManager.h"
+#include "YSY/Game/DDGameSingleton.h"
 #include "YSY/Game/DDGameInstance.h"
 #include "Engine/AssetManager.h"
 
@@ -16,54 +17,44 @@ void UDDTrapAssetManager::LoadTrapAssetsAsync()
 {
     TObjectPtr<UDDGameInstance> MyGameInstance = Cast<UDDGameInstance>(GetWorld()->GetGameInstance());
     check(MyGameInstance);
-
-    TObjectPtr<UDDTrapManager> TrapManager = MyGameInstance->GetTrapManager();
-    check(TrapManager);
    
-    TObjectPtr<UDataTable> TrapDataTable = TrapManager->GetTrapDataTable();
-    check(TrapDataTable);
+    const TMap<FName, FDDTrapStruct>& TrapDataTable = UDDGameSingleton::Get().GetTrapDataTable();
 
-
-    // 데이터 테이블의 모든 행을 순회
-    static const FString ContextString(TEXT("GENERAL"));
-    TArray<FDDTrapStruct*> AllTrapData;
-    TrapDataTable->GetAllRows(ContextString, AllTrapData);
-
-    for (FDDTrapStruct* TrapStruct : AllTrapData)
+    for (auto& Elem : TrapDataTable)
     {
-        if (TrapStruct)
-        {
-            FSoftObjectPath TrapMeshPath;
-            if (TrapStruct->TrapMeshType == ETrapMeshType::StaticMesh) {
-                TrapMeshPath = TrapStruct->TrapStaticMesh.ToSoftObjectPath();
-            }
-            else {
-                TrapMeshPath = TrapStruct->TrapSkeletalMesh.ToSoftObjectPath();
-            }
+        FSoftObjectPath TrapMeshPath;
+        if (Elem.Value.TrapMeshType == ETrapMeshType::StaticMesh) {
+            TrapMeshPath = Elem.Value.TrapStaticMesh.ToSoftObjectPath();
+        }
+        else {
+            TrapMeshPath = Elem.Value.TrapSkeletalMesh.ToSoftObjectPath();
+        }
             
-            if (TrapMeshPath.IsValid())
-            {
-                TrapAssetsToLoad.Add(TrapStruct->TrapName, TrapMeshPath);
-                UE_LOG(LogTemp, Log, TEXT("Trap Mesh is valid for %s"), *TrapStruct->TrapName.ToString());
-            }
-            else
-            {
-                UE_LOG(LogTemp, Warning, TEXT("Trap Mesh path is invalid for %s"), *TrapStruct->TrapName.ToString());
-            }
+        if (TrapMeshPath.IsValid())
+        {
+            TrapAssetsToLoad.Add(Elem.Value.TrapName, TrapMeshPath);
+            UE_LOG(LogTemp, Warning, TEXT("Trap Mesh is valid for %s"), *Elem.Value.TrapName.ToString());
+        }
+        else
+        {
+            UE_LOG(LogTemp, Warning, TEXT("Trap Mesh path is invalid for %s"), *Elem.Value.TrapName.ToString());
         }
     }
 
     // 비동기 로드 시작
     TArray<FSoftObjectPath> AssetsToLoad;
     TrapAssetsToLoad.GenerateValueArray(AssetsToLoad);
-    StreamableManager.RequestAsyncLoad(AssetsToLoad, FStreamableDelegate::CreateUObject(this, &UDDTrapAssetManager::OnTrapAssetsLoaded));
+    MyGameInstance->GetStreamableManager().RequestAsyncLoad(AssetsToLoad, FStreamableDelegate::CreateUObject(this, &UDDTrapAssetManager::OnTrapAssetsLoaded));
 }
 
 void UDDTrapAssetManager::OnTrapAssetsLoaded()
 {
+    TObjectPtr<UDDGameInstance> MyGameInstance = Cast<UDDGameInstance>(GetWorld()->GetGameInstance());
+    check(MyGameInstance);
+
     for (const TPair<FName, FSoftObjectPath>& AssetPair : TrapAssetsToLoad)
     {
-        UObject* LoadedAsset = StreamableManager.LoadSynchronous(AssetPair.Value);
+        UObject* LoadedAsset = MyGameInstance->GetStreamableManager().LoadSynchronous(AssetPair.Value);
 
         if (UStaticMesh* LoadedStaticMesh = Cast<UStaticMesh>(LoadedAsset))
         {
@@ -82,22 +73,4 @@ void UDDTrapAssetManager::OnTrapAssetsLoaded()
 
     // 로드 완료 처리
     TrapAssetsToLoad.Empty();
-}
-
-TObjectPtr<UStaticMesh> UDDTrapAssetManager::GetLoadedTrapStaticMesh(const FName& TrapName) const
-{
-    if (LoadedTrapStaticMeshes.Contains(TrapName))
-    {
-        return LoadedTrapStaticMeshes[TrapName];
-    }
-    return nullptr;
-}
-
-TObjectPtr<USkeletalMesh> UDDTrapAssetManager::GetLoadedTrapSkeletalMesh(const FName& TrapName) const
-{
-    if (LoadedTrapSkeletalMeshes.Contains(TrapName))
-    {
-        return LoadedTrapSkeletalMeshes[TrapName];
-    }
-    return nullptr;
 }
