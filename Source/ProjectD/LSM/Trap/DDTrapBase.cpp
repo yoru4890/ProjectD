@@ -1,20 +1,20 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "LSM/Trap/DDTrapBase.h"
+#include "Particles/ParticleSystemComponent.h"
 
 // Sets default values
 ADDTrapBase::ADDTrapBase()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	ParticleEffectComponent = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("ParticleEffect"));
+	ParticleEffectComponent->SetupAttachment(RootComponent);
 
-	//Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
-	//RootComponent = Mesh;
+}
 
-	//static ConstructorHelpers::FObjectFinder<UStaticMesh> TrapMeshRef(TEXT("/Script/Engine.StaticMesh'/Engine/BasicShapes/Cube.Cube'"));
-	//if (TrapMeshRef.Object) {
-	//	Mesh->SetStaticMesh(TrapMeshRef.Object);
-	//}
+ADDTrapBase::~ADDTrapBase()
+{
 
 }
 
@@ -46,10 +46,6 @@ void ADDTrapBase::InitFromDataTable(const FDDTrapStruct& TrapData)
 	TrapChildNames = TrapData.TrapChildNames;
 	bIsTrapUnlocked = TrapData.bIsTrapUnlocked;
 	TrapMeshType = TrapData.TrapMeshType;
-	//TrapStaticMesh = TrapData.TrapStaticMesh.LoadSynchronous();
-	//TrapSkeletalMesh = TrapData.TrapSkeletalMesh.LoadSynchronous();
-	//TrapAnimBlueprint = TrapData.TrapAnimBlueprint.LoadSynchronous();
-	//TrapEffect = TrapData.TrapEffect.LoadSynchronous();
 	bIsDotTrap = TrapData.bIsDotTrap;
 	DotDamage = TrapData.DotDamage;
 	DotDuration = TrapData.DotDuration;
@@ -59,3 +55,9 @@ void ADDTrapBase::InitFromDataTable(const FDDTrapStruct& TrapData)
 	SlowDuration = TrapData.SlowDuration;
 }
 
+void ADDTrapBase::SetTrapAssets(UStaticMesh* StaticMesh, USkeletalMesh* SkeletalMesh, UAnimBlueprint* AnimBlueprint, UParticleSystem* ParticleEffect)
+{
+	if (ParticleEffect && ParticleEffectComponent) {
+		ParticleEffectComponent->SetTemplate(ParticleEffect);
+	}
+}

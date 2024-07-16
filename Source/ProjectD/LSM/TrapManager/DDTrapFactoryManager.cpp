@@ -2,22 +2,27 @@
 
 
 #include "LSM/TrapManager/DDTrapFactoryManager.h"
-#include "LSM/TrapFactory/DDAnimatedTrapFactory.h"
 
 
 UDDTrapFactoryManager::UDDTrapFactoryManager()
 {
-	TrapNamesToFactories.Add("ThornTrap", UDDAnimatedTrapFactory::StaticClass());
+	
 }
 
-void UDDTrapFactoryManager::Initialize(TMap<FName, FDDTrapStruct>& TrapDataTable)
+void UDDTrapFactoryManager::Initialize(const TMap<FName, FDDTrapStruct>& TrapDataTable)
 {
+	for (auto& Elem : TrapDataTable) {
+		if (Elem.Value.TrapFactoryClass) {
+			TrapNamesToFactories.Add(Elem.Key, Elem.Value.TrapFactoryClass);
+		}
+	}
 
+	UE_LOG(LogTemp, Warning, TEXT("TrapNamesToFactories Num : %d"), TrapNamesToFactories.Num());
 }
 
-const IDDTrapFactoryInterface* UDDTrapFactoryManager::GetTrapFactory(const FName& TrapName)
+IDDTrapFactoryInterface* UDDTrapFactoryManager::GetTrapFactory(const FName& TrapName)
 {
-	if (const TSubclassOf<UObject>* FactoryClass = TrapNamesToFactories.Find(TrapName))
+	if (UClass** FactoryClass = TrapNamesToFactories.Find(TrapName))
 	{
 		if (UObject** FactoryInstance = TrapFactoryInstances.Find(*FactoryClass))
 		{
@@ -33,9 +38,4 @@ const IDDTrapFactoryInterface* UDDTrapFactoryManager::GetTrapFactory(const FName
 	}
 
 	return nullptr; // 팩토리를 찾을 수 없음
-}
-
-void UDDTrapFactoryManager::SetTrapManager(UDDTrapManager* InTrapManager)
-{
-	TrapManager = InTrapManager;
 }

@@ -4,19 +4,19 @@
 
 #include "CoreMinimal.h"
 #include "LSM/Trap/DDTrapBase.h"
-#include "DDAnimatedTrap.generated.h"
+#include "DDStaticTrap.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class PROJECTD_API ADDAnimatedTrap : public ADDTrapBase
+class PROJECTD_API ADDStaticTrap : public ADDTrapBase
 {
 	GENERATED_BODY()
 
 public:
-	ADDAnimatedTrap();
-	
+	ADDStaticTrap();
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -31,5 +31,6 @@ public:
 protected:
 	// Skeletal Mesh Component
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<USkeletalMeshComponent> SkeletalMeshComponent;
+	TObjectPtr<UStaticMeshComponent> StaticMeshComponent;
+
 };

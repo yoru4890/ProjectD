@@ -19,6 +19,11 @@ public:
     // TrapAsset을 비동기로 불러오는 함수
     void LoadTrapAssetsAsync();
 
+    UStaticMesh* GetStaticMesh(const FName& TrapName);
+    USkeletalMesh* GetSkeletalMesh(const FName& TrapName);
+    UAnimBlueprint* GetAnimBlueprint(const FName& TrapName);
+    UParticleSystem* GetParticleEffect(const FName& TrapName);
+
 private:
 
     // Asset이 로드되면 실행될 콜백함수
@@ -37,5 +42,11 @@ private:
 
     UPROPERTY()
     TMap<FName, TObjectPtr<USkeletalMesh>> LoadedTrapSkeletalMeshes;
+
+    UPROPERTY()
+    TMap<FName, TObjectPtr<UAnimBlueprint>> LoadedTrapAnimBlueprints;
+
+    UPROPERTY()
+    TMap<FName, TObjectPtr<UParticleSystem>> LoadedTrapEffects;
 	
 };

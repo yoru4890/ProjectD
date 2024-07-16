@@ -101,4 +101,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<class ADDTrapBase> TrapClass; // ∆Æ∑¶ ≈¨∑°Ω∫
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trap")
+	TSubclassOf<UObject> TrapFactoryClass; // ∆Æ∑¶ ∆—≈‰∏Æ ≈¨∑°Ω∫
 };

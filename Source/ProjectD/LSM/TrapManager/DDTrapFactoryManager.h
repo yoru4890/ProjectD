@@ -19,22 +19,16 @@ class PROJECTD_API UDDTrapFactoryManager : public UObject
 public:
 	UDDTrapFactoryManager();
 
-	void Initialize(TMap<FName, FDDTrapStruct>& TrapDataTable);
+	void Initialize(const TMap<FName, FDDTrapStruct>& TrapDataTable);
 
-	const IDDTrapFactoryInterface* GetTrapFactory(const FName& TrapName);
-
-	void SetTrapManager(class UDDTrapManager* InTrapManager);
+	IDDTrapFactoryInterface* GetTrapFactory(const FName& TrapName);
 
 private:
 	UPROPERTY()
 	// 트랩 팩토리 인스턴스를 저장하는 맵
-	TMap<TSubclassOf<UObject>, UObject*> TrapFactoryInstances;
+	TMap<UClass*, UObject*> TrapFactoryInstances;
 
 	UPROPERTY()
 	// 트랩 이름을 트랩 팩토리 인스턴스와 연관시키는 맵
-	TMap<FName, TSubclassOf<UObject>> TrapNamesToFactories;
-
-	UPROPERTY()
-	// TrapManager 참조
-	class UDDTrapManager* TrapManager;
+	TMap<FName, UClass*> TrapNamesToFactories;
 };

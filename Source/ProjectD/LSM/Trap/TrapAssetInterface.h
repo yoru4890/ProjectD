@@ -4,11 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
-#include "DDTrapFactoryInterface.generated.h"
+#include "TrapAssetInterface.generated.h"
 
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
-class UDDTrapFactoryInterface : public UInterface
+class UTrapAssetInterface : public UInterface
 {
 	GENERATED_BODY()
 };
@@ -16,11 +16,11 @@ class UDDTrapFactoryInterface : public UInterface
 /**
  * 
  */
-class PROJECTD_API IDDTrapFactoryInterface
+class PROJECTD_API ITrapAssetInterface
 {
 	GENERATED_BODY()
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual AActor* CreateTrap(UWorld* World, const FName& TrapName, const FVector& Location, const FRotator& Rotation, AActor* Owner, APawn* Instigator) = 0;
+	virtual void SetTrapAssets(UStaticMesh* StaticMesh, USkeletalMesh* SkeletalMesh, UAnimBlueprint* AnimBlueprint, UParticleSystem* ParticleEffect) = 0;
 };

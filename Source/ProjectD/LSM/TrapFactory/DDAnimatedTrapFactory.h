@@ -16,6 +16,6 @@ class PROJECTD_API UDDAnimatedTrapFactory : public UObject, public IDDTrapFactor
 	GENERATED_BODY()
 
 public:
-	virtual AActor* CreateTrap(UWorld* World, const FVector& Location, const FRotator& Rotation, AActor* Owner, APawn* Instigator) override;
+	virtual AActor* CreateTrap(UWorld* World, const FName& TrapName, const FVector& Location, const FRotator& Rotation, AActor* Owner, APawn* Instigator) override;
 
 };

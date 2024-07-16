@@ -4,16 +4,15 @@
 #include "LSM/TrapFactory/DDAnimatedTrapFactory.h"
 #include "LSM/Trap/DDAnimatedTrap.h"
 
-AActor* UDDAnimatedTrapFactory::CreateTrap(UWorld* World, const FVector& Location, const FRotator& Rotation, AActor* Owner, APawn* Instigator)
+AActor* UDDAnimatedTrapFactory::CreateTrap(UWorld* World, const FName& TrapName, const FVector& Location, const FRotator& Rotation, AActor* Owner, APawn* Instigator)
 {
 	check(World);
-	FActorSpawnParameters SpawnParams;
 	ADDAnimatedTrap* NewTrap = World->SpawnActor<ADDAnimatedTrap>(ADDAnimatedTrap::StaticClass(), Location, Rotation);
 	if (NewTrap)
 	{
+		NewTrap->SetActorLocationAndRotation(Location, Rotation);
 		NewTrap->SetOwner(Owner);
-		//NewTrap->Instigator = Instigator;
-		// Initialize NewTrap as needed
+		NewTrap->SetInstigator(Instigator);
 	}
 	return NewTrap;
 

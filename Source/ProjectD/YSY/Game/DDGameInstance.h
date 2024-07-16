@@ -18,11 +18,11 @@ class PROJECTD_API UDDGameInstance : public UGameInstance
 public:
 	virtual void Init() override;
 
-	FORCEINLINE TObjectPtr<class UDDTrapAssetManager> GetTrapAssetManager() const { return TrapAssetManager; }
+	FORCEINLINE class UDDTrapAssetManager* GetTrapAssetManager() const { return TrapAssetManager; }
 
-	FORCEINLINE TObjectPtr<class UDDTrapManager>  GetTrapManager() const { return TrapManager; }
+	FORCEINLINE class UDDTrapManager*  GetTrapManager() const { return TrapManager; }
 
-	FORCEINLINE TObjectPtr<class UDDTrapFactoryManager>  GetTrapFactoryManager() const { return TrapFactoryManager; }
+	FORCEINLINE class UDDTrapFactoryManager*  GetTrapFactoryManager() const { return TrapFactoryManager; }
 
 	FORCEINLINE FStreamableManager& GetStreamableManager() { return StreamableManager; }
 

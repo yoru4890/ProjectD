@@ -5,17 +5,18 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "DDTrapStruct.h"
+#include "TrapAssetInterface.h"
 #include "DDTrapBase.generated.h"
 
 UCLASS()
-class PROJECTD_API ADDTrapBase : public AActor
+class PROJECTD_API ADDTrapBase : public AActor, public ITrapAssetInterface
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
 	ADDTrapBase();
-
+	virtual ~ADDTrapBase() override;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -90,9 +91,14 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bIsSlowTrap"))
 	float SlowDuration; // 이동 속도 감소 지속 시간
 
+protected:
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UParticleSystemComponent> ParticleEffectComponent;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	void InitFromDataTable(const FDDTrapStruct& TrapData);
+	virtual void InitFromDataTable(const FDDTrapStruct& TrapData);
+	virtual void SetTrapAssets(UStaticMesh* StaticMesh, USkeletalMesh* SkeletalMesh, UAnimBlueprint* AnimBlueprint, UParticleSystem* ParticleEffect) override;
 
 };

@@ -35,7 +35,7 @@ public:
 
 	// 트랩 스폰 메서드
 	UFUNCTION(BlueprintCallable)
-	class ADDTrapBase* SpawnTrap(const UWorld* World, const FName& TrapName, const FVector& Location, const FRotator& Rotation);
+	class ADDTrapBase* SpawnTrap(UWorld* World, const FName& TrapName, const FVector& Location, const FRotator& Rotation, AActor* Owner, APawn* Instigator);
 
 private:
 	UPROPERTY()
