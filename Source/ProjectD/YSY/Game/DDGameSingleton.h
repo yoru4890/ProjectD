@@ -29,6 +29,7 @@ private:
 	TMap<FName, FDDEnemyData> EnemyDataTable;
 	TMap<FName, FDDTrapStruct> TrapDataTable;
 
+
 	template<typename T>
 	void LoadDataTable(TMap<FName, T>& DataTable, const FString& Path);
 };

@@ -34,7 +34,7 @@ void ADDTrapBase::Tick(float DeltaTime)
 
 void ADDTrapBase::InitFromDataTable(const FDDTrapStruct& TrapData)
 {
-	TrapName = TrapData.TrapName;
+	TrapName = TrapData.Name;
 	TrapType = TrapData.TrapType;
 	TrapBuildCost = TrapData.TrapBuildCost;
 	TrapUpgradeCost = TrapData.TrapUpgradeCost;

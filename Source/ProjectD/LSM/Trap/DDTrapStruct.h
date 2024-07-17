@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "LSM/BaseStruct.h"
 #include "DDTrapStruct.generated.h"
 
 /**
@@ -25,14 +26,11 @@ enum class ETrapType : uint8
 };
 
 USTRUCT(BlueprintType)
-struct FDDTrapStruct : public FTableRowBase
+struct FDDTrapStruct : public FBaseStruct
 {
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName TrapName; // ∆Æ∑¶¿« ¿Ã∏ß
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	ETrapType TrapType; // ∆Æ∑¶¿« ≈∏¿‘
 

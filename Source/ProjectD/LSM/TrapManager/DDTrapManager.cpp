@@ -21,28 +21,26 @@ void UDDTrapManager::SetTrapFactoryManager(UDDTrapFactoryManager* InTrapFactoryM
 
 bool UDDTrapManager::IsTowerUnlocked(const FName& TrapName) const
 {
-	const FDDTrapStruct* TrapStruct = GetTrapData(TrapName);
-	check(TrapStruct);
+	const FDDTrapStruct& TrapStruct = GetTrapData(TrapName);
 
-	return TrapStruct->bIsTrapUnlocked;
+	return TrapStruct.bIsTrapUnlocked;
 
 }
 
 void UDDTrapManager::UnlockTower(const FName& TrapName)
 {
-	FDDTrapStruct* TrapStruct = GetTrapData(TrapName);
-	TrapStruct->bIsTrapUnlocked = true;
-
+	FDDTrapStruct& TrapStruct = GetTrapData(TrapName);
+	TrapStruct.bIsTrapUnlocked = true;
 }
 
-const FDDTrapStruct* UDDTrapManager::GetTrapData(const FName& TrapName) const
+const FDDTrapStruct& UDDTrapManager::GetTrapData(const FName& TrapName) const
 {
-	return UDDGameSingleton::Get().GetTrapDataTable().Find(TrapName);
+	return *UDDGameSingleton::Get().GetTrapDataTable().Find(TrapName);
 }
 
-FDDTrapStruct* UDDTrapManager::GetTrapData(const FName& TrapName)
+FDDTrapStruct& UDDTrapManager::GetTrapData(const FName& TrapName)
 {
-	return UDDGameSingleton::Get().GetTrapDataTable().Find(TrapName);
+	return *UDDGameSingleton::Get().GetTrapDataTable().Find(TrapName);
 }
 
 TMap<FName, FDDTrapStruct>& UDDTrapManager::GetTrapDataTable()
@@ -59,8 +57,7 @@ ADDTrapBase* UDDTrapManager::SpawnTrap(UWorld* World, const FName& TrapName, con
 {
 	check(World); // World가 null이면 실행 중지
 
-	const FDDTrapStruct* TrapStruct = GetTrapData(TrapName);
-	check(TrapStruct); // TrapStruct가 null이면 실행 중지
+	const FDDTrapStruct& TrapStruct = GetTrapData(TrapName);
 
 	UDDGameInstance* MyGameInstance = Cast<UDDGameInstance>(GetWorld()->GetGameInstance());
 	check(MyGameInstance);
@@ -71,27 +68,8 @@ ADDTrapBase* UDDTrapManager::SpawnTrap(UWorld* World, const FName& TrapName, con
 	IDDTrapFactoryInterface* TrapFactory = FactoryManager->GetTrapFactory(TrapName);
 	check(TrapFactory);
 
-	TrapFactory->CreateTrap(World, TrapName, Location, Rotation, Owner, Instigator);
+	ADDTrapBase* NewTrap = TrapFactory->CreateTrap(World, TrapName, TrapStruct, Location, Rotation, Owner, Instigator);
 
-	ADDTrapBase* NewTrap = Cast<ADDTrapBase>(TrapFactory->CreateTrap(World, TrapName, Location, Rotation, Owner, Instigator));
-	if (NewTrap)
-	{
-		// 트랩 초기화 함수 호출
-		NewTrap->InitFromDataTable(*UDDTrapManager::GetTrapData(TrapName));
-
-		UStaticMesh* StaticMesh = MyGameInstance->GetTrapAssetManager()->GetStaticMesh(TrapName);
-		USkeletalMesh* SkeletalMesh = MyGameInstance->GetTrapAssetManager()->GetSkeletalMesh(TrapName);
-		UAnimBlueprint* AnimBlueprint = MyGameInstance->GetTrapAssetManager()->GetAnimBlueprint(TrapName);
-		UParticleSystem* ParticleEffect = MyGameInstance->GetTrapAssetManager()->GetParticleEffect(TrapName);
-
-		ITrapAssetInterface* TrapAssetInterface = Cast<ITrapAssetInterface>(NewTrap);
-		if (TrapAssetInterface)
-		{
-			TrapAssetInterface->SetTrapAssets(StaticMesh, SkeletalMesh, AnimBlueprint, ParticleEffect);
-		}
-
-	}
 
 	return NewTrap;
-
 }

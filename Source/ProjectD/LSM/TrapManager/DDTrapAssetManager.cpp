@@ -23,57 +23,61 @@ void UDDTrapAssetManager::LoadTrapAssetsAsync()
 
 	for (auto& Elem : TrapDataTable)
 	{
-		FSoftObjectPath TrapMeshPath;
-		FSoftObjectPath TrapParticlePath = Elem.Value.TrapEffect.ToSoftObjectPath();
-		FSoftObjectPath TrapAnimBlueprintPath = Elem.Value.TrapAnimBlueprint.ToSoftObjectPath();
+		FTrapAssetsToLoad TrapAssetsToLoad;
 		if (Elem.Value.TrapMeshType == ETrapMeshType::StaticMesh) {
-			TrapMeshPath = Elem.Value.TrapStaticMesh.ToSoftObjectPath();
+			TrapAssetsToLoad.StaticMesh = Elem.Value.TrapStaticMesh.ToSoftObjectPath();
 		}
 		else {
-			TrapMeshPath = Elem.Value.TrapSkeletalMesh.ToSoftObjectPath();
+			TrapAssetsToLoad.SkeletalMesh = Elem.Value.TrapSkeletalMesh.ToSoftObjectPath();
 		}
 
-		bool bAssetsValid = false;
+		TrapAssetsToLoad.Effect = Elem.Value.TrapEffect.ToSoftObjectPath();
+		TrapAssetsToLoad.AnimBlueprint = Elem.Value.TrapAnimBlueprint.ToSoftObjectPath();
 
-		if (TrapMeshPath.IsValid())
+		if (TrapAssetsToLoad.StaticMesh.IsValid() || TrapAssetsToLoad.SkeletalMesh.IsValid() || TrapAssetsToLoad.Effect.IsValid() || TrapAssetsToLoad.AnimBlueprint.IsValid())
 		{
-			TrapAssetsToLoad.Add(Elem.Value.TrapName, TrapMeshPath);
-			bAssetsValid = true;
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Trap Mesh path is invalid for %s"), *Elem.Value.TrapName.ToString());
-		}
-
-		if (TrapParticlePath.IsValid())
-		{
-			TrapAssetsToLoad.Add(Elem.Value.TrapName, TrapParticlePath);
-			bAssetsValid = true;
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Trap Particle path is invalid for %s"), *Elem.Value.TrapName.ToString());
-		}
-
-		if (TrapAnimBlueprintPath.IsValid())
-		{
-			TrapAssetsToLoad.Add(Elem.Value.TrapName, TrapAnimBlueprintPath);
-			bAssetsValid = true;
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Trap AnimBlueprint path is invalid for %s"), *Elem.Value.TrapName.ToString());
-		}
-
-		if (bAssetsValid)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Assets are valid for %s"), *Elem.Value.TrapName.ToString());
+			TrapAssetsToLoads.Add(Elem.Key, TrapAssetsToLoad);
 		}
 	}
 
 	// 비동기 로드 시작
 	TArray<FSoftObjectPath> AssetsToLoad;
-	TrapAssetsToLoad.GenerateValueArray(AssetsToLoad);
+	for (const TPair<FName, FTrapAssetsToLoad>& AssetPair : TrapAssetsToLoads)
+	{
+		if (AssetPair.Value.StaticMesh.IsValid())
+		{
+			AssetsToLoad.Add(AssetPair.Value.StaticMesh);
+		}
+		else 
+		{
+			UE_LOG(LogTemp, Warning, TEXT(" %s : StaticMesh's Path is Invalid"), *AssetPair.Key.ToString());
+		}
+		if (AssetPair.Value.SkeletalMesh.IsValid()) 
+		{
+			AssetsToLoad.Add(AssetPair.Value.SkeletalMesh);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT(" %s : SkeletalMesh's Path is Invalid"), *AssetPair.Key.ToString());
+		}
+		if (AssetPair.Value.Effect.IsValid()) 
+		{
+			AssetsToLoad.Add(AssetPair.Value.Effect);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT(" %s : Effect's Path is Invalid"), *AssetPair.Key.ToString());
+		}
+		if (AssetPair.Value.AnimBlueprint.IsValid())
+		{
+			AssetsToLoad.Add(AssetPair.Value.AnimBlueprint);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT(" %s : AnimBlueprint's Path is Invalid"), *AssetPair.Key.ToString());
+		}
+	}
+
 	MyGameInstance->GetStreamableManager().RequestAsyncLoad(AssetsToLoad, FStreamableDelegate::CreateUObject(this, &UDDTrapAssetManager::OnTrapAssetsLoaded));
 }
 
@@ -81,62 +85,78 @@ void UDDTrapAssetManager::OnTrapAssetsLoaded()
 {
 	UDDGameInstance* MyGameInstance = Cast<UDDGameInstance>(GetWorld()->GetGameInstance());
 	check(MyGameInstance);
-	UE_LOG(LogTemp, Warning, TEXT("check OnTrapAssetsLoaded"));
-	for (const TPair<FName, FSoftObjectPath>& AssetPair : TrapAssetsToLoad)
-	{
-		UObject* LoadedAsset = MyGameInstance->GetStreamableManager().LoadSynchronous(AssetPair.Value);
+	UE_LOG(LogTemp, Log, TEXT("OnTrapAssetsLoaded : TrapAssetsToLoadNum -> %d"), TrapAssetsToLoads.Num());
 
-		if (UStaticMesh* LoadedStaticMesh = Cast<UStaticMesh>(LoadedAsset))
+	for (const TPair<FName, FTrapAssetsToLoad>& AssetPair : TrapAssetsToLoads)
+	{
+		FLoadedTrapAsset LoadedAssets;
+		LoadAssetIfValid<UStaticMesh>(MyGameInstance, AssetPair.Value.StaticMesh, LoadedAssets.StaticMesh);
+		LoadAssetIfValid<USkeletalMesh>(MyGameInstance, AssetPair.Value.SkeletalMesh, LoadedAssets.SkeletalMesh);
+		LoadAssetIfValid<UParticleSystem>(MyGameInstance, AssetPair.Value.Effect, LoadedAssets.Effect);
+		LoadAssetIfValid<UAnimBlueprint>(MyGameInstance, AssetPair.Value.AnimBlueprint, LoadedAssets.AnimBlueprint);
+
+		if (LoadedAssets.StaticMesh || LoadedAssets.SkeletalMesh || LoadedAssets.Effect || LoadedAssets.AnimBlueprint)
 		{
-			LoadedTrapStaticMeshes.Add(AssetPair.Key, LoadedStaticMesh);
-			UE_LOG(LogTemp, Warning, TEXT("UStaticMesh loaded: %s"), *AssetPair.Key.ToString());
+			LoadedTrapAssets.Add(AssetPair.Key, LoadedAssets);
 		}
-		else if (USkeletalMesh* LoadedSkeletalMesh = Cast<USkeletalMesh>(LoadedAsset))
-		{
-			LoadedTrapSkeletalMeshes.Add(AssetPair.Key, LoadedSkeletalMesh);
-			UE_LOG(LogTemp, Warning, TEXT("USkeletalMesh loaded: %s"), *AssetPair.Key.ToString());
-		}
-		else if (UAnimBlueprint* LoadedTrapAnimBlueprint = Cast<UAnimBlueprint>(LoadedAsset))
-		{
-			LoadedTrapAnimBlueprints.Add(AssetPair.Key, LoadedTrapAnimBlueprint);
-			UE_LOG(LogTemp, Warning, TEXT("UAnimBlueprint loaded: %s"), *AssetPair.Key.ToString());
-		}
-		else if (UParticleSystem* LoadedTrapEffect = Cast<UParticleSystem>(LoadedAsset))
-		{
-			LoadedTrapEffects.Add(AssetPair.Key, LoadedTrapEffect);
-			UE_LOG(LogTemp, Warning, TEXT("UParticleSystem loaded: %s"), *AssetPair.Key.ToString());
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Unsupported asset type loaded: %s"), *AssetPair.Key.ToString());
-		}
+
 	}
 
 
 	// 로드 완료 처리
-	TrapAssetsToLoad.Empty();
+	TrapAssetsToLoads.Empty();
+}
+
+template<typename AssetType>
+void UDDTrapAssetManager::LoadAssetIfValid(UDDGameInstance* MyGameInstance, const FSoftObjectPath& AssetPath, TObjectPtr<AssetType>& OutLoadedAsset)
+{
+	if (AssetPath.IsValid())
+	{
+		UObject* LoadedAsset = MyGameInstance->GetStreamableManager().LoadSynchronous(AssetPath);
+		if (AssetType* TypedLoadedAsset = Cast<AssetType>(LoadedAsset))
+		{
+			OutLoadedAsset = TypedLoadedAsset;
+			UE_LOG(LogTemp, Log, TEXT("%s loaded: %s"), *AssetType::StaticClass()->GetName(), *AssetPath.ToString());
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Failed to load asset: %s"), *AssetPath.ToString());
+		}
+	}
 }
 
 UStaticMesh* UDDTrapAssetManager::GetStaticMesh(const FName& TrapName)
 {
-	UStaticMesh* StaticMesh = *LoadedTrapStaticMeshes.Find(TrapName);
-	return StaticMesh;
+	if (FLoadedTrapAsset* LoadedAssets = LoadedTrapAssets.Find(TrapName))
+	{
+		return LoadedAssets->StaticMesh;
+	}
+	return nullptr;
 }
 
 USkeletalMesh* UDDTrapAssetManager::GetSkeletalMesh(const FName& TrapName)
 {
-	USkeletalMesh* SkeletalMesh = *LoadedTrapSkeletalMeshes.Find(TrapName);
-	return SkeletalMesh;
+	if (FLoadedTrapAsset* LoadedAssets = LoadedTrapAssets.Find(TrapName))
+	{
+		return LoadedAssets->SkeletalMesh;
+	}
+	return nullptr;
 }
 
 UAnimBlueprint* UDDTrapAssetManager::GetAnimBlueprint(const FName& TrapName)
 {
-	UAnimBlueprint* AnimBlueprint = *LoadedTrapAnimBlueprints.Find(TrapName);
-	return AnimBlueprint;
+	if (FLoadedTrapAsset* LoadedAssets = LoadedTrapAssets.Find(TrapName))
+	{
+		return LoadedAssets->AnimBlueprint;
+	}
+	return nullptr;
 }
 
 UParticleSystem* UDDTrapAssetManager::GetParticleEffect(const FName& TrapName)
 {
-	UParticleSystem* ParticleSystem = *LoadedTrapEffects.Find(TrapName);
-	return ParticleSystem;
+	if (FLoadedTrapAsset* LoadedAssets = LoadedTrapAssets.Find(TrapName))
+	{
+		return LoadedAssets->Effect;
+	}
+	return nullptr;
 }

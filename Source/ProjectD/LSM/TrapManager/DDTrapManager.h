@@ -25,9 +25,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void UnlockTower(const FName& TrapName);
 
-	const FDDTrapStruct* GetTrapData(const FName& TrapName) const;
+	const FDDTrapStruct& GetTrapData(const FName& TrapName) const;
 
-	FDDTrapStruct* GetTrapData(const FName& TrapName);
+	FDDTrapStruct& GetTrapData(const FName& TrapName);
 
 	TMap<FName, FDDTrapStruct>& GetTrapDataTable();
 

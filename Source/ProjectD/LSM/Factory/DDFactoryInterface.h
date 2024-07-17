@@ -4,12 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
-#include "LSM/Trap/DDTrapBase.h"
-#include "DDTrapFactoryInterface.generated.h"
+#include "LSM/BaseStruct.h"
+#include "DDFactoryInterface.generated.h"
 
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
-class UDDTrapFactoryInterface : public UInterface
+class UDDFactoryInterface : public UInterface
 {
 	GENERATED_BODY()
 };
@@ -17,11 +17,11 @@ class UDDTrapFactoryInterface : public UInterface
 /**
  * 
  */
-class PROJECTD_API IDDTrapFactoryInterface
+class PROJECTD_API IDDFactoryInterface
 {
 	GENERATED_BODY()
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual ADDTrapBase* CreateTrap(UWorld* World, const FName& TrapName, const FDDTrapStruct& TrapStruct,  const FVector& Location, const FRotator& Rotation, AActor* Owner, APawn* Instigator) = 0;
+	virtual UObject* CreateObject(UWorld* World, const FName& ObjectName, const FBaseStruct& ObjectStruct, const FVector& Location, const FRotator& Rotation, AActor* Owner, APawn* Instigator) = 0;
 };
