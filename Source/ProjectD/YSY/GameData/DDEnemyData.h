@@ -52,4 +52,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
 	uint8 bIsBoss : 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	uint8 bIsElite : 1;
 };
