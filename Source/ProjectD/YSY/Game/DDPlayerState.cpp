@@ -3,3 +3,7 @@
 
 #include "YSY/Game/DDPlayerState.h"
 
+ADDPlayerState::ADDPlayerState()
+{
+	Gold = 500;
+}
