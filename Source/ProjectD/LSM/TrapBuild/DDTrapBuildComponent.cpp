@@ -3,7 +3,7 @@
 
 #include "LSM/TrapBuild/DDTrapBuildComponent.h"
 #include "YSY/Game/DDGameInstance.h"
-#include "LSM/TrapManager/DDTrapManager.h"
+#include "LSM/Manager/DDTrapManager.h"
 #include "LSM/Trap/DDTrapBase.h"
 
 // Sets default values for this component's properties

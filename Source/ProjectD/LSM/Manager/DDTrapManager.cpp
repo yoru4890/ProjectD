@@ -1,23 +1,18 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "LSM/TrapManager/DDTrapManager.h"
+#include "LSM/Manager/DDTrapManager.h"
 #include "YSY/Game/DDGameSingleton.h"
 #include "YSY/Game/DDGameInstance.h"
-#include "DDTrapFactoryManager.h"
-#include "DDTrapAssetManager.h"
+#include "DDFactoryManager.h"
+#include "DDAssetManager.h"
 #include "LSM/Trap/DDTrapBase.h"
+#include "LSM/Factory/DDFactoryInterface.h"
 #include "GameFramework/Actor.h"
 
 UDDTrapManager::UDDTrapManager()
 {
 
 }
-
-void UDDTrapManager::SetTrapFactoryManager(UDDTrapFactoryManager* InTrapFactoryManager)
-{
-	TrapFactoryManager = InTrapFactoryManager;
-}
-
 
 bool UDDTrapManager::IsTowerUnlocked(const FName& TrapName) const
 {
@@ -59,16 +54,19 @@ ADDTrapBase* UDDTrapManager::SpawnTrap(UWorld* World, const FName& TrapName, con
 
 	const FDDTrapStruct& TrapStruct = GetTrapData(TrapName);
 
+
 	UDDGameInstance* MyGameInstance = Cast<UDDGameInstance>(GetWorld()->GetGameInstance());
 	check(MyGameInstance);
 
-	UDDTrapFactoryManager* FactoryManager = MyGameInstance->GetTrapFactoryManager();
+	UDDFactoryManager* FactoryManager = MyGameInstance->GetFactoryManager();
 	check(FactoryManager);
 
-	IDDTrapFactoryInterface* TrapFactory = FactoryManager->GetTrapFactory(TrapName);
+	IDDFactoryInterface* TrapFactory = FactoryManager->GetFactory(TrapName);
 	check(TrapFactory);
 
-	ADDTrapBase* NewTrap = TrapFactory->CreateTrap(World, TrapName, TrapStruct, Location, Rotation, Owner, Instigator);
+	UObject* CreatedObject = TrapFactory->CreateObject(World, TrapName, TrapStruct, Location, Rotation, Owner, Instigator);
+
+	ADDTrapBase* NewTrap = Cast<ADDTrapBase>(CreatedObject);
 
 
 	return NewTrap;

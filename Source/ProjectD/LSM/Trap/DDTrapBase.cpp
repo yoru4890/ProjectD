@@ -6,10 +6,8 @@
 // Sets default values
 ADDTrapBase::ADDTrapBase()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	ParticleEffectComponent = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("ParticleEffect"));
-	ParticleEffectComponent->SetupAttachment(RootComponent);
 
 }
 
@@ -22,7 +20,7 @@ ADDTrapBase::~ADDTrapBase()
 void ADDTrapBase::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 }
 
 // Called every frame
@@ -45,7 +43,7 @@ void ADDTrapBase::InitFromDataTable(const FDDTrapStruct& TrapData)
 	TrapParentName = TrapData.TrapParentName;
 	TrapChildNames = TrapData.TrapChildNames;
 	bIsTrapUnlocked = TrapData.bIsTrapUnlocked;
-	TrapMeshType = TrapData.TrapMeshType;
+	TrapMeshType = TrapData.MeshType;
 	bIsDotTrap = TrapData.bIsDotTrap;
 	DotDamage = TrapData.DotDamage;
 	DotDuration = TrapData.DotDuration;
@@ -55,9 +53,31 @@ void ADDTrapBase::InitFromDataTable(const FDDTrapStruct& TrapData)
 	SlowDuration = TrapData.SlowDuration;
 }
 
-void ADDTrapBase::SetTrapAssets(UStaticMesh* StaticMesh, USkeletalMesh* SkeletalMesh, UAnimBlueprint* AnimBlueprint, UParticleSystem* ParticleEffect)
+void ADDTrapBase::SetTrapAssets(TArray<UStaticMesh*> StaticMeshs, TArray<USkeletalMesh*> SkeletalMeshs, UAnimBlueprint* AnimBlueprint, TArray<UParticleSystem*> ParticleEffects)
 {
-	if (ParticleEffect && ParticleEffectComponent) {
-		ParticleEffectComponent->SetTemplate(ParticleEffect);
+	// 기존 ParticleEffectComponents 배열 초기화
+	for (UParticleSystemComponent* ParticleEffectComponent : ParticleEffectComponents)
+	{
+		if (ParticleEffectComponent)
+		{
+			ParticleEffectComponent->DestroyComponent();
+		}
+	}
+	ParticleEffectComponents.Empty();
+
+	for (auto* ParticlEffects : ParticleEffects) {
+		UParticleSystemComponent* ParticleEffectComponent = NewObject<UParticleSystemComponent>(this);
+		check(ParticleEffectComponent);
+		ParticleEffectComponent->SetTemplate(ParticlEffects);
+		ParticleEffectComponents.Add(ParticleEffectComponent);
+	}
+}
+
+void ADDTrapBase::SetAttachParticleToRoot()
+{
+	for (UParticleSystemComponent* ParticleEffectComponent : ParticleEffectComponents) {
+		check(ParticleEffectComponent);
+		ParticleEffectComponent->SetupAttachment(RootComponent);
+		ParticleEffectComponent->RegisterComponent();
 	}
 }

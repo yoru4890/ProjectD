@@ -9,13 +9,6 @@
 /**
  *
  */
-UENUM(BlueprintType)
-enum class ETrapMeshType : uint8
-{
-	StaticMesh,
-	SkeletalMesh,
-	Unknown
-};
 
 UENUM(BlueprintType)
 enum class ETrapType : uint8
@@ -62,21 +55,6 @@ public:
 	bool bIsTrapUnlocked; // 트랩이 언락되었는지 여부
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	ETrapMeshType TrapMeshType; // 트랩의 메쉬 타입
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "TrapMeshType == ETrapMeshType::StaticMesh"))
-	TSoftObjectPtr<UStaticMesh> TrapStaticMesh; // 트랩의 스태틱 메쉬
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "TrapMeshType == ETrapMeshType::SkeletalMesh"))
-	TSoftObjectPtr<USkeletalMesh> TrapSkeletalMesh; // 트랩의 스켈레톤 메쉬
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "TrapMeshType == ETrapMeshType::SkeletalMesh"))
-	TSoftObjectPtr<UAnimBlueprint> TrapAnimBlueprint; // 트랩의 애니메이션 블루프린트
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSoftObjectPtr<UParticleSystem> TrapEffect; // 트랩의 공격 이펙트
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsDotTrap; // 도트 공격 트랩 여부
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bIsDotTrap"))
@@ -99,7 +77,4 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<class ADDTrapBase> TrapClass; // 트랩 클래스
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Trap")
-	TSubclassOf<UObject> TrapFactoryClass; // 트랩 팩토리 클래스
 };

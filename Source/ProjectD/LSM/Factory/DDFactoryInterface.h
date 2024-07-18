@@ -23,5 +23,5 @@ class PROJECTD_API IDDFactoryInterface
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual UObject* CreateObject(UWorld* World, const FName& ObjectName, const FBaseStruct& ObjectStruct, const FVector& Location, const FRotator& Rotation, AActor* Owner, APawn* Instigator) = 0;
+	virtual UObject* CreateObject(UWorld* World, const FName& RowName, const FBaseStruct& ObjectStruct, const FVector& Location, const FRotator& Rotation, AActor* Owner, APawn* Instigator) = 0;
 };

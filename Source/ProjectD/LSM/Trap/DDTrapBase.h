@@ -56,19 +56,19 @@ protected:
 	bool bIsTrapUnlocked; // 트랩이 언락되었는지 여부
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	ETrapMeshType TrapMeshType; // 트랩의 메쉬 타입
+	EMeshType TrapMeshType; // 트랩의 메쉬 타입
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "TrapMeshType == ETrapMeshType::StaticMesh"))
-	TObjectPtr<UStaticMesh> TrapStaticMesh; // 트랩의 스태틱 메쉬
+	TArray<TObjectPtr<UStaticMesh>> TrapStaticMeshs; // 트랩의 스태틱 메쉬
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "TrapMeshType == ETrapMeshType::SkeletalMesh"))
-	TObjectPtr<USkeletalMesh> TrapSkeletalMesh; // 트랩의 스켈레톤 메쉬
+	TArray<TObjectPtr<USkeletalMesh>> TrapSkeletalMeshs; // 트랩의 스켈레톤 메쉬
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "TrapMeshType == ETrapMeshType::SkeletalMesh"))
-	TObjectPtr<UAnimBlueprint> TrapAnimBlueprint; // 트랩의 애니메이션 블루프린트
+	TObjectPtr<UAnimBlueprint> TrapAnimBlueprints; // 트랩의 애니메이션 블루프린트
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TObjectPtr<UParticleSystem> TrapEffect; // 트랩의 공격 이펙트
+	TArray<TObjectPtr<UParticleSystem>> TrapEffects; // 트랩의 공격 이펙트
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsDotTrap; // 도트 공격 트랩 여부
@@ -93,12 +93,12 @@ protected:
 
 protected:
 	UPROPERTY(EditAnywhere)
-	TObjectPtr<UParticleSystemComponent> ParticleEffectComponent;
+	TArray<TObjectPtr<UParticleSystemComponent>> ParticleEffectComponents;
 
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	virtual void InitFromDataTable(const FDDTrapStruct& TrapData);
-	virtual void SetTrapAssets(UStaticMesh* StaticMesh, USkeletalMesh* SkeletalMesh, UAnimBlueprint* AnimBlueprint, UParticleSystem* ParticleEffect) override;
-
+	virtual void SetTrapAssets(TArray<UStaticMesh*> StaticMeshs, TArray<USkeletalMesh*> SkeletalMeshs, UAnimBlueprint* AnimBlueprint, TArray<UParticleSystem*> ParticleEffects) override;
+	void SetAttachParticleToRoot();
 };

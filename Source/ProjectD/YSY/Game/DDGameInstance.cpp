@@ -2,18 +2,19 @@
 
 
 #include "YSY/Game/DDGameInstance.h"
-#include "LSM/TrapManager/DDTrapAssetManager.h"
-#include "LSM/TrapManager/DDTrapManager.h"
-#include "LSM/TrapManager/DDTrapFactoryManager.h"
+#include "LSM/Manager/DDAssetManager.h"
+#include "LSM/Manager/DDTrapManager.h"
+#include "LSM/Manager/DDFactoryManager.h"
 
 void UDDGameInstance::Init()
 {
 	Super::Init();
 	TrapManager = NewObject<UDDTrapManager>(this);
-	TrapFactoryManager = NewObject<UDDTrapFactoryManager>(this);
-	TrapAssetManager = NewObject<UDDTrapAssetManager>(this);
+	FactoryManager = NewObject<UDDFactoryManager>(this);
+	AssetManager = NewObject<UDDAssetManager>(this);
 
-	TrapFactoryManager->Initialize(TrapManager->GetTrapDataTable());
-	TrapAssetManager->LoadTrapAssetsAsync();
+	FactoryManager->Initialize(TrapManager->GetTrapDataTable());
+	AssetManager->Initialize();
+	
 
 }

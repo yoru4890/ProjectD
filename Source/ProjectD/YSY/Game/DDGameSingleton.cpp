@@ -33,10 +33,18 @@ void UDDGameSingleton::LoadDataTable(TMap<FName, T>& DataTable, const FString& P
 		const UDataTable* DataTableObject = DataTableRef.Object;
 		check(DataTableObject->GetRowMap().Num() > 0);
 
-		TMap<FName, uint8*> TempDataMap = DataTableObject->GetRowMap();
-		for (auto& Elem : TempDataMap)
+		TArray<FName> RowNames = DataTableObject->GetRowNames();
+		for (const FName& RowName : RowNames)
 		{
-			DataTable.Add(Elem.Key, *reinterpret_cast<T*>(Elem.Value));
+			T* RowData = DataTableObject->FindRow<T>(RowName, "");
+			if (RowData)
+			{
+				DataTable.Add(RowName, *RowData);
+			}
+			else
+			{
+				UE_LOG(LogDDGameSingleton, Warning, TEXT("Failed to find row: %s"), *RowName.ToString());
+			}
 		}
 	}
 	else

@@ -26,10 +26,10 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	// Override to set trap assets
-	virtual void SetTrapAssets(UStaticMesh* StaticMesh, USkeletalMesh* SkeletalMesh, UAnimBlueprint* AnimBlueprint, UParticleSystem* ParticleEffect) override;
+	virtual void SetTrapAssets(TArray<UStaticMesh*> StaticMeshs, TArray<USkeletalMesh*> SkeletalMeshs, UAnimBlueprint* AnimBlueprint, TArray<UParticleSystem*> ParticleEffects) override;
 
 protected:
 	// Skeletal Mesh Component
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<USkeletalMeshComponent> SkeletalMeshComponent;
+	TArray<TObjectPtr<USkeletalMeshComponent>> SkeletalMeshComponents;
 };

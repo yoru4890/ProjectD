@@ -15,8 +15,6 @@ class PROJECTD_API UDDTrapManager : public UObject
 public:
 	UDDTrapManager();
 
-	void SetTrapFactoryManager(class UDDTrapFactoryManager* InTrapFactoryManager);
-
 	// 함정이 해금이 되었는지 체크하는 메서드
 	UFUNCTION(BlueprintCallable)
 	bool IsTowerUnlocked(const FName& TrapName) const;
@@ -38,7 +36,5 @@ public:
 	class ADDTrapBase* SpawnTrap(UWorld* World, const FName& TrapName, const FVector& Location, const FRotator& Rotation, AActor* Owner, APawn* Instigator);
 
 private:
-	UPROPERTY()
-	// TrapFactoryManager 참조
-	TObjectPtr<UDDTrapFactoryManager> TrapFactoryManager;
+
 };

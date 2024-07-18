@@ -8,35 +8,35 @@
 #include "DDGameInstance.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
 class PROJECTD_API UDDGameInstance : public UGameInstance
 {
 	GENERATED_BODY()
-	
+
 public:
 	virtual void Init() override;
 
-	FORCEINLINE class UDDTrapAssetManager* GetTrapAssetManager() const { return TrapAssetManager; }
+	FORCEINLINE class UDDAssetManager* GetAssetManager() const { return AssetManager; }
 
-	FORCEINLINE class UDDTrapManager*  GetTrapManager() const { return TrapManager; }
+	FORCEINLINE class UDDTrapManager* GetTrapManager() const { return TrapManager; }
 
-	FORCEINLINE class UDDTrapFactoryManager*  GetTrapFactoryManager() const { return TrapFactoryManager; }
+	FORCEINLINE class UDDFactoryManager* GetFactoryManager() const { return FactoryManager; }
 
 	FORCEINLINE FStreamableManager& GetStreamableManager() { return StreamableManager; }
 
 private:
 	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<class UDDTrapAssetManager> TrapAssetManager;
+	TObjectPtr<class UDDAssetManager> AssetManager;
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UDDTrapManager> TrapManager;
 
 	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<class UDDTrapFactoryManager> TrapFactoryManager;
+	TObjectPtr<class UDDFactoryManager> FactoryManager;
 
 	FStreamableManager StreamableManager;
 
-	
+
 };
