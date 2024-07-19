@@ -15,9 +15,5 @@ class PROJECTD_API UDDEnemyManager : public UObject
 	GENERATED_BODY()
 	
 public:
-	//UDDEnemyManager();
-
-
-
-
+	UDDEnemyManager();
 };

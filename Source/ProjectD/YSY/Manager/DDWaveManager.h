@@ -4,14 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
-#include "DDEnemyFactoryManager.generated.h"
+#include "DDWaveManager.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class PROJECTD_API UDDEnemyFactoryManager : public UObject
+class PROJECTD_API UDDWaveManager : public UObject
 {
 	GENERATED_BODY()
 	
+public:
+	UDDWaveManager();
 };
