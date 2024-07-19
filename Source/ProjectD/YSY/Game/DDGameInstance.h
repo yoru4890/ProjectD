@@ -4,14 +4,39 @@
 
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
+#include "Engine/StreamableManager.h"
 #include "DDGameInstance.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
 class PROJECTD_API UDDGameInstance : public UGameInstance
 {
 	GENERATED_BODY()
-	
+
+public:
+	virtual void Init() override;
+
+	FORCEINLINE class UDDAssetManager* GetAssetManager() const { return AssetManager; }
+
+	FORCEINLINE class UDDTrapManager* GetTrapManager() const { return TrapManager; }
+
+	FORCEINLINE class UDDFactoryManager* GetFactoryManager() const { return FactoryManager; }
+
+	FORCEINLINE FStreamableManager& GetStreamableManager() { return StreamableManager; }
+
+private:
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<class UDDAssetManager> AssetManager;
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<class UDDTrapManager> TrapManager;
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<class UDDFactoryManager> FactoryManager;
+
+	FStreamableManager StreamableManager;
+
+
 };
