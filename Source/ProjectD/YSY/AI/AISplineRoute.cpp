@@ -2,16 +2,27 @@
 
 
 #include "YSY/AI/AISplineRoute.h"
+#include "Components/SplineComponent.h"
 
-// Sets default values
 AAISplineRoute::AAISplineRoute()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
 }
 
-// Called when the game starts or when spawned
+void AAISplineRoute::IncrementRoute()
+{
+	if (++RouteIndex == SplinePath->GetNumberOfSplinePoints() - 1)
+	{
+		// TODO : Goal
+	}
+}
+
+FVector AAISplineRoute::GetSplinePointasWorldPosition()
+{
+	return SplinePath->GetLocationAtSplinePoint(RouteIndex, ESplineCoordinateSpace::World);
+}
+
 void AAISplineRoute::BeginPlay()
 {
 	Super::BeginPlay();

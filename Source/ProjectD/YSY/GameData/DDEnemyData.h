@@ -55,4 +55,10 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
 	uint8 bIsElite : 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = Data)
+	FString MeshPath;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = Data)
+	FString AnimationBlueprintPath;
 };

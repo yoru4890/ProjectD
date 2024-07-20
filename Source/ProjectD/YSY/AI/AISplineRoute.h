@@ -15,6 +15,8 @@ public:
 	// Sets default values for this actor's properties
 	AAISplineRoute();
 
+	void IncrementRoute();
+	FVector GetSplinePointasWorldPosition();
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -22,4 +24,6 @@ protected:
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Comp", meta = (AllowPrivateAccess = "true"))
 	class USplineComponent* SplinePath;
+
+	int32 RouteIndex{};
 };

@@ -16,4 +16,9 @@ class PROJECTD_API UDDEnemyManager : public UObject
 	
 public:
 	UDDEnemyManager();
+
+	UFUNCTION()
+	void OnEnemyDestoryed(AActor* DestoryedActor);
+
+	void SpawnEnemy(const FName& EnemyName);
 };
