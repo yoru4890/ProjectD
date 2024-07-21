@@ -69,5 +69,6 @@ private:
 
 #pragma endregion
 
-	TSubclassOf<class AISplineRoute> AIMoveRoute;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DD", meta = (AllowPrivateAccess = "true"));
+	TSubclassOf<class AAISplineRoute> AIMoveRoute;
 };

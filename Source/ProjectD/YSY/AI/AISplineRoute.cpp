@@ -8,6 +8,8 @@ AAISplineRoute::AAISplineRoute()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
+	SplinePath = CreateDefaultSubobject<USplineComponent>(TEXT("SplinePath"));
+
 }
 
 void AAISplineRoute::IncrementRoute()
