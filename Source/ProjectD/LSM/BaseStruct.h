@@ -31,17 +31,17 @@ public:
 	EMeshType MeshType; // 트랩의 메쉬 타입
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "MeshType == EMeshType::StaticMesh"))
-	TArray<TSoftObjectPtr<UStaticMesh>> StaticMeshs; // 트랩의 스태틱 메쉬
+	TArray<TSoftObjectPtr<UStaticMesh>> StaticMeshs; // 스태틱 메쉬
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "MeshType == EMeshType::SkeletalMesh"))
-	TArray<TSoftObjectPtr<USkeletalMesh>> SkeletalMeshs; // 트랩의 스켈레톤 메쉬
+	TArray<TSoftObjectPtr<USkeletalMesh>> SkeletalMeshs; // 스켈레톤 메쉬
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "MeshType == EMeshType::SkeletalMesh"))
-	TSoftObjectPtr<UAnimBlueprint> AnimBlueprint; // 트랩의 애니메이션 블루프린트
+	TSoftObjectPtr<UAnimBlueprint> AnimBlueprint; // 애니메이션 블루프린트
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<TSoftObjectPtr<UParticleSystem>> Effects; // 트랩의 공격 이펙트
+	TArray<TSoftObjectPtr<UParticleSystem>> Effects; // 공격 이펙트
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<UObject> FactoryClass; // 트랩 팩토리 클래스
+	TSubclassOf<UObject> FactoryClass; // 팩토리 클래스
 };
