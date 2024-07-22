@@ -14,4 +14,8 @@ class PROJECTD_API UDDPSoldierAnimInstance : public UAnimInstance
 {
 	GENERATED_BODY()
 	
+public:
+	UDDPSoldierAnimInstance();
+
+
 };

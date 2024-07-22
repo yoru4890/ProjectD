@@ -27,10 +27,10 @@ public:
 //Character Control Section
 protected:
 	void SetCharacterControl();
+
 	virtual void SetCharacterControlData(const class UDDCharacterControlData* CharacterControlData) override;
 
-	UPROPERTY(EditAnywhere, Category = Character)
-	float MouseSpeed;
+	
 
 //Camera Section
 protected:
@@ -41,10 +41,12 @@ protected:
 	TObjectPtr<class UCameraComponent> FollowCamera;
 
 
-	
-
 //Input Section
 protected:
+
+	void Move(const FInputActionValue& Value);
+	void Look(const FInputActionValue& Value);
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> JumpAction;
 
@@ -54,7 +56,11 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> MoveAction;
 
-	void Move(const FInputActionValue& Value);
-	void Look(const FInputActionValue& Value);
+	UPROPERTY(EditAnywhere, Category = Character)
+	float MouseSpeed;
 
+//Mesh Section
+protected:
+
+	void CreateSkeletalMesh(USkeletalMeshComponent* USkeletalMesh, const FString& Name, const FString& Path );
 };

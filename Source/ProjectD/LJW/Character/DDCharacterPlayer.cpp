@@ -81,8 +81,9 @@ void ADDCharacterPlayer::SetupPlayerInputComponent(class UInputComponent* Player
 
 void ADDCharacterPlayer::SetCharacterControl()
 {
+	
 	UDDCharacterControlData* NewPlayerControlData = CharacterControlManager;
-	//check(NewPlayerControlData);
+	check(NewPlayerControlData);
 
 	SetCharacterControlData(NewPlayerControlData);
 
@@ -134,5 +135,17 @@ void ADDCharacterPlayer::Look(const FInputActionValue& Value)
 	AddControllerYawInput(LookAxisVector.X * MouseSpeed);
 	AddControllerPitchInput(LookAxisVector.Y * MouseSpeed);
 
+}
+
+void ADDCharacterPlayer::CreateSkeletalMesh(USkeletalMeshComponent* SkeletalMesh, const FString& Name, const FString& Path)
+{
+	SkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(*Name);
+	SkeletalMesh->SetupAttachment(GetMesh());
+	ConstructorHelpers::FObjectFinder<USkeletalMesh>MeshRef(*Path);
+	if (MeshRef.Succeeded())
+	{
+		SkeletalMesh->SetSkeletalMesh(MeshRef.Object);
+		SkeletalMesh->SetRelativeLocation(FVector(0, 0, 0));
+	}
 }
 

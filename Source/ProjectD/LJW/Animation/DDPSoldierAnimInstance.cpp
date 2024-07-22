@@ -3,3 +3,6 @@
 
 #include "LJW/Animation/DDPSoldierAnimInstance.h"
 
+UDDPSoldierAnimInstance::UDDPSoldierAnimInstance()
+{
+}
