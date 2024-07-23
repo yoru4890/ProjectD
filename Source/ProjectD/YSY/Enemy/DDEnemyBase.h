@@ -6,10 +6,11 @@
 #include "GameFramework/Character.h"
 #include "YSY/GameData/DDEnemyData.h"
 #include "YSY/Interface/DDEnemyAIInterface.h"
+#include "YSY/Interface/DDCharacterWidgetInterface.h"
 #include "DDEnemyBase.generated.h"
 
 UCLASS()
-class PROJECTD_API ADDEnemyBase : public ACharacter, public IDDEnemyAIInterface
+class PROJECTD_API ADDEnemyBase : public ACharacter, public IDDEnemyAIInterface, public IDDCharacterWidgetInterface
 {
 	GENERATED_BODY()
 
@@ -37,6 +38,17 @@ public:
 
 
 #pragma endregion
+
+#pragma region WidgetInterface
+
+	virtual void SetupCharacterWidget(class UDDUserWidget* InUserWidget);
+
+#pragma endregion
+
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "DD", Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UWidgetComponent> HpBar;
+
 
 private:
 
@@ -85,6 +97,8 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DD", meta = (AllowPrivateAccess = "true"));
 	TObjectPtr<class AAISplineRoute> AIMoveRoute;
+
+	
 
 	TObjectPtr<class ADDEnemyAIController> EnemyAIController;
 

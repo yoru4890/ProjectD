@@ -5,6 +5,8 @@
 #include "YSY/AI/DDEnemyAIController.h"
 #include "YSY/AI/AISplineRoute.h"
 #include "Components/CapsuleComponent.h"
+#include "YSY/UI/DDHpBarWidget.h"
+#include "YSY/UI/DDWidgetComponent.h"
 
 // Sets default values
 ADDEnemyBase::ADDEnemyBase()
@@ -16,7 +18,21 @@ ADDEnemyBase::ADDEnemyBase()
 
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 
+	HpBar = CreateDefaultSubobject<UDDWidgetComponent>(TEXT("HpWidget"));
+	HpBar->SetupAttachment(GetMesh());
+	HpBar->SetRelativeLocation(FVector(0.0f, 0.0f, 180.0f));
 	
+
+	// TODO : YSY Setting HpBarWidget
+
+	/*static ConstructorHelpers::FClassFinder<UUserWidget> HpBarWidgetRef(TEXT("/Game/ArenaBattle/UI/WBP_HpBar.WBP_HpBar_C"));
+	if (HpBarWidgetRef.Class)
+	{
+		HpBar->SetWidgetClass(HpBarWidgetRef.Class);
+		HpBar->SetWidgetSpace(EWidgetSpace::Screen);
+		HpBar->SetDrawSize(FVector2D(150.0f, 15.0f));
+		HpBar->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}*/
 }
 
 void ADDEnemyBase::BeginPlay()
@@ -68,13 +84,25 @@ void ADDEnemyBase::InitializeEnemy(const FDDEnemyData& EnemyData)
 void ADDEnemyBase::SplineMove()
 {
 	FVector Destination = AIMoveRoute->GetSplinePointasWorldPosition(RouteIndex);
-	
+
 	EnemyAIController->MoveToLocation(Destination);
 }
 
 void ADDEnemyBase::SetAIMoveFinishedDelegate(const FAISplineMoveFinished& InOnSplineMoveFinished)
 {
 	OnSplineMoveFinished = InOnSplineMoveFinished;
+}
+
+void ADDEnemyBase::SetupCharacterWidget(UDDUserWidget* InUserWidget)
+{
+	UDDHpBarWidget* HpBarWidget = Cast<UDDHpBarWidget>(InUserWidget);
+	if (HpBarWidget)
+	{
+		HpBarWidget->UpdateStat(100.0f); // TODO : YSY Setting MaxHp
+		HpBarWidget->UpdateHpBar(100.0f); // TODO : YSY StatComponent
+
+		// TODO : YSY StatComponent
+	}
 }
 
 void ADDEnemyBase::SplineMoveFinish()
@@ -100,5 +128,5 @@ void ADDEnemyBase::ArrivalAtGoal()
 
 void ADDEnemyBase::Die()
 {
-	// TODO : Player get gold, Drop Item
+	// TODO : YSY Player get gold, Drop Item
 }
