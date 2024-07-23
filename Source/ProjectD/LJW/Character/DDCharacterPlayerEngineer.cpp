@@ -15,35 +15,42 @@ ADDCharacterPlayerEngineer::ADDCharacterPlayerEngineer()
 	}
 
 	//Hair
-	CreateSkeletalMesh(Hair, TEXT("Hair"), TEXT("/Script/Engine.SkeletalMesh'/Game/G2_Mercenaries/Meshes/Characters/Seperates/Females/SK_FHair.SK_FHair'"));
+	CreateLeaderPoseSkeletalMesh(Hair, TEXT("Hair"), TEXT("/Script/Engine.SkeletalMesh'/Game/G2_Mercenaries/Meshes/Characters/Seperates/Females/SK_FHair.SK_FHair'"));
 	
 	//Feet
-	CreateSkeletalMesh(Feet, TEXT("Feet"), TEXT("/Script/Engine.SkeletalMesh'/Game/G2_Mercenaries/Meshes/Characters/Seperates/Females/SK_Shoes.SK_Shoes'"));
+	CreateLeaderPoseSkeletalMesh(Feet, TEXT("Feet"), TEXT("/Script/Engine.SkeletalMesh'/Game/G2_Mercenaries/Meshes/Characters/Seperates/Females/SK_Shoes.SK_Shoes'"));
 	
+
 	//Hand_L
-	CreateSkeletalMesh(HandL, TEXT("Hand_L"), TEXT("/Script/Engine.SkeletalMesh'/Game/G2_Mercenaries/Meshes/Characters/Seperates/Females/SK_Hand_L.SK_Hand_L'"));
+	CreateLeaderPoseSkeletalMesh(HandL, TEXT("Hand_L"), TEXT("/Script/Engine.SkeletalMesh'/Game/G2_Mercenaries/Meshes/Characters/Seperates/Females/SK_Hand_L.SK_Hand_L'"));
 	
 	//Hand_R
-	CreateSkeletalMesh(HandR, TEXT("Hand_R"), TEXT("/Script/Engine.SkeletalMesh'/Game/G2_Mercenaries/Meshes/Characters/Seperates/Females/SK_Hand_R.SK_Hand_R'"));
+	CreateLeaderPoseSkeletalMesh(HandR, TEXT("Hand_R"), TEXT("/Script/Engine.SkeletalMesh'/Game/G2_Mercenaries/Meshes/Characters/Seperates/Females/SK_Hand_R.SK_Hand_R'"));
 	
 	//UpperBody
-	CreateSkeletalMesh(UpperBody, TEXT("UpperBody"), TEXT("/Script/Engine.SkeletalMesh'/Game/G2_Mercenaries/Meshes/Characters/Seperates/Females/SK_UpperBody_C.SK_UpperBody_C'"));
+	CreateLeaderPoseSkeletalMesh(UpperBody, TEXT("UpperBody"), TEXT("/Script/Engine.SkeletalMesh'/Game/G2_Mercenaries/Meshes/Characters/Seperates/Females/SK_UpperBody_C.SK_UpperBody_C'"));
 	
 	//BottomBody
-	CreateSkeletalMesh(BottomBody, TEXT("BottomBody"), TEXT("/Script/Engine.SkeletalMesh'/Game/G2_Mercenaries/Meshes/Characters/Seperates/Females/SK_BottomBody_B.SK_BottomBody_B'"));
+	CreateLeaderPoseSkeletalMesh(BottomBody, TEXT("BottomBody"), TEXT("/Script/Engine.SkeletalMesh'/Game/G2_Mercenaries/Meshes/Characters/Seperates/Females/SK_BottomBody_B.SK_BottomBody_B'"));
 
 	//ABP
-	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimInstanceClassRef(TEXT(""));
+	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimInstanceClassRef(TEXT("/Script/Engine.AnimBlueprint'/Game/0000/LJW/Animation/ABP_Engineer.ABP_Engineer_C'"));
 	if (AnimInstanceClassRef.Class)
 	{
 		GetMesh()->SetAnimInstanceClass(AnimInstanceClassRef.Class);
 	}
 
-
+	//Animation Tick Option
+	GetMesh()->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
 }
+
 
 void ADDCharacterPlayerEngineer::BeginPlay()
 {
 	Super::BeginPlay();
+
+	
 }
+
+
 

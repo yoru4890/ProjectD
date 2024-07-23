@@ -53,6 +53,7 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 
 }
 
+
 void ADDCharacterPlayer::BeginPlay()
 {
 	Super::BeginPlay();
@@ -137,7 +138,7 @@ void ADDCharacterPlayer::Look(const FInputActionValue& Value)
 
 }
 
-void ADDCharacterPlayer::CreateSkeletalMesh(USkeletalMeshComponent* SkeletalMesh, const FString& Name, const FString& Path)
+void ADDCharacterPlayer::CreateLeaderPoseSkeletalMesh(USkeletalMeshComponent* SkeletalMesh, const FString& Name, const FString& Path)
 {
 	SkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(*Name);
 	SkeletalMesh->SetupAttachment(GetMesh());
@@ -146,6 +147,8 @@ void ADDCharacterPlayer::CreateSkeletalMesh(USkeletalMeshComponent* SkeletalMesh
 	{
 		SkeletalMesh->SetSkeletalMesh(MeshRef.Object);
 		SkeletalMesh->SetRelativeLocation(FVector(0, 0, 0));
+		//Leader pose Component
+		SkeletalMesh->SetLeaderPoseComponent(GetMesh());
 	}
 }
 

@@ -19,10 +19,10 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-
-
+	
 public :
-	//Character Mesh
+	//Mesh
+	//Character
 	UPROPERTY(VisibleAnywhere, Category = "CharacterMesh")
 	USkeletalMeshComponent* Hair;
 	
@@ -42,7 +42,8 @@ public :
 	USkeletalMeshComponent* UpperBody;
 
 
-
-	UPROPERTY(VisibleAnywhere, Category = "Rifle")
+	//Rifle
+	UPROPERTY(VisibleAnywhere, Category = Rifle)
 	class USkeletalMeshComponent* RifleMesh;
+
 };

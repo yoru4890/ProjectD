@@ -19,6 +19,7 @@ public:
 	ADDCharacterPlayer();
 
 protected:
+	
 	virtual void BeginPlay() override;
 
 public:
@@ -62,5 +63,5 @@ protected:
 //Mesh Section
 protected:
 
-	void CreateSkeletalMesh(USkeletalMeshComponent* USkeletalMesh, const FString& Name, const FString& Path );
+	void CreateLeaderPoseSkeletalMesh(USkeletalMeshComponent* USkeletalMesh, const FString& Name, const FString& Path );
 };
