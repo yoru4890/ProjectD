@@ -7,6 +7,7 @@
 #include "LSM/Trap/DDTrapBase.h"
 #include "LSM/Manager/DDBuildManager.h"
 #include "Kismet/GameplayStatics.h"
+#include "YSY/Collision/CollisionChannel.h"
 
 // Sets default values for this component's properties
 UDDTrapBuildComponent::UDDTrapBuildComponent()
@@ -44,16 +45,32 @@ void UDDTrapBuildComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	if (PreviewTrap) {
+		UE_LOG(LogTemp, Warning, TEXT("PreviewTrap Success"));
+	}
+
 	// ...
 }
 
 void UDDTrapBuildComponent::ReadyTrap(const FName& TrapName)
 {
+	UWorld* World = GetWorld();
+	check(World);
+
+	AActor* Owner = GetOwner();
+	check(Owner);
+
+	APawn* Instigator = Cast<APawn>(Owner);
+
+	PreviewTrap = TrapManager->SpawnTrap(World, TrapName, FVector(-10000,-10000,-10000), FRotator(), Owner, Instigator);
+	GetWorld()->GetTimerManager().SetTimer(TraceTimerHandle, this, &UDDTrapBuildComponent::PerformTrace, 0.1f, true);
 
 }
 
 void UDDTrapBuildComponent::CancleReadyTrap(ADDTrapBase* Trap)
 {
+	PreviewTrap = nullptr;
+	GetWorld()->GetTimerManager().ClearTimer(TraceTimerHandle);
 }
 
 
@@ -86,8 +103,39 @@ void UDDTrapBuildComponent::UpgradeTrap(ADDTrapBase* Trap)
 {
 }
 
-FVector UDDTrapBuildComponent::GetNearestGridCellLocation()
+void UDDTrapBuildComponent::PerformTrace()
 {
-	return FVector();
+	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	if (PlayerController)
+	{
+		FVector CameraLocation;
+		FRotator CameraRotation;
+		PlayerController->GetPlayerViewPoint(CameraLocation, CameraRotation);
+
+		FVector Start = CameraLocation;
+		FVector End = Start + (CameraRotation.Vector() * 2000.f); // Adjust the range as needed
+
+		FHitResult HitResult;
+		FCollisionQueryParams CollisionParams;
+		CollisionParams.AddIgnoredActor(GetOwner());
+
+		bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, GTCHANNEL_BUILDINGTRACE, CollisionParams);
+
+
+		if (bHit)
+		{
+			FVector HitLocation = HitResult.Location;
+
+			if (BuildManager->CanPlaceTrapAtLocation(HitLocation)) {
+				FVector NearestCellLocation = BuildManager->GetNearestGridCellLocation(HitLocation);
+
+				PreviewTrap->SetActorLocation(NearestCellLocation);
+
+			}
+		}
+
+		DrawDebugLine(GetWorld(), Start, End, FColor::Green, false, 1, 0, 1);
+	}
+
 }
 

@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "LSM/Trap/DDTrapBase.h"
+#include "Components/BoxComponent.h"
 #include "Particles/ParticleSystemComponent.h"
 
 // Sets default values
@@ -8,6 +9,11 @@ ADDTrapBase::ADDTrapBase()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	// Create and initialize the BoxComponent
+	BoxCollisionComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxCollisionComponent"));
+	BoxCollisionComponent->SetBoxExtent(FVector(300.0f, 300.0f, 300.0f));
+	RootComponent = BoxCollisionComponent;
 }
 
 ADDTrapBase::~ADDTrapBase()
@@ -64,19 +70,24 @@ void ADDTrapBase::SetTrapAssets(TArray<UStaticMesh*> StaticMeshs, TArray<USkelet
 	}
 	ParticleEffectComponents.Empty();
 
-	for (auto* ParticlEffects : ParticleEffects) {
+	for (auto* ParticlEffect : ParticleEffects) {
 		UParticleSystemComponent* ParticleEffectComponent = NewObject<UParticleSystemComponent>(this);
 		check(ParticleEffectComponent);
-		ParticleEffectComponent->SetTemplate(ParticlEffects);
+		// ParticleRootComponent¿¡ ºÎÂø
+		ParticleEffectComponent->SetupAttachment(RootComponent);
+		ParticleEffectComponent->SetTemplate(ParticlEffect);
+		ParticleEffectComponent->RegisterComponent();
+
 		ParticleEffectComponents.Add(ParticleEffectComponent);
 	}
 }
 
 void ADDTrapBase::SetAttachParticleToRoot()
 {
-	for (UParticleSystemComponent* ParticleEffectComponent : ParticleEffectComponents) {
-		check(ParticleEffectComponent);
-		ParticleEffectComponent->SetupAttachment(RootComponent);
-		ParticleEffectComponent->RegisterComponent();
-	}
+	//for (UParticleSystemComponent* ParticleEffectComponent : ParticleEffectComponents) {
+	//	check(ParticleEffectComponent);
+	//	ParticleEffectComponent->SetupAttachment(RootComponent);
+	//	ParticleEffectComponent->RegisterComponent();
+	//	ParticleEffectComponent->SetRelativeScale3D(FVector(1.f));
+	//}
 }

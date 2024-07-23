@@ -22,6 +22,7 @@ protected:
 	virtual void BeginPlay() override;
 
 protected:
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName TrapName; // 트랩의 이름
 
@@ -58,13 +59,13 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EMeshType TrapMeshType; // 트랩의 메쉬 타입
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "TrapMeshType == ETrapMeshType::StaticMesh"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<TObjectPtr<UStaticMesh>> TrapStaticMeshs; // 트랩의 스태틱 메쉬
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "TrapMeshType == ETrapMeshType::SkeletalMesh"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<TObjectPtr<USkeletalMesh>> TrapSkeletalMeshs; // 트랩의 스켈레톤 메쉬
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "TrapMeshType == ETrapMeshType::SkeletalMesh"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<UAnimBlueprint> TrapAnimBlueprints; // 트랩의 애니메이션 블루프린트
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -94,6 +95,9 @@ protected:
 protected:
 	UPROPERTY(EditAnywhere)
 	TArray<TObjectPtr<UParticleSystemComponent>> ParticleEffectComponents;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class UBoxComponent> BoxCollisionComponent;
 
 public:	
 	// Called every frame

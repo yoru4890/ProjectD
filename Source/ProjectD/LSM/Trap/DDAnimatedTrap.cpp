@@ -32,6 +32,9 @@ void ADDAnimatedTrap::SetTrapAssets(TArray<UStaticMesh*> StaticMeshs, TArray<USk
 	SkeletalMeshComponents.Empty();
 	bool bIsFirstSkeltalMesh = true;
 
+	USkeletalMeshComponent* FirstSkeletalMeshComponent = nullptr;
+
+
 	for (USkeletalMesh* SkeletalMesh : SkeletalMeshs) {
 		USkeletalMeshComponent* SkeletalMeshComponent = NewObject<USkeletalMeshComponent>(this);
 		check(SkeletalMeshComponent);
@@ -40,13 +43,21 @@ void ADDAnimatedTrap::SetTrapAssets(TArray<UStaticMesh*> StaticMeshs, TArray<USk
 		SkeletalMeshComponent->SetSkeletalMesh(SkeletalMesh);
 
 		if (bIsFirstSkeltalMesh) {
-			SetRootComponent(SkeletalMeshComponent);
+			FirstSkeletalMeshComponent = SkeletalMeshComponent;
 			if (AnimBlueprint) {
-				SkeletalMeshComponent->SetAnimInstanceClass(AnimBlueprint->GeneratedClass);
+				FirstSkeletalMeshComponent->SetAnimInstanceClass(AnimBlueprint->GeneratedClass);
 			}
+			FirstSkeletalMeshComponent->RegisterComponent();
 			bIsFirstSkeltalMesh = false;
 		}
-		SkeletalMeshComponent->RegisterComponent();
+		else {
+			SkeletalMeshComponent->SetupAttachment(FirstSkeletalMeshComponent);
+			SkeletalMeshComponent->RegisterComponent();
+		}
 		SkeletalMeshComponents.Add(SkeletalMeshComponent);
 	}
+	FBoxSphereBounds Bounds = FirstSkeletalMeshComponent->GetSkeletalMeshAsset()->GetBounds();
+	FVector BoxExtent = Bounds.BoxExtent;
+	FVector ScaleFactor = FVector(300.f / (BoxExtent.X * 2 ), 300.f / (BoxExtent.Y * 2 ),1);
+	FirstSkeletalMeshComponent->SetWorldScale3D(ScaleFactor);
 }

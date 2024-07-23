@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Engine/DataTable.h" // Ensure this include is present for FTableRowBase
 #include "BaseStruct.generated.h"
 
 /**
@@ -30,14 +31,18 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EMeshType MeshType; // 트랩의 메쉬 타입
 
+
+	// Static mesh array, visible only if MeshType is StaticMesh
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "MeshType == EMeshType::StaticMesh"))
-	TArray<TSoftObjectPtr<UStaticMesh>> StaticMeshs; // 스태틱 메쉬
+	TArray<TSoftObjectPtr<UStaticMesh>> StaticMeshs;
 
+	// Skeletal mesh array, visible only if MeshType is SkeletalMesh
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "MeshType == EMeshType::SkeletalMesh"))
-	TArray<TSoftObjectPtr<USkeletalMesh>> SkeletalMeshs; // 스켈레톤 메쉬
+	TArray<TSoftObjectPtr<USkeletalMesh>> SkeletalMeshs;
 
+	// Animation blueprint, visible only if MeshType is SkeletalMesh
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "MeshType == EMeshType::SkeletalMesh"))
-	TSoftObjectPtr<UAnimBlueprint> AnimBlueprint; // 애니메이션 블루프린트
+	TSoftObjectPtr<UAnimBlueprint> AnimBlueprint;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<TSoftObjectPtr<UParticleSystem>> Effects; // 공격 이펙트
