@@ -4,6 +4,7 @@
 #include "YSY/Enemy/DDEnemyBase.h"
 #include "YSY/AI/DDEnemyAIController.h"
 #include "YSY/AI/AISplineRoute.h"
+#include "Components/CapsuleComponent.h"
 
 // Sets default values
 ADDEnemyBase::ADDEnemyBase()
@@ -80,4 +81,24 @@ void ADDEnemyBase::SplineMoveFinish()
 {
 	RouteIndex++;
 	OnSplineMoveFinished.ExecuteIfBound();
+
+	if (AIMoveRoute->IsSplineEnd(RouteIndex))
+	{
+		ArrivalAtGoal();
+	}
+}
+
+void ADDEnemyBase::ArrivalAtGoal()
+{
+	GetMesh()->SetVisibility(false);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	EnemyAIController->StopAI();
+
+	// TODO : YSY Caculate Potal Count
+}
+
+void ADDEnemyBase::Die()
+{
+	// TODO : Player get gold, Drop Item
 }

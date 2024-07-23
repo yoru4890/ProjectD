@@ -26,6 +26,10 @@ public:
 	void InitializeEnemy(const FDDEnemyData& EnemyData);
 
 	void SplineMoveFinish();
+
+	void ArrivalAtGoal();
+
+	void Die();
 #pragma region AIInterface
 
 	virtual void SplineMove() override;

@@ -15,10 +15,13 @@ public:
 	// Sets default values for this actor's properties
 	AAISplineRoute();
 
-	FVector GetSplinePointasWorldPosition(int RouteIndex);
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+public:
+	FVector GetSplinePointasWorldPosition(int RouteIndex);
+	bool IsSplineEnd(int RouteIndex);
 
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Comp", meta = (AllowPrivateAccess = "true"))

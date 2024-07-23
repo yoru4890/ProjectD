@@ -14,9 +14,12 @@ AAISplineRoute::AAISplineRoute()
 
 FVector AAISplineRoute::GetSplinePointasWorldPosition(int RouteIndex)
 {
-	// TODO : YSY RouteIndex EndCheck
-
 	return SplinePath->GetLocationAtSplinePoint(RouteIndex, ESplineCoordinateSpace::World);
+}
+
+bool AAISplineRoute::IsSplineEnd(int RouteIndex)
+{
+	return RouteIndex >= SplinePath->GetNumberOfSplinePoints();
 }
 
 void AAISplineRoute::BeginPlay()
