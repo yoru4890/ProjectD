@@ -5,10 +5,11 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "YSY/GameData/DDEnemyData.h"
+#include "YSY/Interface/DDEnemyAIInterface.h"
 #include "DDEnemyBase.generated.h"
 
 UCLASS()
-class PROJECTD_API ADDEnemyBase : public ACharacter
+class PROJECTD_API ADDEnemyBase : public ACharacter, public IDDEnemyAIInterface
 {
 	GENERATED_BODY()
 
@@ -23,6 +24,12 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "DD")
 	void InitializeEnemy(const FDDEnemyData& EnemyData);
+
+#pragma region AIInterface
+
+	virtual class AAISplineRoute* GetAISplineRoute() const;
+
+#pragma endregion
 
 private:
 
@@ -70,5 +77,7 @@ private:
 #pragma endregion
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DD", meta = (AllowPrivateAccess = "true"));
-	TSubclassOf<class AAISplineRoute> AIMoveRoute;
+	TObjectPtr<class AAISplineRoute> AIMoveRoute;
+
+	TObjectPtr<class ADDEnemyAIController> EnemyAIController;
 };

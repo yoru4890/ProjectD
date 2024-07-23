@@ -19,6 +19,11 @@ void ADDEnemyBase::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	EnemyAIController = Cast<ADDEnemyAIController>(GetController());
+	check(EnemyAIController);
+
+	EnemyAIController->RunAI();
+
 }
 
 void ADDEnemyBase::Tick(float DeltaTime)
@@ -52,5 +57,12 @@ void ADDEnemyBase::InitializeEnemy(const FDDEnemyData& EnemyData)
 	{
 		GetMesh()->SetAnimInstanceClass(AnimInstanceClassRef.Class);
 	}
+}
+
+AAISplineRoute* ADDEnemyBase::GetAISplineRoute() const
+{
+	ensureMsgf(AIMoveRoute, TEXT("AIMoveRoute is NULL"));
+
+	return AIMoveRoute;
 }
 

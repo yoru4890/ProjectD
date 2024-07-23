@@ -16,8 +16,10 @@ void AAISplineRoute::IncrementRoute()
 {
 	if (++RouteIndex == SplinePath->GetNumberOfSplinePoints() - 1)
 	{
-		// TODO : Goal
+		// TODO : YSY Goal
 	}
+
+	UE_LOG(LogTemp, Warning, TEXT("%d"), RouteIndex);
 }
 
 FVector AAISplineRoute::GetSplinePointasWorldPosition()
