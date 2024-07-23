@@ -13,6 +13,8 @@ class UDDEnemyAIInterface : public UInterface
 	GENERATED_BODY()
 };
 
+DECLARE_DELEGATE(FAISplineMoveFinished);
+
 /**
  * 
  */
@@ -23,5 +25,7 @@ class PROJECTD_API IDDEnemyAIInterface
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 	
-	virtual class AAISplineRoute* GetAISplineRoute() const = 0;
+	virtual void SplineMove() = 0;
+
+	virtual void SetAIMoveFinishedDelegate(const FAISplineMoveFinished& InOnSplineMoveFinished) = 0;
 };

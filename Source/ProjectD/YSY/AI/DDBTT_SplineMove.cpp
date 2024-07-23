@@ -36,32 +36,16 @@ EBTNodeResult::Type UDDBTT_SplineMove::ExecuteTask(UBehaviorTreeComponent& Owner
 		return EBTNodeResult::Failed;
 	}
 
-	AISplineRoute = AIPawn->GetAISplineRoute();
-	ensureMsgf(AISplineRoute, TEXT("AISplineRoute is NULL In BTT"));
-	
-	auto Destination = AISplineRoute->GetSplinePointasWorldPosition();
-	auto MoveResult =AIController->MoveToLocation(Destination);
-	
-	if (MoveResult == EPathFollowingRequestResult::RequestSuccessful)
-	{
-		OwnerComptr = &OwnerComp;
+	FAISplineMoveFinished OnSplineMoveFinished;
+	OnSplineMoveFinished.BindLambda(
+		[&]()
+		{
+			FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+		}
+	);
 
-		AIController->GetPathFollowingComponent()->OnRequestFinished.AddUObject(this, &UDDBTT_SplineMove::OnMoveCompleted);
-		AISplineRoute->IncrementRoute();
-		return EBTNodeResult::InProgress;
-	}
+	AIPawn->SetAIMoveFinishedDelegate(OnSplineMoveFinished);
+	AIPawn->SplineMove();
 	
-	return EBTNodeResult::Failed;
-}
-
-void UDDBTT_SplineMove::OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result)
-{
-	if (Result.Code == EPathFollowingResult::Success)
-	{
-		FinishLatentTask(*OwnerComptr, EBTNodeResult::Succeeded);
-	}
-	else
-	{
-		FinishLatentTask(*OwnerComptr, EBTNodeResult::Failed);
-	}
+	return EBTNodeResult::InProgress;
 }

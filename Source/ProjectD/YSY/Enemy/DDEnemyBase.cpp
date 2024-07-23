@@ -3,6 +3,7 @@
 
 #include "YSY/Enemy/DDEnemyBase.h"
 #include "YSY/AI/DDEnemyAIController.h"
+#include "YSY/AI/AISplineRoute.h"
 
 // Sets default values
 ADDEnemyBase::ADDEnemyBase()
@@ -13,6 +14,8 @@ ADDEnemyBase::ADDEnemyBase()
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
+
+	
 }
 
 void ADDEnemyBase::BeginPlay()
@@ -21,6 +24,8 @@ void ADDEnemyBase::BeginPlay()
 	
 	EnemyAIController = Cast<ADDEnemyAIController>(GetController());
 	check(EnemyAIController);
+
+	EnemyAIController->OnMoveFinished.BindUObject(this, &ADDEnemyBase::SplineMoveFinish);
 
 	EnemyAIController->RunAI();
 
@@ -59,10 +64,20 @@ void ADDEnemyBase::InitializeEnemy(const FDDEnemyData& EnemyData)
 	}
 }
 
-AAISplineRoute* ADDEnemyBase::GetAISplineRoute() const
+void ADDEnemyBase::SplineMove()
 {
-	ensureMsgf(AIMoveRoute, TEXT("AIMoveRoute is NULL"));
-
-	return AIMoveRoute;
+	FVector Destination = AIMoveRoute->GetSplinePointasWorldPosition(RouteIndex);
+	
+	EnemyAIController->MoveToLocation(Destination);
 }
 
+void ADDEnemyBase::SetAIMoveFinishedDelegate(const FAISplineMoveFinished& InOnSplineMoveFinished)
+{
+	OnSplineMoveFinished = InOnSplineMoveFinished;
+}
+
+void ADDEnemyBase::SplineMoveFinish()
+{
+	RouteIndex++;
+	OnSplineMoveFinished.ExecuteIfBound();
+}

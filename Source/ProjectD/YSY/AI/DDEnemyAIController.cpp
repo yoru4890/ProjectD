@@ -23,6 +23,8 @@ ADDEnemyAIController::ADDEnemyAIController()
 	{
 		ownedBT = BTFinder.Object;
 	}
+
+	ReceiveMoveCompleted.AddDynamic(this, &ADDEnemyAIController::OnMoveCompleted);
 }
 
 void ADDEnemyAIController::BeginPlay()
@@ -35,12 +37,18 @@ void ADDEnemyAIController::OnPossess(APawn* InPawn)
 	Super::OnPossess(InPawn);
 }
 
+void ADDEnemyAIController::OnMoveCompleted(FAIRequestID RequestID, EPathFollowingResult::Type Result)
+{
+	Super::OnMoveCompleted(RequestID, Result);
+
+	OnMoveFinished.ExecuteIfBound();
+}
+
 void ADDEnemyAIController::RunAI()
 {
 	UBlackboardComponent* BlackboardPtr{ Blackboard.Get() };
 	if (UseBlackboard(ownedBB, BlackboardPtr))
 	{
-		Blackboard->SetValueAsObject(BBKEY_TARGET, UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
 		bool RunResult = RunBehaviorTree(ownedBT);
 		ensure(RunResult);
 

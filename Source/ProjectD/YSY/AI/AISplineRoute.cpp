@@ -12,18 +12,10 @@ AAISplineRoute::AAISplineRoute()
 
 }
 
-void AAISplineRoute::IncrementRoute()
+FVector AAISplineRoute::GetSplinePointasWorldPosition(int RouteIndex)
 {
-	if (++RouteIndex == SplinePath->GetNumberOfSplinePoints() - 1)
-	{
-		// TODO : YSY Goal
-	}
+	// TODO : YSY RouteIndex EndCheck
 
-	UE_LOG(LogTemp, Warning, TEXT("%d"), RouteIndex);
-}
-
-FVector AAISplineRoute::GetSplinePointasWorldPosition()
-{
 	return SplinePath->GetLocationAtSplinePoint(RouteIndex, ESplineCoordinateSpace::World);
 }
 

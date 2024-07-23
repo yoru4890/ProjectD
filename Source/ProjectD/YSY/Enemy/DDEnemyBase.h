@@ -25,9 +25,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "DD")
 	void InitializeEnemy(const FDDEnemyData& EnemyData);
 
+	void SplineMoveFinish();
 #pragma region AIInterface
 
-	virtual class AAISplineRoute* GetAISplineRoute() const;
+	virtual void SplineMove() override;
+	virtual void SetAIMoveFinishedDelegate(const FAISplineMoveFinished& InOnSplineMoveFinished) override;
+
 
 #pragma endregion
 
@@ -80,4 +83,8 @@ private:
 	TObjectPtr<class AAISplineRoute> AIMoveRoute;
 
 	TObjectPtr<class ADDEnemyAIController> EnemyAIController;
+
+	int32 RouteIndex;
+
+	FAISplineMoveFinished OnSplineMoveFinished{};
 };
