@@ -5,6 +5,8 @@
 #include "YSY/Game/DDGameInstance.h"
 #include "LSM/Manager/DDTrapManager.h"
 #include "LSM/Trap/DDTrapBase.h"
+#include "LSM/Manager/DDBuildManager.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values for this component's properties
 UDDTrapBuildComponent::UDDTrapBuildComponent()
@@ -30,6 +32,10 @@ void UDDTrapBuildComponent::BeginPlay()
 	TrapManager = GameInstance->GetTrapManager();
 	check(TrapManager);
 
+	// BuildManager initialization
+	BuildManager = Cast<ADDBuildManager>(UGameplayStatics::GetActorOfClass(GetWorld(), ADDBuildManager::StaticClass()));
+	check(BuildManager);
+
 }
 
 
@@ -42,6 +48,16 @@ void UDDTrapBuildComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 }
 
 void UDDTrapBuildComponent::ReadyTrap(const FName& TrapName)
+{
+
+}
+
+void UDDTrapBuildComponent::CancleReadyTrap(ADDTrapBase* Trap)
+{
+}
+
+
+void UDDTrapBuildComponent::BuildTrap(ADDTrapBase* Trap)
 {
 	check(TrapManager);
 
@@ -56,19 +72,9 @@ void UDDTrapBuildComponent::ReadyTrap(const FName& TrapName)
 	FVector Location = Owner->GetActorLocation();
 	FRotator Rotator = Owner->GetActorRotation();
 
-	ADDTrapBase* SpawnedTrap = TrapManager->SpawnTrap(World, TrapName, Location, Rotator, Owner, Instigator);
+	//ADDTrapBase* SpawnedTrap = TrapManager->SpawnTrap(World, TrapName, Location, Rotator, Owner, Instigator);
 
 	UE_LOG(LogTemp, Warning, TEXT("TrapReady Success"));
-}
-
-void UDDTrapBuildComponent::CancleReadyTrap(ADDTrapBase* Trap)
-{
-}
-
-
-void UDDTrapBuildComponent::BuildTrap(ADDTrapBase* Trap)
-{
-	UE_LOG(LogTemp, Warning, TEXT("TrapBuild Success"));
 }
 
 void UDDTrapBuildComponent::CancleBuildTrap(ADDTrapBase* Trap)
@@ -78,5 +84,10 @@ void UDDTrapBuildComponent::CancleBuildTrap(ADDTrapBase* Trap)
 
 void UDDTrapBuildComponent::UpgradeTrap(ADDTrapBase* Trap)
 {
+}
+
+FVector UDDTrapBuildComponent::GetNearestGridCellLocation()
+{
+	return FVector();
 }
 
