@@ -4,6 +4,7 @@
 #include "LJW/Character/DDCharacterPlayer.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "InputMappingContext.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -25,13 +26,16 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	FollowCamera->bUsePawnControlRotation = false;
 
-	//Input
+	//Data
 	static ConstructorHelpers::FObjectFinder<UDDCharacterControlData> DataRef(TEXT("/Script/Engine.Blueprint'/Game/0000/LJW/Blueprints/BP_DDCharacterControlData.BP_DDCharacterControlData'"));
 	if (DataRef.Object)
 	{
 		CharacterControlManager = DataRef.Object;
 	}
-		
+	
+#pragma region Input
+
+	//Input
 	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionJumpRef(TEXT("/Script/EnhancedInput.InputAction'/Game/0000/LJW/Input/IA_Jump.IA_Jump'"));
 	if (nullptr != InputActionJumpRef.Object) 
 	{
@@ -50,6 +54,13 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 		MoveAction = InputActionMoveRef.Object;
 	}
 
+	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionSprintRef(TEXT("/Script/EnhancedInput.InputAction'/Game/0000/LJW/Input/IA_Sprint.IA_Sprint'"));
+	if (nullptr != InputActionSprintRef.Object)
+	{
+		SprintAction = InputActionSprintRef.Object;
+	}
+
+#pragma endregion
 
 }
 
@@ -74,10 +85,21 @@ void ADDCharacterPlayer::SetupPlayerInputComponent(class UInputComponent* Player
 
 	UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent);
 
+	//Jump
 	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
+	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Canceled, this, &ACharacter::StopJumping);
 	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
+	
+	//Move
 	EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ADDCharacterPlayer::Move);
+	
+	//Look
 	EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ADDCharacterPlayer::Look);
+	
+	//Sprint
+	EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Triggered, this, &ADDCharacterPlayer::Sprint);
+	EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Canceled, this, &ADDCharacterPlayer::Walk);
+	EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &ADDCharacterPlayer::Walk);
 }
 
 void ADDCharacterPlayer::SetCharacterControl()
@@ -112,6 +134,7 @@ void ADDCharacterPlayer::SetCharacterControlData(const UDDCharacterControlData* 
 	CameraBoom->bInheritYaw = CharacterControlData->bInheritYaw;
 	CameraBoom->bInheritRoll = CharacterControlData->bInheritRoll;
 	MouseSpeed = CharacterControlData->MouseSpeed;
+
 }
 
 void ADDCharacterPlayer::Move(const FInputActionValue& Value)
@@ -136,6 +159,17 @@ void ADDCharacterPlayer::Look(const FInputActionValue& Value)
 	AddControllerYawInput(LookAxisVector.X * MouseSpeed);
 	AddControllerPitchInput(LookAxisVector.Y * MouseSpeed);
 
+}
+
+void ADDCharacterPlayer::Sprint(const FInputActionValue& Value)
+{
+	GetCharacterMovement()->MaxWalkSpeed = 427.f;
+	// Stat->BaseStat.RUnspeed;
+}
+
+void ADDCharacterPlayer::Walk(const FInputActionValue& Value)
+{
+	GetCharacterMovement()->MaxWalkSpeed = 147.f;
 }
 
 void ADDCharacterPlayer::CreateLeaderPoseSkeletalMesh(USkeletalMeshComponent* SkeletalMesh, const FString& Name, const FString& Path)
