@@ -35,5 +35,5 @@ protected:
 	float CurrentHp;
 
 	UPROPERTY(Transient, VisibleInstanceOnly, Category = "DD")
-	float MaxHp;
+	float MaxHp = 100.0f; // TODO : YSY Setting MaxHp 
 };

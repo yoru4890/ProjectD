@@ -36,7 +36,7 @@ EBTNodeResult::Type UDDBTT_SplineMove::ExecuteTask(UBehaviorTreeComponent& Owner
 		return EBTNodeResult::Failed;
 	}
 
-	FAISplineMoveFinished OnSplineMoveFinished;
+	FAISplineMoveOnFinishedSignature OnSplineMoveFinished;
 	OnSplineMoveFinished.BindLambda(
 		[&]()
 		{

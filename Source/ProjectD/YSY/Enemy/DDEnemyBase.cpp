@@ -2,14 +2,15 @@
 
 
 #include "YSY/Enemy/DDEnemyBase.h"
+#include "Components/CapsuleComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Engine/DamageEvents.h"
 #include "YSY/AI/DDEnemyAIController.h"
 #include "YSY/AI/AISplineRoute.h"
-#include "Components/CapsuleComponent.h"
 #include "YSY/UI/DDHpBarWidget.h"
 #include "YSY/UI/DDWidgetComponent.h"
-#include "Kismet/GameplayStatics.h"
 #include "YSY/Stat/DDEnemyStatComponent.h"
-#include "Engine/DamageEvents.h"
+#include "YSY/DamageType/AllDamageType.h"
 
 // Sets default values
 ADDEnemyBase::ADDEnemyBase()
@@ -46,9 +47,37 @@ void ADDEnemyBase::PostInitializeComponents()
 
 float ADDEnemyBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	float ResultDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-	
-	return ResultDamage;
+	const UDamageType* DamageType = DamageEvent.DamageTypeClass.GetDefaultObject();
+
+	float ActualDamage = DamageAmount;
+
+	if (DamageType->IsA<UHackingDamageType>())
+	{
+		CaculateHackingDamage(ActualDamage);
+	}
+	else if (DamageType->IsA<UPiercingDamageType>())
+	{
+		CaculatePiercingDamage(ActualDamage);
+	}
+	else if (DamageType->IsA<UCorrosionDamageType>())
+	{
+		CaculateCorrosionDamage(ActualDamage);
+	}
+
+	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
+	{
+		FPointDamageEvent* PointDamageEvent = (FPointDamageEvent*)(&DamageEvent);
+
+		if (PointDamageEvent->HitInfo.BoneName == "laser_01") // TODO : YSY WeakPoint Name
+		{
+			ActualDamage *= 1.5f; // TODO : YSY WeakPoint Caculation
+			UE_LOG(LogTemp, Warning, TEXT("WeakPoint"));
+		}
+	}
+
+	Stat->ApplyDamage(ActualDamage);
+
+	return Super::TakeDamage(ActualDamage, DamageEvent, EventInstigator, DamageCauser);
 }
 
 void ADDEnemyBase::BeginPlay()
@@ -73,6 +102,8 @@ void ADDEnemyBase::Tick(float DeltaTime)
 
 void ADDEnemyBase::InitializeEnemy(const FDDEnemyData& EnemyData)
 {
+	EnemyName = EnemyData.EnemyName;
+	WeakPoint = EnemyData.WeakPoint;
 	EnemyType = EnemyData.EnemyType;
 	MaxHP = EnemyData.MaxHP;
 	MovementSpeed = EnemyData.MovementSpeed;
@@ -80,7 +111,7 @@ void ADDEnemyBase::InitializeEnemy(const FDDEnemyData& EnemyData)
 	Damage = EnemyData.Damage;
 	AttackRange = EnemyData.AttackRange;
 	AggroRange = EnemyData.AggroRange;
-	HealthWidgetHeight = EnemyData.HealthWidgetHeight;
+	//HealthWidgetHeight = EnemyData.HealthWidgetHeight; TODO : YSY Setting HpWidget Height
 	GoldDropAmount = EnemyData.GoldDropAmount;
 	bIsBoss = EnemyData.bIsBoss;
 	bIsElite = EnemyData.bIsElite;
@@ -105,7 +136,7 @@ void ADDEnemyBase::SplineMove()
 	EnemyAIController->MoveToLocation(Destination);
 }
 
-void ADDEnemyBase::SetAIMoveFinishedDelegate(const FAISplineMoveFinished& InOnSplineMoveFinished)
+void ADDEnemyBase::SetAIMoveFinishedDelegate(const FAISplineMoveOnFinishedSignature& InOnSplineMoveFinished)
 {
 	OnSplineMoveFinished = InOnSplineMoveFinished;
 }
@@ -120,6 +151,18 @@ void ADDEnemyBase::SetupCharacterWidget(UDDUserWidget* InUserWidget)
 		Stat->OnHpChanged.AddUObject(HpBarWidget, &UDDHpBarWidget::UpdateHpBar);
 		// TODO : YSY StatComponent
 	}
+}
+
+void ADDEnemyBase::ApplyStun(float Time)
+{
+	// TODO : YSY ApplyStun
+	UE_LOG(LogTemp, Warning, TEXT("Stun"));
+}
+
+void ADDEnemyBase::ApplySlow(float Time, float SlowRate)
+{
+	// TODO : YSY ApplySlow
+	UE_LOG(LogTemp, Warning, TEXT("Slow"));
 }
 
 void ADDEnemyBase::SplineMoveFinish()
@@ -155,5 +198,80 @@ void ADDEnemyBase::UpdateWidgetScale()
 		float Distance = FVector::Dist(CameraLocation, GetActorLocation());
 		float ScaleFactor = FMath::Clamp(Distance / 1000.0f, 0.5f, 2.0f);
 		HpBar->SetWorldScale3D(FVector(ScaleFactor));
+	}
+}
+
+// TODO : YSY Need to remove Magic Number
+
+void ADDEnemyBase::CaculateHackingDamage(float& ActualDamage)
+{
+	// TODO : YSY HackingDamage
+	UE_LOG(LogTemp, Warning, TEXT("Hacking"));
+
+	switch (EnemyType)
+	{
+	case EEnemyType::LightArmor:
+		ActualDamage *= 0.75f;
+		break;
+	case EEnemyType::Mechanical:
+		ActualDamage *= 1.0f;
+		break;
+	case EEnemyType::Cybernetic:
+		ActualDamage *= 2.0f;
+		break;
+	case EEnemyType::Unknown:
+		UE_LOG(LogTemp, Warning, TEXT("UnknownDamage"));
+		break;
+	default:
+		break;
+	}
+
+}
+
+void ADDEnemyBase::CaculatePiercingDamage(float& ActualDamage)
+{
+	// TODO : YSY PiercingDamage
+	UE_LOG(LogTemp, Warning, TEXT("Piercing"));
+
+	switch (EnemyType)
+	{
+	case EEnemyType::LightArmor:
+		ActualDamage *= 2.0f;
+		break;
+	case EEnemyType::Mechanical:
+		ActualDamage *= 0.75f;
+		break;
+	case EEnemyType::Cybernetic:
+		ActualDamage *= 1.0f;
+		break;
+	case EEnemyType::Unknown:
+		UE_LOG(LogTemp, Warning, TEXT("UnknownDamage"));
+		break;
+	default:
+		break;
+	}
+}
+
+void ADDEnemyBase::CaculateCorrosionDamage(float& ActualDamage)
+{
+	// TODO : YSY CorrosionDamage
+	UE_LOG(LogTemp, Warning, TEXT("Corrosion"));
+
+	switch (EnemyType)
+	{
+	case EEnemyType::LightArmor:
+		ActualDamage *= 1.0f;
+		break;
+	case EEnemyType::Mechanical:
+		ActualDamage *= 2.0f;
+		break;
+	case EEnemyType::Cybernetic:
+		ActualDamage *= 0.75f;
+		break;
+	case EEnemyType::Unknown:
+		UE_LOG(LogTemp, Warning, TEXT("UnknownDamage"));
+		break;
+	default:
+		break;
 	}
 }

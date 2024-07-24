@@ -38,10 +38,15 @@ public:
 	void Die();
 
 	void UpdateWidgetScale();
+
+	void CaculateHackingDamage(float& ActualDamage);
+	void CaculatePiercingDamage(float& ActualDamage);
+	void CaculateCorrosionDamage(float& ActualDamage);
+
 #pragma region AIInterface
 
 	virtual void SplineMove() override;
-	virtual void SetAIMoveFinishedDelegate(const FAISplineMoveFinished& InOnSplineMoveFinished) override;
+	virtual void SetAIMoveFinishedDelegate(const FAISplineMoveOnFinishedSignature& InOnSplineMoveFinished) override;
 
 
 #pragma endregion
@@ -54,6 +59,8 @@ public:
 
 #pragma region DamageInterface
 
+	virtual void ApplyStun(float Time);
+	virtual void ApplySlow(float Time, float SlowRate);
 
 #pragma endregion
 
@@ -66,6 +73,11 @@ protected:
 private:
 
 #pragma region FEnemyData
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DD", meta = (AllowPrivateAccess = "true"))
+	FName EnemyName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DD", meta = (AllowPrivateAccess = "true"))
+	FName WeakPoint;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DD", meta = (AllowPrivateAccess = "true"))
 	EEnemyType EnemyType;
@@ -89,9 +101,6 @@ private:
 	float AggroRange;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DD", meta = (AllowPrivateAccess = "true"))
-	float HealthWidgetHeight;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DD", meta = (AllowPrivateAccess = "true"))
 	int32 GoldDropAmount;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DD", meta = (AllowPrivateAccess = "true"))
@@ -99,12 +108,6 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DD", meta = (AllowPrivateAccess = "true"))
 	uint8 bIsElite : 1;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DD", meta = (AllowPrivateAccess = "true"))
-	FString MeshPath;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DD", meta = (AllowPrivateAccess = "true"))
-	FString AnimationBlueprintPath;
 
 #pragma endregion
 
@@ -115,5 +118,5 @@ private:
 
 	int32 RouteIndex;
 
-	FAISplineMoveFinished OnSplineMoveFinished{};
+	FAISplineMoveOnFinishedSignature OnSplineMoveFinished{};
 };

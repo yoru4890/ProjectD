@@ -6,7 +6,7 @@
 #include "AIController.h"
 #include "DDEnemyAIController.generated.h"
 
-DECLARE_DELEGATE(FOnMoveFinished);
+DECLARE_DELEGATE(FMoveOnFinishedSignature);
 
 /**
  * 
@@ -31,7 +31,7 @@ public:
 	void StopAI();
 
 public:
-	FOnMoveFinished OnMoveFinished;
+	FMoveOnFinishedSignature OnMoveFinished;
 
 private:
 	UPROPERTY(EditAnywhere)

@@ -13,7 +13,7 @@ class UDDEnemyAIInterface : public UInterface
 	GENERATED_BODY()
 };
 
-DECLARE_DELEGATE(FAISplineMoveFinished);
+DECLARE_DELEGATE(FAISplineMoveOnFinishedSignature);
 
 /**
  * 
@@ -27,5 +27,5 @@ public:
 	
 	virtual void SplineMove() = 0;
 
-	virtual void SetAIMoveFinishedDelegate(const FAISplineMoveFinished& InOnSplineMoveFinished) = 0;
+	virtual void SetAIMoveFinishedDelegate(const FAISplineMoveOnFinishedSignature& InOnSplineMoveFinished) = 0;
 };
