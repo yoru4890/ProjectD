@@ -11,12 +11,12 @@ UDDEnemyManager::UDDEnemyManager()
 
 void UDDEnemyManager::OnEnemyDestoryed(AActor* DestoryedActor)
 {
-	// TODO : Player should get Gold, Score
+	// TODO : YSY Player should get Gold, Score
 }
 
 void UDDEnemyManager::SpawnEnemy(const FName& EnemyName)
 {
-	// TODO : Setting SpawnTransform
+	// TODO : YSY Setting SpawnTransform
 
 	ADDEnemyBase* Enemy = GetWorld()->SpawnActorDeferred<ADDEnemyBase>(ADDEnemyBase::StaticClass(), {});
 

@@ -7,15 +7,20 @@
 #include "YSY/GameData/DDEnemyData.h"
 #include "YSY/Interface/DDEnemyAIInterface.h"
 #include "YSY/Interface/DDCharacterWidgetInterface.h"
+#include "YSY/Interface/DamageInterface.h"
 #include "DDEnemyBase.generated.h"
 
 UCLASS()
-class PROJECTD_API ADDEnemyBase : public ACharacter, public IDDEnemyAIInterface, public IDDCharacterWidgetInterface
+class PROJECTD_API ADDEnemyBase : public ACharacter, public IDDEnemyAIInterface, public IDDCharacterWidgetInterface, public IDamageInterface
 {
 	GENERATED_BODY()
 
 public:
 	ADDEnemyBase();
+
+	virtual void PostInitializeComponents() override;
+
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
 protected:
 	virtual void BeginPlay() override;
@@ -31,6 +36,8 @@ public:
 	void ArrivalAtGoal();
 
 	void Die();
+
+	void UpdateWidgetScale();
 #pragma region AIInterface
 
 	virtual void SplineMove() override;
@@ -45,11 +52,17 @@ public:
 
 #pragma endregion
 
+#pragma region DamageInterface
+
+
+#pragma endregion
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "DD", Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UWidgetComponent> HpBar;
 
-
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "DD", Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UDDEnemyStatComponent> Stat;
 private:
 
 #pragma region FEnemyData
@@ -97,8 +110,6 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DD", meta = (AllowPrivateAccess = "true"));
 	TObjectPtr<class AAISplineRoute> AIMoveRoute;
-
-	
 
 	TObjectPtr<class ADDEnemyAIController> EnemyAIController;
 

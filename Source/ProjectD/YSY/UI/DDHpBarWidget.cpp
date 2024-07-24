@@ -14,7 +14,7 @@ void UDDHpBarWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	HpProgressBar = Cast<UProgressBar>(GetWidgetFromName(TEXT("")));
+	HpProgressBar = Cast<UProgressBar>(GetWidgetFromName(TEXT("EnemyHpBar")));
 	ensure(HpProgressBar);
 
 	IDDCharacterWidgetInterface* CharacterWidget = Cast<IDDCharacterWidgetInterface>(OwningActor);
