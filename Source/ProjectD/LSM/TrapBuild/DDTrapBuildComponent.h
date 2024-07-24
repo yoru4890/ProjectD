@@ -44,4 +44,10 @@ private:
 	UPROPERTY()
 	TObjectPtr<class UDDTrapManager> TrapManager;
 
+	UPROPERTY()
+	TObjectPtr<class ADDBuildManager> BuildManager;
+
+	// Function to perform LineTrace and get the nearest grid cell location
+	FVector GetNearestGridCellLocation();
+
 };

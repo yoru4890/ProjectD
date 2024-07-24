@@ -64,6 +64,7 @@ ADDTrapBase* UDDTrapManager::SpawnTrap(UWorld* World, const FName& TrapName, con
 	IDDFactoryInterface* TrapFactory = FactoryManager->GetFactory(TrapName);
 	check(TrapFactory);
 
+
 	UObject* CreatedObject = TrapFactory->CreateObject(World, TrapName, TrapStruct, Location, Rotation, Owner, Instigator);
 
 	ADDTrapBase* NewTrap = Cast<ADDTrapBase>(CreatedObject);

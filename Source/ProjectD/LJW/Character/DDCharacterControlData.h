@@ -29,6 +29,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = CharacterMovement)
 	FRotator RotationRate;
 
+	UPROPERTY(EditAnywhere, Category = CharacterMovement)
+	float MouseSpeed;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	TObjectPtr<class UInputMappingContext> InputMappingContext;
 
@@ -50,5 +53,6 @@ public:
 	UPROPERTY(EditAnywhere, Category = SpringArm)
 	uint32 bInheritRoll : 1;
 
+	
 
 };
