@@ -6,4 +6,5 @@
 UDDCharacterControlData::UDDCharacterControlData()
 {
 	TargetArmLength = 400.0f;
+	MouseSpeed = 0;
 }

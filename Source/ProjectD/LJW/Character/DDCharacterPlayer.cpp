@@ -12,6 +12,9 @@
 
 ADDCharacterPlayer::ADDCharacterPlayer()
 {
+	//Control
+	MouseSpeed = 1;
+
 	//Camera
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
@@ -50,6 +53,7 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 
 }
 
+
 void ADDCharacterPlayer::BeginPlay()
 {
 	Super::BeginPlay();
@@ -78,8 +82,9 @@ void ADDCharacterPlayer::SetupPlayerInputComponent(class UInputComponent* Player
 
 void ADDCharacterPlayer::SetCharacterControl()
 {
+	
 	UDDCharacterControlData* NewPlayerControlData = CharacterControlManager;
-	//check(NewPlayerControlData);
+	check(NewPlayerControlData);
 
 	SetCharacterControlData(NewPlayerControlData);
 
@@ -106,7 +111,7 @@ void ADDCharacterPlayer::SetCharacterControlData(const UDDCharacterControlData* 
 	CameraBoom->bInheritPitch = CharacterControlData->bInheritPitch;
 	CameraBoom->bInheritYaw = CharacterControlData->bInheritYaw;
 	CameraBoom->bInheritRoll = CharacterControlData->bInheritRoll;
-	
+	MouseSpeed = CharacterControlData->MouseSpeed;
 }
 
 void ADDCharacterPlayer::Move(const FInputActionValue& Value)
@@ -128,8 +133,22 @@ void ADDCharacterPlayer::Look(const FInputActionValue& Value)
 {
 	FVector2D LookAxisVector = Value.Get<FVector2D>();
 
-	AddControllerYawInput(LookAxisVector.X);
-	AddControllerPitchInput(LookAxisVector.Y);
+	AddControllerYawInput(LookAxisVector.X * MouseSpeed);
+	AddControllerPitchInput(LookAxisVector.Y * MouseSpeed);
 
+}
+
+void ADDCharacterPlayer::CreateLeaderPoseSkeletalMesh(USkeletalMeshComponent* SkeletalMesh, const FString& Name, const FString& Path)
+{
+	SkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(*Name);
+	SkeletalMesh->SetupAttachment(GetMesh());
+	ConstructorHelpers::FObjectFinder<USkeletalMesh>MeshRef(*Path);
+	if (MeshRef.Succeeded())
+	{
+		SkeletalMesh->SetSkeletalMesh(MeshRef.Object);
+		SkeletalMesh->SetRelativeLocation(FVector(0, 0, 0));
+		//Leader pose Component
+		SkeletalMesh->SetLeaderPoseComponent(GetMesh());
+	}
 }
 
