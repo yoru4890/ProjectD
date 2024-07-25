@@ -30,6 +30,10 @@ ADDEnemyAIController::ADDEnemyAIController()
 void ADDEnemyAIController::BeginPlay()
 {
 	Super::BeginPlay();
+
+	//DDPlayer = Cast<AActor>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+
+	BlackboardComp = Blackboard.Get();
 }
 
 void ADDEnemyAIController::OnPossess(APawn* InPawn)
@@ -62,4 +66,29 @@ void ADDEnemyAIController::StopAI()
 	{
 		BTComponent->StopTree();
 	}
+}
+
+void ADDEnemyAIController::StartCaculateDistPlayer()
+{
+	GetWorld()->GetTimerManager().SetTimer(CaculateDistTH, [this]()
+		{
+			float Dist = GetOwner()->GetDistanceTo(DDPlayer);
+			if (Dist <= 450.0f)
+			{
+				//BlackboardComp->SetValueAsBool()
+			}
+			else if (Dist <= 600.0f)
+			{
+
+			}
+			else
+			{
+
+			}
+		}, 0.5f, true, 1.0f);
+}
+
+void ADDEnemyAIController::StopCaculateDistPlayer()
+{
+	GetWorld()->GetTimerManager().ClearTimer(CaculateDistTH);
 }

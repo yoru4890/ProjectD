@@ -14,6 +14,7 @@ class UDDEnemyAIInterface : public UInterface
 };
 
 DECLARE_DELEGATE(FAISplineMoveOnFinishedSignature);
+DECLARE_DELEGATE(FAIAttackOnFinishedSignature);
 
 /**
  * 
@@ -28,4 +29,12 @@ public:
 	virtual void SplineMove() = 0;
 
 	virtual void SetAIMoveFinishedDelegate(const FAISplineMoveOnFinishedSignature& InOnSplineMoveFinished) = 0;
+
+	virtual void AttackByAI() = 0;
+
+	virtual void SetAIAttackFinsihedDelegate(const FAIAttackOnFinishedSignature& InOnAttackFinished) = 0;
+
+	virtual float GetAIDetectRange() const noexcept = 0;
+
+	virtual float GetAILoseAggroRange() const noexcept = 0;
 };

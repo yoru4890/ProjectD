@@ -141,6 +141,43 @@ void ADDEnemyBase::SetAIMoveFinishedDelegate(const FAISplineMoveOnFinishedSignat
 	OnSplineMoveFinished = InOnSplineMoveFinished;
 }
 
+void ADDEnemyBase::AttackByAI()
+{
+	// TODO : YSY Complete Attack
+
+	UE_LOG(LogTemp, Warning, TEXT("Attack"));
+
+	FTimerHandle AttackTimer;
+	GetWorld()->GetTimerManager().SetTimer(AttackTimer, [this]()
+		{
+			OnAttackFinished.ExecuteIfBound();
+		}, 0.1f, false, 2.0f);
+
+	/*AActor* Player{};
+	float DamageAmount{};
+	FDamageEvent DamageEvent{};
+	Player->TakeDamage(DamageAmount, DamageEvent, GetController(), this);*/
+}
+
+void ADDEnemyBase::SetAIAttackFinsihedDelegate(const FAIAttackOnFinishedSignature& InOnAttackFinished)
+{
+	OnAttackFinished = InOnAttackFinished;
+}
+
+float ADDEnemyBase::GetAIDetectRange() const noexcept
+{
+	// TODO : YSY Setting AIDetectRange
+
+	return 300.0f;
+}
+
+float ADDEnemyBase::GetAILoseAggroRange() const noexcept
+{
+	// TODO : YSY Setting AILoseAggroRange
+
+	return 450.0f;
+}
+
 void ADDEnemyBase::SetupCharacterWidget(UDDUserWidget* InUserWidget)
 {
 	UDDHpBarWidget* HpBarWidget = Cast<UDDHpBarWidget>(InUserWidget);

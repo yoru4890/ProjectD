@@ -47,8 +47,11 @@ public:
 
 	virtual void SplineMove() override;
 	virtual void SetAIMoveFinishedDelegate(const FAISplineMoveOnFinishedSignature& InOnSplineMoveFinished) override;
+	virtual void AttackByAI() override;
+	virtual void SetAIAttackFinsihedDelegate(const FAIAttackOnFinishedSignature& InOnAttackFinished) override;
 
-
+	virtual float GetAIDetectRange() const noexcept;
+	virtual float GetAILoseAggroRange() const noexcept;
 #pragma endregion
 
 #pragma region WidgetInterface
@@ -119,4 +122,5 @@ private:
 	int32 RouteIndex;
 
 	FAISplineMoveOnFinishedSignature OnSplineMoveFinished{};
+	FAIAttackOnFinishedSignature OnAttackFinished{};
 };

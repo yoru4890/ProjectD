@@ -29,6 +29,8 @@ protected:
 public:
 	void RunAI();
 	void StopAI();
+	void StartCaculateDistPlayer();
+	void StopCaculateDistPlayer();
 
 public:
 	FMoveOnFinishedSignature OnMoveFinished;
@@ -40,5 +42,11 @@ private:
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<class UBehaviorTree> ownedBT{};
 
-	
+	UPROPERTY()
+	TObjectPtr<class UBlackboardComponent> BlackboardComp;
+
+	UPROPERTY()
+	TObjectPtr<AActor> DDPlayer{};
+
+	FTimerHandle CaculateDistTH;
 };
