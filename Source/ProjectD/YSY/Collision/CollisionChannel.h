@@ -17,3 +17,4 @@
 #define GTCHANNEL_TOWERDAMAGE ECC_GameTraceChannel7
 #define GTCHANNEL_TRAPDAMAGE ECC_GameTraceChannel8
 #define GTCHANNEL_ENEMYDAMAGE ECC_GameTraceChannel9
+#define GTCHANNEL_MANAGETRACE ECC_GameTraceChannel10

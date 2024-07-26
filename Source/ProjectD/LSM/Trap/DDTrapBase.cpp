@@ -3,6 +3,7 @@
 #include "LSM/Trap/DDTrapBase.h"
 #include "Components/BoxComponent.h"
 #include "Particles/ParticleSystemComponent.h"
+#include "YSY/Collision/CollisionChannel.h"
 
 // Sets default values
 ADDTrapBase::ADDTrapBase()
@@ -12,8 +13,15 @@ ADDTrapBase::ADDTrapBase()
 
 	// Create and initialize the BoxComponent
 	BoxCollisionComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxCollisionComponent"));
-	BoxCollisionComponent->SetBoxExtent(FVector(300.0f, 300.0f, 300.0f));
+	BoxCollisionComponent->SetBoxExtent(FVector(150.0f, 150.0f, 40.0f));
+	BoxCollisionComponent->SetCollisionResponseToChannel(GTCHANNEL_MANAGETRACE, ECR_Block);
 	RootComponent = BoxCollisionComponent;
+
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> MaterialFinder(TEXT("/Game/0000/LSM/Mesh/Trap/LSM_MI_PreviewTrap.LSM_MI_PreviewTrap"));
+	if (MaterialFinder.Succeeded())
+	{
+		PreviewMaterial = MaterialFinder.Object;
+	}
 }
 
 ADDTrapBase::~ADDTrapBase()
@@ -25,6 +33,9 @@ ADDTrapBase::~ADDTrapBase()
 void ADDTrapBase::BeginPlay()
 {
 	Super::BeginPlay();
+	if (PreviewMaterial) {
+		DynamicMaterialInstance = UMaterialInstanceDynamic::Create(PreviewMaterial, this);
+	}
 
 }
 
@@ -35,18 +46,18 @@ void ADDTrapBase::Tick(float DeltaTime)
 
 }
 
-void ADDTrapBase::InitFromDataTable(const FDDTrapStruct& TrapData)
+void ADDTrapBase::InitFromDataTable(const FName& RowName, const FDDTrapStruct& TrapData)
 {
-	TrapName = TrapData.Name;
-	TrapType = TrapData.TrapType;
+	TrapRowName = RowName;
+	TrapDisplayName = TrapData.DisplayName;
 	TrapBuildCost = TrapData.TrapBuildCost;
 	TrapUpgradeCost = TrapData.TrapUpgradeCost;
 	TrapUnlockCost = TrapData.TrapUnlockCost;
 	TrapCoolTime = TrapData.TrapCoolTime;
 	TrapDamage = TrapData.TrapDamage;
 	TrapLevel = TrapData.TrapLevel;
-	TrapParentName = TrapData.TrapParentName;
-	TrapChildNames = TrapData.TrapChildNames;
+	TrapParentName = TrapData.TrapParentRowName;
+	TrapChildNames = TrapData.TrapChildRowNames;
 	bIsTrapUnlocked = TrapData.bIsTrapUnlocked;
 	TrapMeshType = TrapData.MeshType;
 	bIsDotTrap = TrapData.bIsDotTrap;
@@ -56,6 +67,7 @@ void ADDTrapBase::InitFromDataTable(const FDDTrapStruct& TrapData)
 	bIsSlowTrap = TrapData.bIsSlowTrap;
 	SlowAmount = TrapData.SlowAmount;
 	SlowDuration = TrapData.SlowDuration;
+	bCanAttack = false;
 }
 
 void ADDTrapBase::SetTrapAssets(TArray<UStaticMesh*> StaticMeshs, TArray<USkeletalMesh*> SkeletalMeshs, UAnimBlueprint* AnimBlueprint, TArray<UParticleSystem*> ParticleEffects)
@@ -82,12 +94,56 @@ void ADDTrapBase::SetTrapAssets(TArray<UStaticMesh*> StaticMeshs, TArray<USkelet
 	}
 }
 
-void ADDTrapBase::SetAttachParticleToRoot()
+void ADDTrapBase::SetMaterialToPreview(bool bCanPay)
 {
-	//for (UParticleSystemComponent* ParticleEffectComponent : ParticleEffectComponents) {
-	//	check(ParticleEffectComponent);
-	//	ParticleEffectComponent->SetupAttachment(RootComponent);
-	//	ParticleEffectComponent->RegisterComponent();
-	//	ParticleEffectComponent->SetRelativeScale3D(FVector(1.f));
-	//}
+	if (bCanPay) {
+		DynamicMaterialInstance->SetVectorParameterValue("Param", FLinearColor(0, 0, 0.6f, 1));
+	}else{
+		DynamicMaterialInstance->SetVectorParameterValue("Param", FLinearColor(0.6, 0, 0, 1));
+	}
+	if (TrapMeshType == EMeshType::StaticMesh) {
+		TArray<UStaticMeshComponent*> Components;
+		GetComponents<UStaticMeshComponent>(Components);
+
+		for (int a = 0; a < Components.Num(); a++) {
+			for (int b = 0; b < OriginalMaterials[a].Materials.Num(); b++) {
+				Components[a]->SetMaterial(b, DynamicMaterialInstance);
+			}
+		}
+	}
+	else if (TrapMeshType == EMeshType::SkeletalMesh) {
+		TArray<USkeletalMeshComponent*> Components;
+		GetComponents<USkeletalMeshComponent>(Components);
+
+		for (int a = 0; a < Components.Num(); a++) {
+			for (int b = 0; b < OriginalMaterials[a].Materials.Num(); b++) {
+				Components[a]->SetMaterial(b, DynamicMaterialInstance);
+			}
+		}
+	}
 }
+
+void ADDTrapBase::SetMaterialToOriginal()
+{
+	if (TrapMeshType == EMeshType::StaticMesh) {
+		TArray<UStaticMeshComponent*> Components;
+		GetComponents<UStaticMeshComponent>(Components);
+
+		for (int a = 0; a < Components.Num(); a++) {
+			for (int b = 0; b < OriginalMaterials[a].Materials.Num(); b++) {
+				Components[a]->SetMaterial(b, OriginalMaterials[a].Materials[b]);
+			}
+		}
+	}
+	else if (TrapMeshType == EMeshType::SkeletalMesh) {
+		TArray<USkeletalMeshComponent*> Components;
+		GetComponents<USkeletalMeshComponent>(Components);
+
+		for (int a = 0; a < Components.Num(); a++) {
+			for (int b = 0; b < OriginalMaterials[a].Materials.Num(); b++) {
+				Components[a]->SetMaterial(b, OriginalMaterials[a].Materials[b]);
+			}
+		}
+	}
+}
+

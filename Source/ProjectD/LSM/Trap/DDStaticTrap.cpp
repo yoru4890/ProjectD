@@ -33,12 +33,14 @@ void ADDStaticTrap::SetTrapAssets(TArray<UStaticMesh*> StaticMeshs, TArray<USkel
 	bool bIsFirstStaticMesh = true;
 
 	UStaticMeshComponent* FirstStaticMeshComponent = nullptr;
+	int32 StaticNum = 0;
 
 	for (UStaticMesh* StaticMesh : StaticMeshs) {
 		UStaticMeshComponent* StaticMeshComponent = NewObject<UStaticMeshComponent>(this);
 		check(StaticMeshComponent);
 
 		StaticMeshComponent->SetStaticMesh(StaticMesh);
+		StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		StaticMeshComponent->SetupAttachment(RootComponent);
 
 		if (bIsFirstStaticMesh) {
@@ -51,6 +53,11 @@ void ADDStaticTrap::SetTrapAssets(TArray<UStaticMesh*> StaticMeshs, TArray<USkel
 
 		StaticMeshComponent->RegisterComponent();
 		StaticMeshComponents.Add(StaticMeshComponent);
+
+		FMaterialsStruct MaterialStruct;
+		MaterialStruct.Materials = StaticMeshComponent->GetMaterials();
+		OriginalMaterials.Add(StaticNum, MaterialStruct);
+		StaticNum++;
 	}
 
 	FBoxSphereBounds Bounds = FirstStaticMeshComponent->GetStaticMesh()->GetBounds();

@@ -33,6 +33,7 @@ void ADDAnimatedTrap::SetTrapAssets(TArray<UStaticMesh*> StaticMeshs, TArray<USk
 	bool bIsFirstSkeltalMesh = true;
 
 	USkeletalMeshComponent* FirstSkeletalMeshComponent = nullptr;
+	int32 SkeletalNum = 0;
 
 
 	for (USkeletalMesh* SkeletalMesh : SkeletalMeshs) {
@@ -55,6 +56,11 @@ void ADDAnimatedTrap::SetTrapAssets(TArray<UStaticMesh*> StaticMeshs, TArray<USk
 			SkeletalMeshComponent->RegisterComponent();
 		}
 		SkeletalMeshComponents.Add(SkeletalMeshComponent);
+		FMaterialsStruct MaterialStruct;
+		MaterialStruct.Materials = SkeletalMeshComponent->GetMaterials();
+		OriginalMaterials.Add(SkeletalNum, MaterialStruct);
+		SkeletalNum++;
+		
 	}
 	FBoxSphereBounds Bounds = FirstSkeletalMeshComponent->GetSkeletalMeshAsset()->GetBounds();
 	FVector BoxExtent = Bounds.BoxExtent;

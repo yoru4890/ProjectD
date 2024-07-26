@@ -8,6 +8,17 @@
 #include "TrapAssetInterface.h"
 #include "DDTrapBase.generated.h"
 
+
+USTRUCT(BlueprintType)
+struct FMaterialsStruct
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(VisibleAnywhere)
+	TArray<TObjectPtr<UMaterialInterface>> Materials;
+};
+
 UCLASS()
 class PROJECTD_API ADDTrapBase : public AActor, public ITrapAssetInterface
 {
@@ -24,10 +35,13 @@ protected:
 protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName TrapName; // 트랩의 이름
+	FString TrapDisplayName; // 트랩의 이름
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	ETrapType TrapType; // 트랩의 메쉬 타입
+	FName TrapRowName; // 트랩의 이름
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bCanAttack; // 트랩이 공격할 수 있는지
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 TrapBuildCost; // 트랩의 설치비용
@@ -60,18 +74,6 @@ protected:
 	EMeshType TrapMeshType; // 트랩의 메쉬 타입
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<TObjectPtr<UStaticMesh>> TrapStaticMeshs; // 트랩의 스태틱 메쉬
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<TObjectPtr<USkeletalMesh>> TrapSkeletalMeshs; // 트랩의 스켈레톤 메쉬
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TObjectPtr<UAnimBlueprint> TrapAnimBlueprints; // 트랩의 애니메이션 블루프린트
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<TObjectPtr<UParticleSystem>> TrapEffects; // 트랩의 공격 이펙트
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsDotTrap; // 도트 공격 트랩 여부
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bIsDotTrap"))
@@ -99,10 +101,24 @@ protected:
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<class UBoxComponent> BoxCollisionComponent;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
+	TObjectPtr<UMaterialInterface> PreviewMaterial;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
+	TMap<int32, FMaterialsStruct> OriginalMaterials;
+
+	UPROPERTY()
+	TObjectPtr<UMaterialInstanceDynamic> DynamicMaterialInstance;
+
+public:
+	FORCEINLINE const FName& GetTrapRowName() const { return TrapRowName; }
+	FORCEINLINE const int32 GetTrapBuildCost() const { return TrapBuildCost; }
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	virtual void InitFromDataTable(const FDDTrapStruct& TrapData);
+	virtual void InitFromDataTable(const FName& RowName, const FDDTrapStruct& TrapData);
 	virtual void SetTrapAssets(TArray<UStaticMesh*> StaticMeshs, TArray<USkeletalMesh*> SkeletalMeshs, UAnimBlueprint* AnimBlueprint, TArray<UParticleSystem*> ParticleEffects) override;
-	void SetAttachParticleToRoot();
+	void SetMaterialToPreview(bool bCanPay);
+	void SetMaterialToOriginal();
 };

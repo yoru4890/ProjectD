@@ -83,7 +83,7 @@ const FVector ADDBuildManager::GetNearestGridCellLocation(const FVector& HitLoca
 {
 	FIntPoint GridCellIndex = ConvertWorldLocationToGridCell(HitLocation);
 
-	UE_LOG(LogTemp, Warning, TEXT("GridCellIndices: X=%d, Y=%d"), GridCellIndex.X, GridCellIndex.Y);
+	//UE_LOG(LogTemp, Warning, TEXT("GridCellIndices: X=%d, Y=%d"), GridCellIndex.X, GridCellIndex.Y);
 
 	if (GridCellMap.Contains(GridCellIndex))
 	{
