@@ -3,36 +3,36 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
-#include "DDMeleeData.generated.h"
+#include "DDWeaponData.generated.h"
 
 UENUM(BlueprintType)
-enum class EMeleeType : uint8
+enum class EAttackType : uint8
 {
-	Cudgel,
-	Lightsaber,
-	Sword,
+	Melee, // TODO : LJW Need to write UMETA
+	Range,
 	Unknown
 };
 
+
 USTRUCT(BlueprintType)
-struct FDDMeleeData : public FTableRowBase
+struct FDDWeaponData : public FTableRowBase
 {
 	GENERATED_BODY()
 
 public:
-	FDDMeleeData() {}
+	FDDWeaponData() {}
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
-	EMeleeType MeleeType;
+	EAttackType AttackType;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
-	FString MeleeName;
+	FString WeaponName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
-	USkeletalMeshComponent* MeleeMesh;
+	USkeletalMeshComponent* WeaponMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
-	FString MeleeInformation;
+	FString WeaponInformation;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
 	int32 BuildCost;

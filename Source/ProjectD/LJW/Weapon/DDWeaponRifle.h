@@ -4,12 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "LJW/Weapon/DDWeaponBase.h"
-#include "DDWeaponMelee.generated.h"
+#include "DDWeaponRifle.generated.h"
 
-
+/**
+ * 
+ */
 UCLASS()
-class PROJECTD_API ADDWeaponMelee : public ADDWeaponBase
+class PROJECTD_API ADDWeaponRifle : public ADDWeaponBase
 {
 	GENERATED_BODY()
-
+	
 };

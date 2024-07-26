@@ -4,15 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "LJW/Weapon/DDWeaponData.h"
 #include "DDWeaponBase.generated.h"
 
-UENUM(BlueprintType)
-enum class EWeaponType : uint8
-{
-	Melee,
-	Range,
-	Unknown
-};
+
 
 UCLASS()
 class PROJECTD_API ADDWeaponBase : public AActor
@@ -23,11 +18,13 @@ public:
 	// Sets default values for this actor's properties
 	ADDWeaponBase();
 
+	void InitData(const FDDWeaponData& WeaponData);
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-
+	
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon)

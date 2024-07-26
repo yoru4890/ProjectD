@@ -9,6 +9,9 @@ UDDGameSingleton::UDDGameSingleton()
 {
 	LoadDataTable<FDDEnemyData>(EnemyDataTable, TEXT("/Script/Engine.DataTable'/Game/0000/YSY/Data/DT_EnemyData.DT_EnemyData'"));
 	LoadDataTable<FDDTrapStruct>(TrapDataTable, TEXT("/Script/Engine.DataTable'/Game/0000/LSM/Data/LSM_DT_Trap.LSM_DT_Trap'"));
+	LoadDataTable<FDDWeaponData>(WeaponDataTable, TEXT(""));
+	// TODO : LJW
+
 }
 
 UDDGameSingleton& UDDGameSingleton::Get()
