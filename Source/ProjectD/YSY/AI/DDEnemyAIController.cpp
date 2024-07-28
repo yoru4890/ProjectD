@@ -6,6 +6,7 @@
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardData.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "GameFramework/Character.h"
 #include "YSY/AI/BlackboardKey.h"
 
 ADDEnemyAIController::ADDEnemyAIController()
@@ -30,10 +31,6 @@ ADDEnemyAIController::ADDEnemyAIController()
 void ADDEnemyAIController::BeginPlay()
 {
 	Super::BeginPlay();
-
-	//DDPlayer = Cast<AActor>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
-
-	BlackboardComp = Blackboard.Get();
 }
 
 void ADDEnemyAIController::OnPossess(APawn* InPawn)
@@ -53,6 +50,12 @@ void ADDEnemyAIController::RunAI()
 	UBlackboardComponent* BlackboardPtr{ Blackboard.Get() };
 	if (UseBlackboard(ownedBB, BlackboardPtr))
 	{
+		ACharacter* PlayerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+
+		if (PlayerCharacter)
+		{
+			BlackboardPtr->SetValueAsObject(BBKEY_TARGET, PlayerCharacter);
+		}
 		bool RunResult = RunBehaviorTree(ownedBT);
 		ensure(RunResult);
 
@@ -66,29 +69,4 @@ void ADDEnemyAIController::StopAI()
 	{
 		BTComponent->StopTree();
 	}
-}
-
-void ADDEnemyAIController::StartCaculateDistPlayer()
-{
-	GetWorld()->GetTimerManager().SetTimer(CaculateDistTH, [this]()
-		{
-			float Dist = GetOwner()->GetDistanceTo(DDPlayer);
-			if (Dist <= 450.0f)
-			{
-				//BlackboardComp->SetValueAsBool()
-			}
-			else if (Dist <= 600.0f)
-			{
-
-			}
-			else
-			{
-
-			}
-		}, 0.5f, true, 1.0f);
-}
-
-void ADDEnemyAIController::StopCaculateDistPlayer()
-{
-	GetWorld()->GetTimerManager().ClearTimer(CaculateDistTH);
 }

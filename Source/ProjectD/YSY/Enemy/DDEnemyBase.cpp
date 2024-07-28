@@ -89,7 +89,12 @@ void ADDEnemyBase::BeginPlay()
 
 	EnemyAIController->OnMoveFinished.BindUObject(this, &ADDEnemyBase::SplineMoveFinish);
 
-	EnemyAIController->RunAI();
+	FTimerHandle TempTH;
+	GetWorld()->GetTimerManager().SetTimer(TempTH, [this]()
+		{
+			EnemyAIController->RunAI();
+		}, 0.1f, false, 2.0f);
+	
 
 }
 
@@ -168,14 +173,14 @@ float ADDEnemyBase::GetAIDetectRange() const noexcept
 {
 	// TODO : YSY Setting AIDetectRange
 
-	return 300.0f;
+	return 350.0f;
 }
 
-float ADDEnemyBase::GetAILoseAggroRange() const noexcept
+float ADDEnemyBase::GetAIAttackRange() const noexcept
 {
 	// TODO : YSY Setting AILoseAggroRange
 
-	return 450.0f;
+	return 200.0f;
 }
 
 void ADDEnemyBase::SetupCharacterWidget(UDDUserWidget* InUserWidget)

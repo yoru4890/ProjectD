@@ -36,5 +36,5 @@ public:
 
 	virtual float GetAIDetectRange() const noexcept = 0;
 
-	virtual float GetAILoseAggroRange() const noexcept = 0;
+	virtual float GetAIAttackRange() const noexcept = 0;
 };

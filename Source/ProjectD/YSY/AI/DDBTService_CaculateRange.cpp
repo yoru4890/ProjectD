@@ -17,8 +17,6 @@ void UDDBTService_CaculateRange::TickNode(UBehaviorTreeComponent& OwnerComp, uin
 {
 	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
 
-	UE_LOG(LogTemp, Warning, TEXT("1"));
-
 	APawn* Target = Cast<APawn>(OwnerComp.GetBlackboardComponent()->GetValueAsObject(BBKEY_TARGET));
 	if (!Target)
 	{
@@ -45,13 +43,13 @@ void UDDBTService_CaculateRange::TickNode(UBehaviorTreeComponent& OwnerComp, uin
 	}
 
 	float DistanceToTarget = ControllingPawn->GetDistanceTo(Target);
-	float RangeWithRaduis = AIPawn->GetAILoseAggroRange();
-	/*if (DistanceToTarget <= RangeWithRaduis)
+	float RangeWithRaduis = AIPawn->GetAIAttackRange();
+	if (DistanceToTarget <= RangeWithRaduis)
 	{
-		OwnerComp.GetBlackboardComponent()->SetValueAsBool(BBKEY_RANGE, true);
+		OwnerComp.GetBlackboardComponent()->SetValueAsBool(BBKEY_CANATTACK, true);
 	}
 	else
 	{
-		OwnerComp.GetBlackboardComponent()->SetValueAsBool(BBKEY_RANGE, false);
-	}*/
+		OwnerComp.GetBlackboardComponent()->SetValueAsBool(BBKEY_CANATTACK, false);
+	}
 }

@@ -51,7 +51,7 @@ public:
 	virtual void SetAIAttackFinsihedDelegate(const FAIAttackOnFinishedSignature& InOnAttackFinished) override;
 
 	virtual float GetAIDetectRange() const noexcept;
-	virtual float GetAILoseAggroRange() const noexcept;
+	virtual float GetAIAttackRange() const noexcept;
 #pragma endregion
 
 #pragma region WidgetInterface
