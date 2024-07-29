@@ -14,14 +14,19 @@ ADDTrapBase::ADDTrapBase()
 	// Create and initialize the BoxComponent
 	BoxCollisionComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxCollisionComponent"));
 	BoxCollisionComponent->SetBoxExtent(FVector(150.0f, 150.0f, 40.0f));
-	BoxCollisionComponent->SetCollisionResponseToChannel(GTCHANNEL_MANAGETRACE, ECR_Block);
+	BoxCollisionComponent->SetCollisionProfileName(TEXT("Trap"), true);
 	RootComponent = BoxCollisionComponent;
+	
 
 	static ConstructorHelpers::FObjectFinder<UMaterialInterface> MaterialFinder(TEXT("/Game/0000/LSM/Mesh/Trap/LSM_MI_PreviewTrap.LSM_MI_PreviewTrap"));
 	if (MaterialFinder.Succeeded())
 	{
 		PreviewMaterial = MaterialFinder.Object;
 	}
+
+	BoxCollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &ADDTrapBase::OnBoxCollisionBeginOverlap);
+	BoxCollisionComponent->OnComponentEndOverlap.AddDynamic(this, &ADDTrapBase::OnBoxCollisionEndOverlap);
+
 }
 
 ADDTrapBase::~ADDTrapBase()
@@ -44,6 +49,29 @@ void ADDTrapBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	TimeSinceLastAttack += DeltaTime;
+
+	if (bCanAttack && NumEnemiesInRange > 0 && TimeSinceLastAttack >= TrapCoolTime)
+	{
+		Attack();
+		TimeSinceLastAttack = 0.f;
+	}
+
+}
+void ADDTrapBase::SetTrapCanAttack(const bool bInCanAttack)
+{
+	bCanAttack = bInCanAttack;
+	NumEnemiesInRange = 0;
+	TimeSinceLastAttack = 0;
+
+	if (!bInCanAttack) 
+	{
+		BoxCollisionComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+	else
+	{
+		BoxCollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	}
 }
 
 void ADDTrapBase::InitFromDataTable(const FName& RowName, const FDDTrapStruct& TrapData)
@@ -98,7 +126,8 @@ void ADDTrapBase::SetMaterialToPreview(bool bCanPay)
 {
 	if (bCanPay) {
 		DynamicMaterialInstance->SetVectorParameterValue("Param", FLinearColor(0, 0, 0.6f, 1));
-	}else{
+	}
+	else {
 		DynamicMaterialInstance->SetVectorParameterValue("Param", FLinearColor(0.6, 0, 0, 1));
 	}
 	if (TrapMeshType == EMeshType::StaticMesh) {
@@ -145,5 +174,22 @@ void ADDTrapBase::SetMaterialToOriginal()
 			}
 		}
 	}
+}
+
+void ADDTrapBase::Attack()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Trap Attack"));
+}
+
+void ADDTrapBase::OnBoxCollisionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	NumEnemiesInRange++;
+	UE_LOG(LogTemp, Warning, TEXT("Trap Begin Overlap"));
+}
+
+void ADDTrapBase::OnBoxCollisionEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	NumEnemiesInRange--;
+	UE_LOG(LogTemp, Warning, TEXT("Trap End Overlap"));
 }
 

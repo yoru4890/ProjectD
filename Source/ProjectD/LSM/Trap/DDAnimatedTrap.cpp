@@ -67,3 +67,9 @@ void ADDAnimatedTrap::SetTrapAssets(TArray<UStaticMesh*> StaticMeshs, TArray<USk
 	FVector ScaleFactor = FVector(300.f / (BoxExtent.X * 2 ), 300.f / (BoxExtent.Y * 2 ),1);
 	FirstSkeletalMeshComponent->SetWorldScale3D(ScaleFactor);
 }
+
+void ADDAnimatedTrap::Attack()
+{
+	Super::Attack();
+
+}

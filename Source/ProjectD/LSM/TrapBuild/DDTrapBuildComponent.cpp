@@ -152,7 +152,6 @@ void UDDTrapBuildComponent::CancleBuildTrap()
 	BuildManager->SetGridCellAsBlank(ManagedTrap->GetActorLocation());
 	PlayerState->AddGold(ManagedTrapData.TrapBuildCost * 0.8f);
 	TrapManager->DestroyTrap(*ManagedTrap);
-	ManagedTrap->SetTrapCanAttack(false);
 	ManagedTrap = nullptr;
 }
 

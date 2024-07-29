@@ -10,9 +10,11 @@
 UObject* UDDTrapFactory::CreateObject(UWorld* World, const FName& RowName, const FBaseStruct& ObjectStruct, const FVector& Location, const FRotator& Rotation, AActor* Owner, APawn* Instigator)
 {
 	check(World);
-
+	
 	const FDDTrapStruct* TrapStruct = static_cast<const FDDTrapStruct*>(&ObjectStruct);
 	UClass* TrapClass = TrapStruct->TrapClass;
+
+	
 	check(TrapClass);
 	// TrapClass를 사용하여 NewTrap 생성
 	ADDTrapBase* NewTrap = World->SpawnActor<ADDTrapBase>(TrapClass);

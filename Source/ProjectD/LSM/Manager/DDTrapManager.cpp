@@ -108,6 +108,7 @@ ADDTrapBase* UDDTrapManager::SpawnTrap(UWorld* World, const FName& RowName, cons
 	NewTrap->SetActorHiddenInGame(false);
 	NewTrap->SetActorEnableCollision(true);
 	NewTrap->SetActorTickEnabled(true);
+	NewTrap->SetTrapCanAttack(false);
 
 	return NewTrap;
 }
@@ -118,4 +119,5 @@ void UDDTrapManager::DestroyTrap(ADDTrapBase& Trap)
 	Trap.SetActorHiddenInGame(true);
 	Trap.SetActorEnableCollision(false);
 	Trap.SetActorTickEnabled(false);
+	Trap.SetTrapCanAttack(false);
 }

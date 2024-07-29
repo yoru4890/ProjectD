@@ -32,6 +32,32 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+public:
+	FORCEINLINE const FName& GetTrapRowName() const { return TrapRowName; }
+	//FORCEINLINE const int32 GetTrapBuildCost() const { return TrapBuildCost; }
+
+public:	
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+	virtual void InitFromDataTable(const FName& RowName, const FDDTrapStruct& TrapData);
+	void  SetTrapCanAttack(const bool bInCanAttack);
+	virtual void SetTrapAssets(TArray<UStaticMesh*> StaticMeshs, TArray<USkeletalMesh*> SkeletalMeshs, UAnimBlueprint* AnimBlueprint, TArray<UParticleSystem*> ParticleEffects) override;
+	void SetMaterialToPreview(bool bCanPay);
+	void SetMaterialToOriginal();
+
+protected:
+	virtual void Attack();
+
+private:
+	UFUNCTION()
+	void OnBoxCollisionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+	void OnBoxCollisionEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
+	int32 NumEnemiesInRange;
+
 protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -54,6 +80,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 TrapCoolTime; // 트랩의 공격 쿨타임
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float TimeSinceLastAttack; // 트랩의 공격 쿨타임
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 TrapDamage; // 트랩의 데미지
@@ -94,7 +123,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bIsSlowTrap"))
 	float SlowDuration; // 이동 속도 감소 지속 시간
 
-protected:
 	UPROPERTY(EditAnywhere)
 	TArray<TObjectPtr<UParticleSystemComponent>> ParticleEffectComponents;
 
@@ -109,17 +137,4 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr<UMaterialInstanceDynamic> DynamicMaterialInstance;
-
-public:
-	FORCEINLINE const FName& GetTrapRowName() const { return TrapRowName; }
-	FORCEINLINE void  SetTrapCanAttack(const bool bInCanAttack) { bCanAttack = bInCanAttack; }
-	//FORCEINLINE const int32 GetTrapBuildCost() const { return TrapBuildCost; }
-
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-	virtual void InitFromDataTable(const FName& RowName, const FDDTrapStruct& TrapData);
-	virtual void SetTrapAssets(TArray<UStaticMesh*> StaticMeshs, TArray<USkeletalMesh*> SkeletalMeshs, UAnimBlueprint* AnimBlueprint, TArray<UParticleSystem*> ParticleEffects) override;
-	void SetMaterialToPreview(bool bCanPay);
-	void SetMaterialToOriginal();
 };

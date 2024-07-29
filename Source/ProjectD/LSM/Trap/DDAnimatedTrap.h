@@ -32,4 +32,6 @@ protected:
 	// Skeletal Mesh Component
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	TArray<TObjectPtr<USkeletalMeshComponent>> SkeletalMeshComponents;
+
+	virtual void Attack() override;
 };
