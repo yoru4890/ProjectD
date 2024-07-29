@@ -38,7 +38,7 @@ public:
 
 	// 새로운 함수: 트랩 업그레이드
 	UFUNCTION(BlueprintCallable)
-	void UpgradeTrap(const FName& RowName);
+	bool UpgradeTrap(const FName& RowName);
 
 	UFUNCTION(BlueprintCallable)
 	void AllStopTrace();
@@ -89,5 +89,7 @@ private:
 
 	bool CanPayTrapBuildCost(const FName& RowName) const;
 	bool PayTrapBuildCost(const FName& RowName) const;
+	bool CanPayTrapUpgradeCost(const FName& RowName) const;
+	bool PayTrapUpgradeCost(const FName& RowName) const;
 
 };

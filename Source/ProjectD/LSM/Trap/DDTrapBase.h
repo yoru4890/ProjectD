@@ -112,7 +112,8 @@ protected:
 
 public:
 	FORCEINLINE const FName& GetTrapRowName() const { return TrapRowName; }
-	FORCEINLINE const int32 GetTrapBuildCost() const { return TrapBuildCost; }
+	FORCEINLINE void  SetTrapCanAttack(const bool bInCanAttack) { bCanAttack = bInCanAttack; }
+	//FORCEINLINE const int32 GetTrapBuildCost() const { return TrapBuildCost; }
 
 public:	
 	// Called every frame

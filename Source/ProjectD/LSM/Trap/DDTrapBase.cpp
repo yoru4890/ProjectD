@@ -50,15 +50,15 @@ void ADDTrapBase::InitFromDataTable(const FName& RowName, const FDDTrapStruct& T
 {
 	TrapRowName = RowName;
 	TrapDisplayName = TrapData.DisplayName;
-	TrapBuildCost = TrapData.TrapBuildCost;
-	TrapUpgradeCost = TrapData.TrapUpgradeCost;
-	TrapUnlockCost = TrapData.TrapUnlockCost;
+	//TrapBuildCost = TrapData.TrapBuildCost;
+	//TrapUpgradeCost = TrapData.TrapUpgradeCost;
+	//TrapUnlockCost = TrapData.TrapUnlockCost;
 	TrapCoolTime = TrapData.TrapCoolTime;
 	TrapDamage = TrapData.TrapDamage;
-	TrapLevel = TrapData.TrapLevel;
-	TrapParentName = TrapData.TrapParentRowName;
-	TrapChildNames = TrapData.TrapChildRowNames;
-	bIsTrapUnlocked = TrapData.bIsTrapUnlocked;
+	//TrapLevel = TrapData.TrapLevel;
+	//TrapParentName = TrapData.TrapParentRowName;
+	//TrapChildNames = TrapData.TrapChildRowNames;
+	//bIsTrapUnlocked = TrapData.bIsTrapUnlocked;
 	TrapMeshType = TrapData.MeshType;
 	bIsDotTrap = TrapData.bIsDotTrap;
 	DotDamage = TrapData.DotDamage;
