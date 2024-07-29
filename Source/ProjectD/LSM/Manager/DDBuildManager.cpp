@@ -63,10 +63,10 @@ void ADDBuildManager::InitializeGridCells()
 			if (GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, ECC_Visibility, CollisionParams))
 			{
 				CellLocation.Z = HitResult.ImpactPoint.Z;
-				GridCell = FGridCell(CellLocation, true);
+				GridCell = FGridCell(CellLocation, HitResult.ImpactNormal, true);
 			}
 			else {
-				GridCell = FGridCell(CellLocation, false);
+				GridCell = FGridCell(CellLocation, HitResult.ImpactNormal, false);
 			}
 			GridCellMap.Add(FIntPoint(Row, Column), GridCell);
 		}
@@ -109,12 +109,23 @@ const bool ADDBuildManager::CanPlaceTrapAtLocation(const FVector& HitLocation) c
 {
 	int32 Length = TrapCellWidth / 2;
 	FIntPoint Cell = ConvertWorldLocationToGridCell(HitLocation);
+	if (!GridCellMap.Contains(Cell)) {
+		return false;
+	}
+
+	FVector InNormalVector = GridCellMap[Cell].NormalVector;
+	FVector StandardPoint = GridCellMap[Cell].WorldLocation;
 
 	for (int32 Row = Cell.X - Length; Row <= Cell.X + Length; Row++) {
 		for (int32 Col = Cell.Y - Length; Col <= Cell.Y + Length; Col++) {
 			FIntPoint TempPoint = FIntPoint(Row, Col);
 			if (GridCellMap.Contains(TempPoint)) {
 				if (!GridCellMap[TempPoint].bCanBuild) {
+					return false;
+				}
+				// 점이 평면 위에 있는지 확인
+				FVector PointLocation = GridCellMap[TempPoint].WorldLocation; // GridCell을 월드 위치로 변환하는 함수가 필요
+				if (!IsPointOnSamePlane(PointLocation, StandardPoint, InNormalVector)) {
 					return false;
 				}
 			}
@@ -125,6 +136,16 @@ const bool ADDBuildManager::CanPlaceTrapAtLocation(const FVector& HitLocation) c
 	}
 
 	return true;
+}
+
+const FVector ADDBuildManager::GetGridCellNormalVector(const FVector& HitLocation) const
+{
+	FIntPoint Cell = ConvertWorldLocationToGridCell(HitLocation);
+	if (GridCellMap.Contains(Cell)) {
+		FVector outNormalVector = GridCellMap[Cell].NormalVector;
+		return outNormalVector;
+	}
+	return FVector(FLT_MAX, FLT_MAX, FLT_MAX);
 }
 
 bool ADDBuildManager::SetGridCellAsOccupied(const FVector& HitLocation)
@@ -173,4 +194,13 @@ bool ADDBuildManager::SetGridCellAsBlank(const FVector& HitLocation)
 	}
 
 	return false;
+}
+
+const bool ADDBuildManager::IsPointOnSamePlane(const FVector& InPointWorldLocation, const FVector& StandardPointWorldLocation, const FVector& PlaneNormalVector) const
+{
+	// 평면 위에 있는 점이라면 내적했을 때, 값이 0
+	float DistanceToPlane = FVector::DotProduct(PlaneNormalVector, InPointWorldLocation - StandardPointWorldLocation);
+	UE_LOG(LogTemp, Warning, TEXT("Dot Product : %f"), DistanceToPlane);
+	UE_LOG(LogTemp, Warning, TEXT("Impact Point X: %f, Y: %f, Z: %f "), InPointWorldLocation.X, InPointWorldLocation.Y, InPointWorldLocation.Z);
+	return FMath::Abs(DistanceToPlane) <= KINDA_SMALL_NUMBER;
 }

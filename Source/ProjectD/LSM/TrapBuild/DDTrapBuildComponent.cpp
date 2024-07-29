@@ -190,7 +190,7 @@ bool UDDTrapBuildComponent::UpgradeTrap(const FName& RowName)
 
 	APawn* Instigator = Cast<APawn>(Owner);
 
-	ADDTrapBase* NewTrap = TrapManager->SpawnTrap(World, RowName, ManagedTrap->GetActorLocation(), FRotator(0, 0, 0), Owner, Instigator);
+	ADDTrapBase* NewTrap = TrapManager->SpawnTrap(World, RowName, ManagedTrap->GetActorLocation(), ManagedTrap->GetActorRotation(), Owner, Instigator);
 	TrapManager->DestroyTrap(*ManagedTrap);
 
 	ManagedTrap = NewTrap;
@@ -276,7 +276,11 @@ void UDDTrapBuildComponent::PerformTrapBuildTrace()
 
 				check(PreviewTrap);
 				PreviewTrap->SetActorLocation(NearestCellLocation);
+				FVector NormalVector = BuildManager->GetGridCellNormalVector(HitLocation);
+				FRotator ActorRotation = FRotationMatrix::MakeFromZ(NormalVector).Rotator();
+				PreviewTrap->SetActorRotation(ActorRotation);
 				PreviewTrap->SetActorHiddenInGame(false);
+
 
 				// Hide the warning widget if there is a hit
 				if (HitWarningWidgetInstance && HitWarningWidgetInstance->IsInViewport())
