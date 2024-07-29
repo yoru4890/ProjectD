@@ -7,3 +7,14 @@
 #define TCHANNEL_BUILDINGTRACE ETraceTypeQuery::TraceTypeQuery3
 #define TCHANNEL_PLAYERDAMAGE ETraceTypeQuery::TraceTypeQuery4
 
+
+#define GTCHANNEL_BUILDINGTRACE ECC_GameTraceChannel1
+#define GTCHANNEL_PlAYERDAMAGE ECC_GameTraceChannel2
+#define GTCHANNEL_ENEMY ECC_GameTraceChannel3
+#define GTCHANNEL_PLAYER ECC_GameTraceChannel4
+#define GTCHANNEL_TOWER ECC_GameTraceChannel5
+#define GTCHANNEL_TRAP ECC_GameTraceChannel6
+#define GTCHANNEL_TOWERDAMAGE ECC_GameTraceChannel7
+#define GTCHANNEL_TRAPDAMAGE ECC_GameTraceChannel8
+#define GTCHANNEL_ENEMYDAMAGE ECC_GameTraceChannel9
+#define GTCHANNEL_MANAGETRACE ECC_GameTraceChannel10

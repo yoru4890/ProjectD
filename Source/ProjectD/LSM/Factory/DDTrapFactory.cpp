@@ -7,7 +7,7 @@
 #include "LSM/Manager/DDAssetManager.h"
 #include "YSY/Game/DDGameInstance.h"
 
-UObject* UDDTrapFactory::CreateObject(UWorld* World, const FName& ObjectName, const FBaseStruct& ObjectStruct, const FVector& Location, const FRotator& Rotation, AActor* Owner, APawn* Instigator)
+UObject* UDDTrapFactory::CreateObject(UWorld* World, const FName& RowName, const FBaseStruct& ObjectStruct, const FVector& Location, const FRotator& Rotation, AActor* Owner, APawn* Instigator)
 {
 	check(World);
 
@@ -24,15 +24,15 @@ UObject* UDDTrapFactory::CreateObject(UWorld* World, const FName& ObjectName, co
 	UDDAssetManager* AssetManager = MyGameInstance->GetAssetManager();
 	check(AssetManager);
 
-	FLoadedAsset& LoadedAsset = AssetManager->GetLoadedAssetByName(ObjectName);
+	FLoadedAsset& LoadedAsset = AssetManager->GetLoadedAssetByName(RowName);
 
 	NewTrap->SetTrapAssets(LoadedAsset.StaticMeshs, LoadedAsset.SkeletalMeshs, LoadedAsset.AnimBlueprint, LoadedAsset.Effects);
-	NewTrap->SetAttachParticleToRoot();
 
-	NewTrap->SetActorLocationAndRotation(Location, Rotation);
+	NewTrap->SetActorLocation(Location);
+	NewTrap->SetActorRotation(Rotation);
 	NewTrap->SetOwner(Owner);
 	NewTrap->SetInstigator(Instigator);
-	NewTrap->InitFromDataTable(*TrapStruct);
+	NewTrap->InitFromDataTable(RowName,*TrapStruct);
 
 
 	return NewTrap;

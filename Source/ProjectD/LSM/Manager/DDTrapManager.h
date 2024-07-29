@@ -7,6 +7,16 @@
 #include "LSM/Trap/DDTrapStruct.h"
 #include "DDTrapManager.generated.h"
 
+USTRUCT(BlueprintType)
+struct FTrapList
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(VisibleAnywhere)
+	TArray<TObjectPtr<ADDTrapBase>> Traps;
+};
+
 UCLASS()
 class PROJECTD_API UDDTrapManager : public UObject
 {
@@ -17,15 +27,15 @@ public:
 
 	// 함정이 해금이 되었는지 체크하는 메서드
 	UFUNCTION(BlueprintCallable)
-	bool IsTowerUnlocked(const FName& TrapName) const;
+	bool IsTowerUnlocked(const FName& RowName) const;
 
 	// 함정을 해금하는 메서드
 	UFUNCTION(BlueprintCallable)
-	void UnlockTower(const FName& TrapName);
+	bool UnlockTower(const FName& RowName);
 
-	const FDDTrapStruct& GetTrapData(const FName& TrapName) const;
+	const FDDTrapStruct& GetTrapData(const FName& RowName) const;
 
-	FDDTrapStruct& GetTrapData(const FName& TrapName);
+	FDDTrapStruct& GetTrapData(const FName& RowName);
 
 	TMap<FName, FDDTrapStruct>& GetTrapDataTable();
 
@@ -33,8 +43,11 @@ public:
 
 	// 트랩 스폰 메서드
 	UFUNCTION(BlueprintCallable)
-	class ADDTrapBase* SpawnTrap(UWorld* World, const FName& TrapName, const FVector& Location, const FRotator& Rotation, AActor* Owner, APawn* Instigator);
+	class ADDTrapBase* SpawnTrap(UWorld* World, const FName& RowName, const FVector& Location, const FRotator& Rotation, AActor* Owner, APawn* Instigator);
+
+	void DestroyTrap(class ADDTrapBase& Trap);
 
 private:
+	TMap<FName, FTrapList> TrapPool;
 
 };

@@ -25,20 +25,35 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION(BlueprintCallable)
-	void ReadyTrap(const FName& TrapName);
+	AActor* ReadyTrap(const FName& RowName);
 
 	UFUNCTION(BlueprintCallable)
-	void CancleReadyTrap(class ADDTrapBase* Trap);
+	void CancleReadyTrap();
 
 	UFUNCTION(BlueprintCallable)
-	void BuildTrap(class ADDTrapBase* Trap);
+	bool BuildTrap();
 
 	UFUNCTION(BlueprintCallable)
-	void CancleBuildTrap(class ADDTrapBase* Trap);
+	void CancleBuildTrap();
 
 	// 새로운 함수: 트랩 업그레이드
 	UFUNCTION(BlueprintCallable)
-	void UpgradeTrap(class ADDTrapBase* Trap);
+	void UpgradeTrap(const FName& RowName);
+
+	UFUNCTION(BlueprintCallable)
+	void AllStopTrace();
+
+	UFUNCTION(BlueprintCallable)
+	void StopTrapBuildTrace();
+
+	UFUNCTION(BlueprintCallable)
+	void StartTrapBuildTrace();
+
+	UFUNCTION(BlueprintCallable)
+	void StopTrapManageTrace();
+
+	UFUNCTION(BlueprintCallable)
+	void StartTrapManageTrace();
 
 private:
 	UPROPERTY()
@@ -47,7 +62,32 @@ private:
 	UPROPERTY()
 	TObjectPtr<class ADDBuildManager> BuildManager;
 
-	// Function to perform LineTrace and get the nearest grid cell location
-	FVector GetNearestGridCellLocation();
+	UPROPERTY()
+	TObjectPtr<class ADDPlayerState> PlayerState;
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<class ADDTrapBase> PreviewTrap;
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<class ADDTrapBase> ManagedTrap;
+
+	FTimerHandle TrapBuildTraceTimerHandle;
+
+	FTimerHandle TrapManageTraceTimerHandle;
+
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<UUserWidget> HitWarningWidgetClass;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class UDDCantBuildWidget> HitWarningWidgetInstance;
+
+	bool bIsSetTrap = false;
+
+	void PerformTrapBuildTrace();
+
+	void PerformTrapManageTrace();
+
+	bool CanPayTrapBuildCost(const FName& RowName) const;
+	bool PayTrapBuildCost(const FName& RowName) const;
 
 };
