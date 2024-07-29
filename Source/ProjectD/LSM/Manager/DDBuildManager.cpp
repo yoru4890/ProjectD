@@ -200,7 +200,5 @@ const bool ADDBuildManager::IsPointOnSamePlane(const FVector& InPointWorldLocati
 {
 	// 평면 위에 있는 점이라면 내적했을 때, 값이 0
 	float DistanceToPlane = FVector::DotProduct(PlaneNormalVector, InPointWorldLocation - StandardPointWorldLocation);
-	UE_LOG(LogTemp, Warning, TEXT("Dot Product : %f"), DistanceToPlane);
-	UE_LOG(LogTemp, Warning, TEXT("Impact Point X: %f, Y: %f, Z: %f "), InPointWorldLocation.X, InPointWorldLocation.Y, InPointWorldLocation.Z);
 	return FMath::Abs(DistanceToPlane) <= KINDA_SMALL_NUMBER;
 }
