@@ -18,7 +18,7 @@ public:
 	// Sets default values for this actor's properties
 	ADDWeaponBase();
 
-	void InitData(const FDDWeaponData& WeaponData);
+	void InitData(const FName& RowName, const FDDWeaponData& WeaponData);
 
 protected:
 	// Called when the game starts or when spawned
@@ -27,6 +27,12 @@ protected:
 	
 
 protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
+	FName WeaponRowName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
+	FString WeaponDisplayName;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon)
 	USkeletalMeshComponent* WeaponMesh;
 
@@ -34,7 +40,7 @@ protected:
 	FString WeaponInformation;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon)
-	int32 BuildCost;
+	int32 Price;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon)
 	int32 UpgradeCost;

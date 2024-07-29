@@ -8,9 +8,9 @@
 UENUM(BlueprintType)
 enum class EAttackType : uint8
 {
-	Melee, // TODO : LJW Need to write UMETA
-	Range,
-	Unknown
+	Melee UMETA(DisplayName = "Melee"),
+	Range UMETA(DisplayName = "Range"),
+	Unknown UMETA(DisplayName = "Unknown")
 };
 
 
@@ -21,21 +21,25 @@ struct FDDWeaponData : public FTableRowBase
 
 public:
 	FDDWeaponData() {}
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
+	FString WeaponName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
 	EAttackType AttackType;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
-	FString WeaponName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
 	USkeletalMeshComponent* WeaponMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
+	TSubclassOf<class ADDWeaponBase> WeaponClass; 
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
 	FString WeaponInformation;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
-	int32 BuildCost;
+	int32 Price;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
 	int32 UpgradeCost;
@@ -51,4 +55,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
 	float AttackRange;
+
+
 };

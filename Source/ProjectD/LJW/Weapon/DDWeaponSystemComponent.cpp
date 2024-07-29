@@ -26,32 +26,18 @@ void UDDWeaponSystemComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 void UDDWeaponSystemComponent::InitializeWeapon()
 {
 	// ΩÃ±€≈Êø°º≠ dataµÈ¿ª æÚ¿Ω
-	FDDWeaponData MondungiData;
-	TArray<FName> WeaponNames;
+	auto WeaponDatas = UDDGameSingleton::Get().GetWeaponDataTable();
+	Weapons.SetNum(static_cast<int32>(EWeaponType::Unknown));
+	
+	for (auto& [WeaponDataName, WeaponDataValue] : WeaponDatas)
+	{
+		UClass* TempClass = WeaponDataValue.WeaponClass;
+		auto TempWeapon = GetWorld()->SpawnActor<ADDWeaponBase>(TempClass);
+		TempWeapon->InitData(WeaponDataName,WeaponDataValue);
+		Weapons.Add(TempWeapon);
+	}
 
-	Weapon1->InitData(MondungiData);
+	// TODO : LJW MyInit()
 
-	auto TempWeapon = NewObject<ADDWeaponRifle>();
-	Weapons.Add(TempWeapon);
-	//Weapon[0].Attack();
-
-	/*Weapons[0]->InitData("∏˘µ’¿Ã");
-	Weapons[1]->InitData("∏˘µ’¿Ã§§§©§∑§©");
-	Weapons[2]->InitData("∏˘µ’§±§§");
-	Weapons[3]->InitData("§±§§§∑§©");
-	Weapons[4]->InitData("±§º±∞À");*/
-
-	//// TODO : LJW MyInit()
-	//Weapons.SetNum(static_cast<int32>(EWeaponType::Unknown));
-
-	//FDDWeaponData TempData;
-	//TArray<FName> WeaponNames;
-	//WeaponNames.Add("∏˘µ’¿Ã");
-	//for (int i{}; i < Weapons.Num(); i++)
-	//{
-	//	Weapons[i].InitData(WeaponDatas[i]);
-	//}
-	//initData("TrapName");
-	//auto WeaponDatas = UDDGameSingleton::Get().GetEnemyDataTable();
 }
 

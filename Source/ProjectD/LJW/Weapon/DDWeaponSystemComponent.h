@@ -10,14 +10,14 @@
 UENUM(BlueprintType)
 enum class EWeaponType : uint8
 {
-	Cudgel,
-	LightSaber,
-	Sword,
-	Rifle,
-	Sniper,
-	Bazooka,
-	Machinegun,
-	Unknown
+	Cudgel UMETA(DisplayName = "Cudgel"),
+	LightSaber UMETA(DisplayName = "LightSaber"),
+	Sword UMETA(DisplayName = "Sword"),
+	Rifle UMETA(DisplayName = "Rifle"),
+	Sniper UMETA(DisplayName = "Sniper"),
+	Bazooka UMETA(DisplayName = "Bazooka"),
+	Machinegun UMETA(DisplayName = "Machinegun"),
+	Unknown UMETA(DisplayName = "Unknown")
 };
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -39,12 +39,5 @@ public:
 
 private:
 	
-	class ADDWeaponBase* Weapon1; // ¸ùµÕÀÌ
-	class ADDWeaponBase* Weapon2;
-	ADDWeaponBase* Weapon3;
-	ADDWeaponBase* Weapon4;
-	ADDWeaponBase* Weapon5;
-	ADDWeaponBase* Weapon6;
-	ADDWeaponBase* Weapon7;
 	TArray<ADDWeaponBase*> Weapons;
 };

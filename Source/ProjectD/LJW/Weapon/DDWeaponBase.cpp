@@ -17,9 +17,21 @@ void ADDWeaponBase::BeginPlay()
 	
 }
 
-void ADDWeaponBase::InitData(const FDDWeaponData& WeaponData)
+void ADDWeaponBase::InitData(const FName& RowName, const FDDWeaponData& WeaponData)
 {
-	BuildCost = WeaponData.BuildCost;
+	//TODO : Init Data
+	WeaponRowName = RowName;
+	WeaponDisplayName = WeaponData.WeaponName;
+	WeaponInformation = WeaponData.WeaponInformation;
+	Price = WeaponData.Price;
+	UpgradeCost = WeaponData.UpgradeCost;
+	UnlockLP = WeaponData.UnlockLP;
+	AttackCooltime = WeaponData.AttackCooltime;
+	AttackDamage = WeaponData.AttackDamage;
+	AttackRange = WeaponData.AttackRange;
+
+	//Mesh
+	WeaponMesh = WeaponData.WeaponMesh;
 }
 
 
