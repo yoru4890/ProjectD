@@ -2,6 +2,8 @@
 
 
 #include "YSY/Manager/DDWaveManager.h"
+#include "Kismet/GameplayStatics.h"
+#include "YSY/AI/AISplineRoute.h"
 
 UDDWaveManager::UDDWaveManager()
 {
@@ -25,7 +27,19 @@ UDDWaveManager::UDDWaveManager()
 		for (auto& [RowName, Data] : DataMap)
 		{
 			auto WaveData = reinterpret_cast<FDDWaveData*>(Data);
-			WaveInfo[WaveData->Stage][WaveData->WaveNumber] = MoveTemp(*WaveData);
+			WaveInfo[WaveData->Stage][WaveData->WaveNumber] = MoveTemp(WaveData);
 		}
+
+	}
+}
+
+void UDDWaveManager::SetSplines()
+{
+	TArray<AActor*> OutActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AAISplineRoute::StaticClass(), OutActors);
+
+	for (auto& Actor : OutActors)
+	{
+		Splines.Add(CastChecked<AAISplineRoute>(Actor));
 	}
 }

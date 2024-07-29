@@ -14,11 +14,18 @@ UCLASS()
 class PROJECTD_API UDDWaveManager : public UObject
 {
 	GENERATED_BODY()
-	
+
 public:
 	UDDWaveManager();
 
+	UFUNCTION(BlueprintCallable)
+	void SetSplines();
+
+	TArray<class AAISplineRoute*>& GetSplines() { return Splines; };
+
 private:
 
-	TArray<TArray<FDDWaveData>> WaveInfo;
+	TArray<TArray<FDDWaveData*>> WaveInfo;
+
+	TArray<class AAISplineRoute*> Splines;
 };

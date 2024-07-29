@@ -83,12 +83,11 @@ float ADDEnemyBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 void ADDEnemyBase::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	EnemyAIController = Cast<ADDEnemyAIController>(GetController());
 	check(EnemyAIController);
 
 	EnemyAIController->OnMoveFinished.BindUObject(this, &ADDEnemyBase::SplineMoveFinish);
-
 }
 
 void ADDEnemyBase::Tick(float DeltaTime)
@@ -100,6 +99,7 @@ void ADDEnemyBase::Tick(float DeltaTime)
 
 void ADDEnemyBase::InitializeEnemy(const FDDEnemyData& EnemyData)
 {
+
 	EnemyName = EnemyData.EnemyName;
 	WeakPoint = EnemyData.WeakPoint;
 	EnemyType = EnemyData.EnemyType;
@@ -114,16 +114,19 @@ void ADDEnemyBase::InitializeEnemy(const FDDEnemyData& EnemyData)
 	bIsBoss = EnemyData.bIsBoss;
 	bIsElite = EnemyData.bIsElite;
 
-	ConstructorHelpers::FObjectFinder<USkeletalMesh> MeshRef(*EnemyData.MeshPath);
-	if (MeshRef.Object)
+	USkeletalMesh* MeshTemp = LoadObject<USkeletalMesh>(nullptr, *EnemyData.MeshPath);
+	ensure(MeshTemp);
+	if (MeshTemp)
 	{
-		GetMesh()->SetSkeletalMesh(MeshRef.Object);
+		GetMesh()->SetSkeletalMesh(MeshTemp);
+		GetMesh()->SetRelativeLocationAndRotation({ 0,0,-90 }, { 0,-90,0 });
 	}
 
-	ConstructorHelpers::FClassFinder<UAnimInstance> AnimInstanceClassRef(*EnemyData.AnimationBlueprintPath);
-	if (AnimInstanceClassRef.Class)
+	UClass* AnimInstanceClass = LoadObject<UClass>(nullptr, *EnemyData.AnimationBlueprintPath);
+	ensure(AnimInstanceClass);
+	if (AnimInstanceClass)
 	{
-		GetMesh()->SetAnimInstanceClass(AnimInstanceClassRef.Class);
+		GetMesh()->SetAnimInstanceClass(AnimInstanceClass);
 	}
 }
 
@@ -223,6 +226,8 @@ void ADDEnemyBase::ArrivalAtGoal()
 void ADDEnemyBase::Die()
 {
 	// TODO : YSY Player get gold, Drop Item
+
+	OnDie.ExecuteIfBound(EnemyName, this);
 }
 
 void ADDEnemyBase::UpdateWidgetScale()
@@ -322,4 +327,9 @@ void ADDEnemyBase::Deactivate()
 {
 	SetActorHiddenInGame(true);
 	SetActorEnableCollision(false);
+}
+
+void ADDEnemyBase::SetAIMoveRoute(TArray<class AAISplineRoute*> Splines, int32 Index)
+{
+	AIMoveRoute = Splines[Index];
 }

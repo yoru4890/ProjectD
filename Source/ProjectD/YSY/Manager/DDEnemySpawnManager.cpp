@@ -4,13 +4,20 @@
 #include "YSY/Manager/DDEnemySpawnManager.h"
 #include "YSY/Enemy/DDEnemyBase.h"
 #include "YSY/Game/DDGameSingleton.h"
+#include "YSY/Game/DDGameInstance.h"
+#include "YSY/Manager/DDWaveManager.h"
+#include "Kismet/GameplayStatics.h"
 
 UDDEnemySpawnManager::UDDEnemySpawnManager()
 {
 }
 
-void UDDEnemySpawnManager::Initialize(const TMap<FName, int32>& EnemyPoolSizes)
+void UDDEnemySpawnManager::SetupEnemyPools(const TMap<FName, int32>& EnemyPoolSizes)
 {
+	Pools.Empty();
+	ActiveObjects.Empty();
+	InactiveObjects.Empty();
+
 	for (auto& [EnemyName, PoolSize] : EnemyPoolSizes)
 	{
 		Pools.FindOrAdd(EnemyName, TArray<ADDEnemyBase*>());
@@ -52,12 +59,9 @@ void UDDEnemySpawnManager::Deactivate(const FName& EnemyName, ADDEnemyBase* Enem
 	{
 		InactiveObjects[EnemyName].Add(Enemy);
 		Enemy->Deactivate();
-	}
-}
 
-void UDDEnemySpawnManager::OnEnemyDestoryed(AActor* DestoryedActor)
-{
-	// TODO : YSY Player should get Gold, Score
+		// TODO : YSY Player should get Gold, Score
+	}
 }
 
 void UDDEnemySpawnManager::SpawnEnemy(const FName& EnemyName)
@@ -68,8 +72,11 @@ void UDDEnemySpawnManager::SpawnEnemy(const FName& EnemyName)
 
 	if (Enemy)
 	{
-		Enemy->OnDestroyed.AddDynamic(this, &UDDEnemySpawnManager::OnEnemyDestoryed);
+		Enemy->OnDie.BindUObject(this, &UDDEnemySpawnManager::Deactivate);
 		Enemy->InitializeEnemy(*UDDGameSingleton::Get().GetEnemyDataTable().Find(EnemyName));
+		
+		UDDGameInstance* DDGameInstance = Cast<UDDGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+		Enemy->SetAIMoveRoute(DDGameInstance->GetWaveManager()->GetSplines(), 0);
 		Enemy->FinishSpawning({});
 		Enemy->Deactivate();
 		Pools[EnemyName].Add(Enemy);

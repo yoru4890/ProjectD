@@ -26,6 +26,12 @@ public:
 
 	FORCEINLINE FStreamableManager& GetStreamableManager() { return StreamableManager; }
 
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE class UDDEnemySpawnManager* GetEnemySpawnManager() const { return EnemySpawnManager; }
+
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE class UDDWaveManager* GetWaveManager() const { return WaveManager; }
+
 private:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UDDAssetManager> AssetManager;
@@ -38,5 +44,9 @@ private:
 
 	FStreamableManager StreamableManager;
 
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<class UDDEnemySpawnManager> EnemySpawnManager;
 
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<class UDDWaveManager> WaveManager;
 };

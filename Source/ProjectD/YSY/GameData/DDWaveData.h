@@ -23,4 +23,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
 	TArray<int32> PathOrder;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	TMap<FName, int32> EnemyPoolSizes;
 };

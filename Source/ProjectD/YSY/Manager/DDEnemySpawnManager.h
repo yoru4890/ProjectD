@@ -16,12 +16,12 @@ class PROJECTD_API UDDEnemySpawnManager : public UObject
 public:
 	UDDEnemySpawnManager();
 
-	void Initialize(const TMap<FName, int32>& EnemyPoolSizes);
+	UFUNCTION(BlueprintCallable)
+	void SetupEnemyPools(const TMap<FName, int32>& EnemyPoolSizes);
+	UFUNCTION(BlueprintCallable)
 	AActor* Activate(const FName& EnemyName, const FVector& Position);
+	UFUNCTION(BlueprintCallable)
 	void Deactivate(const FName& EnemyName, ADDEnemyBase* Enemy);
-
-	UFUNCTION()
-	void OnEnemyDestoryed(AActor* DestoryedActor);
 
 	void SpawnEnemy(const FName& EnemyName);
 

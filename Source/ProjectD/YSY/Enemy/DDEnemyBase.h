@@ -10,6 +10,8 @@
 #include "YSY/Interface/DamageInterface.h"
 #include "DDEnemyBase.generated.h"
 
+DECLARE_DELEGATE_TwoParams(FOnDieSignature, const FName&, ADDEnemyBase*);
+
 UCLASS()
 class PROJECTD_API ADDEnemyBase : public ACharacter, public IDDEnemyAIInterface, public IDDCharacterWidgetInterface, public IDamageInterface
 {
@@ -46,6 +48,8 @@ public:
 	void Activate();
 	void Deactivate();
 
+	void SetAIMoveRoute(TArray<class AAISplineRoute*> Splines, int32 Index);
+
 #pragma region AIInterface
 
 	virtual void SplineMove() override;
@@ -69,6 +73,9 @@ public:
 	virtual void ApplySlow(float Time, float SlowRate);
 
 #pragma endregion
+
+public:
+	FOnDieSignature OnDie{};
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "DD", Meta = (AllowPrivateAccess = "true"))

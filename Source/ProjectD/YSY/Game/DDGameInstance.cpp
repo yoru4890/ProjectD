@@ -5,6 +5,8 @@
 #include "LSM/Manager/DDAssetManager.h"
 #include "LSM/Manager/DDTrapManager.h"
 #include "LSM/Manager/DDFactoryManager.h"
+#include "YSY/Manager/DDEnemySpawnManager.h"
+#include "YSY/Manager/DDWaveManager.h"
 
 void UDDGameInstance::Init()
 {
@@ -16,5 +18,6 @@ void UDDGameInstance::Init()
 	FactoryManager->Initialize(TrapManager->GetTrapDataTable());
 	AssetManager->Initialize();
 	
-
+	EnemySpawnManager = NewObject<UDDEnemySpawnManager>(this);
+	WaveManager = NewObject<UDDWaveManager>(this);
 }
