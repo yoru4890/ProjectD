@@ -19,6 +19,7 @@ public:
 	ADDCharacterPlayer();
 
 protected:
+	
 	virtual void BeginPlay() override;
 
 public:
@@ -27,7 +28,10 @@ public:
 //Character Control Section
 protected:
 	void SetCharacterControl();
+
 	virtual void SetCharacterControlData(const class UDDCharacterControlData* CharacterControlData) override;
+
+	
 
 //Camera Section
 protected:
@@ -36,10 +40,14 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UCameraComponent> FollowCamera;
-	
+
 
 //Input Section
 protected:
+
+	void Move(const FInputActionValue& Value);
+	void Look(const FInputActionValue& Value);
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> JumpAction;
 
@@ -49,7 +57,11 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> MoveAction;
 
-	void Move(const FInputActionValue& Value);
-	void Look(const FInputActionValue& Value);
+	UPROPERTY(EditAnywhere, Category = Character)
+	float MouseSpeed;
 
+//Mesh Section
+protected:
+
+	void CreateLeaderPoseSkeletalMesh(USkeletalMeshComponent* USkeletalMesh, const FString& Name, const FString& Path );
 };
