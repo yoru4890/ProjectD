@@ -15,16 +15,20 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	FVector WorldLocation;
 	UPROPERTY(VisibleAnywhere)
+	FVector NormalVector;
+	UPROPERTY(VisibleAnywhere)
 	bool bCanBuild;
 
 	FGridCell()
 		: WorldLocation(0)
+		, NormalVector(0,0,1)
 		, bCanBuild(false)
 	{}
 
 	// 매개변수를 가진 생성자
-	FGridCell(FVector InWorldLocation, bool bInCanBuild)
+	FGridCell(FVector InWorldLocation, FVector InNormalVector, bool bInCanBuild)
 		: WorldLocation(InWorldLocation)
+		, NormalVector(InNormalVector)
 		, bCanBuild(bInCanBuild)
 	{}
 
@@ -69,10 +73,12 @@ private:
 public:
 	const FVector GetNearestGridCellLocation(const FVector& HitLocation) const;
 	const bool CanPlaceTrapAtLocation(const FVector& HitLocation) const;
+	const FVector GetGridCellNormalVector(const FVector& HitLocation) const;
 	bool SetGridCellAsOccupied(const FVector& HitLocation);
 	bool SetGridCellAsBlank(const FVector& HitLocation);
 
 private:
 	const FIntPoint ConvertWorldLocationToGridCell(const FVector& Location) const;
+	const bool IsPointOnSamePlane(const FVector& InPointWorldLocation, const FVector& StandardPointWorldLocation, const FVector& PlaneNormalVector) const;
 	
 };
