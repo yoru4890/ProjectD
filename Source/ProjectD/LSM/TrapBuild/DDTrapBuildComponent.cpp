@@ -130,13 +130,15 @@ bool UDDTrapBuildComponent::BuildTrap()
 	BuildManager->SetGridCellAsOccupied(PreviewTrap->GetActorLocation());
 
 	const FName& TrapRowName = PreviewTrap->GetTrapRowName();
+
+	PreviewTrap->SetTrapCanAttack(true);
 	PayTrapBuildCost(TrapRowName);
 
 	PreviewTrap = nullptr;
 	ReadyTrap(TrapRowName);
 
-	UE_LOG(LogTemp, Warning, TEXT("TrapBuild Success"));
-	UE_LOG(LogTemp, Warning, TEXT("Player Gold : %d"), PlayerState->GetGold());
+	//UE_LOG(LogTemp, Warning, TEXT("TrapBuild Success"));
+	//UE_LOG(LogTemp, Warning, TEXT("Player Gold : %d"), PlayerState->GetGold());
 
 	return true;
 }
@@ -146,23 +148,39 @@ void UDDTrapBuildComponent::CancleBuildTrap()
 	if (!ManagedTrap) {
 		return;
 	}
+	FDDTrapStruct& ManagedTrapData = TrapManager->GetTrapData(ManagedTrap->GetTrapRowName());
 	BuildManager->SetGridCellAsBlank(ManagedTrap->GetActorLocation());
-	PlayerState->AddGold(ManagedTrap->GetTrapBuildCost());
+	PlayerState->AddGold(ManagedTrapData.TrapBuildCost * 0.8f);
 	TrapManager->DestroyTrap(*ManagedTrap);
+	ManagedTrap->SetTrapCanAttack(false);
 	ManagedTrap = nullptr;
 }
 
-void UDDTrapBuildComponent::UpgradeTrap(const FName& RowName)
+bool UDDTrapBuildComponent::UpgradeTrap(const FName& RowName)
 {
 	if (!ManagedTrap) 
 	{
-		return;
+		return false;
 	}
-	FDDTrapStruct& TrapData = TrapManager->GetTrapData(RowName);
-	if (!TrapData.bIsTrapUnlocked)
+	FDDTrapStruct& UpgradeTrapData = TrapManager->GetTrapData(RowName);
+	if (!UpgradeTrapData.bIsTrapUnlocked)
 	{
-		return;
+		return false;
 	}
+
+	if (!CanPayTrapUpgradeCost(RowName)) 
+	{
+		return false;
+	}
+
+	FDDTrapStruct& ManagedTrapData = TrapManager->GetTrapData(ManagedTrap->GetTrapRowName());
+
+	if (!ManagedTrapData.TrapChildRowNames.Contains(RowName))
+	{
+		return false;
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Upgrade Gold : %d"), UpgradeTrapData.TrapUpgradeCost);
 
 	UWorld* World = GetWorld();
 	check(World);
@@ -176,6 +194,10 @@ void UDDTrapBuildComponent::UpgradeTrap(const FName& RowName)
 	TrapManager->DestroyTrap(*ManagedTrap);
 
 	ManagedTrap = NewTrap;
+	ManagedTrap->SetTrapCanAttack(true);
+	ManagedTrap->SetMaterialToPreview(true);
+	PayTrapUpgradeCost(RowName);
+	return true;
 }
 
 void UDDTrapBuildComponent::AllStopTrace()
@@ -221,7 +243,8 @@ void UDDTrapBuildComponent::StartTrapManageTrace()
 
 void UDDTrapBuildComponent::PerformTrapBuildTrace()
 {
-	UE_LOG(LogTemp, Warning, TEXT("PerformTrapBuildTrace Success"));
+	//UE_LOG(LogTemp, Warning, TEXT("PerformTrapBuildTrace Success"));
+	//UE_LOG(LogTemp, Warning, TEXT("Player Gold : %d"),PlayerState->GetGold());
 	if (!PreviewTrap)
 	{
 		return;
@@ -296,7 +319,6 @@ void UDDTrapBuildComponent::PerformTrapBuildTrace()
 
 void UDDTrapBuildComponent::PerformTrapManageTrace()
 {
-	UE_LOG(LogTemp, Warning, TEXT("PerformTrapManageTrace Success"));
 	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	if (PlayerController)
 	{
@@ -326,6 +348,7 @@ void UDDTrapBuildComponent::PerformTrapManageTrace()
 				}
 				ManagedTrap = Cast<ADDTrapBase>(HitActor);// HitResult에서 맞은 Actor를 가져옴
 				ManagedTrap->SetMaterialToPreview(true);
+				//UE_LOG(LogTemp, Warning, TEXT("Manage Trap Changed"));
 			}
 		}
 		else {
@@ -348,5 +371,19 @@ bool UDDTrapBuildComponent::PayTrapBuildCost(const FName& RowName) const
 {
 	const FDDTrapStruct& TrapData = TrapManager->GetTrapData(RowName);
 	bool bIsPay = PlayerState->SubtractGold(TrapData.TrapBuildCost);
+	return bIsPay;
+}
+
+bool UDDTrapBuildComponent::CanPayTrapUpgradeCost(const FName& RowName) const
+{
+	const FDDTrapStruct& TrapData = TrapManager->GetTrapData(RowName);
+	bool bCanPay = PlayerState->CheckGold(TrapData.TrapUpgradeCost);
+	return bCanPay;
+}
+
+bool UDDTrapBuildComponent::PayTrapUpgradeCost(const FName& RowName) const
+{
+	const FDDTrapStruct& TrapData = TrapManager->GetTrapData(RowName);
+	bool bIsPay = PlayerState->SubtractGold(TrapData.TrapUpgradeCost);
 	return bIsPay;
 }
