@@ -24,6 +24,12 @@ public:
 	FDDEnemyData() {}
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	FName EnemyName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	FName WeakPoint;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
 	EEnemyType EnemyType;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)

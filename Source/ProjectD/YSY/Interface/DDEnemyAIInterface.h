@@ -13,6 +13,9 @@ class UDDEnemyAIInterface : public UInterface
 	GENERATED_BODY()
 };
 
+DECLARE_DELEGATE(FAISplineMoveOnFinishedSignature);
+DECLARE_DELEGATE(FAIAttackOnFinishedSignature);
+
 /**
  * 
  */
@@ -22,4 +25,16 @@ class PROJECTD_API IDDEnemyAIInterface
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
+	
+	virtual void SplineMove() = 0;
+
+	virtual void SetAIMoveFinishedDelegate(const FAISplineMoveOnFinishedSignature& InOnSplineMoveFinished) = 0;
+
+	virtual void AttackByAI() = 0;
+
+	virtual void SetAIAttackFinsihedDelegate(const FAIAttackOnFinishedSignature& InOnAttackFinished) = 0;
+
+	virtual float GetAIDetectRange() const noexcept = 0;
+
+	virtual float GetAIAttackRange() const noexcept = 0;
 };

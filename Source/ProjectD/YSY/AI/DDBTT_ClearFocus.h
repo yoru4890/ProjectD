@@ -4,17 +4,18 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
-#include "DDBTT_SplineMove.generated.h"
+#include "DDBTT_ClearFocus.generated.h"
 
-DECLARE_LOG_CATEGORY_EXTERN(BTTLog, Log, All);
-
+/**
+ * 
+ */
 UCLASS()
-class PROJECTD_API UDDBTT_SplineMove : public UBTTaskNode
+class PROJECTD_API UDDBTT_ClearFocus : public UBTTaskNode
 {
 	GENERATED_BODY()
-	
 public:
-	UDDBTT_SplineMove();
+	UDDBTT_ClearFocus();
 
+protected:
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 };

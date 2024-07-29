@@ -6,6 +6,7 @@
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardData.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "GameFramework/Character.h"
 #include "YSY/AI/BlackboardKey.h"
 
 ADDEnemyAIController::ADDEnemyAIController()
@@ -23,6 +24,8 @@ ADDEnemyAIController::ADDEnemyAIController()
 	{
 		ownedBT = BTFinder.Object;
 	}
+
+	ReceiveMoveCompleted.AddDynamic(this, &ADDEnemyAIController::OnMoveCompleted);
 }
 
 void ADDEnemyAIController::BeginPlay()
@@ -35,12 +38,24 @@ void ADDEnemyAIController::OnPossess(APawn* InPawn)
 	Super::OnPossess(InPawn);
 }
 
+void ADDEnemyAIController::OnMoveCompleted(FAIRequestID RequestID, EPathFollowingResult::Type Result)
+{
+	Super::OnMoveCompleted(RequestID, Result);
+
+	OnMoveFinished.ExecuteIfBound();
+}
+
 void ADDEnemyAIController::RunAI()
 {
 	UBlackboardComponent* BlackboardPtr{ Blackboard.Get() };
 	if (UseBlackboard(ownedBB, BlackboardPtr))
 	{
-		Blackboard->SetValueAsObject(BBKEY_TARGET, UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
+		ACharacter* PlayerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+
+		if (PlayerCharacter)
+		{
+			BlackboardPtr->SetValueAsObject(BBKEY_TARGET, PlayerCharacter);
+		}
 		bool RunResult = RunBehaviorTree(ownedBT);
 		ensure(RunResult);
 
