@@ -6,6 +6,34 @@
 #include "GameFramework/Actor.h"
 #include "DDBuildManager.generated.h"
 
+USTRUCT(BlueprintType)
+struct FGridCell
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(VisibleAnywhere)
+	FVector WorldLocation;
+	UPROPERTY(VisibleAnywhere)
+	FVector NormalVector;
+	UPROPERTY(VisibleAnywhere)
+	bool bCanBuild;
+
+	FGridCell()
+		: WorldLocation(0)
+		, NormalVector(0,0,1)
+		, bCanBuild(false)
+	{}
+
+	// 매개변수를 가진 생성자
+	FGridCell(FVector InWorldLocation, FVector InNormalVector, bool bInCanBuild)
+		: WorldLocation(InWorldLocation)
+		, NormalVector(InNormalVector)
+		, bCanBuild(bInCanBuild)
+	{}
+
+};
+
 UCLASS()
 class PROJECTD_API ADDBuildManager : public AActor
 {
@@ -28,6 +56,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Init")
 	float GridCellSize;
 
+	UPROPERTY(EditAnywhere, Category = "Init")
+	int32 TrapCellWidth;
+
 	// Box collision component to define the bounds of the BuildManager
 	UPROPERTY(EditAnywhere, Category = "Components")
 	TObjectPtr<class UBoxComponent> BoxComponent;
@@ -37,5 +68,17 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Init")
 	// Array to store grid cell locations
-	TArray<FVector> GridCellLocations;
+	TMap<FIntPoint, FGridCell> GridCellMap;
+
+public:
+	const FVector GetNearestGridCellLocation(const FVector& HitLocation) const;
+	const bool CanPlaceTrapAtLocation(const FVector& HitLocation) const;
+	const FVector GetGridCellNormalVector(const FVector& HitLocation) const;
+	bool SetGridCellAsOccupied(const FVector& HitLocation);
+	bool SetGridCellAsBlank(const FVector& HitLocation);
+
+private:
+	const FIntPoint ConvertWorldLocationToGridCell(const FVector& Location) const;
+	const bool IsPointOnSamePlane(const FVector& InPointWorldLocation, const FVector& StandardPointWorldLocation, const FVector& PlaneNormalVector) const;
+	
 };

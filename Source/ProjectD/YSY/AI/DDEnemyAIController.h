@@ -6,6 +6,8 @@
 #include "AIController.h"
 #include "DDEnemyAIController.generated.h"
 
+DECLARE_DELEGATE(FMoveOnFinishedSignature);
+
 /**
  * 
  */
@@ -19,9 +21,17 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void OnPossess(APawn* InPawn) override;
+
+	UFUNCTION()
+	virtual void OnMoveCompleted(FAIRequestID RequestID, EPathFollowingResult::Type Result) override;
+
+
 public:
 	void RunAI();
 	void StopAI();
+
+public:
+	FMoveOnFinishedSignature OnMoveFinished;
 
 private:
 	UPROPERTY(EditAnywhere)
@@ -29,4 +39,5 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<class UBehaviorTree> ownedBT{};
+
 };

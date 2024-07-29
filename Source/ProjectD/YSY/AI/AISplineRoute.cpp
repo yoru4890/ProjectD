@@ -12,17 +12,14 @@ AAISplineRoute::AAISplineRoute()
 
 }
 
-void AAISplineRoute::IncrementRoute()
-{
-	if (++RouteIndex == SplinePath->GetNumberOfSplinePoints() - 1)
-	{
-		// TODO : Goal
-	}
-}
-
-FVector AAISplineRoute::GetSplinePointasWorldPosition()
+FVector AAISplineRoute::GetSplinePointasWorldPosition(int RouteIndex)
 {
 	return SplinePath->GetLocationAtSplinePoint(RouteIndex, ESplineCoordinateSpace::World);
+}
+
+bool AAISplineRoute::IsSplineEnd(int RouteIndex)
+{
+	return RouteIndex >= SplinePath->GetNumberOfSplinePoints();
 }
 
 void AAISplineRoute::BeginPlay()

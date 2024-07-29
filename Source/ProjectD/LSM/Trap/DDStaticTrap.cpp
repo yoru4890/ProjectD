@@ -32,21 +32,38 @@ void ADDStaticTrap::SetTrapAssets(TArray<UStaticMesh*> StaticMeshs, TArray<USkel
 	StaticMeshComponents.Empty();
 	bool bIsFirstStaticMesh = true;
 
+	UStaticMeshComponent* FirstStaticMeshComponent = nullptr;
+	int32 StaticNum = 0;
+
 	for (UStaticMesh* StaticMesh : StaticMeshs) {
 		UStaticMeshComponent* StaticMeshComponent = NewObject<UStaticMeshComponent>(this);
 		check(StaticMeshComponent);
 
 		StaticMeshComponent->SetStaticMesh(StaticMesh);
+		StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		StaticMeshComponent->SetupAttachment(RootComponent);
 
 		if (bIsFirstStaticMesh) {
-			SetRootComponent(StaticMeshComponent);
+			FirstStaticMeshComponent = StaticMeshComponent;
 			bIsFirstStaticMesh = false;
+		}
+		else {
+			StaticMeshComponent->SetupAttachment(FirstStaticMeshComponent);
 		}
 
 		StaticMeshComponent->RegisterComponent();
 		StaticMeshComponents.Add(StaticMeshComponent);
+
+		FMaterialsStruct MaterialStruct;
+		MaterialStruct.Materials = StaticMeshComponent->GetMaterials();
+		OriginalMaterials.Add(StaticNum, MaterialStruct);
+		StaticNum++;
 	}
+
+	FBoxSphereBounds Bounds = FirstStaticMeshComponent->GetStaticMesh()->GetBounds();
+	FVector BoxExtent = Bounds.BoxExtent;
+	FVector ScaleFactor = FVector(300.f / (BoxExtent.X * 2), 300.f / (BoxExtent.Y * 2), 1);
+	FirstStaticMeshComponent->SetWorldScale3D(ScaleFactor);
 }
 
 //void ADDStaticTrap::SetTrapAssets(UStaticMesh* StaticMesh, USkeletalMesh* SkeletalMesh, UAnimBlueprint* AnimBlueprint, TArray<UParticleSystem*> ParticleEffects)

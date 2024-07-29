@@ -10,23 +10,12 @@
  *
  */
 
-UENUM(BlueprintType)
-enum class ETrapType : uint8
-{
-	ThornTrap,
-	IceTrap,
-	Unknown
-};
-
 USTRUCT(BlueprintType)
 struct FDDTrapStruct : public FBaseStruct
 {
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	ETrapType TrapType; // 트랩의 타입
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 TrapBuildCost; // 트랩의 설치비용
 
@@ -46,10 +35,10 @@ public:
 	int32 TrapLevel; // 트랩의 레벨(테크)
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName TrapParentName; // 부모 트랩의 이름
+	FName TrapParentRowName; // 부모 트랩의 이름
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<FName> TrapChildNames; // 자식 트랩의 이름들
+	TArray<FName> TrapChildRowNames; // 자식 트랩의 이름들
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsTrapUnlocked; // 트랩이 언락되었는지 여부

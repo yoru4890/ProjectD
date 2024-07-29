@@ -6,4 +6,5 @@
 ADDPlayerState::ADDPlayerState()
 {
 	Gold = 500;
+	LikePoint = 5;
 }

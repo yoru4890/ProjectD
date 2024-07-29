@@ -6,9 +6,8 @@
 #include "BehaviorTree/BTTaskNode.h"
 #include "DDBTT_SplineMove.generated.h"
 
-/**
- * 
- */
+DECLARE_LOG_CATEGORY_EXTERN(BTTLog, Log, All);
+
 UCLASS()
 class PROJECTD_API UDDBTT_SplineMove : public UBTTaskNode
 {
