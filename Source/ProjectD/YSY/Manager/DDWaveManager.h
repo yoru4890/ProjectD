@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
+#include "YSY/GameData/DDWaveData.h"
 #include "DDWaveManager.generated.h"
 
 /**
@@ -16,4 +17,8 @@ class PROJECTD_API UDDWaveManager : public UObject
 	
 public:
 	UDDWaveManager();
+
+private:
+
+	TArray<TArray<FDDWaveData>> WaveInfo;
 };

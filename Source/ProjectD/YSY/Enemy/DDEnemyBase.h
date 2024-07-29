@@ -43,6 +43,9 @@ public:
 	void CaculatePiercingDamage(float& ActualDamage);
 	void CaculateCorrosionDamage(float& ActualDamage);
 
+	void Activate();
+	void Deactivate();
+
 #pragma region AIInterface
 
 	virtual void SplineMove() override;

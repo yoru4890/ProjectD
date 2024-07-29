@@ -57,6 +57,12 @@ public:
 	int32 GoldDropAmount;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	int32 PoolSize;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	int32 ID;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
 	uint8 bIsBoss : 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)

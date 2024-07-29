@@ -89,13 +89,6 @@ void ADDEnemyBase::BeginPlay()
 
 	EnemyAIController->OnMoveFinished.BindUObject(this, &ADDEnemyBase::SplineMoveFinish);
 
-	FTimerHandle TempTH;
-	GetWorld()->GetTimerManager().SetTimer(TempTH, [this]()
-		{
-			EnemyAIController->RunAI();
-		}, 0.1f, false, 2.0f);
-	
-
 }
 
 void ADDEnemyBase::Tick(float DeltaTime)
@@ -316,4 +309,17 @@ void ADDEnemyBase::CaculateCorrosionDamage(float& ActualDamage)
 	default:
 		break;
 	}
+}
+
+void ADDEnemyBase::Activate()
+{
+	SetActorHiddenInGame(false);
+	SetActorEnableCollision(true);
+	EnemyAIController->RunAI();
+}
+
+void ADDEnemyBase::Deactivate()
+{
+	SetActorHiddenInGame(true);
+	SetActorEnableCollision(false);
 }
