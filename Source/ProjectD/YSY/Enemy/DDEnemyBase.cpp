@@ -75,9 +75,9 @@ float ADDEnemyBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 		}
 	}
 
-	Stat->ApplyDamage(ActualDamage);
+	Stat->ApplyStatDamage(ActualDamage);
 
-	return Super::TakeDamage(ActualDamage, DamageEvent, EventInstigator, DamageCauser);
+	return ActualDamage;
 }
 
 void ADDEnemyBase::BeginPlay()
@@ -191,6 +191,11 @@ void ADDEnemyBase::SetupCharacterWidget(UDDUserWidget* InUserWidget)
 	}
 }
 
+float ADDEnemyBase::ApplyDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	return TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+}
+
 void ADDEnemyBase::ApplyStun(float Time)
 {
 	// TODO : YSY ApplyStun
@@ -201,6 +206,41 @@ void ADDEnemyBase::ApplySlow(float Time, float SlowRate)
 {
 	// TODO : YSY ApplySlow
 	UE_LOG(LogTemp, Warning, TEXT("Slow"));
+}
+
+void ADDEnemyBase::ApplyDamageOverTime(EDotDamageType DamageType, float Time, float TimeInterval, float DamageAmount)
+{
+	FDotEffectState& DotEffectState = DotEffectStates.FindOrAdd(DamageType);
+
+	
+	if (DotEffectState.ElapsedTime > 0.0f && DamageAmount < DotEffectState.DamageAmount)
+	{
+		return;
+	}
+	
+	DotEffectState.ElapsedTime = 0.0f;
+	DotEffectState.DamageAmount = DamageAmount;
+	
+	GetWorld()->GetTimerManager().SetTimer(DotEffectState.TimerHandle, [this, &DotEffectState, TimeInterval, Time, DamageType]()
+		{
+			Stat->ApplyStatDamage(DotEffectState.DamageAmount);
+			DotEffectState.ElapsedTime += TimeInterval;
+			UE_LOG(LogTemp, Warning, TEXT("%f"), DotEffectState.ElapsedTime);
+			if (DotEffectState.ElapsedTime >= Time)
+			{
+				ClearDotEffect(DamageType);
+			}
+		},
+		TimeInterval, true, 0.01f);
+
+}
+
+void ADDEnemyBase::ApplyChainDamage(int DamageAmount, int NumberOfChain)
+{
+}
+
+void ADDEnemyBase::ApplyDamageIncreaseDebuff(float Time, float DebuffRate)
+{
 }
 
 void ADDEnemyBase::SplineMoveFinish()
@@ -332,4 +372,15 @@ void ADDEnemyBase::Deactivate()
 void ADDEnemyBase::SetAIMoveRoute(TArray<class AAISplineRoute*> Splines, int32 Index)
 {
 	AIMoveRoute = Splines[Index];
+}
+
+void ADDEnemyBase::ClearDotEffect(EDotDamageType DamageType)
+{
+	FDotEffectState* DotEffectState = DotEffectStates.Find(DamageType);
+	if (DotEffectState)
+	{
+		GetWorld()->GetTimerManager().ClearTimer(DotEffectState->TimerHandle);
+		DotEffectState->DamageAmount = 0.0f;
+		DotEffectState->ElapsedTime = 0.0f;
+	}
 }

@@ -21,7 +21,7 @@ void UDDEnemyStatComponent::SetCurrentHp(float NewHp)
 	OnHpChanged.Broadcast(CurrentHp);
 }
 
-float UDDEnemyStatComponent::ApplyDamage(float InDamage)
+float UDDEnemyStatComponent::ApplyStatDamage(float InDamage)
 {
 	const float PrevHp = CurrentHp;
 	const float ActualDamage = FMath::Clamp<float>(InDamage, 0, InDamage);

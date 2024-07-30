@@ -28,7 +28,7 @@ public:
 	FORCEINLINE float GetCurrentHp() const noexcept { return CurrentHp; }
 	void SetCurrentHp(float NewHp);
 		
-	float ApplyDamage(float InDamage);
+	float ApplyStatDamage(float InDamage);
 
 protected:
 	UPROPERTY(Transient, VisibleInstanceOnly, Category = "DD")

@@ -12,6 +12,20 @@
 
 DECLARE_DELEGATE_TwoParams(FOnDieSignature, const FName&, ADDEnemyBase*);
 
+struct FDotEffectState
+{
+	float DamageAmount = 0.0f;
+	float ElapsedTime = 0.0f;
+	FTimerHandle TimerHandle;
+};
+
+struct FDebuffState
+{
+	float AmountRate = 0.0f;
+	float ElapsedTime = 0.0f;
+	FTimerHandle TimerHandle;
+};
+
 UCLASS()
 class PROJECTD_API ADDEnemyBase : public ACharacter, public IDDEnemyAIInterface, public IDDCharacterWidgetInterface, public IDamageInterface
 {
@@ -50,6 +64,8 @@ public:
 
 	void SetAIMoveRoute(TArray<class AAISplineRoute*> Splines, int32 Index);
 
+	void ClearDotEffect(EDotDamageType DamageType);
+
 #pragma region AIInterface
 
 	virtual void SplineMove() override;
@@ -69,8 +85,18 @@ public:
 
 #pragma region DamageInterface
 
+	UFUNCTION(BlueprintCallable)
+	virtual float ApplyDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser);
+	UFUNCTION(BlueprintCallable)
 	virtual void ApplyStun(float Time);
+	UFUNCTION(BlueprintCallable)
 	virtual void ApplySlow(float Time, float SlowRate);
+	UFUNCTION(BlueprintCallable)
+	virtual void ApplyDamageOverTime(EDotDamageType DamageType, float Time, float TimeInterval, float DamageAmount);
+	UFUNCTION(BlueprintCallable)
+	virtual void ApplyChainDamage(int DamageAmount, int NumberOfChain);
+	UFUNCTION(BlueprintCallable)
+	virtual void ApplyDamageIncreaseDebuff(float Time, float DebuffRate);
 
 #pragma endregion
 
@@ -133,4 +159,7 @@ private:
 
 	FAISplineMoveOnFinishedSignature OnSplineMoveFinished{};
 	FAIAttackOnFinishedSignature OnAttackFinished{};
+
+	TMap<EDotDamageType, FDotEffectState> DotEffectStates;
+	TMap<EDebuffType, FDebuffState> DebuffStates;
 };
