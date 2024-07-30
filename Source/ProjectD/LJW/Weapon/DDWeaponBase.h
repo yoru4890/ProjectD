@@ -24,7 +24,9 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	
+public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Weapon)
+	USkeletalMeshComponent* WeaponSkeletal;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
@@ -32,9 +34,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
 	FString WeaponDisplayName;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon)
-	USkeletalMeshComponent* WeaponMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon)
 	FString WeaponInformation;

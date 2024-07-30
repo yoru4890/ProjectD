@@ -28,9 +28,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
 	EAttackType AttackType;
 
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
-	USkeletalMeshComponent* WeaponMesh;
+	USkeletalMesh* WeaponMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
 	TSubclassOf<class ADDWeaponBase> WeaponClass; 

@@ -7,7 +7,8 @@
 // Sets default values
 ADDWeaponBase::ADDWeaponBase()
 {
-	
+	WeaponSkeletal = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMesh"));
+	WeaponSkeletal->SetupAttachment(RootComponent);
 }
 
 // Called when the game starts or when spawned
@@ -30,8 +31,13 @@ void ADDWeaponBase::InitData(const FName& RowName, const FDDWeaponData& WeaponDa
 	AttackDamage = WeaponData.AttackDamage;
 	AttackRange = WeaponData.AttackRange;
 
-	//Mesh
-	WeaponMesh = WeaponData.WeaponMesh;
+	////Mesh
+	if (WeaponData.WeaponMesh) 
+	{
+		WeaponSkeletal->SetSkeletalMesh(WeaponData.WeaponMesh);
+		WeaponSkeletal->SetCollisionProfileName(TEXT("NoCollision"));
+	}
+	
 }
 
 

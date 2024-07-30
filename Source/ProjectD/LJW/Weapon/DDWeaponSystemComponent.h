@@ -38,6 +38,6 @@ public:
 		
 
 private:
-	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon, meta = (AllowPrivateAccess = "true"))
 	TArray<ADDWeaponBase*> Weapons;
 };

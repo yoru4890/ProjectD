@@ -69,4 +69,11 @@ protected:
 protected:
 
 	void CreateLeaderPoseSkeletalMesh(USkeletalMeshComponent* USkeletalMesh, const FString& Name, const FString& Path );
+
+
+//Actor Component
+protected:
+
+	UPROPERTY(VisibleAnywhere, Category = Weapon)
+	class UDDWeaponSystemComponent* WeaponSystem;
 };

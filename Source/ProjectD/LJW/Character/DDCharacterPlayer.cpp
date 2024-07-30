@@ -9,6 +9,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "DDCharacterControlData.h"
+#include "LJW/Weapon/DDWeaponSystemComponent.h"
 
 
 ADDCharacterPlayer::ADDCharacterPlayer()
@@ -33,7 +34,11 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 		CharacterControlManager = DataRef.Object;
 	}
 	
-#pragma region Input
+	WeaponSystem = CreateDefaultSubobject<UDDWeaponSystemComponent>(TEXT("WeaponSystem"));
+	
+	
+
+#pragma region Init Input
 
 	//Input
 	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionJumpRef(TEXT("/Script/EnhancedInput.InputAction'/Game/0000/LJW/Input/IA_Jump.IA_Jump'"));
