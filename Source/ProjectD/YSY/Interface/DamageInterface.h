@@ -35,9 +35,7 @@ class PROJECTD_API IDamageInterface
 public:
 
 	virtual float ApplyDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) = 0;
-	virtual void ApplyStun(float Time) = 0;
-	virtual void ApplySlow(float Time, float SlowRate) = 0;
 	virtual void ApplyDamageOverTime(EDotDamageType DamageType, float Time, float TimeInterval, float DamageAmount) = 0;
 	virtual void ApplyChainDamage(int DamageAmount, int NumberOfChain) = 0;
-	virtual void ApplyDamageIncreaseDebuff(float Time, float DebuffRate) = 0;
+	virtual void ApplyDebuff(EDebuffType DebuffType, float Time, float DebuffRate) = 0;
 };

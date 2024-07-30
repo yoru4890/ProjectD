@@ -5,6 +5,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/DamageEvents.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "YSY/AI/DDEnemyAIController.h"
 #include "YSY/AI/AISplineRoute.h"
 #include "YSY/UI/DDHpBarWidget.h"
@@ -43,6 +44,7 @@ void ADDEnemyBase::PostInitializeComponents()
 	Super::PostInitializeComponents();
 
 	Stat->OnHpZero.AddUObject(this, &ADDEnemyBase::Die);
+	Stat->OnMovementSpeedChange.AddUObject(this, &ADDEnemyBase::ChangeMaxWalkSpeed);
 }
 
 float ADDEnemyBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -75,7 +77,7 @@ float ADDEnemyBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 		}
 	}
 
-	Stat->ApplyStatDamage(ActualDamage);
+	Stat->ApplyStatDamage(ActualDamage * Stat->GetDamageReceiveRate());
 
 	return ActualDamage;
 }
@@ -120,6 +122,7 @@ void ADDEnemyBase::InitializeEnemy(const FDDEnemyData& EnemyData)
 	{
 		GetMesh()->SetSkeletalMesh(MeshTemp);
 		GetMesh()->SetRelativeLocationAndRotation({ 0,0,-90 }, { 0,-90,0 });
+		GetMesh()->SetCollisionProfileName(FName("Enemy"));
 	}
 
 	UClass* AnimInstanceClass = LoadObject<UClass>(nullptr, *EnemyData.AnimationBlueprintPath);
@@ -196,18 +199,6 @@ float ADDEnemyBase::ApplyDamage(float DamageAmount, FDamageEvent const& DamageEv
 	return TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 }
 
-void ADDEnemyBase::ApplyStun(float Time)
-{
-	// TODO : YSY ApplyStun
-	UE_LOG(LogTemp, Warning, TEXT("Stun"));
-}
-
-void ADDEnemyBase::ApplySlow(float Time, float SlowRate)
-{
-	// TODO : YSY ApplySlow
-	UE_LOG(LogTemp, Warning, TEXT("Slow"));
-}
-
 void ADDEnemyBase::ApplyDamageOverTime(EDotDamageType DamageType, float Time, float TimeInterval, float DamageAmount)
 {
 	FDotEffectState& DotEffectState = DotEffectStates.FindOrAdd(DamageType);
@@ -223,7 +214,7 @@ void ADDEnemyBase::ApplyDamageOverTime(EDotDamageType DamageType, float Time, fl
 	
 	GetWorld()->GetTimerManager().SetTimer(DotEffectState.TimerHandle, [this, &DotEffectState, TimeInterval, Time, DamageType]()
 		{
-			Stat->ApplyStatDamage(DotEffectState.DamageAmount);
+			Stat->ApplyStatDamage(DotEffectState.DamageAmount * Stat->GetDamageReceiveRate());
 			DotEffectState.ElapsedTime += TimeInterval;
 			UE_LOG(LogTemp, Warning, TEXT("%f"), DotEffectState.ElapsedTime);
 			if (DotEffectState.ElapsedTime >= Time)
@@ -239,8 +230,22 @@ void ADDEnemyBase::ApplyChainDamage(int DamageAmount, int NumberOfChain)
 {
 }
 
-void ADDEnemyBase::ApplyDamageIncreaseDebuff(float Time, float DebuffRate)
+void ADDEnemyBase::ApplyDebuff(EDebuffType DebuffType, float Time, float DebuffRate)
 {
+	FDebuffState& DebuffState = DebuffStates.FindOrAdd(DebuffType);
+
+	if (DebuffState.ElapsedTime > 0.0f && DebuffRate < DebuffState.AmountRate)
+	{
+		return;
+	}
+
+	DebuffState.ElapsedTime = 0.0f;
+	DebuffState.AmountRate = DebuffRate;
+
+	GetWorld()->GetTimerManager().SetTimer(DebuffState.TimerHandle, [this]()
+		{
+			
+		}, 0.01f, false, Time);
 }
 
 void ADDEnemyBase::SplineMoveFinish()
@@ -383,4 +388,21 @@ void ADDEnemyBase::ClearDotEffect(EDotDamageType DamageType)
 		DotEffectState->DamageAmount = 0.0f;
 		DotEffectState->ElapsedTime = 0.0f;
 	}
+}
+
+void ADDEnemyBase::ChangeMaxWalkSpeed(float Amount)
+{
+	GetCharacterMovement()->MaxWalkSpeed = MovementSpeed * Amount;
+}
+
+void ADDEnemyBase::Stun(float Time)
+{
+	EnemyAIController->StopAI();
+
+	FTimerHandle StunTimerHandle{};
+	GetWorld()->GetTimerManager().SetTimer(StunTimerHandle, [this]()
+		{
+			EnemyAIController->RunAI();
+		}
+	,0.01f, false, Time);
 }

@@ -66,6 +66,9 @@ public:
 
 	void ClearDotEffect(EDotDamageType DamageType);
 
+	void ChangeMaxWalkSpeed(float Amount);
+	void Stun(float Time);
+
 #pragma region AIInterface
 
 	virtual void SplineMove() override;
@@ -88,15 +91,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	virtual float ApplyDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser);
 	UFUNCTION(BlueprintCallable)
-	virtual void ApplyStun(float Time);
-	UFUNCTION(BlueprintCallable)
-	virtual void ApplySlow(float Time, float SlowRate);
-	UFUNCTION(BlueprintCallable)
 	virtual void ApplyDamageOverTime(EDotDamageType DamageType, float Time, float TimeInterval, float DamageAmount);
 	UFUNCTION(BlueprintCallable)
 	virtual void ApplyChainDamage(int DamageAmount, int NumberOfChain);
 	UFUNCTION(BlueprintCallable)
-	virtual void ApplyDamageIncreaseDebuff(float Time, float DebuffRate);
+	virtual void ApplyDebuff(EDebuffType DebuffType, float Time, float DebuffRate);
 
 #pragma endregion
 

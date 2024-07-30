@@ -33,3 +33,39 @@ float UDDEnemyStatComponent::ApplyStatDamage(float InDamage)
 	}
 	return ActualDamage;
 }
+
+void UDDEnemyStatComponent::ApplySlow(float Amount)
+{
+	MovementSlowRate = Amount;
+	UpdateMovementSpeed();
+}
+
+void UDDEnemyStatComponent::ApplyFast(float Amount)
+{
+	MovementFastRate = Amount;
+	UpdateMovementSpeed();
+}
+
+// Need to bind : FOnMovementSpeedChangeSignature OnMovementSpeedChange bind to OwnerActor
+void UDDEnemyStatComponent::UpdateMovementSpeed()
+{
+	MovementSpeedRate *= (MovementSlowRate * MovementFastRate);
+	OnMovementSpeedChange.Broadcast(MovementSpeedRate);
+}
+
+void UDDEnemyStatComponent::ApplyDamageReceiveIncrease(float Amount)
+{
+	DamageReceiveIncreaseRate = Amount;
+	UpdateDamageReceive();
+}
+
+void UDDEnemyStatComponent::ApplyDamageReceiveDecrease(float Amount)
+{
+	DamageReceiveDecreaseRate = Amount;
+	UpdateDamageReceive();
+}
+
+void UDDEnemyStatComponent::UpdateDamageReceive()
+{
+	DamageReceiveRate *= (DamageReceiveDecreaseRate * DamageReceiveIncreaseRate);
+}
