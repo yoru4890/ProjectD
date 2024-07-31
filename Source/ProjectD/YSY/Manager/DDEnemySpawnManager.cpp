@@ -72,7 +72,7 @@ void UDDEnemySpawnManager::SpawnEnemy(const FName& EnemyName)
 
 	if (Enemy)
 	{
-		Enemy->OnDie.BindUObject(this, &UDDEnemySpawnManager::Deactivate);
+		Enemy->OnDie.AddUObject(this, &UDDEnemySpawnManager::Deactivate);
 		Enemy->InitializeEnemy(*UDDGameSingleton::Get().GetEnemyDataTable().Find(EnemyName));
 		
 		UDDGameInstance* DDGameInstance = Cast<UDDGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));

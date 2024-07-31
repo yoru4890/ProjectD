@@ -6,7 +6,7 @@
 #include "UObject/Interface.h"
 #include "AggroTargetInterface.generated.h"
 
-UINTERFACE(Blueprintable)
+UINTERFACE(MinimalAPI)
 class UAggroTargetInterface : public UInterface
 {
 	GENERATED_BODY()
@@ -18,5 +18,6 @@ class PROJECTD_API IAggroTargetInterface
 
 public:
 	virtual void AddAggro() = 0;
-	virtual void MaxAggro() = 0;
+	virtual void SubtractAggro() = 0;
+	virtual bool IsMaxAggro() = 0;
 };

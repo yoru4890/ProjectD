@@ -10,7 +10,7 @@
 #include "YSY/Interface/DamageInterface.h"
 #include "DDEnemyBase.generated.h"
 
-DECLARE_DELEGATE_TwoParams(FOnDieSignature, const FName&, ADDEnemyBase*);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnDieSignature, const FName&, ADDEnemyBase*);
 DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnDebuffSignature, FTimerHandle&, float, float);
 
 struct FDotEffectState
@@ -80,6 +80,9 @@ public:
 
 	virtual float GetAIDetectRange() const noexcept;
 	virtual float GetAIAttackRange() const noexcept;
+	virtual bool GetIsAggroState() const noexcept;
+	virtual void SetIsAggroState(bool bNewAggroState);
+
 #pragma endregion
 
 #pragma region WidgetInterface
@@ -163,4 +166,6 @@ private:
 
 	TMap<EDotDamageType, FDotEffectState> DotEffectStates;
 	TMap<EDebuffType, FDebuffState> DebuffStates;
+
+	bool bIsAggroState{};
 };

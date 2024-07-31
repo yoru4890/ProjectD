@@ -193,6 +193,16 @@ float ADDEnemyBase::GetAIAttackRange() const noexcept
 	return AttackRange;
 }
 
+bool ADDEnemyBase::GetIsAggroState() const noexcept
+{
+	return bIsAggroState;
+}
+
+void ADDEnemyBase::SetIsAggroState(bool bNewAggroState)
+{
+	bIsAggroState = bNewAggroState;
+}
+
 void ADDEnemyBase::SetupCharacterWidget(UDDUserWidget* InUserWidget)
 {
 	UDDHpBarWidget* HpBarWidget = Cast<UDDHpBarWidget>(InUserWidget);
@@ -280,7 +290,7 @@ void ADDEnemyBase::Die()
 {
 	// TODO : YSY Player get gold, Drop Item
 
-	OnDie.ExecuteIfBound(EnemyName, this);
+	OnDie.Broadcast(EnemyName, this);
 }
 
 void ADDEnemyBase::UpdateWidgetScale()

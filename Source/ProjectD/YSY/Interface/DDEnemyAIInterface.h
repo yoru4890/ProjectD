@@ -37,4 +37,7 @@ public:
 	virtual float GetAIDetectRange() const noexcept = 0;
 
 	virtual float GetAIAttackRange() const noexcept = 0;
+
+	virtual bool GetIsAggroState() const noexcept = 0;
+	virtual void SetIsAggroState(bool bNewAggroState) = 0;
 };

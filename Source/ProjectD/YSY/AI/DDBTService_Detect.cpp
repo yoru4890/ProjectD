@@ -3,11 +3,12 @@
 
 #include "YSY/AI/DDBTService_Detect.h"
 #include "AIController.h"
-#include "YSY/AI/BlackboardKey.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "YSY/AI/BlackboardKey.h"
 #include "YSY/Interface/DDEnemyAIInterface.h"
 #include "YSY/Collision/CollisionChannel.h"
+#include "YSY/Interface/AggroTargetInterface.h"
 
 UDDBTService_Detect::UDDBTService_Detect()
 {
@@ -44,14 +45,30 @@ void UDDBTService_Detect::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* Nod
 		return;
 	}
 
+	IAggroTargetInterface* AggroTarget = Cast<IAggroTargetInterface>(Target);
+
 	float DistanceToTarget = ControllingPawn->GetDistanceTo(Target);
 	float RangeWithRaduis = AIPawn->GetAIDetectRange();
+
 	if (DistanceToTarget <= RangeWithRaduis)
 	{
-		OwnerComp.GetBlackboardComponent()->SetValueAsBool(BBKEY_ISAGGRO, true);
+		bool bIsMaxAggro = AggroTarget->IsMaxAggro();
+
+		if (!(AIPawn->GetIsAggroState()) && !bIsMaxAggro)
+		{
+			AIPawn->SetIsAggroState(true);
+			AggroTarget->AddAggro();
+			OwnerComp.GetBlackboardComponent()->SetValueAsBool(BBKEY_ISAGGRO, true);
+		}
 	}
 	else
 	{
+		if (AIPawn->GetIsAggroState())
+		{
+			AIPawn->SetIsAggroState(false);
+			AggroTarget->SubtractAggro();
+		}
+
 		OwnerComp.GetBlackboardComponent()->SetValueAsBool(BBKEY_ISAGGRO, false);
 	}
 }
