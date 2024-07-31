@@ -29,7 +29,7 @@ public:
 	EAttackType AttackType;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
-	USkeletalMesh* WeaponMesh;
+	TObjectPtr<USkeletalMesh> WeaponMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
 	TSubclassOf<class ADDWeaponBase> WeaponClass; 

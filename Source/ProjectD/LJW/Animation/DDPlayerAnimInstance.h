@@ -4,19 +4,19 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
-#include "DDPEngineerAnimInstance.generated.h"
+#include "DDPlayerAnimInstance.generated.h"
 
 /**
  * 
  */
 
 UCLASS()
-class PROJECTD_API UDDPEngineerAnimInstance : public UAnimInstance
+class PROJECTD_API UDDPlayerAnimInstance : public UAnimInstance
 {
 	GENERATED_BODY()
 
 public :
-	UDDPEngineerAnimInstance();
+	UDDPlayerAnimInstance();
 
 protected:
 	virtual void NativeInitializeAnimation() override;
@@ -53,5 +53,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
 	float JumpingThreshold;
 
+	//Anim Montage
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Animation)
+	TObjectPtr<UAnimMontage> ChangeRifle;
 
 };

@@ -7,6 +7,7 @@
 // Sets default values
 ADDWeaponBase::ADDWeaponBase()
 {
+	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
 	WeaponSkeletal = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMesh"));
 	WeaponSkeletal->SetupAttachment(RootComponent);
 }
@@ -16,6 +17,18 @@ void ADDWeaponBase::BeginPlay()
 {
 	Super::BeginPlay();
 	
+}
+
+void ADDWeaponBase::DisableWeapon()
+{
+	SetActorHiddenInGame(true);
+	SetActorTickEnabled(false);
+}
+
+void ADDWeaponBase::EnableWeapon()
+{
+	SetActorHiddenInGame(false);
+	SetActorTickEnabled(true);
 }
 
 void ADDWeaponBase::InitData(const FName& RowName, const FDDWeaponData& WeaponData)
@@ -37,6 +50,9 @@ void ADDWeaponBase::InitData(const FName& RowName, const FDDWeaponData& WeaponDa
 		WeaponSkeletal->SetSkeletalMesh(WeaponData.WeaponMesh);
 		WeaponSkeletal->SetCollisionProfileName(TEXT("NoCollision"));
 	}
+
+	//무기 비활성화
+	DisableWeapon();
 	
 }
 

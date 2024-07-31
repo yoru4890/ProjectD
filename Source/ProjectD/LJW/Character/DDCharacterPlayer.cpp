@@ -34,6 +34,7 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 		CharacterControlManager = DataRef.Object;
 	}
 	
+	//Weapon System Component
 	WeaponSystem = CreateDefaultSubobject<UDDWeaponSystemComponent>(TEXT("WeaponSystem"));
 	
 	
@@ -41,28 +42,40 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 #pragma region Init Input
 
 	//Input
-	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionJumpRef(TEXT("/Script/EnhancedInput.InputAction'/Game/0000/LJW/Input/IA_Jump.IA_Jump'"));
-	if (nullptr != InputActionJumpRef.Object) 
+	static ConstructorHelpers::FObjectFinder<UInputAction> JumpRef(TEXT("/Script/EnhancedInput.InputAction'/Game/0000/LJW/Input/IA_Player_Jump.IA_Player_Jump'"));
+	if (nullptr != JumpRef.Object)
 	{
-		JumpAction = InputActionJumpRef.Object;
+		JumpAction = JumpRef.Object;
 	}
 
-	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionLookRef(TEXT("/Script/EnhancedInput.InputAction'/Game/0000/LJW/Input/IA_Look.IA_Look'"));
-	if (nullptr != InputActionLookRef.Object)
+	static ConstructorHelpers::FObjectFinder<UInputAction> LookRef(TEXT("/Script/EnhancedInput.InputAction'/Game/0000/LJW/Input/IA_Player_Look.IA_Player_Look'"));
+	if (nullptr != LookRef.Object)
 	{
-		LookAction = InputActionLookRef.Object;
+		LookAction = LookRef.Object;
 	}
 
-	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionMoveRef(TEXT("/Script/EnhancedInput.InputAction'/Game/0000/LJW/Input/IA_Move.IA_Move'"));
-	if (nullptr != InputActionMoveRef.Object)
+	static ConstructorHelpers::FObjectFinder<UInputAction> MoveRef(TEXT("/Script/EnhancedInput.InputAction'/Game/0000/LJW/Input/IA_Player_Move.IA_Player_Move'"));
+	if (nullptr != MoveRef.Object)
 	{
-		MoveAction = InputActionMoveRef.Object;
+		MoveAction = MoveRef.Object;
 	}
 
-	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionSprintRef(TEXT("/Script/EnhancedInput.InputAction'/Game/0000/LJW/Input/IA_Sprint.IA_Sprint'"));
-	if (nullptr != InputActionSprintRef.Object)
+	static ConstructorHelpers::FObjectFinder<UInputAction> SprintRef(TEXT("/Script/EnhancedInput.InputAction'/Game/0000/LJW/Input/IA_Player_Sprint.IA_Player_Sprint'"));
+	if (nullptr != SprintRef.Object)
 	{
-		SprintAction = InputActionSprintRef.Object;
+		SprintAction = SprintRef.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction>MeleeRef(TEXT("/Script/EnhancedInput.InputAction'/Game/0000/LJW/Input/IA_Player_EquipMelee.IA_Player_EquipMelee'"));
+	if (nullptr != MeleeRef.Object)
+	{
+		EquipMeleeAction = MeleeRef.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction>RangeRef(TEXT("/Script/EnhancedInput.InputAction'/Game/0000/LJW/Input/IA_Player_EquipRange.IA_Player_EquipRange'"));
+	if (nullptr != RangeRef.Object)
+	{
+		EquipRangeAction = RangeRef.Object;
 	}
 
 #pragma endregion
@@ -105,6 +118,10 @@ void ADDCharacterPlayer::SetupPlayerInputComponent(class UInputComponent* Player
 	EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Triggered, this, &ADDCharacterPlayer::Sprint);
 	EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Canceled, this, &ADDCharacterPlayer::Walk);
 	EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &ADDCharacterPlayer::Walk);
+
+	//Weapon System
+	EnhancedInputComponent->BindAction(EquipMeleeAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::EquipMelee);
+	EnhancedInputComponent->BindAction(EquipRangeAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::EquipRange);
 }
 
 void ADDCharacterPlayer::SetCharacterControl()
@@ -191,3 +208,12 @@ void ADDCharacterPlayer::CreateLeaderPoseSkeletalMesh(USkeletalMeshComponent* Sk
 	}
 }
 
+void ADDCharacterPlayer::EquipMelee()
+{
+	WeaponSystem->EquipMeleeWeapon();
+}
+
+void ADDCharacterPlayer::EquipRange()
+{
+	WeaponSystem->EquipRangeWeapon();
+}

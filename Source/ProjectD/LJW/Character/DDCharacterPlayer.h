@@ -61,6 +61,12 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> SprintAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> EquipMeleeAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> EquipRangeAction;
+
 	UPROPERTY(EditAnywhere, Category = Character)
 	float MouseSpeed;
 
@@ -71,9 +77,13 @@ protected:
 	void CreateLeaderPoseSkeletalMesh(USkeletalMeshComponent* USkeletalMesh, const FString& Name, const FString& Path );
 
 
-//Actor Component
+//Weapon System
+protected:
+	void EquipMelee();
+	void EquipRange();
+
 protected:
 
 	UPROPERTY(VisibleAnywhere, Category = Weapon)
-	class UDDWeaponSystemComponent* WeaponSystem;
+	TObjectPtr<class UDDWeaponSystemComponent> WeaponSystem;
 };

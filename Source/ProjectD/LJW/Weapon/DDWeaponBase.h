@@ -18,15 +18,22 @@ public:
 	// Sets default values for this actor's properties
 	ADDWeaponBase();
 
+public:
+
 	void InitData(const FName& RowName, const FDDWeaponData& WeaponData);
+
+	void DisableWeapon();
+	void EnableWeapon();
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+
+
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Weapon)
-	USkeletalMeshComponent* WeaponSkeletal;
+	TObjectPtr<USkeletalMeshComponent> WeaponSkeletal;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
