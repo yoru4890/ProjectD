@@ -11,8 +11,6 @@ UDDEnemyStatComponent::UDDEnemyStatComponent()
 void UDDEnemyStatComponent::InitializeComponent()
 {
 	Super::InitializeComponent();
-
-	SetCurrentHp(100.0f); // TODO : YSY Setting HpData
 }
 
 void UDDEnemyStatComponent::SetCurrentHp(float NewHp)
@@ -34,38 +32,72 @@ float UDDEnemyStatComponent::ApplyStatDamage(float InDamage)
 	return ActualDamage;
 }
 
-void UDDEnemyStatComponent::ApplySlow(float Amount)
+void UDDEnemyStatComponent::ApplySlow(FTimerHandle& TimerHandle, float Time, float Amount)
 {
 	MovementSlowRate = Amount;
 	UpdateMovementSpeed();
+	UE_LOG(LogTemp, Warning, TEXT("SlowStart%f"), Amount);
+
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this]()
+		{
+			MovementSlowRate = 1.0f;
+			UpdateMovementSpeed();
+			UE_LOG(LogTemp, Warning, TEXT("SlowEnd"));
+		}
+	, 0.01f, false, Time);
 }
 
-void UDDEnemyStatComponent::ApplyFast(float Amount)
+void UDDEnemyStatComponent::ApplyFast(FTimerHandle& TimerHandle, float Time, float Amount)
 {
 	MovementFastRate = Amount;
 	UpdateMovementSpeed();
+
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this]()
+		{
+			MovementFastRate = 1.0f;
+			UpdateMovementSpeed();
+		}
+	, 0.01f, false, Time);
 }
 
 // Need to bind : FOnMovementSpeedChangeSignature OnMovementSpeedChange bind to OwnerActor
 void UDDEnemyStatComponent::UpdateMovementSpeed()
 {
-	MovementSpeedRate *= (MovementSlowRate * MovementFastRate);
+	MovementSpeedRate = (MovementSlowRate * MovementFastRate);
 	OnMovementSpeedChange.Broadcast(MovementSpeedRate);
 }
 
-void UDDEnemyStatComponent::ApplyDamageReceiveIncrease(float Amount)
+// How to use : 50% -> Amount = 1.5f
+void UDDEnemyStatComponent::ApplyDamageReceiveIncrease(FTimerHandle& TimerHandle, float Time, float Amount)
 {
 	DamageReceiveIncreaseRate = Amount;
 	UpdateDamageReceive();
+	UE_LOG(LogTemp, Warning, TEXT("DamageReceiveIncreaseStart%f"), Amount);
+
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this]()
+		{
+			DamageReceiveIncreaseRate = 1.0f;
+			UpdateDamageReceive();
+			UE_LOG(LogTemp, Warning, TEXT("DamageReceiveIncreaseEnd"));
+		}
+	, 0.01f, false, Time);
 }
 
-void UDDEnemyStatComponent::ApplyDamageReceiveDecrease(float Amount)
+// How to use : 20% -> Amount = 0.8f
+void UDDEnemyStatComponent::ApplyDamageReceiveDecrease(FTimerHandle& TimerHandle, float Time, float Amount)
 {
 	DamageReceiveDecreaseRate = Amount;
 	UpdateDamageReceive();
+
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this]()
+		{
+			DamageReceiveDecreaseRate = 1.0f;
+			UpdateDamageReceive();
+		}
+	, 0.01f, false, Time);
 }
 
 void UDDEnemyStatComponent::UpdateDamageReceive()
 {
-	DamageReceiveRate *= (DamageReceiveDecreaseRate * DamageReceiveIncreaseRate);
+	DamageReceiveRate = (DamageReceiveDecreaseRate * DamageReceiveIncreaseRate);
 }

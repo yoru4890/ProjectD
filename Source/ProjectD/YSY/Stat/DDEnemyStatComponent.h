@@ -10,12 +10,12 @@ DECLARE_MULTICAST_DELEGATE(FOnHpZeroDelegate);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnHpChangedDelegate, float /*CurrentHp*/);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnMovementSpeedChangeSignature, float);
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class PROJECTD_API UDDEnemyStatComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-public:	
+public:
 	// Sets default values for this component's properties
 	UDDEnemyStatComponent();
 
@@ -30,25 +30,28 @@ public:
 	FORCEINLINE float GetCurrentHp() const noexcept { return CurrentHp; }
 	void SetCurrentHp(float NewHp);
 
+	FORCEINLINE float GetMaxHp() const noexcept { return MaxHp; }
+	void SetMaxHp(float NewHp) { MaxHp = NewHp; }
+
 	FORCEINLINE float GetMovementSpeed() const noexcept { return MovementSpeedRate; }
 	FORCEINLINE float GetDamageReceiveRate() const noexcept { return DamageReceiveRate; }
 
 	float ApplyStatDamage(float InDamage);
 
-	void ApplySlow(float Amount);
-	void ApplyFast(float Amount);
+	void ApplySlow(FTimerHandle& TimerHandle, float Time, float Amount);
+	void ApplyFast(FTimerHandle& TimerHandle, float Time, float Amount);
 	void UpdateMovementSpeed();
 
-	void ApplyDamageReceiveIncrease(float Amount);
-	void ApplyDamageReceiveDecrease(float Amount);
+	void ApplyDamageReceiveIncrease(FTimerHandle& TimerHandle, float Time, float Amount);
+	void ApplyDamageReceiveDecrease(FTimerHandle& TimerHandle, float Time, float Amount);
 	void UpdateDamageReceive();
 
 protected:
 	UPROPERTY(Transient, VisibleInstanceOnly, Category = "DD")
-	float CurrentHp;
+	float CurrentHp{};
 
 	UPROPERTY(Transient, VisibleInstanceOnly, Category = "DD")
-	float MaxHp = 100.0f; // TODO : YSY Setting MaxHp 
+	float MaxHp{};
 
 	UPROPERTY(Transient, VisibleInstanceOnly, Category = "DD")
 	float MovementSpeedRate = 1.0f;

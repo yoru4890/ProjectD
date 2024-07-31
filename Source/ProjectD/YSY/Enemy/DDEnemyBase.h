@@ -11,6 +11,7 @@
 #include "DDEnemyBase.generated.h"
 
 DECLARE_DELEGATE_TwoParams(FOnDieSignature, const FName&, ADDEnemyBase*);
+DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnDebuffSignature, FTimerHandle&, float, float);
 
 struct FDotEffectState
 {
@@ -24,6 +25,7 @@ struct FDebuffState
 	float AmountRate = 0.0f;
 	float ElapsedTime = 0.0f;
 	FTimerHandle TimerHandle;
+	FOnDebuffSignature OnDebuffDelegate;
 };
 
 UCLASS()
@@ -67,7 +69,7 @@ public:
 	void ClearDotEffect(EDotDamageType DamageType);
 
 	void ChangeMaxWalkSpeed(float Amount);
-	void Stun(float Time);
+	void Stun(FTimerHandle& TimerHandle, float Time, float Amount);
 
 #pragma region AIInterface
 

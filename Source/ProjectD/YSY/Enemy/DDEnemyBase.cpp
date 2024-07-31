@@ -43,8 +43,21 @@ void ADDEnemyBase::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 
+	ensure(Stat);
+
 	Stat->OnHpZero.AddUObject(this, &ADDEnemyBase::Die);
 	Stat->OnMovementSpeedChange.AddUObject(this, &ADDEnemyBase::ChangeMaxWalkSpeed);
+
+	DebuffStates.Add(EDebuffType::Stun, FDebuffState());
+	DebuffStates.Add(EDebuffType::Slow, FDebuffState());
+	DebuffStates.Add(EDebuffType::DamageIncrease, FDebuffState());
+
+	if (Stat)
+	{
+		DebuffStates[EDebuffType::Stun].OnDebuffDelegate.AddUObject(this, &ADDEnemyBase::Stun);
+		DebuffStates[EDebuffType::Slow].OnDebuffDelegate.AddUObject(Stat, &UDDEnemyStatComponent::ApplySlow);
+		DebuffStates[EDebuffType::DamageIncrease].OnDebuffDelegate.AddUObject(Stat, &UDDEnemyStatComponent::ApplyDamageReceiveIncrease);
+	}
 }
 
 float ADDEnemyBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -70,7 +83,7 @@ float ADDEnemyBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 	{
 		FPointDamageEvent* PointDamageEvent = (FPointDamageEvent*)(&DamageEvent);
 
-		if (PointDamageEvent->HitInfo.BoneName == "laser_01") // TODO : YSY WeakPoint Name
+		if (PointDamageEvent->HitInfo.BoneName == WeakPoint)
 		{
 			ActualDamage *= 1.5f; // TODO : YSY WeakPoint Caculation
 			UE_LOG(LogTemp, Warning, TEXT("WeakPoint"));
@@ -78,7 +91,7 @@ float ADDEnemyBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 	}
 
 	Stat->ApplyStatDamage(ActualDamage * Stat->GetDamageReceiveRate());
-
+	UE_LOG(LogTemp, Warning, TEXT("%f"), ActualDamage * Stat->GetDamageReceiveRate());
 	return ActualDamage;
 }
 
@@ -106,12 +119,14 @@ void ADDEnemyBase::InitializeEnemy(const FDDEnemyData& EnemyData)
 	WeakPoint = EnemyData.WeakPoint;
 	EnemyType = EnemyData.EnemyType;
 	MaxHP = EnemyData.MaxHP;
+	Stat->SetMaxHp(MaxHP);
+	Stat->SetCurrentHp(MaxHP);
 	MovementSpeed = EnemyData.MovementSpeed;
 	AttackSpeed = EnemyData.AttackSpeed;
 	Damage = EnemyData.Damage;
 	AttackRange = EnemyData.AttackRange;
 	AggroRange = EnemyData.AggroRange;
-	//HealthWidgetHeight = EnemyData.HealthWidgetHeight; TODO : YSY Setting HpWidget Height
+	HpBar->SetRelativeLocation({ 0.0f,0.0f,EnemyData.HealthWidgetHeight });
 	GoldDropAmount = EnemyData.GoldDropAmount;
 	bIsBoss = EnemyData.bIsBoss;
 	bIsElite = EnemyData.bIsElite;
@@ -170,16 +185,12 @@ void ADDEnemyBase::SetAIAttackFinsihedDelegate(const FAIAttackOnFinishedSignatur
 
 float ADDEnemyBase::GetAIDetectRange() const noexcept
 {
-	// TODO : YSY Setting AIDetectRange
-
-	return 350.0f;
+	return AggroRange;
 }
 
 float ADDEnemyBase::GetAIAttackRange() const noexcept
 {
-	// TODO : YSY Setting AILoseAggroRange
-
-	return 200.0f;
+	return AttackRange;
 }
 
 void ADDEnemyBase::SetupCharacterWidget(UDDUserWidget* InUserWidget)
@@ -187,8 +198,8 @@ void ADDEnemyBase::SetupCharacterWidget(UDDUserWidget* InUserWidget)
 	UDDHpBarWidget* HpBarWidget = Cast<UDDHpBarWidget>(InUserWidget);
 	if (HpBarWidget)
 	{
-		HpBarWidget->UpdateStat(100.0f); // TODO : YSY Setting MaxHp
-		HpBarWidget->UpdateHpBar(100.0f); // TODO : YSY StatComponent
+		HpBarWidget->UpdateStat(Stat->GetMaxHp());
+		HpBarWidget->UpdateHpBar(Stat->GetMaxHp());
 		Stat->OnHpChanged.AddUObject(HpBarWidget, &UDDHpBarWidget::UpdateHpBar);
 		// TODO : YSY StatComponent
 	}
@@ -216,7 +227,6 @@ void ADDEnemyBase::ApplyDamageOverTime(EDotDamageType DamageType, float Time, fl
 		{
 			Stat->ApplyStatDamage(DotEffectState.DamageAmount * Stat->GetDamageReceiveRate());
 			DotEffectState.ElapsedTime += TimeInterval;
-			UE_LOG(LogTemp, Warning, TEXT("%f"), DotEffectState.ElapsedTime);
 			if (DotEffectState.ElapsedTime >= Time)
 			{
 				ClearDotEffect(DamageType);
@@ -230,9 +240,10 @@ void ADDEnemyBase::ApplyChainDamage(int DamageAmount, int NumberOfChain)
 {
 }
 
+// Stun case : Time == DebuffRate
 void ADDEnemyBase::ApplyDebuff(EDebuffType DebuffType, float Time, float DebuffRate)
 {
-	FDebuffState& DebuffState = DebuffStates.FindOrAdd(DebuffType);
+	FDebuffState& DebuffState = DebuffStates[DebuffType];
 
 	if (DebuffState.ElapsedTime > 0.0f && DebuffRate < DebuffState.AmountRate)
 	{
@@ -242,10 +253,7 @@ void ADDEnemyBase::ApplyDebuff(EDebuffType DebuffType, float Time, float DebuffR
 	DebuffState.ElapsedTime = 0.0f;
 	DebuffState.AmountRate = DebuffRate;
 
-	GetWorld()->GetTimerManager().SetTimer(DebuffState.TimerHandle, [this]()
-		{
-			
-		}, 0.01f, false, Time);
+	DebuffState.OnDebuffDelegate.Broadcast(DebuffState.TimerHandle, Time, DebuffState.AmountRate);
 }
 
 void ADDEnemyBase::SplineMoveFinish()
@@ -363,6 +371,7 @@ void ADDEnemyBase::CaculateCorrosionDamage(float& ActualDamage)
 
 void ADDEnemyBase::Activate()
 {
+	Stat->SetCurrentHp(MaxHP);
 	SetActorHiddenInGame(false);
 	SetActorEnableCollision(true);
 	EnemyAIController->RunAI();
@@ -395,14 +404,17 @@ void ADDEnemyBase::ChangeMaxWalkSpeed(float Amount)
 	GetCharacterMovement()->MaxWalkSpeed = MovementSpeed * Amount;
 }
 
-void ADDEnemyBase::Stun(float Time)
+void ADDEnemyBase::Stun(FTimerHandle& TimerHandle, float Time, float Amount)
 {
-	EnemyAIController->StopAI();
+	// TODO : YSY High Cost, Need to Fix Algorithm.
 
-	FTimerHandle StunTimerHandle{};
-	GetWorld()->GetTimerManager().SetTimer(StunTimerHandle, [this]()
+	EnemyAIController->StopAI();
+	UE_LOG(LogTemp, Warning, TEXT("StunStart"));
+
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this]()
 		{
 			EnemyAIController->RunAI();
+			UE_LOG(LogTemp, Warning, TEXT("StunEnd"));
 		}
 	,0.01f, false, Time);
 }

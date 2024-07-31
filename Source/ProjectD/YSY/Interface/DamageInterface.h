@@ -17,7 +17,9 @@ UENUM(BlueprintType)
 enum class EDotDamageType : uint8
 {
 	Acid UMETA(DisplayName = "Acid"),
-	Fire UMETA(DisplayName = "Fire")
+	Fire UMETA(DisplayName = "Fire"),
+
+	Unknown
 };
 
 UENUM(BlueprintType)
@@ -25,7 +27,9 @@ enum class EDebuffType : uint8
 {
 	Slow UMETA(DisplayName = "Slow"),
 	Stun UMETA(DisplayName = "Stun"),
-	DamageIncrease UMETA(DisplayName = "DamageIncrease")
+	DamageIncrease UMETA(DisplayName = "DamageIncrease"),
+
+	Unknown
 };
 
 class PROJECTD_API IDamageInterface
