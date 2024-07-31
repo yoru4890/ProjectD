@@ -26,15 +26,22 @@ UObject* UDDTrapFactory::CreateObject(UWorld* World, const FName& RowName, const
 	UDDAssetManager* AssetManager = MyGameInstance->GetAssetManager();
 	check(AssetManager);
 
-	FLoadedAsset& LoadedAsset = AssetManager->GetLoadedAssetByName(RowName);
+	FBaseStruct* LoadedAsset = AssetManager->GetLoadedAssetByName(RowName);
 
-	NewTrap->SetTrapAssets(LoadedAsset.StaticMeshs, LoadedAsset.SkeletalMeshs, LoadedAsset.AnimBlueprint, LoadedAsset.Effects);
+	if (!LoadedAsset)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Not Loaded At UDDTrapFactory"));
+		return nullptr;
+	}
+
+	NewTrap->SetTrapAssets(*LoadedAsset);
 
 	NewTrap->SetActorLocation(Location);
 	NewTrap->SetActorRotation(Rotation);
 	NewTrap->SetOwner(Owner);
 	NewTrap->SetInstigator(Instigator);
 	NewTrap->InitFromDataTable(RowName,*TrapStruct);
+	
 
 
 	return NewTrap;

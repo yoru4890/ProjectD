@@ -21,6 +21,7 @@ USTRUCT(BlueprintType)
 struct FBaseStruct : public FTableRowBase
 {
 	GENERATED_BODY()
+
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString DisplayName; // 오브젝트의 이름
@@ -29,7 +30,7 @@ public:
 	int32 ID; // 오브젝트의 고유 식별자
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EMeshType MeshType; // 트랩의 메쉬 타입
+	EMeshType MeshType; // 메쉬 타입
 
 
 	// Static mesh array, visible only if MeshType is StaticMesh
@@ -42,11 +43,21 @@ public:
 
 	// Animation blueprint, visible only if MeshType is SkeletalMesh
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "MeshType == EMeshType::SkeletalMesh"))
-	TSoftObjectPtr<UAnimBlueprint> AnimBlueprint;
+	TSoftObjectPtr<UAnimBlueprint> MyAnimBlueprint;
+
+	// Animation blueprint, visible only if MeshType is SkeletalMesh
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "MeshType == EMeshType::SkeletalMesh"))
+	TArray<TSoftObjectPtr<UAnimMontage>> AnimMontages;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<TSoftObjectPtr<UParticleSystem>> Effects; // 공격 이펙트
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<UObject> FactoryClass; // 팩토리 클래스
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<UDamageType> DamageType; // 팩토리 클래스
+
+	bool bIsLoading = false;
+	bool bIsLoaded = false;
 };

@@ -18,9 +18,9 @@ void ADDStaticTrap::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void ADDStaticTrap::SetTrapAssets(TArray<UStaticMesh*> StaticMeshs, TArray<USkeletalMesh*> SkeletalMeshs, UAnimBlueprint* AnimBlueprint, TArray<UParticleSystem*> ParticleEffects)
+void ADDStaticTrap::SetTrapAssets(FBaseStruct& LoadedAsset)
 {
-	Super::SetTrapAssets(StaticMeshs, SkeletalMeshs, AnimBlueprint, ParticleEffects);
+	Super::SetTrapAssets(LoadedAsset);
 	// 기존 ParticleEffectComponents 배열 초기화
 	for (UStaticMeshComponent* StaticMeshComponent : StaticMeshComponents)
 	{
@@ -35,11 +35,18 @@ void ADDStaticTrap::SetTrapAssets(TArray<UStaticMesh*> StaticMeshs, TArray<USkel
 	UStaticMeshComponent* FirstStaticMeshComponent = nullptr;
 	int32 StaticNum = 0;
 
-	for (UStaticMesh* StaticMesh : StaticMeshs) {
+	for (TSoftObjectPtr<UStaticMesh>& StaticMeshSoftPtr : LoadedAsset.StaticMeshs) {
 		UStaticMeshComponent* StaticMeshComponent = NewObject<UStaticMeshComponent>(this);
 		check(StaticMeshComponent);
 
-		StaticMeshComponent->SetStaticMesh(StaticMesh);
+		if (StaticMeshSoftPtr.IsValid())
+		{
+			StaticMeshComponent->SetStaticMesh(StaticMeshSoftPtr.Get());
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("%s : StaticMesh not loaded"), TrapRowName);
+		}
 		StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		StaticMeshComponent->SetupAttachment(RootComponent);
 
@@ -65,11 +72,3 @@ void ADDStaticTrap::SetTrapAssets(TArray<UStaticMesh*> StaticMeshs, TArray<USkel
 	FVector ScaleFactor = FVector(300.f / (BoxExtent.X * 2), 300.f / (BoxExtent.Y * 2), 1);
 	FirstStaticMeshComponent->SetWorldScale3D(ScaleFactor);
 }
-
-//void ADDStaticTrap::SetTrapAssets(UStaticMesh* StaticMesh, USkeletalMesh* SkeletalMesh, UAnimBlueprint* AnimBlueprint, TArray<UParticleSystem*> ParticleEffects)
-//{
-//	//Super::SetTrapAssets(StaticMesh, SkeletalMesh, AnimBlueprint, ParticleEffect);
-//	//if (StaticMeshComponent && StaticMesh) {
-//	//	StaticMeshComponent->SetStaticMesh(StaticMesh);
-//	//}
-//}

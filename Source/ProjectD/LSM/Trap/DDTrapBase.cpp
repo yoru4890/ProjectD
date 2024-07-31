@@ -4,6 +4,7 @@
 #include "Components/BoxComponent.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "YSY/Collision/CollisionChannel.h"
+#include "Engine/DamageEvents.h"
 
 // Sets default values
 ADDTrapBase::ADDTrapBase()
@@ -51,7 +52,7 @@ void ADDTrapBase::Tick(float DeltaTime)
 
 	TimeSinceLastAttack += DeltaTime;
 
-	if (bCanAttack && NumEnemiesInRange > 0 && TimeSinceLastAttack >= TrapCoolTime)
+	if (bCanAttack && !TrappedEnemies.IsEmpty() && TimeSinceLastAttack >= TrapCoolTime)
 	{
 		Attack();
 		TimeSinceLastAttack = 0.f;
@@ -61,7 +62,6 @@ void ADDTrapBase::Tick(float DeltaTime)
 void ADDTrapBase::SetTrapCanAttack(const bool bInCanAttack)
 {
 	bCanAttack = bInCanAttack;
-	NumEnemiesInRange = 0;
 	TimeSinceLastAttack = 0;
 
 	if (!bInCanAttack) 
@@ -96,9 +96,10 @@ void ADDTrapBase::InitFromDataTable(const FName& RowName, const FDDTrapStruct& T
 	SlowAmount = TrapData.SlowAmount;
 	SlowDuration = TrapData.SlowDuration;
 	bCanAttack = false;
+	TrapDamageType = TrapData.DamageType;
 }
 
-void ADDTrapBase::SetTrapAssets(TArray<UStaticMesh*> StaticMeshs, TArray<USkeletalMesh*> SkeletalMeshs, UAnimBlueprint* AnimBlueprint, TArray<UParticleSystem*> ParticleEffects)
+void ADDTrapBase::SetTrapAssets(FBaseStruct& LoadedAsset)
 {
 	// 기존 ParticleEffectComponents 배열 초기화
 	for (UParticleSystemComponent* ParticleEffectComponent : ParticleEffectComponents)
@@ -110,12 +111,19 @@ void ADDTrapBase::SetTrapAssets(TArray<UStaticMesh*> StaticMeshs, TArray<USkelet
 	}
 	ParticleEffectComponents.Empty();
 
-	for (auto* ParticlEffect : ParticleEffects) {
+	for (TSoftObjectPtr<UParticleSystem>& ParticlEffectSoftPtr : LoadedAsset.Effects) {
 		UParticleSystemComponent* ParticleEffectComponent = NewObject<UParticleSystemComponent>(this);
 		check(ParticleEffectComponent);
 		// ParticleRootComponent에 부착
 		ParticleEffectComponent->SetupAttachment(RootComponent);
-		ParticleEffectComponent->SetTemplate(ParticlEffect);
+		if(ParticlEffectSoftPtr.IsValid())
+		{
+			ParticleEffectComponent->SetTemplate(ParticlEffectSoftPtr.Get());
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("%s : ParticleEffect not loaded"), TrapRowName);
+		}
 		ParticleEffectComponent->RegisterComponent();
 
 		ParticleEffectComponents.Add(ParticleEffectComponent);
@@ -178,18 +186,21 @@ void ADDTrapBase::SetMaterialToOriginal()
 
 void ADDTrapBase::Attack()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Trap Attack"));
+	FDamageEvent DamageEvent{};
+	DamageEvent.DamageTypeClass = TrapDamageType;
+	for (AActor* Enemy : TrappedEnemies) {
+		Enemy->TakeDamage(TrapDamage, DamageEvent, nullptr, this);
+		UE_LOG(LogTemp, Warning, TEXT("Trap Attack : %d , Damage Type: %s"), TrapDamage, *TrapDamageType->GetDisplayNameText().ToString());
+	}
 }
 
 void ADDTrapBase::OnBoxCollisionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	NumEnemiesInRange++;
-	UE_LOG(LogTemp, Warning, TEXT("Trap Begin Overlap"));
+	TrappedEnemies.Add(OtherActor);
 }
 
 void ADDTrapBase::OnBoxCollisionEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	NumEnemiesInRange--;
-	UE_LOG(LogTemp, Warning, TEXT("Trap End Overlap"));
+	TrappedEnemies.Remove(OtherActor);
 }
 

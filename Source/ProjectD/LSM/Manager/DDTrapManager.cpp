@@ -10,13 +10,14 @@
 #include "GameFramework/Actor.h"
 #include "YSY/Game/DDPlayerState.h"
 #include "Kismet/GameplayStatics.h"
+#include "LSM/Manager/DDAssetManager.h"
 
 UDDTrapManager::UDDTrapManager()
 {
 
 }
 
-bool UDDTrapManager::IsTowerUnlocked(const FName& RowName) const
+bool UDDTrapManager::IsTrapUnlocked(const FName& RowName) const
 {
 	const FDDTrapStruct& TrapStruct = GetTrapData(RowName);
 
@@ -24,7 +25,7 @@ bool UDDTrapManager::IsTowerUnlocked(const FName& RowName) const
 
 }
 
-bool UDDTrapManager::UnlockTower(const FName& RowName)
+bool UDDTrapManager::UnlockTrap(const FName& RowName)
 {
 	FDDTrapStruct& TrapStruct = GetTrapData(RowName);
 
@@ -33,6 +34,7 @@ bool UDDTrapManager::UnlockTower(const FName& RowName)
 	while (ParentName != FName("None")) {
 		if (!GetTrapData(ParentName).bIsTrapUnlocked) 
 		{
+			UE_LOG(LogTemp, Warning, TEXT("Parent Trap is Not Unlocked"));
 			return false;
 		}
 		ParentName = GetTrapData(ParentName).TrapParentRowName;
@@ -43,10 +45,53 @@ bool UDDTrapManager::UnlockTower(const FName& RowName)
 
 	if (PlayerState->CheckLikePoint(TrapStruct.TrapUnlockCost)) {
 		PlayerState->SubtractLikePoint(TrapStruct.TrapUnlockCost);
+		TrapStruct.bIsTrapUnlocked = true;
+		UDDGameInstance* MyGameInstance = Cast<UDDGameInstance>(GetWorld()->GetGameInstance());
+		check(MyGameInstance);
+
+		UDDAssetManager* AssetManager = MyGameInstance->GetAssetManager();
+		check(AssetManager);
+		AssetManager->LoadAssetsAsync(RowName);
+
 		return true;
 	}
-
 	return false;
+}
+
+bool UDDTrapManager::LockTrap(const FName& RowName)
+{
+	TArray<FName> Stack;
+	Stack.Push(RowName);
+
+	while (Stack.Num()>0) {
+		FName CurrentName = Stack.Pop();
+		FDDTrapStruct& CurrentTrapStruct = GetTrapData(CurrentName);
+
+		for (auto& ChildName : CurrentTrapStruct.TrapChildRowNames)
+		{
+			if (!GetTrapData(ChildName).bIsTrapUnlocked)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Child Trap %s is Not Unlocked"), *ChildName.ToString());
+				return false;
+			}
+			Stack.Push(ChildName);
+		}
+	}
+	ADDPlayerState* PlayerState = CastChecked<ADDPlayerState>(UGameplayStatics::GetPlayerState(GetWorld(), 0));
+	check(PlayerState);
+
+	FDDTrapStruct& LockTrapData = GetTrapData(RowName);
+
+	PlayerState->AddLikePoint(LockTrapData.TrapUnlockCost);
+	LockTrapData.bIsTrapUnlocked = false;
+
+	UDDGameInstance* MyGameInstance = Cast<UDDGameInstance>(GetWorld()->GetGameInstance());
+	check(MyGameInstance);
+
+	UDDAssetManager* AssetManager = MyGameInstance->GetAssetManager();
+	check(AssetManager);
+	AssetManager->RemoveLoadedAssetByName(RowName);
+	return true;
 }
 
 const FDDTrapStruct& UDDTrapManager::GetTrapData(const FName& RowName) const
@@ -102,6 +147,10 @@ ADDTrapBase* UDDTrapManager::SpawnTrap(UWorld* World, const FName& RowName, cons
 		check(TrapFactory);
 
 		UObject* CreatedObject = TrapFactory->CreateObject(World, RowName, TrapStruct, Location, Rotation, Owner, Instigator);
+		if (!CreatedObject)
+		{
+			return nullptr;
+		}
 		NewTrap = Cast<ADDTrapBase>(CreatedObject);
 	}
 
