@@ -52,12 +52,12 @@ void UDDBTService_Detect::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* Nod
 
 	if (DistanceToTarget <= RangeWithRaduis)
 	{
-		bool bIsMaxAggro = AggroTarget->IsMaxAggro();
+		// bool bIsMaxAggro = AggroTarget->IsMaxAggro();
 
-		if (!(AIPawn->GetIsAggroState()) && !bIsMaxAggro)
+		if (!(AIPawn->GetIsAggroState()) /*&& !bIsMaxAggro*/)
 		{
 			AIPawn->SetIsAggroState(true);
-			AggroTarget->AddAggro();
+			//AggroTarget->AddAggro();
 			OwnerComp.GetBlackboardComponent()->SetValueAsBool(BBKEY_ISAGGRO, true);
 		}
 	}
@@ -66,7 +66,7 @@ void UDDBTService_Detect::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* Nod
 		if (AIPawn->GetIsAggroState())
 		{
 			AIPawn->SetIsAggroState(false);
-			AggroTarget->SubtractAggro();
+			//AggroTarget->SubtractAggro();
 		}
 
 		OwnerComp.GetBlackboardComponent()->SetValueAsBool(BBKEY_ISAGGRO, false);

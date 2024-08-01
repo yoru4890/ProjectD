@@ -69,8 +69,11 @@ public:
 	uint8 bIsElite : 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = Data)
-	FString MeshPath;
+	TSoftObjectPtr<USkeletalMesh> SkeletalMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = Data)
-	FString AnimationBlueprintPath;
+	TSoftObjectPtr<UAnimBlueprint> AnimationBlueprint;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = Data)
+	TSoftObjectPtr<UAnimMontage> AttackMontage;
 };

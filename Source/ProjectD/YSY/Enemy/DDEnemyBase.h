@@ -152,11 +152,15 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DD", meta = (AllowPrivateAccess = "true"))
 	uint8 bIsElite : 1;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DD", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UAnimMontage> AttackMontage;
+
 #pragma endregion
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DD", meta = (AllowPrivateAccess = "true"));
 	TObjectPtr<class AAISplineRoute> AIMoveRoute;
 
+	UPROPERTY()
 	TObjectPtr<class ADDEnemyAIController> EnemyAIController;
 
 	int32 RouteIndex;
@@ -168,4 +172,6 @@ private:
 	TMap<EDebuffType, FDebuffState> DebuffStates;
 
 	bool bIsAggroState{};
+
+	
 };
