@@ -22,16 +22,17 @@ protected:
 	
 	virtual void BeginPlay() override;
 
+
+
 public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	
+
 //Character Control Section
 protected:
 	void SetCharacterControl();
 
 	virtual void SetCharacterControlData(const class UDDCharacterControlData* CharacterControlData) override;
-
-	
 
 //Camera Section
 protected:
@@ -78,6 +79,8 @@ protected:
 
 
 //Weapon System
+
+
 protected:
 	void EquipMelee();
 	void EquipRange();

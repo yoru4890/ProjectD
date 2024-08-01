@@ -7,6 +7,8 @@
 #include "LJW/Weapon/DDWeaponBase.h"
 #include "DDWeaponSystemComponent.generated.h"
 
+
+
 UENUM(BlueprintType)
 enum class EWeaponType : uint8
 {
@@ -22,6 +24,7 @@ enum class EWeaponType : uint8
 	Unknown UMETA(DisplayName = "Unknown")
 };
 
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class PROJECTD_API UDDWeaponSystemComponent : public UActorComponent
 {
@@ -29,7 +32,6 @@ class PROJECTD_API UDDWeaponSystemComponent : public UActorComponent
 
 public:	
 	UDDWeaponSystemComponent();
-
 protected:
 	virtual void BeginPlay() override;
 
@@ -40,6 +42,9 @@ public:
 	
 	void EquipMeleeWeapon();
 	void EquipRangeWeapon();
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Animation)
+	TObjectPtr<UAnimMontage> ChangeMontage;
 
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon, meta = (AllowPrivateAccess = "true"))
@@ -55,5 +60,9 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon, meta = (AllowPrivateAccess = "true"))
 	int32 CurrentRangeWeapon;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category= Weapon, meta = (AllowPrivateAccess = "true"))
+	EWeaponType CurrentWeaponEnum;
+
+	
 
 };

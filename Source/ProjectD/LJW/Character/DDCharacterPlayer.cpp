@@ -208,12 +208,15 @@ void ADDCharacterPlayer::CreateLeaderPoseSkeletalMesh(USkeletalMeshComponent* Sk
 	}
 }
 
+
 void ADDCharacterPlayer::EquipMelee()
 {
 	WeaponSystem->EquipMeleeWeapon();
+	//Montage
 }
 
 void ADDCharacterPlayer::EquipRange()
 {
 	WeaponSystem->EquipRangeWeapon();
 }
+

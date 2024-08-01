@@ -6,6 +6,7 @@
 #include "LJW/Weapon/DDWeaponBase.h"
 
 
+
 // Sets default values for this component's properties
 UDDWeaponSystemComponent::UDDWeaponSystemComponent()
 {
@@ -17,7 +18,6 @@ void UDDWeaponSystemComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	InitializeWeapon();
-
 }
 
 void UDDWeaponSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -59,8 +59,6 @@ void UDDWeaponSystemComponent::InitializeWeapon()
 	}
 
 	//Initializing current weapon
-	
-
 	CurrentMeleeWeapon = static_cast<int32>(EWeaponType::Cudgel);
 	CurrentRangeWeapon = static_cast<int32>(EWeaponType::Rifle);
 	CurrentWeapon = Weapons[CurrentMeleeWeapon];
@@ -76,6 +74,28 @@ void UDDWeaponSystemComponent::EquipMeleeWeapon()
 		CurrentWeapon->EnableWeapon();
 	}
 	
+	switch (CurrentWeaponEnum)
+	{
+	case EWeaponType::Cudgel:
+		GetOwner()->FindComponentByClass<USkeletalMeshComponent>()->GetAnimInstance()->Montage_Play(ChangeMontage);
+		break;
+	case EWeaponType::LightSaber:
+		break;
+	case EWeaponType::Sword:
+		break;
+	case EWeaponType::Rifle:
+		break;
+	case EWeaponType::Sniper:
+		break;
+	case EWeaponType::Bazooka:
+		break;
+	case EWeaponType::Machinegun:
+		break;
+	case EWeaponType::Unknown:
+		break;
+	default:
+		break;
+	}
 }
 
 void UDDWeaponSystemComponent::EquipRangeWeapon()
@@ -86,6 +106,7 @@ void UDDWeaponSystemComponent::EquipRangeWeapon()
 		//TODO : LJW Anim Notify
 		Weapons[CurrentMeleeWeapon]->DisableWeapon();
 		CurrentWeapon->EnableWeapon();
+		
 	}
 }
 
