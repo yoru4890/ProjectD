@@ -14,20 +14,13 @@ UDDWaveManager::UDDWaveManager()
 		const UDataTable* DataTableObject = WaveDataTableRef.Object;
 		check(DataTableObject->GetRowMap().Num() > 0);
 
-		WaveInfo.SetNum(DataTableObject->GetRowMap().Num() + 1);
-
-		const int32 MaxWave{ 10 };
-
-		for (auto& Wave : WaveInfo)
-		{
-			Wave.SetNum(MaxWave + 1);
-		}
+		StageWaveInfo.SetNum(DataTableObject->GetRowMap().Num() + 1);
 
 		auto& DataMap = DataTableObject->GetRowMap();
 		for (auto& [RowName, Data] : DataMap)
 		{
 			auto WaveData = reinterpret_cast<FDDWaveData*>(Data);
-			WaveInfo[WaveData->Stage][WaveData->WaveNumber] = MoveTemp(WaveData);
+			StageWaveInfo[WaveData->Stage] = *WaveData;
 		}
 
 	}

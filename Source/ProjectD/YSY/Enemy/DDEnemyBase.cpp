@@ -38,14 +38,14 @@ ADDEnemyBase::ADDEnemyBase()
 		HpBar->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 
-	GetCharacterMovement()->bUseRVOAvoidance = true;
-	GetCharacterMovement()->AvoidanceConsiderationRadius = 300.0f;
-	GetCharacterMovement()->bConstrainToPlane = true;
+	//GetCharacterMovement()->bUseRVOAvoidance = true;
+	//GetCharacterMovement()->AvoidanceConsiderationRadius = 300.0f;
+	//GetCharacterMovement()->bConstrainToPlane = true;
 
-	GetCharacterMovement()->bEnablePhysicsInteraction = false;
-	GetCharacterMovement()->bPushForceUsingZOffset = true;
-	GetCharacterMovement()->bPushForceScaledToMass = true;
-	GetCharacterMovement()->PushForceFactor = 0.0f;
+	//GetCharacterMovement()->bEnablePhysicsInteraction = false;
+	//GetCharacterMovement()->bPushForceUsingZOffset = true;
+	//GetCharacterMovement()->bPushForceScaledToMass = true;
+	//GetCharacterMovement()->PushForceFactor = 0.0f;
 }
 
 void ADDEnemyBase::PostInitializeComponents()
@@ -92,10 +92,15 @@ float ADDEnemyBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 	{
 		FPointDamageEvent* PointDamageEvent = (FPointDamageEvent*)(&DamageEvent);
 
-		if (PointDamageEvent->HitInfo.BoneName == WeakPoint)
+		UE_LOG(LogTemp, Warning, TEXT("%s"), *(PointDamageEvent->HitInfo.BoneName.ToString()));
+
+		for (const FName& Weakpoint : WeakPoints)
 		{
-			ActualDamage *= 1.5f; // TODO : YSY WeakPoint Caculation
-			UE_LOG(LogTemp, Warning, TEXT("WeakPoint"));
+			if (PointDamageEvent->HitInfo.BoneName == Weakpoint)
+			{
+				ActualDamage *= 1.5f; // TODO : YSY WeakPoint Caculation
+				UE_LOG(LogTemp, Warning, TEXT("WeakPoint"));
+			}
 		}
 	}
 
@@ -125,7 +130,7 @@ void ADDEnemyBase::InitializeEnemy(const FDDEnemyData& EnemyData)
 {
 
 	EnemyName = EnemyData.EnemyName;
-	WeakPoint = EnemyData.WeakPoint;
+	WeakPoints = EnemyData.WeakPoints;
 	EnemyType = EnemyData.EnemyType;
 	MaxHP = EnemyData.MaxHP;
 	Stat->SetMaxHp(MaxHP);
@@ -140,8 +145,6 @@ void ADDEnemyBase::InitializeEnemy(const FDDEnemyData& EnemyData)
 	bIsBoss = EnemyData.bIsBoss;
 	bIsElite = EnemyData.bIsElite;
 
-	ensure(EnemyData.SkeletalMesh);
-
 	if (!EnemyData.SkeletalMesh.IsValid())
 	{
 		EnemyData.SkeletalMesh.LoadSynchronous();
@@ -152,8 +155,6 @@ void ADDEnemyBase::InitializeEnemy(const FDDEnemyData& EnemyData)
 	GetMesh()->SetRelativeLocationAndRotation({ 0,0,-90 }, { 0,-90,0 });
 	GetMesh()->SetCollisionProfileName(FName("Enemy"));
 
-	ensure(EnemyData.AnimationBlueprint);
-
 	if (!EnemyData.AnimationBlueprint.IsValid())
 	{
 		EnemyData.AnimationBlueprint.LoadSynchronous();
@@ -162,14 +163,12 @@ void ADDEnemyBase::InitializeEnemy(const FDDEnemyData& EnemyData)
 	UAnimBlueprint* AnimBP = EnemyData.AnimationBlueprint.Get();
 	GetMesh()->SetAnimInstanceClass(AnimBP->GeneratedClass);
 
-	ensure(EnemyData.AttackMontage);
-
 	if (!EnemyData.AttackMontage.IsValid())
 	{
 		EnemyData.AttackMontage.LoadSynchronous();
 	}
 
-	UAnimMontage* Montage = EnemyData.AttackMontage.Get();
+	AttackMontage = EnemyData.AttackMontage.Get();
 }
 
 void ADDEnemyBase::SplineMove()
@@ -408,6 +407,7 @@ void ADDEnemyBase::Activate()
 	Stat->SetCurrentHp(MaxHP);
 	SetActorHiddenInGame(false);
 	SetActorEnableCollision(true);
+	SetActorLocation(AIMoveRoute->GetSplinePointasWorldPosition(0));
 	EnemyAIController->RunAI();
 }
 

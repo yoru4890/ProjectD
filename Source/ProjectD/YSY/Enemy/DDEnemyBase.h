@@ -71,6 +71,9 @@ public:
 	void ChangeMaxWalkSpeed(float Amount);
 	void Stun(FTimerHandle& TimerHandle, float Time, float Amount);
 
+	UFUNCTION()
+	void AttackFinished();
+
 #pragma region AIInterface
 
 	virtual void SplineMove() override;
@@ -120,7 +123,7 @@ private:
 	FName EnemyName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DD", meta = (AllowPrivateAccess = "true"))
-	FName WeakPoint;
+	TArray<FName> WeakPoints;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DD", meta = (AllowPrivateAccess = "true"))
 	EEnemyType EnemyType;

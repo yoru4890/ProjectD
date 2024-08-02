@@ -16,10 +16,10 @@ public:
 	int32 Stage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
-	int32 WaveNumber;
+	int32 MaxWaveNum;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
-	TArray<int32> EnemyOrder;
+	TArray<FName> EnemyOrder;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
 	TArray<int32> PathOrder;

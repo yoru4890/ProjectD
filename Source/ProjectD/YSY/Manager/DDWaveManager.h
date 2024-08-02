@@ -21,11 +21,15 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetSplines();
 
-	TArray<class AAISplineRoute*>& GetSplines() { return Splines; };
+	UFUNCTION(BlueprintCallable)
+	TArray<class AAISplineRoute*>& GetSplines() { return Splines; }
+
+	UFUNCTION(BlueprintCallable)
+	TArray<FDDWaveData>& GetStageWaveInfos() { return StageWaveInfo; }
 
 private:
 
-	TArray<TArray<FDDWaveData*>> WaveInfo;
+	TArray<FDDWaveData> StageWaveInfo;
 
 	TArray<class AAISplineRoute*> Splines;
 };

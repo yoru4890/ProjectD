@@ -19,7 +19,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetupEnemyPools(const TMap<FName, int32>& EnemyPoolSizes);
 	UFUNCTION(BlueprintCallable)
-	AActor* Activate(const FName& EnemyName, const FVector& Position);
+	AActor* Activate(const FName& EnemyName, int32 SplineIndex);
 	UFUNCTION(BlueprintCallable)
 	void Deactivate(const FName& EnemyName, ADDEnemyBase* Enemy);
 

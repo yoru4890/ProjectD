@@ -32,15 +32,16 @@ void UDDEnemySpawnManager::SetupEnemyPools(const TMap<FName, int32>& EnemyPoolSi
 
 }
 
-AActor* UDDEnemySpawnManager::Activate(const FName& EnemyName, const FVector& Position)
+AActor* UDDEnemySpawnManager::Activate(const FName& EnemyName, int32 SplineIndex)
 {
 	if (InactiveObjects.Contains(EnemyName) && InactiveObjects[EnemyName].Num() > 0)
 	{
 		ADDEnemyBase* Enemy = InactiveObjects[EnemyName].Last();
 		InactiveObjects[EnemyName].Pop();
 		ActiveObjects[EnemyName].Add(Enemy);
+		UDDGameInstance* DDGameInstance = Cast<UDDGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+		Enemy->SetAIMoveRoute(DDGameInstance->GetWaveManager()->GetSplines(), SplineIndex);
 		Enemy->Activate();
-		Enemy->SetActorLocation(Position);
 		return Enemy;
 	}
 	else
@@ -74,9 +75,6 @@ void UDDEnemySpawnManager::SpawnEnemy(const FName& EnemyName)
 	{
 		Enemy->OnDie.AddUObject(this, &UDDEnemySpawnManager::Deactivate);
 		Enemy->InitializeEnemy(*UDDGameSingleton::Get().GetEnemyDataTable().Find(EnemyName));
-		
-		UDDGameInstance* DDGameInstance = Cast<UDDGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
-		Enemy->SetAIMoveRoute(DDGameInstance->GetWaveManager()->GetSplines(), 0);
 		Enemy->FinishSpawning({});
 		Enemy->Deactivate();
 		Pools[EnemyName].Add(Enemy);

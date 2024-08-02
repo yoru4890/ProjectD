@@ -27,7 +27,7 @@ public:
 	FName EnemyName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
-	FName WeakPoint;
+	TArray<FName> WeakPoints;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
 	EEnemyType EnemyType;
