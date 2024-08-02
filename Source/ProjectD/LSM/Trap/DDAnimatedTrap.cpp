@@ -19,7 +19,7 @@ void ADDAnimatedTrap::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void ADDAnimatedTrap::SetTrapAssets(FBaseStruct& LoadedAsset)
+void ADDAnimatedTrap::SetTrapAssets(FDDBuildingBaseStruct& LoadedAsset)
 {
 	Super::SetTrapAssets(LoadedAsset);
 	// 기존 ParticleEffectComponents 배열 초기화
@@ -94,7 +94,7 @@ void ADDAnimatedTrap::SetTrapAssets(FBaseStruct& LoadedAsset)
 
 	FBoxSphereBounds Bounds = SkeletalMesh->GetBounds();
 	FVector BoxExtent = Bounds.BoxExtent;
-	FVector ScaleFactor = FVector(300.f / (BoxExtent.X * 2 ), 300.f / (BoxExtent.Y * 2 ), 300.f / (BoxExtent.X * 2));
+	FVector ScaleFactor = FVector(GridCellSize*TrapCellWidth / (BoxExtent.X * 2 ), GridCellSize * TrapCellWidth / (BoxExtent.Y * 2 ), GridCellSize * TrapCellWidth / (BoxExtent.X * 2));
 	FirstSkeletalMeshComponent->SetWorldScale3D(ScaleFactor);
 	FirstSkeletalMeshComponent->SetRelativeLocation(FVector(0, 0, TrapMeshZAxisModify));
 	UE_LOG(LogTemp, Warning, TEXT("TrapMeshZAxisModify is : %f"), TrapMeshZAxisModify);

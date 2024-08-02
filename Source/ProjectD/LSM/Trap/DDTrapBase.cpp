@@ -5,6 +5,8 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "YSY/Collision/CollisionChannel.h"
 #include "Engine/DamageEvents.h"
+#include "LSM/Manager/DDBuildManager.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 ADDTrapBase::ADDTrapBase()
@@ -44,6 +46,12 @@ void ADDTrapBase::BeginPlay()
 		DynamicMaterialInstance = UMaterialInstanceDynamic::Create(PreviewMaterial, this);
 	}
 
+	// 빌드매니저에서 Grid 크기를 가져온다.
+	ADDBuildManager* BuildManager = Cast<ADDBuildManager>(UGameplayStatics::GetActorOfClass(GetWorld(), ADDBuildManager::StaticClass()));
+	check(BuildManager);
+
+	GridCellSize = BuildManager->GetGridCellSize();
+
 }
 
 // Called every frame
@@ -79,15 +87,9 @@ void ADDTrapBase::InitFromDataTable(const FName& RowName, const FDDTrapStruct& T
 {
 	TrapRowName = RowName;
 	TrapDisplayName = TrapData.DisplayName;
-	//TrapBuildCost = TrapData.TrapBuildCost;
-	//TrapUpgradeCost = TrapData.TrapUpgradeCost;
-	//TrapUnlockCost = TrapData.TrapUnlockCost;
+	TrapCellWidth = TrapData.OccupiedCellWidth;
 	TrapCoolTime = TrapData.TrapCoolTime;
 	TrapDamage = TrapData.TrapDamage;
-	//TrapLevel = TrapData.TrapLevel;
-	//TrapParentName = TrapData.TrapParentRowName;
-	//TrapChildNames = TrapData.TrapChildRowNames;
-	//bIsTrapUnlocked = TrapData.bIsTrapUnlocked;
 	TrapMeshType = TrapData.MeshType;
 	bIsDotTrap = TrapData.bIsDotTrap;
 	DotDamage = TrapData.DotDamage;
@@ -102,7 +104,7 @@ void ADDTrapBase::InitFromDataTable(const FName& RowName, const FDDTrapStruct& T
 	UE_LOG(LogTemp, Warning, TEXT("TrapMeshZAxisModify is : %f"), TrapData.MeshZAxisModify);
 }
 
-void ADDTrapBase::SetTrapAssets(FBaseStruct& LoadedAsset)
+void ADDTrapBase::SetTrapAssets(FDDBuildingBaseStruct& LoadedAsset)
 {
 	// 기존 ParticleEffectComponents 배열 초기화
 	for (UParticleSystemComponent* ParticleEffectComponent : ParticleEffectComponents)

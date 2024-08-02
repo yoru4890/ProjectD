@@ -34,6 +34,7 @@ protected:
 
 public:
 	FORCEINLINE const FName& GetTrapRowName() const { return TrapRowName; }
+	FORCEINLINE const int32 GetTrapCellWidth() const { return TrapCellWidth; }
 	//FORCEINLINE const int32 GetTrapBuildCost() const { return TrapBuildCost; }
 
 public:	
@@ -41,7 +42,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void InitFromDataTable(const FName& RowName, const FDDTrapStruct& TrapData);
 	void  SetTrapCanAttack(const bool bInCanAttack);
-	virtual void SetTrapAssets(FBaseStruct& LoadedAsset) override;
+	virtual void SetTrapAssets(FDDBuildingBaseStruct& LoadedAsset) override;
 	void SetMaterialToPreview(bool bCanPay);
 	void SetMaterialToOriginal();
 
@@ -63,6 +64,12 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName TrapRowName; // 트랩의 이름
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 TrapCellWidth; // 트랩이 차지하는 셀의 크기
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 GridCellSize; // 셀 한칸이 차지하는 길이
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bCanAttack; // 트랩이 공격할 수 있는지

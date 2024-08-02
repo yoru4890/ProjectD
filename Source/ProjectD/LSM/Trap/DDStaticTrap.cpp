@@ -18,7 +18,7 @@ void ADDStaticTrap::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void ADDStaticTrap::SetTrapAssets(FBaseStruct& LoadedAsset)
+void ADDStaticTrap::SetTrapAssets(FDDBuildingBaseStruct& LoadedAsset)
 {
 	Super::SetTrapAssets(LoadedAsset);
 	// 기존 ParticleEffectComponents 배열 초기화
@@ -70,6 +70,6 @@ void ADDStaticTrap::SetTrapAssets(FBaseStruct& LoadedAsset)
 	FBoxSphereBounds Bounds = FirstStaticMeshComponent->GetStaticMesh()->GetBounds();
 	FirstStaticMeshComponent->SetRelativeLocation(FVector(0, 0, TrapMeshZAxisModify));
 	FVector BoxExtent = Bounds.BoxExtent;
-	FVector ScaleFactor = FVector(300.f / (BoxExtent.X * 2), 300.f / (BoxExtent.Y * 2), 300.f / (BoxExtent.X * 2));
+	FVector ScaleFactor = FVector(GridCellSize * TrapCellWidth / (BoxExtent.X * 2), GridCellSize * TrapCellWidth / (BoxExtent.Y * 2), GridCellSize * TrapCellWidth / (BoxExtent.X * 2));
 	FirstStaticMeshComponent->SetWorldScale3D(ScaleFactor);
 }

@@ -3,7 +3,7 @@
 
 #include "LSM/Manager/DDBuildManager.h"
 #include "Components/BoxComponent.h"
-
+#include "YSY/Collision/CollisionChannel.h"
 // Sets default values
 ADDBuildManager::ADDBuildManager()
 {
@@ -15,7 +15,6 @@ ADDBuildManager::ADDBuildManager()
 
 
 	GridCellSize = 100.f;
-	TrapCellWidth = 3;
 
 }
 
@@ -24,6 +23,7 @@ void ADDBuildManager::BeginPlay()
 {
 	Super::BeginPlay();
 	InitializeGridCells();
+	UpdateTowerZone();
 	DrawDebugBox(GetWorld(), GetActorLocation(), BoxComponent->GetScaledBoxExtent(), FColor::Green, true, -1, 0, 5);
 
 }
@@ -84,8 +84,6 @@ const FVector ADDBuildManager::GetNearestGridCellLocation(const FVector& HitLoca
 {
 	FIntPoint GridCellIndex = ConvertWorldLocationToGridCell(HitLocation);
 
-	//UE_LOG(LogTemp, Warning, TEXT("GridCellIndices: X=%d, Y=%d"), GridCellIndex.X, GridCellIndex.Y);
-
 	if (GridCellMap.Contains(GridCellIndex))
 	{
 		return GridCellMap[GridCellIndex].WorldLocation;
@@ -106,9 +104,9 @@ const FIntPoint ADDBuildManager::ConvertWorldLocationToGridCell(const FVector& L
 	return FIntPoint(CellY, CellX);
 }
 
-const bool ADDBuildManager::CanPlaceTrapAtLocation(const FVector& HitLocation) const
+const bool ADDBuildManager::CanPlaceTrapAtLocation(const FVector& HitLocation, const int32 OccupiedCellWidth) const
 {
-	int32 Length = TrapCellWidth / 2;
+	int32 Length = OccupiedCellWidth / 2;
 	FIntPoint Cell = ConvertWorldLocationToGridCell(HitLocation);
 	if (!GridCellMap.Contains(Cell)) {
 		return false;
@@ -129,6 +127,11 @@ const bool ADDBuildManager::CanPlaceTrapAtLocation(const FVector& HitLocation) c
 				if (!IsPointOnSamePlane(PointLocation, StandardPoint, InNormalVector)) {
 					return false;
 				}
+
+				if (GridCellMap[TempPoint].bIsTowerArea)
+				{
+					return false;
+				}
 			}
 			else {
 				return false;
@@ -137,6 +140,20 @@ const bool ADDBuildManager::CanPlaceTrapAtLocation(const FVector& HitLocation) c
 	}
 
 	return true;
+}
+
+const bool ADDBuildManager::CanPlaceTowerAtLocation(const FVector& HitLocation, const int32 OccupiedCellWidth) const
+{
+	int32 Length = OccupiedCellWidth / 2;
+	FIntPoint Cell = ConvertWorldLocationToGridCell(HitLocation);
+	if (!GridCellMap.Contains(Cell)) {
+		return false;
+	}
+
+	FVector InNormalVector = GridCellMap[Cell].NormalVector;
+	FVector StandardPoint = GridCellMap[Cell].WorldLocation;
+
+	return false;
 }
 
 const FVector ADDBuildManager::GetGridCellNormalVector(const FVector& HitLocation) const
@@ -149,9 +166,9 @@ const FVector ADDBuildManager::GetGridCellNormalVector(const FVector& HitLocatio
 	return FVector(FLT_MAX, FLT_MAX, FLT_MAX);
 }
 
-bool ADDBuildManager::SetGridCellAsOccupied(const FVector& HitLocation)
+bool ADDBuildManager::SetGridCellAsOccupied(const FVector& HitLocation, const int32 OccupiedCellWidth)
 {
-	int32 Length = TrapCellWidth / 2;
+	int32 Length = OccupiedCellWidth / 2;
 	FIntPoint Cell = ConvertWorldLocationToGridCell(HitLocation);
 
 	if (GridCellMap.Contains(Cell)) {
@@ -173,9 +190,9 @@ bool ADDBuildManager::SetGridCellAsOccupied(const FVector& HitLocation)
 	return false;
 }
 
-bool ADDBuildManager::SetGridCellAsBlank(const FVector& HitLocation)
+bool ADDBuildManager::SetGridCellAsBlank(const FVector& HitLocation, const int32 OccupiedCellWidth)
 {
-	int32 Length = TrapCellWidth / 2;
+	int32 Length = OccupiedCellWidth / 2;
 	FIntPoint Cell = ConvertWorldLocationToGridCell(HitLocation);
 
 	if (GridCellMap.Contains(Cell)) {
@@ -202,4 +219,48 @@ const bool ADDBuildManager::IsPointOnSamePlane(const FVector& InPointWorldLocati
 	// 평면 위에 있는 점이라면 내적했을 때, 값이 0
 	float DistanceToPlane = FVector::DotProduct(PlaneNormalVector, InPointWorldLocation - StandardPointWorldLocation);
 	return FMath::Abs(DistanceToPlane) <= KINDA_SMALL_NUMBER;
+}
+
+void ADDBuildManager::AddTowerZone()
+{
+	UBoxComponent* NewTowerZone = NewObject<UBoxComponent>(this);
+	NewTowerZone->RegisterComponent();
+	NewTowerZone->SetBoxExtent(FVector(100.0f, 100.0f, 50.0f));
+	NewTowerZone->SetupAttachment(RootComponent);
+	NewTowerZone->SetCollisionResponseToAllChannels(ECR_Ignore);
+	NewTowerZone->SetCollisionResponseToChannel(GTCHANNEL_BUILDINGTRACE, ECR_Block);
+
+
+	// 이름 설정
+	FName TowerZoneName = FName(*FString::Printf(TEXT("%s:TowerZone"), *NewTowerZone->GetFName().ToString()));
+	NewTowerZone->Rename(*TowerZoneName.ToString());
+
+	TowerZones.Add(NewTowerZone);
+}
+
+void ADDBuildManager::UpdateTowerZone()
+{
+	for (UBoxComponent* TowerZone : TowerZones)
+	{
+		FVector ZoneExtent = TowerZone->GetScaledBoxExtent();
+		FVector ZoneOrigin = TowerZone->GetComponentLocation() - FVector(ZoneExtent.X, ZoneExtent.Y, 0);
+
+		int32 NumCellsX = FMath::CeilToInt((ZoneExtent.X * 2) / GridCellSize);
+		int32 NumCellsY = FMath::CeilToInt((ZoneExtent.Y * 2) / GridCellSize);
+
+		for (int32 Row = 0; Row < NumCellsY; ++Row)
+		{
+			for (int32 Column = 0; Column < NumCellsX; ++Column)
+			{
+				FVector CellLocation = ZoneOrigin + FVector(Column * GridCellSize + GridCellSize / 2, Row * GridCellSize + GridCellSize / 2, 0);
+				FIntPoint CellIndex = ConvertWorldLocationToGridCell(CellLocation);
+
+				if (GridCellMap.Contains(CellIndex))
+				{
+					GridCellMap[CellIndex].bIsTowerArea = true;
+					DrawDebugSphere(GetWorld(), GridCellMap[CellIndex].WorldLocation, 10.0f, 3, FColor::Green, true);
+				}
+			}
+		}
+	}
 }

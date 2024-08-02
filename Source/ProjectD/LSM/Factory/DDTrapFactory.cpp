@@ -7,7 +7,7 @@
 #include "LSM/Manager/DDAssetManager.h"
 #include "YSY/Game/DDGameInstance.h"
 
-UObject* UDDTrapFactory::CreateObject(UWorld* World, const FName& RowName, const FBaseStruct& ObjectStruct, const FVector& Location, const FRotator& Rotation, AActor* Owner, APawn* Instigator)
+UObject* UDDTrapFactory::CreateObject(UWorld* World, const FName& RowName, const FDDBuildingBaseStruct& ObjectStruct, const FVector& Location, const FRotator& Rotation, AActor* Owner, APawn* Instigator)
 {
 	check(World);
 	
@@ -26,7 +26,7 @@ UObject* UDDTrapFactory::CreateObject(UWorld* World, const FName& RowName, const
 	UDDAssetManager* AssetManager = MyGameInstance->GetAssetManager();
 	check(AssetManager);
 
-	FBaseStruct* LoadedAsset = AssetManager->GetLoadedAssetByName(RowName);
+	FDDBuildingBaseStruct* LoadedAsset = AssetManager->GetLoadedAssetByName(RowName);
 
 	if (!LoadedAsset)
 	{

@@ -26,7 +26,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	// Override to set trap assets
-	virtual void SetTrapAssets(FBaseStruct& LoadedAsset) override;
+	virtual void SetTrapAssets(FDDBuildingBaseStruct& LoadedAsset) override;
 
 protected:
 	// Skeletal Mesh Component

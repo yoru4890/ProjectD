@@ -18,11 +18,14 @@ public:
 	FVector NormalVector;
 	UPROPERTY(VisibleAnywhere)
 	bool bCanBuild;
+	UPROPERTY(VisibleAnywhere)
+	bool bIsTowerArea;
 
 	FGridCell()
 		: WorldLocation(0)
 		, NormalVector(0,0,1)
 		, bCanBuild(false)
+		, bIsTowerArea(false)
 	{}
 
 	// 매개변수를 가진 생성자
@@ -30,6 +33,7 @@ public:
 		: WorldLocation(InWorldLocation)
 		, NormalVector(InNormalVector)
 		, bCanBuild(bInCanBuild)
+		, bIsTowerArea(false)
 	{}
 
 };
@@ -56,8 +60,6 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Init")
 	float GridCellSize;
 
-	UPROPERTY(EditAnywhere, Category = "Init")
-	int32 TrapCellWidth;
 
 	// Box collision component to define the bounds of the BuildManager
 	UPROPERTY(EditAnywhere, Category = "Components")
@@ -70,15 +72,25 @@ private:
 	// Array to store grid cell locations
 	TMap<FIntPoint, FGridCell> GridCellMap;
 
+	UPROPERTY(EditAnywhere, Category = "Init")
+	TArray<TObjectPtr<UBoxComponent>> TowerZones;
+
 public:
+	FORCEINLINE const float GetGridCellSize() const { return GridCellSize; };
 	const FVector GetNearestGridCellLocation(const FVector& HitLocation) const;
-	const bool CanPlaceTrapAtLocation(const FVector& HitLocation) const;
+	const bool CanPlaceTrapAtLocation(const FVector& HitLocation, const int32 OccupiedCellWidth) const;
+	const bool CanPlaceTowerAtLocation(const FVector& HitLocation, const int32 OccupiedCellWidth) const;
 	const FVector GetGridCellNormalVector(const FVector& HitLocation) const;
-	bool SetGridCellAsOccupied(const FVector& HitLocation);
-	bool SetGridCellAsBlank(const FVector& HitLocation);
+	bool SetGridCellAsOccupied(const FVector& HitLocation, const int32 OccupiedCellWidth);
+	bool SetGridCellAsBlank(const FVector& HitLocation, const int32 OccupiedCellWidth);
 
 private:
 	const FIntPoint ConvertWorldLocationToGridCell(const FVector& Location) const;
 	const bool IsPointOnSamePlane(const FVector& InPointWorldLocation, const FVector& StandardPointWorldLocation, const FVector& PlaneNormalVector) const;
+
+	UFUNCTION(CallInEditor, Category = "Init")
+	void AddTowerZone();
+
+	void UpdateTowerZone();
 	
 };

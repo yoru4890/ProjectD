@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "LSM/TrapBuild/DDTrapBuildComponent.h"
+#include "LSM/BuildComponent/DDTrapBuildComponent.h"
 #include "YSY/Game/DDGameInstance.h"
 #include "LSM/Manager/DDTrapManager.h"
 #include "LSM/Trap/DDTrapBase.h"
@@ -55,8 +55,6 @@ void UDDTrapBuildComponent::BeginPlay()
 	PlayerState = CastChecked<ADDPlayerState>(UGameplayStatics::GetPlayerState(GetWorld(), 0));
 	check(PlayerState);
 
-	//TrapManager->LockTrap(FName(TEXT("UpgradeThornTrap")));
-	//TrapManager->GetTrapData(FName(TEXT("UpgradeThornTrap"))).bIsTrapUnlocked = true;
 }
 
 
@@ -135,7 +133,8 @@ bool UDDTrapBuildComponent::BuildTrap()
 	}
 
 	PreviewTrap->SetMaterialToOriginal();
-	BuildManager->SetGridCellAsOccupied(PreviewTrap->GetActorLocation());
+
+	BuildManager->SetGridCellAsOccupied(PreviewTrap->GetActorLocation(), PreviewTrap->GetTrapCellWidth());
 
 	const FName& TrapRowName = PreviewTrap->GetTrapRowName();
 
@@ -154,7 +153,7 @@ void UDDTrapBuildComponent::CancleBuildTrap()
 		return;
 	}
 	FDDTrapStruct& ManagedTrapData = TrapManager->GetTrapData(ManagedTrap->GetTrapRowName());
-	BuildManager->SetGridCellAsBlank(ManagedTrap->GetActorLocation());
+	BuildManager->SetGridCellAsBlank(ManagedTrap->GetActorLocation(), ManagedTrap->GetTrapCellWidth());
 	PlayerState->AddGold(ManagedTrapData.TrapBuildCost * 0.8f);
 	TrapManager->DestroyTrap(*ManagedTrap);
 	ManagedTrap = nullptr;
@@ -284,10 +283,10 @@ void UDDTrapBuildComponent::PerformTrapBuildTrace()
 			check(BuildManager);
 			check(HitWarningWidgetInstance);
 
-			if (BuildManager->CanPlaceTrapAtLocation(HitLocation)) {
-				FVector NearestCellLocation = BuildManager->GetNearestGridCellLocation(HitLocation);
+			check(PreviewTrap);
 
-				check(PreviewTrap);
+			if (BuildManager->CanPlaceTrapAtLocation(HitLocation, PreviewTrap->GetTrapCellWidth())) {
+				FVector NearestCellLocation = BuildManager->GetNearestGridCellLocation(HitLocation);
 				PreviewTrap->SetActorLocation(NearestCellLocation);
 				FVector NormalVector = BuildManager->GetGridCellNormalVector(HitLocation);
 				FRotator ActorRotation = FRotationMatrix::MakeFromZ(NormalVector).Rotator();

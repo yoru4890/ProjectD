@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "LSM/BaseStruct.h"
+#include "LSM/DDBuildingBaseStruct.h"
 #include "DDTrapStruct.generated.h"
 
 /**
@@ -11,7 +11,7 @@
  */
 
 USTRUCT(BlueprintType)
-struct FDDTrapStruct : public FBaseStruct
+struct FDDTrapStruct : public FDDBuildingBaseStruct
 {
 	GENERATED_BODY()
 

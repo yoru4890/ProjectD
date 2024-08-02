@@ -2,7 +2,7 @@
 
 
 #include "LSM/Manager/DDAssetManager.h"
-#include "LSM/BaseStruct.h"
+#include "LSM/DDBuildingBaseStruct.h"
 #include "YSY/Game/DDGameInstance.h"
 #include "YSY/Game/DDGameSingleton.h"
 #include "Engine/StreamableManager.h"
@@ -25,7 +25,7 @@ void UDDAssetManager::Initialize()
 
 void UDDAssetManager::LoadAssetsAsync(const FName& RowName)
 {
-	FBaseStruct* ObjectStruct = GetObjectBaseData(RowName);
+	FDDBuildingBaseStruct* ObjectStruct = GetObjectBaseData(RowName);
 	if (!ObjectStruct)
 	{
 		return;
@@ -116,10 +116,10 @@ void UDDAssetManager::LoadAssetsAsync(const FName& RowName)
 	StreamableManager.RequestAsyncLoad(SoftObjectPaths, FStreamableDelegate::CreateLambda(OnAssetsLoadedCallback));
 }
 
-FBaseStruct* UDDAssetManager::GetLoadedAssetByName(const FName& RowName)
+FDDBuildingBaseStruct* UDDAssetManager::GetLoadedAssetByName(const FName& RowName)
 {
 	UE_LOG(LogTemp, Warning, TEXT("GetLoadedAssetByName is Called"));
-	FBaseStruct* ObjectStruct = GetObjectBaseData(RowName);
+	FDDBuildingBaseStruct* ObjectStruct = GetObjectBaseData(RowName);
 	if (!ObjectStruct)
 	{
 		return nullptr;
@@ -135,7 +135,7 @@ FBaseStruct* UDDAssetManager::GetLoadedAssetByName(const FName& RowName)
 
 void UDDAssetManager::RemoveLoadedAssetByName(const FName& RowName)
 {
-	FBaseStruct* ObjectStruct = GetObjectBaseData(RowName);
+	FDDBuildingBaseStruct* ObjectStruct = GetObjectBaseData(RowName);
 	if (!ObjectStruct)
 	{
 		return;
@@ -201,7 +201,7 @@ void UDDAssetManager::RemoveLoadedAssetAll()
 	TrapDataTable.GenerateKeyArray(KeyArray);
 	for (FName& RowName : KeyArray)
 	{
-		FBaseStruct* ObjectStruct = GetObjectBaseData(RowName);
+		FDDBuildingBaseStruct* ObjectStruct = GetObjectBaseData(RowName);
 
 		// 각 타입별로 로드된 에셋을 언로드
 		for (TSoftObjectPtr<UStaticMesh>& StaticMesh : ObjectStruct->StaticMeshs)
@@ -229,9 +229,9 @@ void UDDAssetManager::RemoveLoadedAssetAll()
 	}
 }
 
-FBaseStruct* UDDAssetManager::GetObjectBaseData(const FName& RowName)
+FDDBuildingBaseStruct* UDDAssetManager::GetObjectBaseData(const FName& RowName)
 {
-	FBaseStruct* ObjectStruct;
+	FDDBuildingBaseStruct* ObjectStruct;
 	if (UDDGameSingleton::Get().GetTrapDataTable().Find(RowName)) {
 		ObjectStruct = UDDGameSingleton::Get().GetTrapDataTable().Find(RowName);
 		return ObjectStruct;
