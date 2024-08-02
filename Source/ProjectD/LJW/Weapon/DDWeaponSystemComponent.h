@@ -43,6 +43,9 @@ public:
 	void EquipMeleeWeapon();
 	void EquipRangeWeapon();
 
+	void PlayEquipMontage();
+	void PlayUnequipMontage();
+
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon, meta = (AllowPrivateAccess = "true"))
 	TArray<ADDWeaponBase*> Weapons;
