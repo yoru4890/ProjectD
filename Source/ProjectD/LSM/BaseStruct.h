@@ -30,6 +30,9 @@ public:
 	int32 ID; // 오브젝트의 고유 식별자
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float MeshZAxisModify; // 오브젝트의 고유 식별자
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EMeshType MeshType; // 메쉬 타입
 
 

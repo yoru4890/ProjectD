@@ -66,6 +66,7 @@ void ADDBuildManager::InitializeGridCells()
 				GridCell = FGridCell(CellLocation, HitResult.ImpactNormal, true);
 			}
 			else {
+				CellLocation.Z = -10000.f;
 				GridCell = FGridCell(CellLocation, HitResult.ImpactNormal, false);
 			}
 			GridCellMap.Add(FIntPoint(Row, Column), GridCell);

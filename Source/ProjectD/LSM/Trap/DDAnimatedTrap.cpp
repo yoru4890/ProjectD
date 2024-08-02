@@ -94,8 +94,10 @@ void ADDAnimatedTrap::SetTrapAssets(FBaseStruct& LoadedAsset)
 
 	FBoxSphereBounds Bounds = SkeletalMesh->GetBounds();
 	FVector BoxExtent = Bounds.BoxExtent;
-	FVector ScaleFactor = FVector(300.f / (BoxExtent.X * 2 ), 300.f / (BoxExtent.Y * 2 ),1);
+	FVector ScaleFactor = FVector(300.f / (BoxExtent.X * 2 ), 300.f / (BoxExtent.Y * 2 ), 300.f / (BoxExtent.X * 2));
 	FirstSkeletalMeshComponent->SetWorldScale3D(ScaleFactor);
+	FirstSkeletalMeshComponent->SetRelativeLocation(FVector(0, 0, TrapMeshZAxisModify));
+	UE_LOG(LogTemp, Warning, TEXT("TrapMeshZAxisModify is : %f"), TrapMeshZAxisModify);
 
 	if (!AnimMontages.IsEmpty()) 
 	{

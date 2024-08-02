@@ -97,6 +97,8 @@ void ADDTrapBase::InitFromDataTable(const FName& RowName, const FDDTrapStruct& T
 	SlowDuration = TrapData.SlowDuration;
 	bCanAttack = false;
 	TrapDamageType = TrapData.DamageType;
+	TrapMeshZAxisModify = TrapData.MeshZAxisModify;
+	UE_LOG(LogTemp, Warning, TEXT("TrapMeshZAxisModify is : %f"), TrapData.MeshZAxisModify);
 }
 
 void ADDTrapBase::SetTrapAssets(FBaseStruct& LoadedAsset)

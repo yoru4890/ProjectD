@@ -68,6 +68,9 @@ protected:
 	bool bCanAttack; // 트랩이 공격할 수 있는지
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float TrapMeshZAxisModify; // 트랩 메쉬 z축 조정
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSet<TObjectPtr<AActor>> TrappedEnemies; // 트랩의 공격 범위 안에 들어와있는 적들
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

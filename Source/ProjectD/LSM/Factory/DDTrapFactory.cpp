@@ -33,14 +33,13 @@ UObject* UDDTrapFactory::CreateObject(UWorld* World, const FName& RowName, const
 		UE_LOG(LogTemp, Warning, TEXT("Not Loaded At UDDTrapFactory"));
 		return nullptr;
 	}
-
+	NewTrap->InitFromDataTable(RowName, *TrapStruct);
 	NewTrap->SetTrapAssets(*LoadedAsset);
 
 	NewTrap->SetActorLocation(Location);
 	NewTrap->SetActorRotation(Rotation);
 	NewTrap->SetOwner(Owner);
 	NewTrap->SetInstigator(Instigator);
-	NewTrap->InitFromDataTable(RowName,*TrapStruct);
 	
 
 

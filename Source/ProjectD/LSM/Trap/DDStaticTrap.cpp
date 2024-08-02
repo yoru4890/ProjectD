@@ -68,7 +68,8 @@ void ADDStaticTrap::SetTrapAssets(FBaseStruct& LoadedAsset)
 	}
 
 	FBoxSphereBounds Bounds = FirstStaticMeshComponent->GetStaticMesh()->GetBounds();
+	FirstStaticMeshComponent->SetRelativeLocation(FVector(0, 0, TrapMeshZAxisModify));
 	FVector BoxExtent = Bounds.BoxExtent;
-	FVector ScaleFactor = FVector(300.f / (BoxExtent.X * 2), 300.f / (BoxExtent.Y * 2), 1);
+	FVector ScaleFactor = FVector(300.f / (BoxExtent.X * 2), 300.f / (BoxExtent.Y * 2), 300.f / (BoxExtent.X * 2));
 	FirstStaticMeshComponent->SetWorldScale3D(ScaleFactor);
 }
