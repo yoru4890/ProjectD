@@ -123,4 +123,5 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr<UMaterialInstanceDynamic> DynamicMaterialInstance;
+
 };

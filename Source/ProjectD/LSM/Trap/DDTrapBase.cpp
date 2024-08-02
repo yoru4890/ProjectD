@@ -17,7 +17,8 @@ ADDTrapBase::ADDTrapBase()
 	BoxCollisionComponent->SetBoxExtent(FVector(150.0f, 150.0f, 40.0f));
 	BoxCollisionComponent->SetCollisionProfileName(TEXT("Trap"), true);
 	RootComponent = BoxCollisionComponent;
-	
+	BoxCollisionComponent->SetCollisionObjectType(GTCHANNEL_TRAP); // Assuming ECC_GameTraceChannel1 is the new Trap channel
+	BoxCollisionComponent->SetCollisionResponseToChannel(GTCHANNEL_ENEMY, ECollisionResponse::ECR_Overlap); // Assuming Enemy uses ECC_Pawn
 
 	static ConstructorHelpers::FObjectFinder<UMaterialInterface> MaterialFinder(TEXT("/Game/0000/LSM/Mesh/Trap/LSM_MI_PreviewTrap.LSM_MI_PreviewTrap"));
 	if (MaterialFinder.Succeeded())
@@ -205,4 +206,3 @@ void ADDTrapBase::OnBoxCollisionEndOverlap(UPrimitiveComponent* OverlappedCompon
 {
 	TrappedEnemies.Remove(OtherActor);
 }
-
