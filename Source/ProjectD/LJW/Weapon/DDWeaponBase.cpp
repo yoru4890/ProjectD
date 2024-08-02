@@ -3,6 +3,8 @@
 
 #include "LJW/Weapon/DDWeaponBase.h"
 #include "YSY/Game/DDGameSingleton.h"
+#include "LJW/Animation/DDEquipAnimNotify.h"
+#include "LJW/Animation/DDUnequipAnimNotify.h"
 
 // Sets default values
 ADDWeaponBase::ADDWeaponBase()
@@ -43,6 +45,38 @@ void ADDWeaponBase::InitData(const FName& RowName, const FDDWeaponData& WeaponDa
 	AttackCooltime = WeaponData.AttackCooltime;
 	AttackDamage = WeaponData.AttackDamage;
 	AttackRange = WeaponData.AttackRange;
+	
+	if (WeaponData.EquipWeapon)
+	{
+		EquipWeaponAnim = WeaponData.EquipWeapon;
+		UE_LOG(LogTemp, Warning, TEXT("Montage : %s"), *EquipWeaponAnim->GetFName().ToString());
+
+		TArray<FAnimNotifyEvent> notifyEvents{ EquipWeaponAnim->Notifies };
+
+		for (FAnimNotifyEvent eventNotify : notifyEvents)
+		{
+			if (UDDEquipAnimNotify* startNotify = Cast<UDDEquipAnimNotify>(eventNotify.Notify))
+			{
+				startNotify->OnEquipDelegatge.AddUObject(this, &ADDWeaponBase::EnableWeapon);
+			}
+		}
+	}
+
+	if (WeaponData.UnequipWeapon)
+	{
+		UnequipWeaponAnim = WeaponData.UnequipWeapon;
+		UE_LOG(LogTemp, Warning, TEXT("Montage : %s"), *UnequipWeaponAnim->GetFName().ToString());
+
+		TArray<FAnimNotifyEvent> notifyEvents{ UnequipWeaponAnim->Notifies };
+
+		for (FAnimNotifyEvent eventNotify : notifyEvents)
+		{
+			if (UDDUnequipAnimNotify* startNotify = Cast<UDDUnequipAnimNotify>(eventNotify.Notify))
+			{
+				startNotify->OnUnequipDelegatge.AddUObject(this, &ADDWeaponBase::DisableWeapon);
+			}
+		}
+	}
 
 	////Mesh
 	if (WeaponData.WeaponMesh) 
@@ -50,11 +84,8 @@ void ADDWeaponBase::InitData(const FName& RowName, const FDDWeaponData& WeaponDa
 		WeaponSkeletal->SetSkeletalMesh(WeaponData.WeaponMesh);
 		WeaponSkeletal->SetCollisionProfileName(TEXT("NoCollision"));
 	}
-
 	//무기 비활성화
 	DisableWeapon();
 	
 }
-
-
 

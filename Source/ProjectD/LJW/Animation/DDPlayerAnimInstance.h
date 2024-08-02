@@ -53,11 +53,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
 	float JumpingThreshold;
 
-	//Anim Montage
-	UPROPERTY(EditAnyWhere, BlueprintReadOnly, Category = Animation)
-	TObjectPtr<UAnimMontage> ChangeCudgel;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Animation)
-	TObjectPtr<UAnimMontage> ChangeRifle;
 
 };

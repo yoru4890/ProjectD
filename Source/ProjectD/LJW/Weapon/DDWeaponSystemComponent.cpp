@@ -4,6 +4,7 @@
 #include "LJW/Weapon/DDWeaponSystemComponent.h"
 #include "YSY/Game/DDGameSingleton.h"
 #include "LJW/Weapon/DDWeaponBase.h"
+#include <Kismet/KismetSystemLibrary.h>
 
 
 
@@ -11,7 +12,7 @@
 UDDWeaponSystemComponent::UDDWeaponSystemComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
-
+	
 }
 
 void UDDWeaponSystemComponent::BeginPlay()
@@ -44,8 +45,9 @@ void UDDWeaponSystemComponent::InitializeWeapon()
 		if (GetOwner())
 		{
 			//FindComponentByClass -> 여러 개일 경우 가장 첫 번째 메쉬 반환
-			USkeletalMeshComponent* GetParentMesh = GetOwner()->FindComponentByClass<USkeletalMeshComponent>();
-			TempWeapon->AttachToComponent(GetParentMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("RifleSocket"));
+			ParentSkeletal = GetOwner()->FindComponentByClass<USkeletalMeshComponent>();
+			
+			TempWeapon->AttachToComponent(ParentSkeletal, FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("RifleSocket"));
 		}
 		else 
 		{
@@ -68,33 +70,19 @@ void UDDWeaponSystemComponent::EquipMeleeWeapon()
 {
 	if (CurrentWeapon != Weapons[CurrentMeleeWeapon])
 	{
+		if (CurrentWeapon->GetUnequipWeaponMontage())
+		{
+			ParentSkeletal->GetAnimInstance()->Montage_Play(CurrentWeapon->GetUnequipWeaponMontage());
+		}
+
 		CurrentWeapon = Weapons[CurrentMeleeWeapon];
-		//TODO : LJW Anim Notify
-		Weapons[CurrentRangeWeapon]->DisableWeapon();
-		CurrentWeapon->EnableWeapon();
-	}
-	
-	switch (CurrentWeaponEnum)
-	{
-	case EWeaponType::Cudgel:
-		GetOwner()->FindComponentByClass<USkeletalMeshComponent>()->GetAnimInstance()->Montage_Play(ChangeMontage);
-		break;
-	case EWeaponType::LightSaber:
-		break;
-	case EWeaponType::Sword:
-		break;
-	case EWeaponType::Rifle:
-		break;
-	case EWeaponType::Sniper:
-		break;
-	case EWeaponType::Bazooka:
-		break;
-	case EWeaponType::Machinegun:
-		break;
-	case EWeaponType::Unknown:
-		break;
-	default:
-		break;
+		UE_LOG(LogTemp, Warning, TEXT("Current Weapon : %s"), *CurrentWeapon->GetFName().ToString());
+
+
+		if (CurrentWeapon->GetEquipWeaponMontage())
+		{
+			ParentSkeletal->GetAnimInstance()->Montage_Play(CurrentWeapon->GetEquipWeaponMontage());
+		}
 	}
 }
 
@@ -102,12 +90,21 @@ void UDDWeaponSystemComponent::EquipRangeWeapon()
 {
 	if (CurrentWeapon != Weapons[CurrentRangeWeapon])
 	{
-		CurrentWeapon = Weapons[CurrentRangeWeapon];
-		//TODO : LJW Anim Notify
-		Weapons[CurrentMeleeWeapon]->DisableWeapon();
-		CurrentWeapon->EnableWeapon();
-		
+		if (CurrentWeapon->GetUnequipWeaponMontage())
+		{
+			ParentSkeletal->GetAnimInstance()->Montage_Play(CurrentWeapon->GetUnequipWeaponMontage());
+		}
+
+		CurrentWeapon = Weapons[CurrentMeleeWeapon];
+		UE_LOG(LogTemp, Warning, TEXT("Current Weapon : %s"), *CurrentWeapon->GetFName().ToString());
+
+
+		if (CurrentWeapon->GetEquipWeaponMontage())
+		{
+			ParentSkeletal->GetAnimInstance()->Montage_Play(CurrentWeapon->GetEquipWeaponMontage());
+		}
 	}
+
 }
 
 

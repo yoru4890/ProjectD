@@ -34,7 +34,7 @@ ADDCharacterPlayerEngineer::ADDCharacterPlayerEngineer()
 	CreateLeaderPoseSkeletalMesh(BottomBody, TEXT("BottomBody"), TEXT("/Script/Engine.SkeletalMesh'/Game/G2_Mercenaries/Meshes/Characters/Seperates/Females/SK_BottomBody_B.SK_BottomBody_B'"));
 
 	//ABP
-	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimInstanceClassRef(TEXT("/Script/Engine.AnimBlueprint'/Game/0000/LJW/Animation/ABP_Engineer.ABP_Engineer_C'"));
+	static ConstructorHelpers::FClassFinder<UAnimInstance> AnimInstanceClassRef(TEXT("/Script/Engine.AnimBlueprint'/Game/0000/LJW/Animation/ABP_PlayerEngineer.ABP_PlayerEngineer_C'"));
 	if (AnimInstanceClassRef.Class)
 	{
 		GetMesh()->SetAnimInstanceClass(AnimInstanceClassRef.Class);

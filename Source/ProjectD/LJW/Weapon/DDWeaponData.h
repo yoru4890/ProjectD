@@ -56,5 +56,8 @@ public:
 	float AttackRange;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
-	TObjectPtr<UAnimMontage> ChangeWeapon;
+	TObjectPtr<UAnimMontage> EquipWeapon;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
+	TObjectPtr<UAnimMontage> UnequipWeapon;
 };

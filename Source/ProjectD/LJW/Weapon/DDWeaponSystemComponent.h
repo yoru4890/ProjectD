@@ -43,9 +43,6 @@ public:
 	void EquipMeleeWeapon();
 	void EquipRangeWeapon();
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Animation)
-	TObjectPtr<UAnimMontage> ChangeMontage;
-
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon, meta = (AllowPrivateAccess = "true"))
 	TArray<ADDWeaponBase*> Weapons;
@@ -63,6 +60,6 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category= Weapon, meta = (AllowPrivateAccess = "true"))
 	EWeaponType CurrentWeaponEnum;
 
-	
-
-};
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Animation, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<USkeletalMeshComponent> ParentSkeletal;
+}; 

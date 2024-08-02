@@ -25,6 +25,12 @@ public:
 	void DisableWeapon();
 	void EnableWeapon();
 
+	FORCEINLINE UAnimMontage* GetEquipWeaponMontage() const noexcept{ return EquipWeaponAnim; }
+	void SetEquipWeaponMontage(UAnimMontage* InMontage) { EquipWeaponAnim = InMontage; }
+
+	FORCEINLINE UAnimMontage* GetUnequipWeaponMontage() const noexcept { return UnequipWeaponAnim; }
+	void SetUnequipWeaponMontage(UAnimMontage* InMontage) { UnequipWeaponAnim = InMontage; }
+	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -62,4 +68,10 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon)
 	float AttackRange;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon)
+	TObjectPtr<UAnimMontage> EquipWeaponAnim;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon)
+	TObjectPtr<UAnimMontage> UnequipWeaponAnim;
 };
