@@ -5,30 +5,9 @@
 #include "CoreMinimal.h"
 #include "LSM/BaseStruct.h"
 #include "UObject/NoExportTypes.h"
+#include "LSM/DDLoadedAsset.h"
 #include "DDAssetManager.generated.h"
 
-/**
- * 
- */
-USTRUCT()
-struct FLoadedAsset
-{
-    GENERATED_BODY()
-
-    UPROPERTY()
-    TArray<TObjectPtr<UStaticMesh>> StaticMeshs;
-
-    UPROPERTY()
-    TArray<TObjectPtr<USkeletalMesh>> SkeletalMeshs;
-
-    UPROPERTY()
-    TObjectPtr<UAnimBlueprint> AnimBlueprint;
-
-    UPROPERTY()
-    TArray<TObjectPtr<UParticleSystem>> Effects;
-
-    FLoadedAsset() {}
-};
 
 UCLASS()
 class PROJECTD_API UDDAssetManager : public UObject
@@ -38,18 +17,18 @@ class PROJECTD_API UDDAssetManager : public UObject
 public:
     void Initialize();
 
-    void LoadAssetsAsync(const FName& RowName, const FBaseStruct& ObjectStruct);
+    void LoadAssetsAsync(const FName& RowName);
 
-    FLoadedAsset& GetLoadedAssetByName(const FName& RowName);
+    FBaseStruct* GetLoadedAssetByName(const FName& RowName);
 
     void RemoveLoadedAssetByName(const FName& RowName);
 
-    void RevoeLoadedAssetAll();
+    void RemoveLoadedAssetAll();
 
 private:
-    void OnAssetsLoaded(const FName& RowName, FLoadedAsset& LoadedAsset);
+    FBaseStruct* GetObjectBaseData(const FName& RowName);
 
-    // 로딩된 Asset을 담고 있는 자료구조 
-    UPROPERTY()
-    TMap<FName, FLoadedAsset> LoadedAssets;
+    //// 로딩된 Asset을 담고 있는 자료구조 
+    //UPROPERTY()
+    //TMap<FName, FDDLoadedAsset> LoadedAssets;
 };

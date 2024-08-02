@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "LSM/DDLoadedAsset.h"
 #include "UObject/Interface.h"
 #include "TrapAssetInterface.generated.h"
 
@@ -22,5 +23,5 @@ class PROJECTD_API ITrapAssetInterface
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual void SetTrapAssets(TArray<UStaticMesh*> StaticMeshs, TArray<USkeletalMesh*> SkeletalMeshs, UAnimBlueprint* AnimBlueprint, TArray<UParticleSystem*> ParticleEffects) = 0;
+	virtual void SetTrapAssets(FBaseStruct& LoadedAsset) = 0;
 };

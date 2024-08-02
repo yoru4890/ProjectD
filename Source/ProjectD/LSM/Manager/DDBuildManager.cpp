@@ -66,6 +66,7 @@ void ADDBuildManager::InitializeGridCells()
 				GridCell = FGridCell(CellLocation, HitResult.ImpactNormal, true);
 			}
 			else {
+				CellLocation.Z = -10000.f;
 				GridCell = FGridCell(CellLocation, HitResult.ImpactNormal, false);
 			}
 			GridCellMap.Add(FIntPoint(Row, Column), GridCell);
@@ -123,8 +124,8 @@ const bool ADDBuildManager::CanPlaceTrapAtLocation(const FVector& HitLocation) c
 				if (!GridCellMap[TempPoint].bCanBuild) {
 					return false;
 				}
+				FVector PointLocation = GridCellMap[TempPoint].WorldLocation;
 				// 점이 평면 위에 있는지 확인
-				FVector PointLocation = GridCellMap[TempPoint].WorldLocation; // GridCell을 월드 위치로 변환하는 함수가 필요
 				if (!IsPointOnSamePlane(PointLocation, StandardPoint, InNormalVector)) {
 					return false;
 				}

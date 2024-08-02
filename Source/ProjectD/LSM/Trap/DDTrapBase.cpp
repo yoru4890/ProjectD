@@ -4,6 +4,7 @@
 #include "Components/BoxComponent.h"
 #include "Particles/ParticleSystemComponent.h"
 #include "YSY/Collision/CollisionChannel.h"
+#include "Engine/DamageEvents.h"
 
 // Sets default values
 ADDTrapBase::ADDTrapBase()
@@ -14,14 +15,20 @@ ADDTrapBase::ADDTrapBase()
 	// Create and initialize the BoxComponent
 	BoxCollisionComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxCollisionComponent"));
 	BoxCollisionComponent->SetBoxExtent(FVector(150.0f, 150.0f, 40.0f));
-	BoxCollisionComponent->SetCollisionResponseToChannel(GTCHANNEL_MANAGETRACE, ECR_Block);
+	BoxCollisionComponent->SetCollisionProfileName(TEXT("Trap"), true);
 	RootComponent = BoxCollisionComponent;
+	BoxCollisionComponent->SetCollisionObjectType(GTCHANNEL_TRAP); // Assuming ECC_GameTraceChannel1 is the new Trap channel
+	BoxCollisionComponent->SetCollisionResponseToChannel(GTCHANNEL_ENEMY, ECollisionResponse::ECR_Overlap); // Assuming Enemy uses ECC_Pawn
 
 	static ConstructorHelpers::FObjectFinder<UMaterialInterface> MaterialFinder(TEXT("/Game/0000/LSM/Mesh/Trap/LSM_MI_PreviewTrap.LSM_MI_PreviewTrap"));
 	if (MaterialFinder.Succeeded())
 	{
 		PreviewMaterial = MaterialFinder.Object;
 	}
+
+	BoxCollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &ADDTrapBase::OnBoxCollisionBeginOverlap);
+	BoxCollisionComponent->OnComponentEndOverlap.AddDynamic(this, &ADDTrapBase::OnBoxCollisionEndOverlap);
+
 }
 
 ADDTrapBase::~ADDTrapBase()
@@ -44,6 +51,28 @@ void ADDTrapBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	TimeSinceLastAttack += DeltaTime;
+
+	if (bCanAttack && !TrappedEnemies.IsEmpty() && TimeSinceLastAttack >= TrapCoolTime)
+	{
+		Attack();
+		TimeSinceLastAttack = 0.f;
+	}
+
+}
+void ADDTrapBase::SetTrapCanAttack(const bool bInCanAttack)
+{
+	bCanAttack = bInCanAttack;
+	TimeSinceLastAttack = 0;
+
+	if (!bInCanAttack) 
+	{
+		BoxCollisionComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+	else
+	{
+		BoxCollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	}
 }
 
 void ADDTrapBase::InitFromDataTable(const FName& RowName, const FDDTrapStruct& TrapData)
@@ -68,9 +97,12 @@ void ADDTrapBase::InitFromDataTable(const FName& RowName, const FDDTrapStruct& T
 	SlowAmount = TrapData.SlowAmount;
 	SlowDuration = TrapData.SlowDuration;
 	bCanAttack = false;
+	TrapDamageType = TrapData.DamageType;
+	TrapMeshZAxisModify = TrapData.MeshZAxisModify;
+	UE_LOG(LogTemp, Warning, TEXT("TrapMeshZAxisModify is : %f"), TrapData.MeshZAxisModify);
 }
 
-void ADDTrapBase::SetTrapAssets(TArray<UStaticMesh*> StaticMeshs, TArray<USkeletalMesh*> SkeletalMeshs, UAnimBlueprint* AnimBlueprint, TArray<UParticleSystem*> ParticleEffects)
+void ADDTrapBase::SetTrapAssets(FBaseStruct& LoadedAsset)
 {
 	// 기존 ParticleEffectComponents 배열 초기화
 	for (UParticleSystemComponent* ParticleEffectComponent : ParticleEffectComponents)
@@ -82,12 +114,19 @@ void ADDTrapBase::SetTrapAssets(TArray<UStaticMesh*> StaticMeshs, TArray<USkelet
 	}
 	ParticleEffectComponents.Empty();
 
-	for (auto* ParticlEffect : ParticleEffects) {
+	for (TSoftObjectPtr<UParticleSystem>& ParticlEffectSoftPtr : LoadedAsset.Effects) {
 		UParticleSystemComponent* ParticleEffectComponent = NewObject<UParticleSystemComponent>(this);
 		check(ParticleEffectComponent);
 		// ParticleRootComponent에 부착
 		ParticleEffectComponent->SetupAttachment(RootComponent);
-		ParticleEffectComponent->SetTemplate(ParticlEffect);
+		if(ParticlEffectSoftPtr.IsValid())
+		{
+			ParticleEffectComponent->SetTemplate(ParticlEffectSoftPtr.Get());
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("%s : ParticleEffect not loaded"), TrapRowName);
+		}
 		ParticleEffectComponent->RegisterComponent();
 
 		ParticleEffectComponents.Add(ParticleEffectComponent);
@@ -98,7 +137,8 @@ void ADDTrapBase::SetMaterialToPreview(bool bCanPay)
 {
 	if (bCanPay) {
 		DynamicMaterialInstance->SetVectorParameterValue("Param", FLinearColor(0, 0, 0.6f, 1));
-	}else{
+	}
+	else {
 		DynamicMaterialInstance->SetVectorParameterValue("Param", FLinearColor(0.6, 0, 0, 1));
 	}
 	if (TrapMeshType == EMeshType::StaticMesh) {
@@ -147,3 +187,22 @@ void ADDTrapBase::SetMaterialToOriginal()
 	}
 }
 
+void ADDTrapBase::Attack()
+{
+	FDamageEvent DamageEvent{};
+	DamageEvent.DamageTypeClass = TrapDamageType;
+	for (AActor* Enemy : TrappedEnemies) {
+		Enemy->TakeDamage(TrapDamage, DamageEvent, nullptr, this);
+		UE_LOG(LogTemp, Warning, TEXT("Trap Attack : %d , Damage Type: %s"), TrapDamage, *TrapDamageType->GetDisplayNameText().ToString());
+	}
+}
+
+void ADDTrapBase::OnBoxCollisionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	TrappedEnemies.Add(OtherActor);
+}
+
+void ADDTrapBase::OnBoxCollisionEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	TrappedEnemies.Remove(OtherActor);
+}

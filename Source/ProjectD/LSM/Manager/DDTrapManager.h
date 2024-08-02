@@ -27,11 +27,13 @@ public:
 
 	// 함정이 해금이 되었는지 체크하는 메서드
 	UFUNCTION(BlueprintCallable)
-	bool IsTowerUnlocked(const FName& RowName) const;
+	bool IsTrapUnlocked(const FName& RowName) const;
 
 	// 함정을 해금하는 메서드
 	UFUNCTION(BlueprintCallable)
-	bool UnlockTower(const FName& RowName);
+	bool UnlockTrap(const FName& RowName);
+
+	bool LockTrap(const FName& RowName);
 
 	const FDDTrapStruct& GetTrapData(const FName& RowName) const;
 
