@@ -71,6 +71,8 @@ public:
 	void ChangeMaxWalkSpeed(float Amount);
 	void Stun(FTimerHandle& TimerHandle, float Time, float Amount);
 
+	void BindingNotifyAttackFinished();
+
 	UFUNCTION()
 	void AttackFinished();
 

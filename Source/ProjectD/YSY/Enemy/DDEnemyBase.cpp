@@ -12,6 +12,7 @@
 #include "YSY/UI/DDWidgetComponent.h"
 #include "YSY/Stat/DDEnemyStatComponent.h"
 #include "YSY/DamageType/AllDamageType.h"
+#include "YSY/Animation/AttackFinishedAnimNotify.h"
 
 // Sets default values
 ADDEnemyBase::ADDEnemyBase()
@@ -169,6 +170,7 @@ void ADDEnemyBase::InitializeEnemy(const FDDEnemyData& EnemyData)
 	}
 
 	AttackMontage = EnemyData.AttackMontage.Get();
+	BindingNotifyAttackFinished();
 }
 
 void ADDEnemyBase::SplineMove()
@@ -187,18 +189,13 @@ void ADDEnemyBase::AttackByAI()
 {
 	// TODO : YSY Complete Attack
 
-	UE_LOG(LogTemp, Warning, TEXT("Attack"));
+	if (!(GetMesh()->GetAnimInstance()->IsAnyMontagePlaying()))
+	{
+		GetMesh()->GetAnimInstance()->Montage_Play(AttackMontage);
 
-	FTimerHandle AttackTimer;
-	GetWorld()->GetTimerManager().SetTimer(AttackTimer, [this]()
-		{
-			OnAttackFinished.ExecuteIfBound();
-		}, 0.1f, false, 2.0f);
-
-	/*AActor* Player{};
-	float DamageAmount{};
-	FDamageEvent DamageEvent{};
-	Player->TakeDamage(DamageAmount, DamageEvent, GetController(), this);*/
+		UE_LOG(LogTemp, Warning, TEXT("attack"));
+		// Melee, Ranged
+	}
 }
 
 void ADDEnemyBase::SetAIAttackFinsihedDelegate(const FAIAttackOnFinishedSignature& InOnAttackFinished)
@@ -235,7 +232,7 @@ void ADDEnemyBase::SetupCharacterWidget(UDDUserWidget* InUserWidget)
 		HpBarWidget->UpdateHpBar(Stat->GetMaxHp());
 		Stat->OnHpChanged.AddUObject(HpBarWidget, &UDDHpBarWidget::UpdateHpBar);
 		// TODO : YSY StatComponent
-	}
+ 	}
 }
 
 float ADDEnemyBase::ApplyDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -451,4 +448,25 @@ void ADDEnemyBase::Stun(FTimerHandle& TimerHandle, float Time, float Amount)
 			UE_LOG(LogTemp, Warning, TEXT("StunEnd"));
 		}
 	,0.01f, false, Time);
+}
+
+void ADDEnemyBase::BindingNotifyAttackFinished()
+{
+	if (AttackMontage)
+	{
+		TArray<FAnimNotifyEvent> notifyEvents{ AttackMontage->Notifies };
+
+		for (FAnimNotifyEvent eventNotify : notifyEvents)
+		{
+			if (UAttackFinishedAnimNotify* startNotify = Cast<UAttackFinishedAnimNotify>(eventNotify.Notify))
+			{
+				startNotify->onNotified.AddUObject(this, &ADDEnemyBase::AttackFinished);
+			}
+		}
+	}
+}
+
+void ADDEnemyBase::AttackFinished()
+{
+	OnAttackFinished.ExecuteIfBound();
 }
