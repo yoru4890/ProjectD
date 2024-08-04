@@ -32,6 +32,30 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+public:
+	FORCEINLINE const FName& GetTrapRowName() const { return TrapRowName; }
+	//FORCEINLINE const int32 GetTrapBuildCost() const { return TrapBuildCost; }
+
+public:	
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+	virtual void InitFromDataTable(const FName& RowName, const FDDTrapStruct& TrapData);
+	void  SetTrapCanAttack(const bool bInCanAttack);
+	virtual void SetTrapAssets(FBaseStruct& LoadedAsset) override;
+	void SetMaterialToPreview(bool bCanPay);
+	void SetMaterialToOriginal();
+
+protected:
+	virtual void Attack();
+
+private:
+	UFUNCTION()
+	void OnBoxCollisionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+	void OnBoxCollisionEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+
 protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -44,31 +68,19 @@ protected:
 	bool bCanAttack; // 트랩이 공격할 수 있는지
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 TrapBuildCost; // 트랩의 설치비용
+	float TrapMeshZAxisModify; // 트랩 메쉬 z축 조정
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 TrapUpgradeCost; // 트랩의 업그레이드 비용
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 TrapUnlockCost; // 트랩의 언락 비용
+	TSet<TObjectPtr<AActor>> TrappedEnemies; // 트랩의 공격 범위 안에 들어와있는 적들
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 TrapCoolTime; // 트랩의 공격 쿨타임
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float TimeSinceLastAttack; // 트랩의 공격 쿨타임
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 TrapDamage; // 트랩의 데미지
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 TrapLevel; // 트랩의 레벨(테크)
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName TrapParentName; // 부모 트랩의 이름
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<FName> TrapChildNames; // 자식 트랩의 이름들
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bIsTrapUnlocked; // 트랩이 언락되었는지 여부
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EMeshType TrapMeshType; // 트랩의 메쉬 타입
@@ -94,7 +106,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bIsSlowTrap"))
 	float SlowDuration; // 이동 속도 감소 지속 시간
 
-protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<UDamageType> TrapDamageType; // 트랩의 데미지 타입
+
 	UPROPERTY(EditAnywhere)
 	TArray<TObjectPtr<UParticleSystemComponent>> ParticleEffectComponents;
 
@@ -110,16 +124,4 @@ protected:
 	UPROPERTY()
 	TObjectPtr<UMaterialInstanceDynamic> DynamicMaterialInstance;
 
-public:
-	FORCEINLINE const FName& GetTrapRowName() const { return TrapRowName; }
-	FORCEINLINE void  SetTrapCanAttack(const bool bInCanAttack) { bCanAttack = bInCanAttack; }
-	//FORCEINLINE const int32 GetTrapBuildCost() const { return TrapBuildCost; }
-
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-	virtual void InitFromDataTable(const FName& RowName, const FDDTrapStruct& TrapData);
-	virtual void SetTrapAssets(TArray<UStaticMesh*> StaticMeshs, TArray<USkeletalMesh*> SkeletalMeshs, UAnimBlueprint* AnimBlueprint, TArray<UParticleSystem*> ParticleEffects) override;
-	void SetMaterialToPreview(bool bCanPay);
-	void SetMaterialToOriginal();
 };
