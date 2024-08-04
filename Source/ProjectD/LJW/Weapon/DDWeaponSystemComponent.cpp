@@ -70,19 +70,11 @@ void UDDWeaponSystemComponent::EquipMeleeWeapon()
 {
 	if (CurrentWeapon != Weapons[CurrentMeleeWeapon])
 	{
-		if (CurrentWeapon->GetUnequipWeaponMontage())
-		{
-			ParentSkeletal->GetAnimInstance()->Montage_Play(CurrentWeapon->GetUnequipWeaponMontage());
-		}
+		PlayUnequipMontage();
 
 		CurrentWeapon = Weapons[CurrentMeleeWeapon];
 		UE_LOG(LogTemp, Warning, TEXT("Current Weapon : %s"), *CurrentWeapon->GetFName().ToString());
 
-
-		if (CurrentWeapon->GetEquipWeaponMontage())
-		{
-			ParentSkeletal->GetAnimInstance()->Montage_Play(CurrentWeapon->GetEquipWeaponMontage());
-		}
 	}
 }
 
@@ -90,21 +82,28 @@ void UDDWeaponSystemComponent::EquipRangeWeapon()
 {
 	if (CurrentWeapon != Weapons[CurrentRangeWeapon])
 	{
-		if (CurrentWeapon->GetUnequipWeaponMontage())
-		{
-			ParentSkeletal->GetAnimInstance()->Montage_Play(CurrentWeapon->GetUnequipWeaponMontage());
-		}
+		PlayUnequipMontage();
 
 		CurrentWeapon = Weapons[CurrentMeleeWeapon];
 		UE_LOG(LogTemp, Warning, TEXT("Current Weapon : %s"), *CurrentWeapon->GetFName().ToString());
-
-
-		if (CurrentWeapon->GetEquipWeaponMontage())
-		{
-			ParentSkeletal->GetAnimInstance()->Montage_Play(CurrentWeapon->GetEquipWeaponMontage());
-		}
 	}
 
+}
+
+void UDDWeaponSystemComponent::PlayEquipMontage()
+{
+	if (CurrentWeapon->GetEquipWeaponMontage())
+	{
+		ParentSkeletal->GetAnimInstance()->Montage_Play(CurrentWeapon->GetEquipWeaponMontage());
+	}
+}
+
+void UDDWeaponSystemComponent::PlayUnequipMontage()
+{
+	if (CurrentWeapon->GetUnequipWeaponMontage())
+	{
+		ParentSkeletal->GetAnimInstance()->Montage_Play(CurrentWeapon->GetUnequipWeaponMontage());
+	}
 }
 
 
