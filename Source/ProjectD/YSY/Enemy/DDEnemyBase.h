@@ -131,6 +131,9 @@ private:
 	EEnemyType EnemyType;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DD", meta = (AllowPrivateAccess = "true"))
+	EEnemyAttackType EnemyAttackType;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DD", meta = (AllowPrivateAccess = "true"))
 	float MaxHP;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DD", meta = (AllowPrivateAccess = "true"))
@@ -178,5 +181,8 @@ private:
 
 	bool bIsAggroState{};
 
-	
+	float TurnSpeed{ 5.0f };
+
+	UPROPERTY()
+	TObjectPtr<AActor> Player;
 };

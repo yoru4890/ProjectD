@@ -30,6 +30,7 @@ EBTNodeResult::Type UDDBTT_DefaultAttack::ExecuteTask(UBehaviorTreeComponent& Ow
 	OnAttackFinished.BindLambda(
 		[&]()
 		{
+			UE_LOG(LogTemp, Warning, TEXT("Is End"));
 			FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 		}
 	);

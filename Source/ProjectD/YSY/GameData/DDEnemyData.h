@@ -15,6 +15,15 @@ enum class EEnemyType : uint8
 	Unknown
 };
 
+UENUM(BlueprintType)
+enum class EEnemyAttackType : uint8
+{
+	Melee UMETA(DisplayName = "Melee"),
+	Range UMETA(DisplayName = "Range"),
+
+	Unknown
+};
+
 USTRUCT(BlueprintType)
 struct FDDEnemyData : public FTableRowBase
 {
@@ -31,6 +40,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
 	EEnemyType EnemyType;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	EEnemyAttackType EnemyAttackType;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
 	float MaxHP;
@@ -55,12 +67,6 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
 	int32 GoldDropAmount;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
-	int32 PoolSize;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
-	int32 ID;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
 	uint8 bIsBoss : 1;

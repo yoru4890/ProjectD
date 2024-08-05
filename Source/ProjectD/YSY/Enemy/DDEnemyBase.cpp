@@ -118,6 +118,8 @@ void ADDEnemyBase::BeginPlay()
 	check(EnemyAIController);
 
 	EnemyAIController->OnMoveFinished.BindUObject(this, &ADDEnemyBase::SplineMoveFinish);
+
+	Player = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 }
 
 void ADDEnemyBase::Tick(float DeltaTime)
@@ -125,6 +127,14 @@ void ADDEnemyBase::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	UpdateWidgetScale(); // TODO : YSY Doesn't work. Move to SetTimerEvent
+
+	if (bIsAggroState)
+	{
+		auto RotateTemp = (Player->GetActorLocation() - GetActorLocation()).Rotation();
+		RotateTemp.Pitch = 0;
+
+		SetActorRotation(FMath::RInterpTo(GetActorRotation(), RotateTemp, DeltaTime, TurnSpeed));
+	}
 }
 
 void ADDEnemyBase::InitializeEnemy(const FDDEnemyData& EnemyData)
@@ -133,6 +143,7 @@ void ADDEnemyBase::InitializeEnemy(const FDDEnemyData& EnemyData)
 	EnemyName = EnemyData.EnemyName;
 	WeakPoints = EnemyData.WeakPoints;
 	EnemyType = EnemyData.EnemyType;
+	EnemyAttackType = EnemyData.EnemyAttackType;
 	MaxHP = EnemyData.MaxHP;
 	Stat->SetMaxHp(MaxHP);
 	Stat->SetCurrentHp(MaxHP);
@@ -169,7 +180,9 @@ void ADDEnemyBase::InitializeEnemy(const FDDEnemyData& EnemyData)
 		EnemyData.AttackMontage.LoadSynchronous();
 	}
 
-	AttackMontage = EnemyData.AttackMontage.Get();
+	UAnimMontage* EnemyAttackMontage = EnemyData.AttackMontage.Get();
+	AttackMontage = DuplicateObject<UAnimMontage>(EnemyAttackMontage, this);
+
 	BindingNotifyAttackFinished();
 }
 
@@ -188,14 +201,20 @@ void ADDEnemyBase::SetAIMoveFinishedDelegate(const FAISplineMoveOnFinishedSignat
 void ADDEnemyBase::AttackByAI()
 {
 	// TODO : YSY Complete Attack
+	ChangeMaxWalkSpeed(0.0f);
+	GetMesh()->GetAnimInstance()->Montage_Play(AttackMontage);
 
-	if (!(GetMesh()->GetAnimInstance()->IsAnyMontagePlaying()))
+	UE_LOG(LogTemp, Warning, TEXT("attack"));
+
+	if (EnemyAttackType == EEnemyAttackType::Melee)
 	{
-		GetMesh()->GetAnimInstance()->Montage_Play(AttackMontage);
 
-		UE_LOG(LogTemp, Warning, TEXT("attack"));
-		// Melee, Ranged
 	}
+	else if (EnemyAttackType == EEnemyAttackType::Range)
+	{
+
+	}
+	
 }
 
 void ADDEnemyBase::SetAIAttackFinsihedDelegate(const FAIAttackOnFinishedSignature& InOnAttackFinished)
@@ -468,5 +487,6 @@ void ADDEnemyBase::BindingNotifyAttackFinished()
 
 void ADDEnemyBase::AttackFinished()
 {
+	ChangeMaxWalkSpeed(MovementSpeed);
 	OnAttackFinished.ExecuteIfBound();
 }

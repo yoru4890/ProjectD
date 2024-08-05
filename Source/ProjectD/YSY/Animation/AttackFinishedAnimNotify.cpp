@@ -5,5 +5,6 @@
 
 void UAttackFinishedAnimNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {
+	Super::Notify(MeshComp, Animation, EventReference);
 	onNotified.Broadcast();
 }
