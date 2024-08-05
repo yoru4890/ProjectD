@@ -4,17 +4,17 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "DDTrapBuildComponent.generated.h"
+#include "DDBuildComponent.generated.h"
 
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent), Blueprintable)
-class PROJECTD_API UDDTrapBuildComponent : public UActorComponent
+class PROJECTD_API UDDBuildComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:	
 	// Sets default values for this component's properties
-	UDDTrapBuildComponent();
+	UDDBuildComponent();
 
 protected:
 	// Called when the game starts
@@ -25,55 +25,55 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION(BlueprintCallable)
-	AActor* ReadyTrap(const FName& RowName);
+	AActor* ReadyBuilding(const FName& RowName);
 
 	UFUNCTION(BlueprintCallable)
-	void CancleReadyTrap();
+	void CancelReadyBuilding();
 
 	UFUNCTION(BlueprintCallable)
-	bool BuildTrap();
+	bool PlaceBuilding();
 
 	UFUNCTION(BlueprintCallable)
-	void CancleBuildTrap();
+	void CancelPlacedBuilding();
 
 	// 새로운 함수: 트랩 업그레이드
 	UFUNCTION(BlueprintCallable)
-	bool UpgradeTrap(const FName& RowName);
+	bool UpgradeBuilding(const FName& RowName);
 
 	UFUNCTION(BlueprintCallable)
 	void AllStopTrace();
 
 	UFUNCTION(BlueprintCallable)
-	void StopTrapBuildTrace();
+	void StopBuildTrace();
 
 	UFUNCTION(BlueprintCallable)
-	void StartTrapBuildTrace();
+	void StartBuildTrace();
 
 	UFUNCTION(BlueprintCallable)
-	void StopTrapManageTrace();
+	void StopManageTrace();
 
 	UFUNCTION(BlueprintCallable)
-	void StartTrapManageTrace();
+	void StartManageTrace();
 
 private:
 	UPROPERTY()
-	TObjectPtr<class UDDTrapManager> TrapManager;
+	TObjectPtr<class UDDBuildingManager> BuildingManager;
 
 	UPROPERTY()
-	TObjectPtr<class ADDBuildManager> BuildManager;
+	TObjectPtr<class ADDGridBuildManager> GridBuildManager;
 
 	UPROPERTY()
 	TObjectPtr<class ADDPlayerState> PlayerState;
 
 	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<class ADDTrapBase> PreviewTrap;
+	TObjectPtr<class ADDBuildingBase> PreviewBuilding;
 
 	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<class ADDTrapBase> ManagedTrap;
+	TObjectPtr<class ADDBuildingBase> ManagedBuilding;
 
-	FTimerHandle TrapBuildTraceTimerHandle;
+	FTimerHandle BuildTraceTimerHandle;
 
-	FTimerHandle TrapManageTraceTimerHandle;
+	FTimerHandle ManageTraceTimerHandle;
 
 	UPROPERTY(EditAnywhere, Category = "UI")
 	TSubclassOf<UUserWidget> HitWarningWidgetClass;
@@ -81,15 +81,15 @@ private:
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<class UDDCantBuildWidget> HitWarningWidgetInstance;
 
-	bool bIsSetTrap = false;
+	bool bIsSetBuilding = false;
 
-	void PerformTrapBuildTrace();
+	void PerformBuildTrace();
 
-	void PerformTrapManageTrace();
+	void PerformManageTrace();
 
-	bool CanPayTrapBuildCost(const FName& RowName) const;
-	bool PayTrapBuildCost(const FName& RowName) const;
-	bool CanPayTrapUpgradeCost(const FName& RowName) const;
-	bool PayTrapUpgradeCost(const FName& RowName) const;
+	bool CanPayBuildCost(const FName& RowName) const;
+	bool PayBuildCost(const FName& RowName) const;
+	bool CanPayUpgradeCost(const FName& RowName) const;
+	bool PayUpgradeCost(const FName& RowName) const;
 
 };

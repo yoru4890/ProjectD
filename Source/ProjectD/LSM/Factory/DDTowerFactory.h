@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "DDFactoryInterface.h"
-#include "LSM/Tower/DDTowerBase.h"
+#include "LSM/Building/Tower/DDTowerBase.h"
 #include "DDTowerFactory.generated.h"
 
 /**

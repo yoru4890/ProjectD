@@ -5,22 +5,12 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "DDTrapData.h"
-#include "TrapAssetInterface.h"
+#include "LSM/DDSetAssetInterface.h"
+#include "LSM/DDMaterials.h"
 #include "DDTrapBase.generated.h"
 
-
-USTRUCT(BlueprintType)
-struct FMaterialsStruct
-{
-	GENERATED_BODY()
-
-public:
-	UPROPERTY(VisibleAnywhere)
-	TArray<TObjectPtr<UMaterialInterface>> Materials;
-};
-
 UCLASS()
-class PROJECTD_API ADDTrapBase : public AActor, public ITrapAssetInterface
+class PROJECTD_API ADDTrapBase : public AActor, public IDDSetAssetInterface
 {
 	GENERATED_BODY()
 	
@@ -42,7 +32,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void InitFromDataTable(const FName& RowName, const FDDTrapData& TrapData);
 	void  SetTrapCanAttack(const bool bInCanAttack);
-	virtual void SetTrapAssets(FDDBuildingBaseData& LoadedAsset) override;
+	virtual void SetAssets(FDDBuildingBaseData& LoadedAsset) override;
 	void SetMaterialToPreview(bool bCanPay);
 	void SetMaterialToOriginal();
 
@@ -90,7 +80,7 @@ protected:
 	int32 TrapDamage; // 트랩의 데미지
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EMeshType TrapMeshType; // 트랩의 메쉬 타입
+	bool bIsAnimated; // 트랩의 메쉬 타입
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsDotTrap; // 도트 공격 트랩 여부
@@ -126,7 +116,7 @@ protected:
 	TObjectPtr<UMaterialInterface> PreviewMaterial;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
-	TMap<int32, FMaterialsStruct> OriginalMaterials;
+	TMap<int32, FDDMaterials> OriginalMaterials;
 
 	UPROPERTY()
 	TObjectPtr<UMaterialInstanceDynamic> DynamicMaterialInstance;

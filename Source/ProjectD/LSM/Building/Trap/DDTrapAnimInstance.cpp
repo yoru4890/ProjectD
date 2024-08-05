@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "LSM/Trap/DDTrapAnimInstance.h"
+#include "LSM/Building/Trap/DDTrapAnimInstance.h"
 
 UDDTrapAnimInstance::UDDTrapAnimInstance()
 {

@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "LSM/Trap/DDTrapBase.h"
+#include "LSM/Building/Trap/DDTrapBase.h"
 #include "DDAnimatedTrap.generated.h"
 
 /**
@@ -26,7 +26,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	// Override to set trap assets
-	virtual void SetTrapAssets(FDDBuildingBaseData& LoadedAsset) override;
+	virtual void SetAssets(FDDBuildingBaseData& LoadedAsset) override;
 
 protected:
 	// Skeletal Mesh Component

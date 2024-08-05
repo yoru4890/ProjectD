@@ -2,21 +2,20 @@
 
 
 #include "LSM/Manager/DDAssetManager.h"
-#include "LSM/DDBuildingBaseData.h"
+#include "LSM/Building/DDBuildingBaseData.h"
 #include "YSY/Game/DDGameInstance.h"
 #include "YSY/Game/DDGameSingleton.h"
 #include "Engine/StreamableManager.h"
 #include "Engine/AssetManager.h"
-#include "LSM/DDLoadedAsset.h"
 #include "Kismet/GameplayStatics.h"
 
 void UDDAssetManager::Initialize()
 {
-	TMap<FName, FDDTrapData>& TrapDataTable = UDDGameSingleton::Get().GetTrapDataTable();
+	TMap<FName, FDDBuildingBaseData>& BuildingDataTable = UDDGameSingleton::Get().GetBuildingDataTable();
 	UE_LOG(LogTemp, Warning, TEXT("Initialize AssetManager"));
-	for (auto& Elem : TrapDataTable) {
-		UE_LOG(LogTemp, Warning, TEXT("%s is Unlock? : %s"), *Elem.Key.ToString(), Elem.Value.bIsTrapUnlocked ? TEXT("true") : TEXT("false"));
-		if (Elem.Value.bIsTrapUnlocked) {
+	for (auto& Elem : BuildingDataTable) {
+		UE_LOG(LogTemp, Warning, TEXT("%s is Unlock? : %s"), *Elem.Key.ToString(), Elem.Value.bIsUnlocked ? TEXT("true") : TEXT("false"));
+		if (Elem.Value.bIsUnlocked) {
 			LoadAssetsAsync(Elem.Key);
 			UE_LOG(LogTemp, Warning, TEXT(" %s : Init"), *Elem.Key.ToString());
 		}
@@ -52,43 +51,35 @@ void UDDAssetManager::LoadAssetsAsync(const FName& RowName)
 	TArray<FSoftObjectPath> SoftObjectPaths;
 
 	// MeshType의 종류에 따라서
-	if (ObjectStruct->MeshType == EMeshType::StaticMesh) // StaticMesh라면
+	for (const TSoftObjectPtr<UStaticMesh>& StaticMesh : ObjectStruct->StaticMeshs)
 	{
-		// 경로에 추가
-		for (const TSoftObjectPtr<UStaticMesh>& StaticMesh : ObjectStruct->StaticMeshs)
-		{
-			SoftObjectPaths.Add(StaticMesh.ToSoftObjectPath());
-			UE_LOG(LogTemp, Warning, TEXT(" %s : StaticMesh Added"), *RowName.ToString());
-		}
+		SoftObjectPaths.Add(StaticMesh.ToSoftObjectPath());
+		UE_LOG(LogTemp, Warning, TEXT(" %s : StaticMesh Added"), *RowName.ToString());
 	}
-	else if (ObjectStruct->MeshType == EMeshType::SkeletalMesh) // SkeletalMesh라면
+	for (const TSoftObjectPtr<USkeletalMesh>& SkeletalMesh : ObjectStruct->SkeletalMeshs)
 	{
-		// SkletalMesh와 AnimBluePrint를 추가
-		for (const TSoftObjectPtr<USkeletalMesh>& SkeletalMesh : ObjectStruct->SkeletalMeshs)
+		if (SkeletalMesh.IsValid())
 		{
-			if (SkeletalMesh.IsValid())
-			{
-				UE_LOG(LogTemp, Warning, TEXT(" %s : SkeletalMesh isAlready Loaded"), *RowName.ToString());
-			}
-			SoftObjectPaths.Add(SkeletalMesh.ToSoftObjectPath());
-			UE_LOG(LogTemp, Warning, TEXT(" %s : USkeletalMesh Added"), *RowName.ToString());
+			UE_LOG(LogTemp, Warning, TEXT(" %s : SkeletalMesh isAlready Loaded"), *RowName.ToString());
 		}
-		if (ObjectStruct->MyAnimBlueprint.IsValid())
-		{
-			UE_LOG(LogTemp, Warning, TEXT(" %s : AnimBlueprint isAlready Loaded"), *RowName.ToString());
-		}
-		SoftObjectPaths.Add(ObjectStruct->MyAnimBlueprint.ToSoftObjectPath());
-		UE_LOG(LogTemp, Warning, TEXT(" %s : AnimBlueprint Added"), *RowName.ToString());
+		SoftObjectPaths.Add(SkeletalMesh.ToSoftObjectPath());
+		UE_LOG(LogTemp, Warning, TEXT(" %s : USkeletalMesh Added"), *RowName.ToString());
+	}
+	if (ObjectStruct->MyAnimBlueprint.IsValid())
+	{
+		UE_LOG(LogTemp, Warning, TEXT(" %s : AnimBlueprint isAlready Loaded"), *RowName.ToString());
+	}
+	SoftObjectPaths.Add(ObjectStruct->MyAnimBlueprint.ToSoftObjectPath());
+	UE_LOG(LogTemp, Warning, TEXT(" %s : AnimBlueprint Added"), *RowName.ToString());
 
-		for (const TSoftObjectPtr<UAnimMontage>& Montage : ObjectStruct->AnimMontages)
+	for (const TSoftObjectPtr<UAnimMontage>& Montage : ObjectStruct->AnimMontages)
+	{
+		if (Montage.IsValid())
 		{
-			if (Montage.IsValid())
-			{
-				UE_LOG(LogTemp, Warning, TEXT(" %s : Montage isAlready Loaded"), *RowName.ToString());
-			}
-			SoftObjectPaths.Add(Montage.ToSoftObjectPath());
-			UE_LOG(LogTemp, Warning, TEXT(" %s : MyAnimMontage Added"), *RowName.ToString());
+			UE_LOG(LogTemp, Warning, TEXT(" %s : Montage isAlready Loaded"), *RowName.ToString());
 		}
+		SoftObjectPaths.Add(Montage.ToSoftObjectPath());
+		UE_LOG(LogTemp, Warning, TEXT(" %s : MyAnimMontage Added"), *RowName.ToString());
 	}
 	// 파티클도 추가
 	for (const TSoftObjectPtr<UParticleSystem>& Effect : ObjectStruct->Effects)
@@ -197,9 +188,9 @@ void UDDAssetManager::RemoveLoadedAssetByName(const FName& RowName)
 void UDDAssetManager::RemoveLoadedAssetAll()
 {
 	FStreamableManager& StreamableManager = UAssetManager::GetStreamableManager();
-	TMap<FName, FDDTrapData>& TrapDataTable = UDDGameSingleton::Get().GetTrapDataTable();
+	TMap<FName, FDDBuildingBaseData>& BuildingDataTable = UDDGameSingleton::Get().GetBuildingDataTable();
 	TArray<FName> KeyArray;
-	TrapDataTable.GenerateKeyArray(KeyArray);
+	BuildingDataTable.GenerateKeyArray(KeyArray);
 	for (FName& RowName : KeyArray)
 	{
 		FDDBuildingBaseData* ObjectStruct = GetObjectBaseData(RowName);
@@ -233,8 +224,8 @@ void UDDAssetManager::RemoveLoadedAssetAll()
 FDDBuildingBaseData* UDDAssetManager::GetObjectBaseData(const FName& RowName)
 {
 	FDDBuildingBaseData* ObjectStruct;
-	if (UDDGameSingleton::Get().GetTrapDataTable().Find(RowName)) {
-		ObjectStruct = UDDGameSingleton::Get().GetTrapDataTable().Find(RowName);
+	if (UDDGameSingleton::Get().GetBuildingDataTable().Find(RowName)) {
+		ObjectStruct = UDDGameSingleton::Get().GetBuildingDataTable().Find(RowName);
 		return ObjectStruct;
 	}
 	else {

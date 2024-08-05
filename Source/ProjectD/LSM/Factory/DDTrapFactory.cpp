@@ -2,8 +2,8 @@
 
 
 #include "LSM/Factory/DDTrapFactory.h"
-#include "LSM/Trap/DDTrapBase.h"
-#include "LSM/Trap/DDTrapData.h"
+#include "LSM/Building/Trap/DDTrapBase.h"
+#include "LSM/Building/Trap/DDTrapData.h"
 #include "LSM/Manager/DDAssetManager.h"
 #include "YSY/Game/DDGameInstance.h"
 
@@ -34,7 +34,7 @@ UObject* UDDTrapFactory::CreateObject(UWorld* World, const FName& RowName, const
 		return nullptr;
 	}
 	NewTrap->InitFromDataTable(RowName, *TrapStruct);
-	NewTrap->SetTrapAssets(*LoadedAsset);
+	NewTrap->SetAssets(*LoadedAsset);
 
 	NewTrap->SetActorLocation(Location);
 	NewTrap->SetActorRotation(Rotation);

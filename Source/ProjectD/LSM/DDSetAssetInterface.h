@@ -3,13 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "LSM/DDLoadedAsset.h"
 #include "UObject/Interface.h"
-#include "TrapAssetInterface.generated.h"
+#include "DDSetAssetInterface.generated.h"
 
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
-class UTrapAssetInterface : public UInterface
+class UDDSetAssetInterface : public UInterface
 {
 	GENERATED_BODY()
 };
@@ -17,11 +16,11 @@ class UTrapAssetInterface : public UInterface
 /**
  * 
  */
-class PROJECTD_API ITrapAssetInterface
+class PROJECTD_API IDDSetAssetInterface
 {
 	GENERATED_BODY()
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual void SetTrapAssets(FDDBuildingBaseData& LoadedAsset) = 0;
+	virtual void SetAssets(FDDBuildingBaseData& LoadedAsset) = 0;
 };

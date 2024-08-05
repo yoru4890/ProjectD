@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
-#include "LSM/DDBuildingBaseData.h"
+#include "LSM/Building/DDBuildingBaseData.h"
 #include "DDFactoryInterface.generated.h"
 
 // This class does not need to be modified.

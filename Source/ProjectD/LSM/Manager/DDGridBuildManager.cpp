@@ -1,11 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "LSM/Manager/DDBuildManager.h"
+#include "LSM/Manager/DDGridBuildManager.h"
 #include "Components/BoxComponent.h"
 #include "YSY/Collision/CollisionChannel.h"
 // Sets default values
-ADDBuildManager::ADDBuildManager()
+ADDGridBuildManager::ADDGridBuildManager()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -19,7 +19,7 @@ ADDBuildManager::ADDBuildManager()
 }
 
 // Called when the game starts or when spawned
-void ADDBuildManager::BeginPlay()
+void ADDGridBuildManager::BeginPlay()
 {
 	Super::BeginPlay();
 	InitializeGridCells();
@@ -29,13 +29,13 @@ void ADDBuildManager::BeginPlay()
 }
 
 // Called every frame
-void ADDBuildManager::Tick(float DeltaTime)
+void ADDGridBuildManager::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
 }
 
-void ADDBuildManager::InitializeGridCells()
+void ADDGridBuildManager::InitializeGridCells()
 {
 	FVector BoxExtent = BoxComponent->GetScaledBoxExtent();
 	FVector Origin = GetActorLocation() - FVector(BoxExtent.X, BoxExtent.Y, 0);
@@ -80,7 +80,7 @@ void ADDBuildManager::InitializeGridCells()
 	}
 }
 
-const FVector ADDBuildManager::GetNearestGridCellLocation(const FVector& HitLocation) const
+const FVector ADDGridBuildManager::GetNearestGridCellLocation(const FVector& HitLocation) const
 {
 	FIntPoint GridCellIndex = ConvertWorldLocationToGridCell(HitLocation);
 
@@ -92,7 +92,7 @@ const FVector ADDBuildManager::GetNearestGridCellLocation(const FVector& HitLoca
 	return FVector(FLT_MAX, FLT_MAX, FLT_MAX);
 }
 
-const FIntPoint ADDBuildManager::ConvertWorldLocationToGridCell(const FVector& Location) const
+const FIntPoint ADDGridBuildManager::ConvertWorldLocationToGridCell(const FVector& Location) const
 {
 	FVector BoxExtent = BoxComponent->GetScaledBoxExtent();
 	FVector Origin = GetActorLocation() - FVector(BoxExtent.X - GridCellSize / 2, BoxExtent.Y - GridCellSize / 2, 0);
@@ -104,7 +104,7 @@ const FIntPoint ADDBuildManager::ConvertWorldLocationToGridCell(const FVector& L
 	return FIntPoint(CellY, CellX);
 }
 
-const bool ADDBuildManager::CanPlaceTrapAtLocation(const FVector& HitLocation, const int32 OccupiedCellWidth) const
+const bool ADDGridBuildManager::CanPlaceTrapAtLocation(const FVector& HitLocation, const int32 OccupiedCellWidth) const
 {
 	int32 Length = OccupiedCellWidth / 2;
 	FIntPoint Cell = ConvertWorldLocationToGridCell(HitLocation);
@@ -142,7 +142,7 @@ const bool ADDBuildManager::CanPlaceTrapAtLocation(const FVector& HitLocation, c
 	return true;
 }
 
-const bool ADDBuildManager::CanPlaceTowerAtLocation(const FVector& HitLocation, const int32 OccupiedCellWidth) const
+const bool ADDGridBuildManager::CanPlaceTowerAtLocation(const FVector& HitLocation, const int32 OccupiedCellWidth) const
 {
 	int32 Length = OccupiedCellWidth / 2;
 	FIntPoint Cell = ConvertWorldLocationToGridCell(HitLocation);
@@ -156,7 +156,7 @@ const bool ADDBuildManager::CanPlaceTowerAtLocation(const FVector& HitLocation, 
 	return false;
 }
 
-const FVector ADDBuildManager::GetGridCellNormalVector(const FVector& HitLocation) const
+const FVector ADDGridBuildManager::GetGridCellNormalVector(const FVector& HitLocation) const
 {
 	FIntPoint Cell = ConvertWorldLocationToGridCell(HitLocation);
 	if (GridCellMap.Contains(Cell)) {
@@ -166,7 +166,7 @@ const FVector ADDBuildManager::GetGridCellNormalVector(const FVector& HitLocatio
 	return FVector(FLT_MAX, FLT_MAX, FLT_MAX);
 }
 
-bool ADDBuildManager::SetGridCellAsOccupied(const FVector& HitLocation, const int32 OccupiedCellWidth)
+bool ADDGridBuildManager::SetGridCellAsOccupied(const FVector& HitLocation, const int32 OccupiedCellWidth)
 {
 	int32 Length = OccupiedCellWidth / 2;
 	FIntPoint Cell = ConvertWorldLocationToGridCell(HitLocation);
@@ -190,7 +190,7 @@ bool ADDBuildManager::SetGridCellAsOccupied(const FVector& HitLocation, const in
 	return false;
 }
 
-bool ADDBuildManager::SetGridCellAsBlank(const FVector& HitLocation, const int32 OccupiedCellWidth)
+bool ADDGridBuildManager::SetGridCellAsBlank(const FVector& HitLocation, const int32 OccupiedCellWidth)
 {
 	int32 Length = OccupiedCellWidth / 2;
 	FIntPoint Cell = ConvertWorldLocationToGridCell(HitLocation);
@@ -214,14 +214,14 @@ bool ADDBuildManager::SetGridCellAsBlank(const FVector& HitLocation, const int32
 	return false;
 }
 
-const bool ADDBuildManager::IsPointOnSamePlane(const FVector& InPointWorldLocation, const FVector& StandardPointWorldLocation, const FVector& PlaneNormalVector) const
+const bool ADDGridBuildManager::IsPointOnSamePlane(const FVector& InPointWorldLocation, const FVector& StandardPointWorldLocation, const FVector& PlaneNormalVector) const
 {
 	// 평면 위에 있는 점이라면 내적했을 때, 값이 0
 	float DistanceToPlane = FVector::DotProduct(PlaneNormalVector, InPointWorldLocation - StandardPointWorldLocation);
 	return FMath::Abs(DistanceToPlane) <= KINDA_SMALL_NUMBER;
 }
 
-void ADDBuildManager::AddTowerZone()
+void ADDGridBuildManager::AddTowerZone()
 {
 	UBoxComponent* NewTowerZone = NewObject<UBoxComponent>(this);
 	NewTowerZone->RegisterComponent();
@@ -238,7 +238,7 @@ void ADDBuildManager::AddTowerZone()
 	TowerZones.Add(NewTowerZone);
 }
 
-void ADDBuildManager::UpdateTowerZone()
+void ADDGridBuildManager::UpdateTowerZone()
 {
 	for (UBoxComponent* TowerZone : TowerZones)
 	{

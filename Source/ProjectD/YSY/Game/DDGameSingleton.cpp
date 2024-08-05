@@ -8,7 +8,7 @@ DEFINE_LOG_CATEGORY(LogDDGameSingleton);
 UDDGameSingleton::UDDGameSingleton()
 {
 	LoadDataTable<FDDEnemyData>(EnemyDataTable, TEXT("/Script/Engine.DataTable'/Game/0000/YSY/Data/DT_EnemyData.DT_EnemyData'"));
-	LoadDataTable<FDDTrapData>(TrapDataTable, TEXT("/Script/Engine.DataTable'/Game/0000/LSM/Data/LSM_DT_Trap.LSM_DT_Trap'"));
+	LoadDataTable<FDDBuildingBaseData>(BuildingDataTable, TEXT("/Script/Engine.DataTable'/Game/0000/LSM/Data/LSM_DT_Trap.LSM_DT_Trap'"));
 }
 
 UDDGameSingleton& UDDGameSingleton::Get()

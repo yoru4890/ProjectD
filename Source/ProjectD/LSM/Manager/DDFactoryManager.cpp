@@ -4,9 +4,9 @@
 #include "LSM/Manager/DDFactoryManager.h"
 #include "LSM/Factory/DDFactoryInterface.h"
 
-void UDDFactoryManager::Initialize(const TMap<FName, FDDTrapData>& TrapDataTable)
+void UDDFactoryManager::Initialize(const TMap<FName, FDDBuildingBaseData>& BuildingDataTable)
 {
-	for (auto& Elem : TrapDataTable) {
+	for (auto& Elem : BuildingDataTable) {
 		if (Elem.Value.FactoryClass) {
 			NamesToFactories.Add(Elem.Key, Elem.Value.FactoryClass);
 		}

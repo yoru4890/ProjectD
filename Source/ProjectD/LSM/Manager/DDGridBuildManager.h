@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "DDBuildManager.generated.h"
+#include "DDGridBuildManager.generated.h"
 
 USTRUCT(BlueprintType)
 struct FGridCell
@@ -39,13 +39,13 @@ public:
 };
 
 UCLASS()
-class PROJECTD_API ADDBuildManager : public AActor
+class PROJECTD_API ADDGridBuildManager : public AActor
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this actor's properties
-	ADDBuildManager();
+	ADDGridBuildManager();
 
 protected:
 	// Called when the game starts or when spawned

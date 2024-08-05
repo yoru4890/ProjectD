@@ -3,9 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "LSM/DDBuildingBaseData.h"
+#include "LSM/Building/DDBuildingBaseData.h"
 #include "UObject/NoExportTypes.h"
-#include "LSM/DDLoadedAsset.h"
 #include "DDAssetManager.generated.h"
 
 

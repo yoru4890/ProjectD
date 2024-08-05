@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "LSM/Trap/DDStaticTrap.h"
+#include "LSM/Building/Trap/DDStaticTrap.h"
 
 ADDStaticTrap::ADDStaticTrap()
 {
@@ -18,9 +18,9 @@ void ADDStaticTrap::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void ADDStaticTrap::SetTrapAssets(FDDBuildingBaseData& LoadedAsset)
+void ADDStaticTrap::SetAssets(FDDBuildingBaseData& LoadedAsset)
 {
-	Super::SetTrapAssets(LoadedAsset);
+	Super::SetAssets(LoadedAsset);
 	// 기존 ParticleEffectComponents 배열 초기화
 	for (UStaticMeshComponent* StaticMeshComponent : StaticMeshComponents)
 	{
@@ -61,7 +61,7 @@ void ADDStaticTrap::SetTrapAssets(FDDBuildingBaseData& LoadedAsset)
 		StaticMeshComponent->RegisterComponent();
 		StaticMeshComponents.Add(StaticMeshComponent);
 
-		FMaterialsStruct MaterialStruct;
+		FDDMaterials MaterialStruct;
 		MaterialStruct.Materials = StaticMeshComponent->GetMaterials();
 		OriginalMaterials.Add(StaticNum, MaterialStruct);
 		StaticNum++;

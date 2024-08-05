@@ -1,8 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "LSM/Trap/DDAnimatedTrap.h"
-#include "LSM/Trap/DDTrapAnimInstance.h"
+#include "LSM/Building/Trap/DDAnimatedTrap.h"
+#include "LSM/Building/Trap/DDTrapAnimInstance.h"
 
 ADDAnimatedTrap::ADDAnimatedTrap()
 {
@@ -19,9 +19,9 @@ void ADDAnimatedTrap::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void ADDAnimatedTrap::SetTrapAssets(FDDBuildingBaseData& LoadedAsset)
+void ADDAnimatedTrap::SetAssets(FDDBuildingBaseData& LoadedAsset)
 {
-	Super::SetTrapAssets(LoadedAsset);
+	Super::SetAssets(LoadedAsset);
 	// 기존 ParticleEffectComponents 배열 초기화
 	for (USkeletalMeshComponent* SkeletalMeshComponent : SkeletalMeshComponents)
 	{
@@ -80,7 +80,7 @@ void ADDAnimatedTrap::SetTrapAssets(FDDBuildingBaseData& LoadedAsset)
 			SkeletalMeshComponent->RegisterComponent();
 		}
 		SkeletalMeshComponents.Add(SkeletalMeshComponent);
-		FMaterialsStruct MaterialStruct;
+		FDDMaterials MaterialStruct;
 		MaterialStruct.Materials = SkeletalMeshComponent->GetMaterials();
 		OriginalMaterials.Add(SkeletalNum, MaterialStruct);
 		SkeletalNum++;
