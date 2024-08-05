@@ -67,6 +67,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> EquipRangeAction;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> SubSkillAction;
 
 	UPROPERTY(EditAnywhere, Category = Character)
 	float MouseSpeed;
@@ -80,10 +83,17 @@ protected:
 
 //Weapon System
 
+public:
+	UFUNCTION()
+	void OnUnequipMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
 protected:
 	void EquipMelee();
 	void EquipRange();
+	void WeaponSubSkill();
+
+private :
+	bool CanMeleeSubSkill();
 
 protected:
 

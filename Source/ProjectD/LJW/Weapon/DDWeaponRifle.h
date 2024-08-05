@@ -14,4 +14,6 @@ class PROJECTD_API ADDWeaponRifle : public ADDWeaponBase
 {
 	GENERATED_BODY()
 	
+public:
+	virtual void SubSkill() override;
 };

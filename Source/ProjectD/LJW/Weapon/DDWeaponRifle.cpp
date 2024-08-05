@@ -3,3 +3,8 @@
 
 #include "LJW/Weapon/DDWeaponRifle.h"
 
+void ADDWeaponRifle::SubSkill()
+{
+	//Zoom
+	
+}

@@ -14,4 +14,6 @@ class PROJECTD_API ADDWeaponCudgel : public ADDWeaponBase
 {
 	GENERATED_BODY()
 	
+public:
+	virtual void SubSkill() override;
 };

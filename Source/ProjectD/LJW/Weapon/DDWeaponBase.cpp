@@ -3,8 +3,8 @@
 
 #include "LJW/Weapon/DDWeaponBase.h"
 #include "YSY/Game/DDGameSingleton.h"
-#include "LJW/Animation/DDEquipAnimNotify.h"
-#include "LJW/Animation/DDUnequipAnimNotify.h"
+#include "LJW/Animation/DDVisibleWeaponAnimNotify.h"
+#include "LJW/Animation/DDHiddenWeaponAnimNotify.h"
 
 // Sets default values
 ADDWeaponBase::ADDWeaponBase()
@@ -18,8 +18,8 @@ ADDWeaponBase::ADDWeaponBase()
 void ADDWeaponBase::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
+
 
 void ADDWeaponBase::DisableWeapon()
 {
@@ -45,40 +45,44 @@ void ADDWeaponBase::InitData(const FName& RowName, const FDDWeaponData& WeaponDa
 	AttackCooltime = WeaponData.AttackCooltime;
 	AttackDamage = WeaponData.AttackDamage;
 	AttackRange = WeaponData.AttackRange;
-	
-	if (WeaponData.EquipWeapon)
+
+	//Equip Montage
+	if (WeaponData.EquipMontage)
 	{
-		EquipWeaponAnim = WeaponData.EquipWeapon;
+		EquipWeaponAnim = WeaponData.EquipMontage;
 		UE_LOG(LogTemp, Warning, TEXT("Montage : %s"), *EquipWeaponAnim->GetFName().ToString());
 
 		TArray<FAnimNotifyEvent> notifyEvents{ EquipWeaponAnim->Notifies };
 
 		for (FAnimNotifyEvent eventNotify : notifyEvents)
 		{
-			if (UDDEquipAnimNotify* startNotify = Cast<UDDEquipAnimNotify>(eventNotify.Notify))
+			UDDVisibleWeaponAnimNotify* startNotify = Cast<UDDVisibleWeaponAnimNotify>(eventNotify.Notify);
+
+			if (startNotify)
 			{
-				startNotify->OnEquipDelegatge.AddUObject(this, &ADDWeaponBase::EnableWeapon);
+				startNotify->OnVisibleDelegatge.AddUObject(this, &ADDWeaponBase::EnableWeapon);
 			}
 		}
 	}
 
-	if (WeaponData.UnequipWeapon)
+	//Unequip Montage
+	if (WeaponData.UnequipMontage)
 	{
-		UnequipWeaponAnim = WeaponData.UnequipWeapon;
+		UnequipWeaponAnim = WeaponData.UnequipMontage;
+		
 		UE_LOG(LogTemp, Warning, TEXT("Montage : %s"), *UnequipWeaponAnim->GetFName().ToString());
-
 		TArray<FAnimNotifyEvent> notifyEvents{ UnequipWeaponAnim->Notifies };
 
 		for (FAnimNotifyEvent eventNotify : notifyEvents)
 		{
-			if (UDDUnequipAnimNotify* startNotify = Cast<UDDUnequipAnimNotify>(eventNotify.Notify))
+			if (UDDHiddenWeaponAnimNotify* startNotify = Cast<UDDHiddenWeaponAnimNotify>(eventNotify.Notify))
 			{
-				startNotify->OnUnequipDelegatge.AddUObject(this, &ADDWeaponBase::DisableWeapon);
+				startNotify->OnHiddenDelegatge.AddUObject(this, &ADDWeaponBase::DisableWeapon);
 			}
 		}
 	}
-
-	////Mesh
+	
+	//Mesh
 	if (WeaponData.WeaponMesh) 
 	{
 		WeaponSkeletal->SetSkeletalMesh(WeaponData.WeaponMesh);
@@ -87,5 +91,10 @@ void ADDWeaponBase::InitData(const FName& RowName, const FDDWeaponData& WeaponDa
 	//무기 비활성화
 	DisableWeapon();
 	
+	//Skill Montage
+	if (WeaponData.SkillMontage)
+	{
+		SkillWeaponAnim = WeaponData.SkillMontage;
+	}
 }
 

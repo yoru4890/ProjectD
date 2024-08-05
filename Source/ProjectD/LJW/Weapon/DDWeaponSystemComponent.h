@@ -46,6 +46,10 @@ public:
 	void PlayEquipMontage();
 	void PlayUnequipMontage();
 
+	void WeaponSubSkill();
+
+	bool IsUnequipMontage(const UAnimMontage* Montage) const;
+
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon, meta = (AllowPrivateAccess = "true"))
 	TArray<ADDWeaponBase*> Weapons;

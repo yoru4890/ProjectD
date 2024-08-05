@@ -64,6 +64,8 @@ void UDDWeaponSystemComponent::InitializeWeapon()
 	CurrentMeleeWeapon = static_cast<int32>(EWeaponType::Cudgel);
 	CurrentRangeWeapon = static_cast<int32>(EWeaponType::Rifle);
 	CurrentWeapon = Weapons[CurrentMeleeWeapon];
+	CurrentWeapon->EnableWeapon();
+
 }
 
 void UDDWeaponSystemComponent::EquipMeleeWeapon()
@@ -72,7 +74,6 @@ void UDDWeaponSystemComponent::EquipMeleeWeapon()
 	{
 		PlayUnequipMontage();
 
-		CurrentWeapon = Weapons[CurrentMeleeWeapon];
 		UE_LOG(LogTemp, Warning, TEXT("Current Weapon : %s"), *CurrentWeapon->GetFName().ToString());
 
 	}
@@ -84,7 +85,6 @@ void UDDWeaponSystemComponent::EquipRangeWeapon()
 	{
 		PlayUnequipMontage();
 
-		CurrentWeapon = Weapons[CurrentMeleeWeapon];
 		UE_LOG(LogTemp, Warning, TEXT("Current Weapon : %s"), *CurrentWeapon->GetFName().ToString());
 	}
 
@@ -94,6 +94,8 @@ void UDDWeaponSystemComponent::PlayEquipMontage()
 {
 	if (CurrentWeapon->GetEquipWeaponMontage())
 	{
+		CurrentWeapon = (CurrentWeapon == Weapons[CurrentMeleeWeapon] ? Weapons[CurrentRangeWeapon] : Weapons[CurrentMeleeWeapon]);
+
 		ParentSkeletal->GetAnimInstance()->Montage_Play(CurrentWeapon->GetEquipWeaponMontage());
 	}
 }
@@ -104,6 +106,20 @@ void UDDWeaponSystemComponent::PlayUnequipMontage()
 	{
 		ParentSkeletal->GetAnimInstance()->Montage_Play(CurrentWeapon->GetUnequipWeaponMontage());
 	}
+}
+
+void UDDWeaponSystemComponent::WeaponSubSkill()
+{
+	if (CurrentWeapon == CurrentMeleeWeapon)
+	{
+		ParentSkeletal->GetAnimInstance()->Montage_Play(CurrentWeapon->GetSkillWeaponMontage());
+		CurrentWeapon->SubSkill();
+	}
+}
+
+bool UDDWeaponSystemComponent::IsUnequipMontage(const UAnimMontage* Montage) const
+{
+	return CurrentWeapon->GetUnequipWeaponMontage() == Montage;
 }
 
 

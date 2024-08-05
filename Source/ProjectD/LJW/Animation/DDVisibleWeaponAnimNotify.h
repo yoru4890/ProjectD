@@ -4,17 +4,17 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimNotifies/AnimNotify.h"
-#include "DDEquipAnimNotify.generated.h"
+#include "DDVisibleWeaponAnimNotify.generated.h"
 
-DECLARE_MULTICAST_DELEGATE(FOnEquipSignature);
+DECLARE_MULTICAST_DELEGATE(FOnVisibleSignature);
 
 UCLASS()
-class PROJECTD_API UDDEquipAnimNotify : public UAnimNotify
+class PROJECTD_API UDDVisibleWeaponAnimNotify : public UAnimNotify
 {
 	GENERATED_BODY()
 	
 public:
 	virtual void Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference) override;
 
-	FOnEquipSignature OnEquipDelegatge;
+	FOnVisibleSignature OnVisibleDelegatge;
 };

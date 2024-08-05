@@ -10,6 +10,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "DDCharacterControlData.h"
 #include "LJW/Weapon/DDWeaponSystemComponent.h"
+#include "Animation/AnimInstance.h"
 
 
 ADDCharacterPlayer::ADDCharacterPlayer()
@@ -78,6 +79,11 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 		EquipRangeAction = RangeRef.Object;
 	}
 
+	static ConstructorHelpers::FObjectFinder<UInputAction>SubSkillRef(TEXT("/Script/EnhancedInput.InputAction'/Game/0000/LJW/Input/IA_Player_ZoomSkill.IA_Player_ZoomSkill'"));
+	if (nullptr != SubSkillRef.Object)
+	{
+		SubSkillAction = SubSkillRef.Object;
+	}
 #pragma endregion
 
 }
@@ -95,6 +101,7 @@ void ADDCharacterPlayer::BeginPlay()
 	
 	SetCharacterControl();
 	
+	GetMesh()->GetAnimInstance()->OnMontageEnded.AddDynamic(this, &ADDCharacterPlayer::OnUnequipMontageEnded);
 }
 
 void ADDCharacterPlayer::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
@@ -122,6 +129,7 @@ void ADDCharacterPlayer::SetupPlayerInputComponent(class UInputComponent* Player
 	//Weapon System
 	EnhancedInputComponent->BindAction(EquipMeleeAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::EquipMelee);
 	EnhancedInputComponent->BindAction(EquipRangeAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::EquipRange);
+	EnhancedInputComponent->BindAction(SubSkillAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::WeaponSubSkill);
 }
 
 void ADDCharacterPlayer::SetCharacterControl()
@@ -209,14 +217,47 @@ void ADDCharacterPlayer::CreateLeaderPoseSkeletalMesh(USkeletalMeshComponent* Sk
 }
 
 
+void ADDCharacterPlayer::OnUnequipMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	if (WeaponSystem->IsUnequipMontage(Montage))
+	{
+		WeaponSystem->PlayEquipMontage();
+	}
+}
+
 void ADDCharacterPlayer::EquipMelee()
 {
-	WeaponSystem->EquipMeleeWeapon();
+	if (!(GetMesh()->GetAnimInstance()->IsAnyMontagePlaying()))
+	{
+		WeaponSystem->EquipMeleeWeapon();
+	}
 	//Montage
+	
 }
 
 void ADDCharacterPlayer::EquipRange()
 {
-	WeaponSystem->EquipRangeWeapon();
+	if (!(GetMesh()->GetAnimInstance()->IsAnyMontagePlaying()))
+	{
+		WeaponSystem->EquipRangeWeapon();
+	}
+}
+
+void ADDCharacterPlayer::WeaponSubSkill()
+{
+	//if (!(GetMesh()->GetAnimInstance()->Montage_IsPlaying()) && CanMeleeSubSkill());
+	//{
+	//	WeaponSystem->EquipRangeWeapon();
+	//}
+}
+
+bool ADDCharacterPlayer::CanMeleeSubSkill()
+{
+	//Skill 사용 중 불가능
+	
+	//Weapon Change 중 불가능
+	//점프 중 불가능
+	//죽어있을 때 불가능
+	return !GetCharacterMovement()->IsFalling();
 }
 
