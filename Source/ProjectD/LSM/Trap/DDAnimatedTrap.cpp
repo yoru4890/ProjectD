@@ -2,6 +2,7 @@
 
 
 #include "LSM/Trap/DDAnimatedTrap.h"
+#include "LSM/Trap/DDTrapAnimInstance.h"
 
 ADDAnimatedTrap::ADDAnimatedTrap()
 {
@@ -18,9 +19,9 @@ void ADDAnimatedTrap::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void ADDAnimatedTrap::SetTrapAssets(TArray<UStaticMesh*> StaticMeshs, TArray<USkeletalMesh*> SkeletalMeshs, UAnimBlueprint* AnimBlueprint, TArray<UParticleSystem*> ParticleEffects)
+void ADDAnimatedTrap::SetTrapAssets(FBaseStruct& LoadedAsset)
 {
-	Super::SetTrapAssets(StaticMeshs, SkeletalMeshs, AnimBlueprint, ParticleEffects);
+	Super::SetTrapAssets(LoadedAsset);
 	// 기존 ParticleEffectComponents 배열 초기화
 	for (USkeletalMeshComponent* SkeletalMeshComponent : SkeletalMeshComponents)
 	{
@@ -35,19 +36,42 @@ void ADDAnimatedTrap::SetTrapAssets(TArray<UStaticMesh*> StaticMeshs, TArray<USk
 	USkeletalMeshComponent* FirstSkeletalMeshComponent = nullptr;
 	int32 SkeletalNum = 0;
 
-
-	for (USkeletalMesh* SkeletalMesh : SkeletalMeshs) {
+	for (TSoftObjectPtr<UAnimMontage>& AnimMontageSoftPtr : LoadedAsset.AnimMontages)
+	{
+		if (AnimMontageSoftPtr.IsValid())
+		{
+			AnimMontages.Add(AnimMontageSoftPtr.Get());
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("%s : Montages not loaded"), TrapRowName);
+		}
+	}
+	for (TSoftObjectPtr<USkeletalMesh>& SkeletalMeshSoftPtr : LoadedAsset.SkeletalMeshs) {
 		USkeletalMeshComponent* SkeletalMeshComponent = NewObject<USkeletalMeshComponent>(this);
 		check(SkeletalMeshComponent);
 
 		SkeletalMeshComponent->SetupAttachment(RootComponent);
-		SkeletalMeshComponent->SetSkeletalMesh(SkeletalMesh);
+		if (SkeletalMeshSoftPtr.IsValid()) 
+		{
+			SkeletalMeshComponent->SetSkeletalMesh(SkeletalMeshSoftPtr.Get());
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("%s : SkeletalMesh not loaded"), TrapRowName);
+		}
 
 		if (bIsFirstSkeltalMesh) {
 			FirstSkeletalMeshComponent = SkeletalMeshComponent;
-			if (AnimBlueprint) {
-				FirstSkeletalMeshComponent->SetAnimInstanceClass(AnimBlueprint->GeneratedClass);
+			if (LoadedAsset.MyAnimBlueprint.IsValid())
+			{
+				FirstSkeletalMeshComponent->SetAnimInstanceClass(LoadedAsset.MyAnimBlueprint->GeneratedClass);
 			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("%s : AnimBluePrint not loaded"), TrapRowName);
+			}
+
 			FirstSkeletalMeshComponent->RegisterComponent();
 			bIsFirstSkeltalMesh = false;
 		}
@@ -62,8 +86,42 @@ void ADDAnimatedTrap::SetTrapAssets(TArray<UStaticMesh*> StaticMeshs, TArray<USk
 		SkeletalNum++;
 		
 	}
-	FBoxSphereBounds Bounds = FirstSkeletalMeshComponent->GetSkeletalMeshAsset()->GetBounds();
+	USkeletalMesh* SkeletalMesh = FirstSkeletalMeshComponent->GetSkeletalMeshAsset();
+	if (!SkeletalMesh)
+	{
+		return;
+	}
+
+	FBoxSphereBounds Bounds = SkeletalMesh->GetBounds();
 	FVector BoxExtent = Bounds.BoxExtent;
-	FVector ScaleFactor = FVector(300.f / (BoxExtent.X * 2 ), 300.f / (BoxExtent.Y * 2 ),1);
+	FVector ScaleFactor = FVector(300.f / (BoxExtent.X * 2 ), 300.f / (BoxExtent.Y * 2 ), 300.f / (BoxExtent.X * 2));
 	FirstSkeletalMeshComponent->SetWorldScale3D(ScaleFactor);
+	FirstSkeletalMeshComponent->SetRelativeLocation(FVector(0, 0, TrapMeshZAxisModify));
+	UE_LOG(LogTemp, Warning, TEXT("TrapMeshZAxisModify is : %f"), TrapMeshZAxisModify);
+
+	if (!AnimMontages.IsEmpty()) 
+	{
+		AttackMontage = AnimMontages[0];
+	}
+}
+
+void ADDAnimatedTrap::Attack()
+{
+	Super::Attack();
+
+	UAnimInstance* AnimInstance = SkeletalMeshComponents[0]->GetAnimInstance();
+	if (AnimInstance)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AnimInstance Exist"));
+		// UDDTrapAnimInstance로 캐스팅합니다.
+		UDDTrapAnimInstance* TrapAnimInstance = Cast<UDDTrapAnimInstance>(AnimInstance);
+		if (TrapAnimInstance)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Trap AnimInstance Exist"));
+			// PlayAnimationMontage를 호출합니다.
+			TrapAnimInstance->PlayAnimationMontage(AttackMontage);
+		}
+	}
+
+
 }
