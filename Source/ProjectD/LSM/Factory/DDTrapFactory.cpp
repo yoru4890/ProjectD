@@ -3,15 +3,15 @@
 
 #include "LSM/Factory/DDTrapFactory.h"
 #include "LSM/Trap/DDTrapBase.h"
-#include "LSM/Trap/DDTrapStruct.h"
+#include "LSM/Trap/DDTrapData.h"
 #include "LSM/Manager/DDAssetManager.h"
 #include "YSY/Game/DDGameInstance.h"
 
-UObject* UDDTrapFactory::CreateObject(UWorld* World, const FName& RowName, const FDDBuildingBaseStruct& ObjectStruct, const FVector& Location, const FRotator& Rotation, AActor* Owner, APawn* Instigator)
+UObject* UDDTrapFactory::CreateObject(UWorld* World, const FName& RowName, const FDDBuildingBaseData& ObjectStruct, const FVector& Location, const FRotator& Rotation, AActor* Owner, APawn* Instigator)
 {
 	check(World);
 	
-	const FDDTrapStruct* TrapStruct = static_cast<const FDDTrapStruct*>(&ObjectStruct);
+	const FDDTrapData* TrapStruct = static_cast<const FDDTrapData*>(&ObjectStruct);
 	UClass* TrapClass = TrapStruct->TrapClass;
 
 	
@@ -26,7 +26,7 @@ UObject* UDDTrapFactory::CreateObject(UWorld* World, const FName& RowName, const
 	UDDAssetManager* AssetManager = MyGameInstance->GetAssetManager();
 	check(AssetManager);
 
-	FDDBuildingBaseStruct* LoadedAsset = AssetManager->GetLoadedAssetByName(RowName);
+	FDDBuildingBaseData* LoadedAsset = AssetManager->GetLoadedAssetByName(RowName);
 
 	if (!LoadedAsset)
 	{

@@ -4,14 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
-#include "LSM/DDBuildingBaseStruct.h"
-#include "DDTowerStruct.generated.h"
+#include "LSM/DDBuildingBaseData.h"
+#include "DDTowerData.generated.h"
 
 /**
  * 
  */
 USTRUCT(BlueprintType)
-struct FDDTowerStruct : public FDDBuildingBaseStruct
+struct FDDTowerData : public FDDBuildingBaseData
 {
 	GENERATED_BODY()
 	

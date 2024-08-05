@@ -19,7 +19,7 @@ UDDTrapManager::UDDTrapManager()
 
 bool UDDTrapManager::IsTrapUnlocked(const FName& RowName) const
 {
-	const FDDTrapStruct& TrapStruct = GetTrapData(RowName);
+	const FDDTrapData& TrapStruct = GetTrapData(RowName);
 
 	return TrapStruct.bIsTrapUnlocked;
 
@@ -27,7 +27,7 @@ bool UDDTrapManager::IsTrapUnlocked(const FName& RowName) const
 
 bool UDDTrapManager::UnlockTrap(const FName& RowName)
 {
-	FDDTrapStruct& TrapStruct = GetTrapData(RowName);
+	FDDTrapData& TrapStruct = GetTrapData(RowName);
 
 	FName ParentName = TrapStruct.TrapParentRowName;
 
@@ -65,7 +65,7 @@ bool UDDTrapManager::LockTrap(const FName& RowName)
 
 	while (Stack.Num()>0) {
 		FName CurrentName = Stack.Pop();
-		FDDTrapStruct& CurrentTrapStruct = GetTrapData(CurrentName);
+		FDDTrapData& CurrentTrapStruct = GetTrapData(CurrentName);
 
 		for (auto& ChildName : CurrentTrapStruct.TrapChildRowNames)
 		{
@@ -80,7 +80,7 @@ bool UDDTrapManager::LockTrap(const FName& RowName)
 	ADDPlayerState* PlayerState = CastChecked<ADDPlayerState>(UGameplayStatics::GetPlayerState(GetWorld(), 0));
 	check(PlayerState);
 
-	FDDTrapStruct& LockTrapData = GetTrapData(RowName);
+	FDDTrapData& LockTrapData = GetTrapData(RowName);
 
 	PlayerState->AddLikePoint(LockTrapData.TrapUnlockCost);
 	LockTrapData.bIsTrapUnlocked = false;
@@ -94,22 +94,22 @@ bool UDDTrapManager::LockTrap(const FName& RowName)
 	return true;
 }
 
-const FDDTrapStruct& UDDTrapManager::GetTrapData(const FName& RowName) const
+const FDDTrapData& UDDTrapManager::GetTrapData(const FName& RowName) const
 {
 	return *UDDGameSingleton::Get().GetTrapDataTable().Find(RowName);
 }
 
-FDDTrapStruct& UDDTrapManager::GetTrapData(const FName& RowName)
+FDDTrapData& UDDTrapManager::GetTrapData(const FName& RowName)
 {
 	return *UDDGameSingleton::Get().GetTrapDataTable().Find(RowName);
 }
 
-TMap<FName, FDDTrapStruct>& UDDTrapManager::GetTrapDataTable()
+TMap<FName, FDDTrapData>& UDDTrapManager::GetTrapDataTable()
 {
 	return UDDGameSingleton::Get().GetTrapDataTable();
 }
 
-const TMap<FName, FDDTrapStruct>& UDDTrapManager::GetTrapDataTable() const
+const TMap<FName, FDDTrapData>& UDDTrapManager::GetTrapDataTable() const
 {
 	return UDDGameSingleton::Get().GetTrapDataTable();
 }
@@ -135,7 +135,7 @@ ADDTrapBase* UDDTrapManager::SpawnTrap(UWorld* World, const FName& RowName, cons
 		check(World);
 
 		// 트랩 데이터를 가져옵니다.
-		const FDDTrapStruct& TrapStruct = GetTrapData(RowName);
+		const FDDTrapData& TrapStruct = GetTrapData(RowName);
 
 		UDDGameInstance* MyGameInstance = Cast<UDDGameInstance>(World->GetGameInstance());
 		check(MyGameInstance);

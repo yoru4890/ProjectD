@@ -22,7 +22,7 @@ ADDTrapBase::ADDTrapBase()
 	BoxCollisionComponent->SetCollisionObjectType(GTCHANNEL_TRAP); // Assuming ECC_GameTraceChannel1 is the new Trap channel
 	BoxCollisionComponent->SetCollisionResponseToChannel(GTCHANNEL_ENEMY, ECollisionResponse::ECR_Overlap); // Assuming Enemy uses ECC_Pawn
 
-	static ConstructorHelpers::FObjectFinder<UMaterialInterface> MaterialFinder(TEXT("/Game/0000/LSM/Mesh/Trap/LSM_MI_PreviewTrap.LSM_MI_PreviewTrap"));
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> MaterialFinder(TEXT("/Game/0000/LSM/Mesh/LSM_MI_PreviewTrap.LSM_MI_PreviewTrap"));
 	if (MaterialFinder.Succeeded())
 	{
 		PreviewMaterial = MaterialFinder.Object;
@@ -83,7 +83,7 @@ void ADDTrapBase::SetTrapCanAttack(const bool bInCanAttack)
 	}
 }
 
-void ADDTrapBase::InitFromDataTable(const FName& RowName, const FDDTrapStruct& TrapData)
+void ADDTrapBase::InitFromDataTable(const FName& RowName, const FDDTrapData& TrapData)
 {
 	TrapRowName = RowName;
 	TrapDisplayName = TrapData.DisplayName;
@@ -104,7 +104,7 @@ void ADDTrapBase::InitFromDataTable(const FName& RowName, const FDDTrapStruct& T
 	UE_LOG(LogTemp, Warning, TEXT("TrapMeshZAxisModify is : %f"), TrapData.MeshZAxisModify);
 }
 
-void ADDTrapBase::SetTrapAssets(FDDBuildingBaseStruct& LoadedAsset)
+void ADDTrapBase::SetTrapAssets(FDDBuildingBaseData& LoadedAsset)
 {
 	// 기존 ParticleEffectComponents 배열 초기화
 	for (UParticleSystemComponent* ParticleEffectComponent : ParticleEffectComponents)

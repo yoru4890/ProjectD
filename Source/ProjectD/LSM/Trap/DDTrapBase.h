@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "DDTrapStruct.h"
+#include "DDTrapData.h"
 #include "TrapAssetInterface.h"
 #include "DDTrapBase.generated.h"
 
@@ -40,9 +40,9 @@ public:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	virtual void InitFromDataTable(const FName& RowName, const FDDTrapStruct& TrapData);
+	virtual void InitFromDataTable(const FName& RowName, const FDDTrapData& TrapData);
 	void  SetTrapCanAttack(const bool bInCanAttack);
-	virtual void SetTrapAssets(FDDBuildingBaseStruct& LoadedAsset) override;
+	virtual void SetTrapAssets(FDDBuildingBaseData& LoadedAsset) override;
 	void SetMaterialToPreview(bool bCanPay);
 	void SetMaterialToOriginal();
 

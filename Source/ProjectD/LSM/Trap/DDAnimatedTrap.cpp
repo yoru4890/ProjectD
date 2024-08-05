@@ -19,7 +19,7 @@ void ADDAnimatedTrap::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void ADDAnimatedTrap::SetTrapAssets(FDDBuildingBaseStruct& LoadedAsset)
+void ADDAnimatedTrap::SetTrapAssets(FDDBuildingBaseData& LoadedAsset)
 {
 	Super::SetTrapAssets(LoadedAsset);
 	// 기존 ParticleEffectComponents 배열 초기화

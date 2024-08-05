@@ -152,7 +152,7 @@ void UDDTrapBuildComponent::CancleBuildTrap()
 	if (!ManagedTrap) {
 		return;
 	}
-	FDDTrapStruct& ManagedTrapData = TrapManager->GetTrapData(ManagedTrap->GetTrapRowName());
+	FDDTrapData& ManagedTrapData = TrapManager->GetTrapData(ManagedTrap->GetTrapRowName());
 	BuildManager->SetGridCellAsBlank(ManagedTrap->GetActorLocation(), ManagedTrap->GetTrapCellWidth());
 	PlayerState->AddGold(ManagedTrapData.TrapBuildCost * 0.8f);
 	TrapManager->DestroyTrap(*ManagedTrap);
@@ -166,7 +166,7 @@ bool UDDTrapBuildComponent::UpgradeTrap(const FName& RowName)
 		UE_LOG(LogTemp, Warning, TEXT("Upgrade Failed : ManagedTrap is null"));
 		return false;
 	}
-	FDDTrapStruct& UpgradeTrapData = TrapManager->GetTrapData(RowName);
+	FDDTrapData& UpgradeTrapData = TrapManager->GetTrapData(RowName);
 	if (!UpgradeTrapData.bIsTrapUnlocked)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Upgrade Failed : UpgradeTrapData is Lock"));
@@ -179,7 +179,7 @@ bool UDDTrapBuildComponent::UpgradeTrap(const FName& RowName)
 		return false;
 	}
 
-	FDDTrapStruct& ManagedTrapData = TrapManager->GetTrapData(ManagedTrap->GetTrapRowName());
+	FDDTrapData& ManagedTrapData = TrapManager->GetTrapData(ManagedTrap->GetTrapRowName());
 
 	if (!ManagedTrapData.TrapChildRowNames.Contains(RowName))
 	{
@@ -378,28 +378,28 @@ void UDDTrapBuildComponent::PerformTrapManageTrace()
 
 bool UDDTrapBuildComponent::CanPayTrapBuildCost(const FName& RowName) const
 {
-	const FDDTrapStruct& TrapData = TrapManager->GetTrapData(RowName);
+	const FDDTrapData& TrapData = TrapManager->GetTrapData(RowName);
 	bool bCanPay = PlayerState->CheckGold(TrapData.TrapBuildCost);
 	return bCanPay;
 }
 
 bool UDDTrapBuildComponent::PayTrapBuildCost(const FName& RowName) const
 {
-	const FDDTrapStruct& TrapData = TrapManager->GetTrapData(RowName);
+	const FDDTrapData& TrapData = TrapManager->GetTrapData(RowName);
 	bool bIsPay = PlayerState->SubtractGold(TrapData.TrapBuildCost);
 	return bIsPay;
 }
 
 bool UDDTrapBuildComponent::CanPayTrapUpgradeCost(const FName& RowName) const
 {
-	const FDDTrapStruct& TrapData = TrapManager->GetTrapData(RowName);
+	const FDDTrapData& TrapData = TrapManager->GetTrapData(RowName);
 	bool bCanPay = PlayerState->CheckGold(TrapData.TrapUpgradeCost);
 	return bCanPay;
 }
 
 bool UDDTrapBuildComponent::PayTrapUpgradeCost(const FName& RowName) const
 {
-	const FDDTrapStruct& TrapData = TrapManager->GetTrapData(RowName);
+	const FDDTrapData& TrapData = TrapManager->GetTrapData(RowName);
 	bool bIsPay = PlayerState->SubtractGold(TrapData.TrapUpgradeCost);
 	return bIsPay;
 }

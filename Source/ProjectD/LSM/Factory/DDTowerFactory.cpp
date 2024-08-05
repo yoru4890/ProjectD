@@ -3,7 +3,7 @@
 
 #include "LSM/Factory/DDTowerFactory.h"
 
-UObject* UDDTowerFactory::CreateObject(UWorld* World, const FName& RowName, const FDDBuildingBaseStruct& ObjectStruct, const FVector& Location, const FRotator& Rotation, AActor* Owner, APawn* Instigator)
+UObject* UDDTowerFactory::CreateObject(UWorld* World, const FName& RowName, const FDDBuildingBaseData& ObjectStruct, const FVector& Location, const FRotator& Rotation, AActor* Owner, APawn* Instigator)
 {
 	check(World);
 

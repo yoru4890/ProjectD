@@ -2,7 +2,7 @@
 
 
 #include "LSM/Manager/DDAssetManager.h"
-#include "LSM/DDBuildingBaseStruct.h"
+#include "LSM/DDBuildingBaseData.h"
 #include "YSY/Game/DDGameInstance.h"
 #include "YSY/Game/DDGameSingleton.h"
 #include "Engine/StreamableManager.h"
@@ -12,7 +12,7 @@
 
 void UDDAssetManager::Initialize()
 {
-	TMap<FName, FDDTrapStruct>& TrapDataTable = UDDGameSingleton::Get().GetTrapDataTable();
+	TMap<FName, FDDTrapData>& TrapDataTable = UDDGameSingleton::Get().GetTrapDataTable();
 	UE_LOG(LogTemp, Warning, TEXT("Initialize AssetManager"));
 	for (auto& Elem : TrapDataTable) {
 		UE_LOG(LogTemp, Warning, TEXT("%s is Unlock? : %s"), *Elem.Key.ToString(), Elem.Value.bIsTrapUnlocked ? TEXT("true") : TEXT("false"));
@@ -25,7 +25,7 @@ void UDDAssetManager::Initialize()
 
 void UDDAssetManager::LoadAssetsAsync(const FName& RowName)
 {
-	FDDBuildingBaseStruct* ObjectStruct = GetObjectBaseData(RowName);
+	FDDBuildingBaseData* ObjectStruct = GetObjectBaseData(RowName);
 	if (!ObjectStruct)
 	{
 		return;
@@ -45,6 +45,7 @@ void UDDAssetManager::LoadAssetsAsync(const FName& RowName)
 		return;
 	}
 
+	UE_LOG(LogTemp, Warning, TEXT("%s : LoadAssetsAsync is Started."), *RowName.ToString());
 	ObjectStruct->bIsLoading = true;
 
 	// Asset의 경로를 저장하고 있는 Array
@@ -116,10 +117,10 @@ void UDDAssetManager::LoadAssetsAsync(const FName& RowName)
 	StreamableManager.RequestAsyncLoad(SoftObjectPaths, FStreamableDelegate::CreateLambda(OnAssetsLoadedCallback));
 }
 
-FDDBuildingBaseStruct* UDDAssetManager::GetLoadedAssetByName(const FName& RowName)
+FDDBuildingBaseData* UDDAssetManager::GetLoadedAssetByName(const FName& RowName)
 {
 	UE_LOG(LogTemp, Warning, TEXT("GetLoadedAssetByName is Called"));
-	FDDBuildingBaseStruct* ObjectStruct = GetObjectBaseData(RowName);
+	FDDBuildingBaseData* ObjectStruct = GetObjectBaseData(RowName);
 	if (!ObjectStruct)
 	{
 		return nullptr;
@@ -135,7 +136,7 @@ FDDBuildingBaseStruct* UDDAssetManager::GetLoadedAssetByName(const FName& RowNam
 
 void UDDAssetManager::RemoveLoadedAssetByName(const FName& RowName)
 {
-	FDDBuildingBaseStruct* ObjectStruct = GetObjectBaseData(RowName);
+	FDDBuildingBaseData* ObjectStruct = GetObjectBaseData(RowName);
 	if (!ObjectStruct)
 	{
 		return;
@@ -196,12 +197,12 @@ void UDDAssetManager::RemoveLoadedAssetByName(const FName& RowName)
 void UDDAssetManager::RemoveLoadedAssetAll()
 {
 	FStreamableManager& StreamableManager = UAssetManager::GetStreamableManager();
-	TMap<FName, FDDTrapStruct>& TrapDataTable = UDDGameSingleton::Get().GetTrapDataTable();
+	TMap<FName, FDDTrapData>& TrapDataTable = UDDGameSingleton::Get().GetTrapDataTable();
 	TArray<FName> KeyArray;
 	TrapDataTable.GenerateKeyArray(KeyArray);
 	for (FName& RowName : KeyArray)
 	{
-		FDDBuildingBaseStruct* ObjectStruct = GetObjectBaseData(RowName);
+		FDDBuildingBaseData* ObjectStruct = GetObjectBaseData(RowName);
 
 		// 각 타입별로 로드된 에셋을 언로드
 		for (TSoftObjectPtr<UStaticMesh>& StaticMesh : ObjectStruct->StaticMeshs)
@@ -229,9 +230,9 @@ void UDDAssetManager::RemoveLoadedAssetAll()
 	}
 }
 
-FDDBuildingBaseStruct* UDDAssetManager::GetObjectBaseData(const FName& RowName)
+FDDBuildingBaseData* UDDAssetManager::GetObjectBaseData(const FName& RowName)
 {
-	FDDBuildingBaseStruct* ObjectStruct;
+	FDDBuildingBaseData* ObjectStruct;
 	if (UDDGameSingleton::Get().GetTrapDataTable().Find(RowName)) {
 		ObjectStruct = UDDGameSingleton::Get().GetTrapDataTable().Find(RowName);
 		return ObjectStruct;

@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h" // Ensure this include is present for FTableRowBase
-#include "DDBuildingBaseStruct.generated.h"
+#include "DDBuildingBaseData.generated.h"
 
 /**
  * 
@@ -18,7 +18,7 @@ enum class EMeshType : uint8
 };
 
 USTRUCT(BlueprintType)
-struct FDDBuildingBaseStruct : public FTableRowBase
+struct FDDBuildingBaseData : public FTableRowBase
 {
 	GENERATED_BODY()
 

@@ -4,7 +4,7 @@
 #include "LSM/Manager/DDFactoryManager.h"
 #include "LSM/Factory/DDFactoryInterface.h"
 
-void UDDFactoryManager::Initialize(const TMap<FName, FDDTrapStruct>& TrapDataTable)
+void UDDFactoryManager::Initialize(const TMap<FName, FDDTrapData>& TrapDataTable)
 {
 	for (auto& Elem : TrapDataTable) {
 		if (Elem.Value.FactoryClass) {

@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
-#include "LSM/Trap/DDTrapStruct.h"
+#include "LSM/Trap/DDTrapData.h"
 #include "DDTrapManager.generated.h"
 
 USTRUCT(BlueprintType)
@@ -35,13 +35,13 @@ public:
 
 	bool LockTrap(const FName& RowName);
 
-	const FDDTrapStruct& GetTrapData(const FName& RowName) const;
+	const FDDTrapData& GetTrapData(const FName& RowName) const;
 
-	FDDTrapStruct& GetTrapData(const FName& RowName);
+	FDDTrapData& GetTrapData(const FName& RowName);
 
-	TMap<FName, FDDTrapStruct>& GetTrapDataTable();
+	TMap<FName, FDDTrapData>& GetTrapDataTable();
 
-	const TMap<FName, FDDTrapStruct>& GetTrapDataTable() const;
+	const TMap<FName, FDDTrapData>& GetTrapDataTable() const;
 
 	// 트랩 스폰 메서드
 	UFUNCTION(BlueprintCallable)
