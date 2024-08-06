@@ -2,7 +2,7 @@
 
 
 #include "LSM/Factory/DDTrapFactory.h"
-#include "LSM/Building/Trap/DDTrapBase.h"
+#include "LSM/Building/Trap/DDTrap.h"
 #include "LSM/Building/Trap/DDTrapData.h"
 #include "LSM/Manager/DDAssetManager.h"
 #include "YSY/Game/DDGameInstance.h"
@@ -10,14 +10,33 @@
 UObject* UDDTrapFactory::CreateObject(UWorld* World, const FName& RowName, const FDDBuildingBaseData& ObjectStruct, const FVector& Location, const FRotator& Rotation, AActor* Owner, APawn* Instigator)
 {
 	check(World);
-	
-	const FDDTrapData* TrapStruct = static_cast<const FDDTrapData*>(&ObjectStruct);
+
+	const FDDTrapData* TrapStruct = nullptr;
+	if (ObjectStruct.BuildingType == EBuildingType::Trap) 
+	{
+		TrapStruct = static_cast<const FDDTrapData*>(&ObjectStruct);
+
+		UE_LOG(LogTemp, Warning, TEXT("%s is Trap"), *RowName.ToString());
+	}
+
+	if (TrapStruct->TrapClass) 
+	{
+
+	}
+
+
+	if (TrapStruct->AttackCoolTime)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Attack CoolTime is %f"), TrapStruct->AttackCoolTime);
+		return nullptr;
+	}
+
 	UClass* TrapClass = TrapStruct->TrapClass;
 
 	
 	check(TrapClass);
 	// TrapClass를 사용하여 NewTrap 생성
-	ADDTrapBase* NewTrap = World->SpawnActor<ADDTrapBase>(TrapClass);
+	ADDTrap* NewTrap = World->SpawnActor<ADDTrap>(TrapClass);
 	check(NewTrap);
 
 	UDDGameInstance* MyGameInstance = Cast<UDDGameInstance>(GetWorld()->GetGameInstance());

@@ -10,6 +10,7 @@
 #include "YSY/Collision/CollisionChannel.h"
 #include "YSY/Game/DDPlayerState.h"
 #include "LSM/Widget/DDCantBuildWidget.h"
+#include "LSM/Building/DDBuildingBase.h"
 
 // Sets default values for this component's properties
 UDDBuildComponent::UDDBuildComponent()

@@ -121,8 +121,11 @@ protected:
 	UPROPERTY(EditAnywhere)
 	TArray<TObjectPtr<UMeshComponent>> MeshComponents;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+	TArray<TObjectPtr<USkeletalMeshComponent>> SkeletalMeshComponents;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AnimMontages", meta = (AllowPrivateAccess = "true"))
-	TArray<TObjectPtr<UAnimMontage>> AnimMontages;
+	TArray<TObjectPtr<UAnimMontage>> AttackMontages;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
 	TObjectPtr<UMaterialInterface> PreviewMaterial;

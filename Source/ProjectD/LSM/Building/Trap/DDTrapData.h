@@ -17,5 +17,5 @@ struct FDDTrapData : public FDDBuildingBaseData
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<class ADDTrapBase> TrapClass; // Æ®·¦ Å¬·¡½º
+	TSubclassOf<class ADDTrap> TrapClass; // Æ®·¦ Å¬·¡½º
 };

@@ -13,6 +13,7 @@ void UDDGameInstance::Init()
 	FactoryManager = NewObject<UDDFactoryManager>(this);
 	AssetManager = NewObject<UDDAssetManager>(this);
 
+	BuildingManager->Initialize();
 	FactoryManager->Initialize(BuildingManager->GetBuildingDataTable());
 	AssetManager->Initialize();
 	

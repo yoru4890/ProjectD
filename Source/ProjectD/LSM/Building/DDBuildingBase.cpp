@@ -156,11 +156,11 @@ void ADDBuildingBase::SetMeshs(FDDBuildingBaseData& LoadedAsset)
 	}
 	MeshComponents.Empty();
 
-	for (TSoftObjectPtr<UAnimMontage>& AnimMontageSoftPtr : LoadedAsset.AnimMontages)
+	for (TSoftObjectPtr<UAnimMontage>& AnimMontageSoftPtr : LoadedAsset.AttackMontages)
 	{
 		if (AnimMontageSoftPtr.IsValid())
 		{
-			AnimMontages.Add(AnimMontageSoftPtr.Get());
+			AttackMontages.Add(AnimMontageSoftPtr.Get());
 		}
 		else
 		{
@@ -182,9 +182,12 @@ void ADDBuildingBase::SetMeshs(FDDBuildingBaseData& LoadedAsset)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("%s : SkeletalMesh not loaded"), RowName);
 		}
+		SkeletalMeshComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
+		SkeletalMeshComponent->SetCollisionResponseToChannel(GTCHANNEL_MANAGETRACE, ECR_Block);
 		SkeletalMeshComponent->RegisterComponent();
 
 		MeshComponents.Add(SkeletalMeshComponent);
+		SkeletalMeshComponents.Add(SkeletalMeshComponent);
 		FDDMaterials MaterialStruct;
 		MaterialStruct.Materials = SkeletalMeshComponent->GetMaterials();
 		OriginalMaterials.Add(SkeletalMeshComponent, MaterialStruct);
@@ -192,9 +195,8 @@ void ADDBuildingBase::SetMeshs(FDDBuildingBaseData& LoadedAsset)
 
 	if (LoadedAsset.MyAnimBlueprint.IsValid())
 	{
-		if (!MeshComponents.IsEmpty() && MeshComponents[0]->IsA<USkeletalMeshComponent>())
+		for (auto& SkeletalMeshComponent : SkeletalMeshComponents) 
 		{
-			USkeletalMeshComponent* SkeletalMeshComponent = Cast<USkeletalMeshComponent>(MeshComponents[0]);
 			SkeletalMeshComponent->SetAnimInstanceClass(LoadedAsset.MyAnimBlueprint->GeneratedClass);
 		}
 	}

@@ -23,86 +23,86 @@ void ADDAnimatedTrap::SetAssets(FDDBuildingBaseData& LoadedAsset)
 {
 	Super::SetAssets(LoadedAsset);
 	// 기존 ParticleEffectComponents 배열 초기화
-	for (USkeletalMeshComponent* SkeletalMeshComponent : SkeletalMeshComponents)
-	{
-		if (SkeletalMeshComponent)
-		{
-			SkeletalMeshComponent->DestroyComponent();
-		}
-	}
-	SkeletalMeshComponents.Empty();
-	bool bIsFirstSkeltalMesh = true;
+	//for (USkeletalMeshComponent* SkeletalMeshComponent : SkeletalMeshComponents)
+	//{
+	//	if (SkeletalMeshComponent)
+	//	{
+	//		SkeletalMeshComponent->DestroyComponent();
+	//	}
+	//}
+	//SkeletalMeshComponents.Empty();
+	//bool bIsFirstSkeltalMesh = true;
 
-	USkeletalMeshComponent* FirstSkeletalMeshComponent = nullptr;
-	int32 SkeletalNum = 0;
+	//USkeletalMeshComponent* FirstSkeletalMeshComponent = nullptr;
+	//int32 SkeletalNum = 0;
 
-	for (TSoftObjectPtr<UAnimMontage>& AnimMontageSoftPtr : LoadedAsset.AnimMontages)
-	{
-		if (AnimMontageSoftPtr.IsValid())
-		{
-			AnimMontages.Add(AnimMontageSoftPtr.Get());
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("%s : Montages not loaded"), TrapRowName);
-		}
-	}
-	for (TSoftObjectPtr<USkeletalMesh>& SkeletalMeshSoftPtr : LoadedAsset.SkeletalMeshs) {
-		USkeletalMeshComponent* SkeletalMeshComponent = NewObject<USkeletalMeshComponent>(this);
-		check(SkeletalMeshComponent);
+	//for (TSoftObjectPtr<UAnimMontage>& AnimMontageSoftPtr : LoadedAsset.AnimMontages)
+	//{
+	//	if (AnimMontageSoftPtr.IsValid())
+	//	{
+	//		AnimMontages.Add(AnimMontageSoftPtr.Get());
+	//	}
+	//	else
+	//	{
+	//		UE_LOG(LogTemp, Warning, TEXT("%s : Montages not loaded"), TrapRowName);
+	//	}
+	//}
+	//for (TSoftObjectPtr<USkeletalMesh>& SkeletalMeshSoftPtr : LoadedAsset.SkeletalMeshs) {
+	//	USkeletalMeshComponent* SkeletalMeshComponent = NewObject<USkeletalMeshComponent>(this);
+	//	check(SkeletalMeshComponent);
 
-		SkeletalMeshComponent->SetupAttachment(RootComponent);
-		if (SkeletalMeshSoftPtr.IsValid()) 
-		{
-			SkeletalMeshComponent->SetSkeletalMesh(SkeletalMeshSoftPtr.Get());
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("%s : SkeletalMesh not loaded"), TrapRowName);
-		}
+	//	SkeletalMeshComponent->SetupAttachment(RootComponent);
+	//	if (SkeletalMeshSoftPtr.IsValid()) 
+	//	{
+	//		SkeletalMeshComponent->SetSkeletalMesh(SkeletalMeshSoftPtr.Get());
+	//	}
+	//	else
+	//	{
+	//		UE_LOG(LogTemp, Warning, TEXT("%s : SkeletalMesh not loaded"), TrapRowName);
+	//	}
 
-		if (bIsFirstSkeltalMesh) {
-			FirstSkeletalMeshComponent = SkeletalMeshComponent;
-			if (LoadedAsset.MyAnimBlueprint.IsValid())
-			{
-				FirstSkeletalMeshComponent->SetAnimInstanceClass(LoadedAsset.MyAnimBlueprint->GeneratedClass);
-			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("%s : AnimBluePrint not loaded"), TrapRowName);
-			}
+	//	if (bIsFirstSkeltalMesh) {
+	//		FirstSkeletalMeshComponent = SkeletalMeshComponent;
+	//		if (LoadedAsset.MyAnimBlueprint.IsValid())
+	//		{
+	//			FirstSkeletalMeshComponent->SetAnimInstanceClass(LoadedAsset.MyAnimBlueprint->GeneratedClass);
+	//		}
+	//		else
+	//		{
+	//			UE_LOG(LogTemp, Warning, TEXT("%s : AnimBluePrint not loaded"), TrapRowName);
+	//		}
 
-			FirstSkeletalMeshComponent->RegisterComponent();
-			bIsFirstSkeltalMesh = false;
-		}
-		else {
-			SkeletalMeshComponent->SetupAttachment(FirstSkeletalMeshComponent);
-			SkeletalMeshComponent->RegisterComponent();
-		}
-		SkeletalMeshComponents.Add(SkeletalMeshComponent);
-		FDDMaterials MaterialStruct;
-		MaterialStruct.Materials = SkeletalMeshComponent->GetMaterials();
-		OriginalMaterials.Add(SkeletalNum, MaterialStruct);
-		SkeletalNum++;
-		
-	}
-	USkeletalMesh* SkeletalMesh = FirstSkeletalMeshComponent->GetSkeletalMeshAsset();
-	if (!SkeletalMesh)
-	{
-		return;
-	}
+	//		FirstSkeletalMeshComponent->RegisterComponent();
+	//		bIsFirstSkeltalMesh = false;
+	//	}
+	//	else {
+	//		SkeletalMeshComponent->SetupAttachment(FirstSkeletalMeshComponent);
+	//		SkeletalMeshComponent->RegisterComponent();
+	//	}
+	//	SkeletalMeshComponents.Add(SkeletalMeshComponent);
+	//	FDDMaterials MaterialStruct;
+	//	MaterialStruct.Materials = SkeletalMeshComponent->GetMaterials();
+	//	OriginalMaterials.Add(SkeletalNum, MaterialStruct);
+	//	SkeletalNum++;
+	//	
+	//}
+	//USkeletalMesh* SkeletalMesh = FirstSkeletalMeshComponent->GetSkeletalMeshAsset();
+	//if (!SkeletalMesh)
+	//{
+	//	return;
+	//}
 
-	FBoxSphereBounds Bounds = SkeletalMesh->GetBounds();
-	FVector BoxExtent = Bounds.BoxExtent;
-	FVector ScaleFactor = FVector(GridCellSize*TrapCellWidth / (BoxExtent.X * 2 ), GridCellSize * TrapCellWidth / (BoxExtent.Y * 2 ), GridCellSize * TrapCellWidth / (BoxExtent.X * 2));
-	FirstSkeletalMeshComponent->SetWorldScale3D(ScaleFactor);
-	FirstSkeletalMeshComponent->SetRelativeLocation(FVector(0, 0, TrapMeshZAxisModify));
-	UE_LOG(LogTemp, Warning, TEXT("TrapMeshZAxisModify is : %f"), TrapMeshZAxisModify);
+	//FBoxSphereBounds Bounds = SkeletalMesh->GetBounds();
+	//FVector BoxExtent = Bounds.BoxExtent;
+	//FVector ScaleFactor = FVector(GridCellSize*TrapCellWidth / (BoxExtent.X * 2 ), GridCellSize * TrapCellWidth / (BoxExtent.Y * 2 ), GridCellSize * TrapCellWidth / (BoxExtent.X * 2));
+	//FirstSkeletalMeshComponent->SetWorldScale3D(ScaleFactor);
+	//FirstSkeletalMeshComponent->SetRelativeLocation(FVector(0, 0, TrapMeshZAxisModify));
+	//UE_LOG(LogTemp, Warning, TEXT("TrapMeshZAxisModify is : %f"), TrapMeshZAxisModify);
 
-	if (!AnimMontages.IsEmpty()) 
-	{
-		AttackMontage = AnimMontages[0];
-	}
+	//if (!AnimMontages.IsEmpty()) 
+	//{
+	//	AttackMontage = AnimMontages[0];
+	//}
 }
 
 void ADDAnimatedTrap::Attack()

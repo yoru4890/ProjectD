@@ -4,7 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
-#include "LSM/Building/DDBuildingBase.h"
+#include "LSM/Building/Tower/DDTowerData.h"
+#include "LSM/Building/Trap/DDTrapData.h"
 #include "DDBuildingManager.generated.h"
 
 USTRUCT(BlueprintType)
@@ -25,6 +26,8 @@ class PROJECTD_API UDDBuildingManager : public UObject
 public:
 	UDDBuildingManager();
 
+	void Initialize();
+
 	// 함정이 해금이 되었는지 체크하는 메서드
 	UFUNCTION(BlueprintCallable)
 	bool IsBuildingUnlocked(const FName& RowName) const;
@@ -39,9 +42,17 @@ public:
 
 	FDDBuildingBaseData& GetBuildingData(const FName& RowName);
 
-	TMap<FName, FDDBuildingBaseData>& GetBuildingDataTable();
+	const FDDTrapData& GetTrapData(const FName& RowName) const;
+
+	const FDDTowerData& GetTowerData(const FName& RowName) const;
+
+	const TMap<FName, FDDTrapData>& GetTrapDataTable() const;
+
+	const TMap<FName, FDDTowerData>& GetTowerDataTable() const;
 
 	const TMap<FName, FDDBuildingBaseData>& GetBuildingDataTable() const;
+
+	TMap<FName, FDDBuildingBaseData>& GetBuildingDataTable();
 
 	// 트랩 스폰 메서드
 	UFUNCTION(BlueprintCallable)
@@ -51,5 +62,7 @@ public:
 
 private:
 	TMap<FName, FBuildingList> BuildingPool;
+
+	TMap<FName, FDDBuildingBaseData> BuildingDataTable;
 
 };

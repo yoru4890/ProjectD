@@ -10,9 +10,42 @@
 #include "YSY/Game/DDPlayerState.h"
 #include "Kismet/GameplayStatics.h"
 #include "LSM/Manager/DDAssetManager.h"
+#include "LSM/Building/DDBuildingBase.h"
 
 UDDBuildingManager::UDDBuildingManager()
 {
+
+}
+
+void UDDBuildingManager::Initialize()
+{
+	const TMap<FName, FDDTrapData>& TrapDataTable = GetTrapDataTable();
+	const TMap<FName, FDDTowerData>& TowerDataTable = GetTowerDataTable();
+
+	const FDDBuildingBaseData& test = *TrapDataTable.Find("ThornTrap");
+	const FDDTrapData* test2 = static_cast<const FDDTrapData*>(&test);
+
+	if (test2->TrapClass)
+	{
+
+	}
+
+	for (auto& TrapData : TrapDataTable)
+	{
+		BuildingDataTable.Add(TrapData.Key, TrapData.Value);
+	}
+
+	for (auto& TowerData : TowerDataTable)
+	{
+		BuildingDataTable.Add(TowerData.Key, TowerData.Value);
+	}
+
+	const FDDTrapData* test3 = static_cast<const FDDTrapData*>(BuildingDataTable.Find("ThornTrap"));
+
+	if (test3->TrapClass)
+	{
+
+	}
 
 }
 
@@ -93,26 +126,6 @@ bool UDDBuildingManager::LockBuilding(const FName& RowName)
 	return true;
 }
 
-const FDDBuildingBaseData& UDDBuildingManager::GetBuildingData(const FName& RowName) const
-{
-	return *UDDGameSingleton::Get().GetBuildingDataTable().Find(RowName);
-}
-
-FDDBuildingBaseData& UDDBuildingManager::GetBuildingData(const FName& RowName)
-{
-	return *UDDGameSingleton::Get().GetBuildingDataTable().Find(RowName);
-}
-
-TMap<FName, FDDBuildingBaseData>& UDDBuildingManager::GetBuildingDataTable()
-{
-	return UDDGameSingleton::Get().GetBuildingDataTable();
-}
-
-const TMap<FName, FDDBuildingBaseData>& UDDBuildingManager::GetBuildingDataTable() const
-{
-	return UDDGameSingleton::Get().GetBuildingDataTable();
-}
-
 ADDBuildingBase* UDDBuildingManager::SpawnBuilding(UWorld* World, const FName& RowName, const FVector& Location, const FRotator& Rotation, AActor* Owner, APawn* Instigator)
 {
 	if (!BuildingPool.Contains(RowName)) {
@@ -134,7 +147,22 @@ ADDBuildingBase* UDDBuildingManager::SpawnBuilding(UWorld* World, const FName& R
 		check(World);
 
 		// 트랩 데이터를 가져옵니다.
-		const FDDBuildingBaseData& BuildingStruct = GetBuildingData(RowName);
+		const FDDBuildingBaseData& BuildingStruct = *BuildingDataTable.Find(RowName);
+
+		const FDDTrapData* TrapStruct = static_cast<const FDDTrapData*>(&BuildingStruct);
+
+		if (TrapStruct->TrapClass)
+		{
+			return nullptr;
+		}
+
+		//const FDDTrapData& TrapStruct = GetTrapData(RowName);
+
+		//if (TrapStruct.TrapClass) {
+		//	UE_LOG(LogTemp, Warning, TEXT("Class : %s"), *TrapStruct.TrapClass->GetFName().ToString());
+		//	return nullptr;
+		//}
+
 
 		UDDGameInstance* MyGameInstance = Cast<UDDGameInstance>(World->GetGameInstance());
 		check(MyGameInstance);
@@ -142,10 +170,10 @@ ADDBuildingBase* UDDBuildingManager::SpawnBuilding(UWorld* World, const FName& R
 		UDDFactoryManager* FactoryManager = MyGameInstance->GetFactoryManager();
 		check(FactoryManager);
 
-		IDDFactoryInterface* TrapFactory = FactoryManager->GetFactory(RowName);
-		check(TrapFactory);
+		IDDFactoryInterface* BuildingFactory = FactoryManager->GetFactory(RowName);
+		check(BuildingFactory);
 
-		UObject* CreatedObject = TrapFactory->CreateObject(World, RowName, BuildingStruct, Location, Rotation, Owner, Instigator);
+		UObject* CreatedObject = BuildingFactory->CreateObject(World, RowName, BuildingStruct, Location, Rotation, Owner, Instigator);
 		if (!CreatedObject)
 		{
 			return nullptr;
@@ -168,4 +196,46 @@ void UDDBuildingManager::DestroyBuilding(ADDBuildingBase& Building)
 	Building.SetActorEnableCollision(false);
 	Building.SetActorTickEnabled(false);
 	Building.SetCanAttack(false);
+}
+
+
+const FDDBuildingBaseData& UDDBuildingManager::GetBuildingData(const FName& RowName) const
+{
+	return *BuildingDataTable.Find(RowName);
+}
+
+FDDBuildingBaseData& UDDBuildingManager::GetBuildingData(const FName& RowName)
+{
+	return *BuildingDataTable.Find(RowName);
+
+}
+
+const FDDTrapData& UDDBuildingManager::GetTrapData(const FName& RowName) const
+{
+	return *UDDGameSingleton::Get().GetTrapDataTable().Find(RowName);
+}
+
+const FDDTowerData& UDDBuildingManager::GetTowerData(const FName& RowName) const
+{
+	return *UDDGameSingleton::Get().GetTowerDataTable().Find(RowName);
+}
+
+const TMap<FName, FDDTrapData>& UDDBuildingManager::GetTrapDataTable() const
+{
+	return UDDGameSingleton::Get().GetTrapDataTable();
+}
+
+const TMap<FName, FDDTowerData>& UDDBuildingManager::GetTowerDataTable() const
+{
+	return UDDGameSingleton::Get().GetTowerDataTable();
+}
+
+const TMap<FName, FDDBuildingBaseData>& UDDBuildingManager::GetBuildingDataTable() const
+{
+	return BuildingDataTable;
+}
+
+TMap<FName, FDDBuildingBaseData>& UDDBuildingManager::GetBuildingDataTable()
+{
+	return BuildingDataTable;
 }

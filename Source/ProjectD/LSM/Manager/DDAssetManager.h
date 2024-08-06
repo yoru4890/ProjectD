@@ -26,8 +26,4 @@ public:
 
 private:
     FDDBuildingBaseData* GetObjectBaseData(const FName& RowName);
-
-    //// 로딩된 Asset을 담고 있는 자료구조 
-    //UPROPERTY()
-    //TMap<FName, FDDLoadedAsset> LoadedAssets;
 };

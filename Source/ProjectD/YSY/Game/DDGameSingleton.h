@@ -6,6 +6,8 @@
 #include "UObject/NoExportTypes.h"
 #include "YSY/GameData/DDEnemyData.h"
 #include "LSM/Building/DDBuildingBaseData.h"
+#include "LSM/Building/Trap/DDTrapData.h"
+#include "LSM/Building/Tower/DDTowerData.h"
 #include "DDGameSingleton.generated.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogDDGameSingleton, Error, All);
@@ -23,13 +25,15 @@ public:
 	static UDDGameSingleton& Get();
 
 	FORCEINLINE TMap<FName, FDDEnemyData>& GetEnemyDataTable() { return EnemyDataTable; }
-	FORCEINLINE TMap<FName, FDDBuildingBaseData>& GetBuildingDataTable() { return BuildingDataTable; }
+	FORCEINLINE TMap<FName, FDDTrapData>& GetTrapDataTable() { return TrapDataTable; }
+	FORCEINLINE TMap<FName, FDDTowerData>& GetTowerDataTable() { return TowerDataTable; }
 
 private:
 	TMap<FName, FDDEnemyData> EnemyDataTable;
-	TMap<FName, FDDBuildingBaseData> BuildingDataTable;
-
-
+	TMap<FName, FDDTrapData> TrapDataTable;
+	TMap<FName, FDDTowerData> TowerDataTable;
+	
+	
 	template<typename T>
 	void LoadDataTable(TMap<FName, T>& DataTable, const FString& Path)
 	{

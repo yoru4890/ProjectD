@@ -8,10 +8,18 @@
 #include "Engine/StreamableManager.h"
 #include "Engine/AssetManager.h"
 #include "Kismet/GameplayStatics.h"
+#include "LSM/Manager/DDBuildingManager.h"
 
 void UDDAssetManager::Initialize()
 {
-	TMap<FName, FDDBuildingBaseData>& BuildingDataTable = UDDGameSingleton::Get().GetBuildingDataTable();
+	check(GetWorld());
+	UDDGameInstance* GameInstance = CastChecked<UDDGameInstance>(GetWorld()->GetGameInstance());
+	check(GameInstance);
+
+	UDDBuildingManager* BuildingManager = GameInstance->GetBuildingManager();
+	check(BuildingManager);
+
+	const TMap<FName, FDDBuildingBaseData>& BuildingDataTable = BuildingManager->GetBuildingDataTable();
 	UE_LOG(LogTemp, Warning, TEXT("Initialize AssetManager"));
 	for (auto& Elem : BuildingDataTable) {
 		UE_LOG(LogTemp, Warning, TEXT("%s is Unlock? : %s"), *Elem.Key.ToString(), Elem.Value.bIsUnlocked ? TEXT("true") : TEXT("false"));
@@ -72,7 +80,7 @@ void UDDAssetManager::LoadAssetsAsync(const FName& RowName)
 	SoftObjectPaths.Add(ObjectStruct->MyAnimBlueprint.ToSoftObjectPath());
 	UE_LOG(LogTemp, Warning, TEXT(" %s : AnimBlueprint Added"), *RowName.ToString());
 
-	for (const TSoftObjectPtr<UAnimMontage>& Montage : ObjectStruct->AnimMontages)
+	for (const TSoftObjectPtr<UAnimMontage>& Montage : ObjectStruct->AttackMontages)
 	{
 		if (Montage.IsValid())
 		{
@@ -160,7 +168,7 @@ void UDDAssetManager::RemoveLoadedAssetByName(const FName& RowName)
 	UE_LOG(LogTemp, Warning, TEXT("AnimBlueprint IsValid after Reset: %s"), ObjectStruct->MyAnimBlueprint.IsValid() ? TEXT("true") : TEXT("false"));
 
 	// AnimMontage ¾ð·Îµå
-	for (TSoftObjectPtr<UAnimMontage>& Montage : ObjectStruct->AnimMontages)
+	for (TSoftObjectPtr<UAnimMontage>& Montage : ObjectStruct->AttackMontages)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Unloading AnimMontage: %s"), *Montage.ToString());
 		StreamableManager.Unload(Montage.ToSoftObjectPath());
@@ -187,8 +195,16 @@ void UDDAssetManager::RemoveLoadedAssetByName(const FName& RowName)
 
 void UDDAssetManager::RemoveLoadedAssetAll()
 {
+	check(GetWorld());
+	UDDGameInstance* GameInstance = CastChecked<UDDGameInstance>(GetWorld()->GetGameInstance());
+	check(GameInstance);
+
+	UDDBuildingManager* BuildingManager = GameInstance->GetBuildingManager();
+	check(BuildingManager);
+
+	const TMap<FName, FDDBuildingBaseData>& BuildingDataTable = BuildingManager->GetBuildingDataTable();
+
 	FStreamableManager& StreamableManager = UAssetManager::GetStreamableManager();
-	TMap<FName, FDDBuildingBaseData>& BuildingDataTable = UDDGameSingleton::Get().GetBuildingDataTable();
 	TArray<FName> KeyArray;
 	BuildingDataTable.GenerateKeyArray(KeyArray);
 	for (FName& RowName : KeyArray)
@@ -208,7 +224,7 @@ void UDDAssetManager::RemoveLoadedAssetAll()
 		}
 		StreamableManager.Unload(ObjectStruct->MyAnimBlueprint.ToSoftObjectPath());
 		ObjectStruct->MyAnimBlueprint.ResetWeakPtr();
-		for (TSoftObjectPtr<UAnimMontage>& Montage : ObjectStruct->AnimMontages)
+		for (TSoftObjectPtr<UAnimMontage>& Montage : ObjectStruct->AttackMontages)
 		{
 			StreamableManager.Unload(Montage.ToSoftObjectPath());
 			Montage.ResetWeakPtr();
@@ -223,9 +239,18 @@ void UDDAssetManager::RemoveLoadedAssetAll()
 
 FDDBuildingBaseData* UDDAssetManager::GetObjectBaseData(const FName& RowName)
 {
+	check(GetWorld());
+	UDDGameInstance* GameInstance = CastChecked<UDDGameInstance>(GetWorld()->GetGameInstance());
+	check(GameInstance);
+
+	UDDBuildingManager* BuildingManager = GameInstance->GetBuildingManager();
+	check(BuildingManager);
+
+	TMap<FName, FDDBuildingBaseData>& BuildingDataTable = BuildingManager->GetBuildingDataTable();
+
 	FDDBuildingBaseData* ObjectStruct;
-	if (UDDGameSingleton::Get().GetBuildingDataTable().Find(RowName)) {
-		ObjectStruct = UDDGameSingleton::Get().GetBuildingDataTable().Find(RowName);
+	if (BuildingDataTable.Find(RowName)) {
+		ObjectStruct = BuildingDataTable.Find(RowName);
 		return ObjectStruct;
 	}
 	else {

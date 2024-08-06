@@ -101,7 +101,7 @@ public:
 
 	// Animation blueprint, visible only if MeshType is SkeletalMesh
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bIsAnimated == false"))
-	TArray<TSoftObjectPtr<UAnimMontage>> AnimMontages;
+	TArray<TSoftObjectPtr<UAnimMontage>> AttackMontages;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<TSoftObjectPtr<UParticleSystem>> Effects; // 공격 이펙트
