@@ -4,16 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimNotifies/AnimNotify.h"
-#include "AttackFinishedAnimNotify.generated.h"
+#include "AttackTraceAnimNotify.generated.h"
 
-DECLARE_MULTICAST_DELEGATE(FOnAttackFinishedNotifySignature);
+DECLARE_MULTICAST_DELEGATE(FOnAttackTraceNotifySignature);
 
 UCLASS()
-class PROJECTD_API UAttackFinishedAnimNotify : public UAnimNotify
+class PROJECTD_API UAttackTraceAnimNotify : public UAnimNotify
 {
 	GENERATED_BODY()
-	
+
 public:
-	FOnAttackFinishedNotifySignature OnNotified;
+	FOnAttackTraceNotifySignature OnNotified;
 	virtual void Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference) override;
 };

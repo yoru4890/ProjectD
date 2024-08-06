@@ -13,6 +13,7 @@
 #include "YSY/Stat/DDEnemyStatComponent.h"
 #include "YSY/DamageType/AllDamageType.h"
 #include "YSY/Animation/AttackFinishedAnimNotify.h"
+#include "YSY/Animation/AttackTraceAnimNotify.h"
 
 // Sets default values
 ADDEnemyBase::ADDEnemyBase()
@@ -106,7 +107,6 @@ float ADDEnemyBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 	}
 
 	Stat->ApplyStatDamage(ActualDamage * Stat->GetDamageReceiveRate());
-	UE_LOG(LogTemp, Warning, TEXT("%f"), ActualDamage * Stat->GetDamageReceiveRate());
 	return ActualDamage;
 }
 
@@ -128,7 +128,7 @@ void ADDEnemyBase::Tick(float DeltaTime)
 
 	UpdateWidgetScale(); // TODO : YSY Doesn't work. Move to SetTimerEvent
 
-	if (bIsAggroState)
+	if (bIsAggroState && bIsCanTurn)
 	{
 		auto RotateTemp = (Player->GetActorLocation() - GetActorLocation()).Rotation();
 		RotateTemp.Pitch = 0;
@@ -183,7 +183,7 @@ void ADDEnemyBase::InitializeEnemy(const FDDEnemyData& EnemyData)
 	UAnimMontage* EnemyAttackMontage = EnemyData.AttackMontage.Get();
 	AttackMontage = DuplicateObject<UAnimMontage>(EnemyAttackMontage, this);
 
-	BindingNotifyAttackFinished();
+	BindingAnimNotify();
 }
 
 void ADDEnemyBase::SplineMove()
@@ -206,13 +206,9 @@ void ADDEnemyBase::AttackByAI()
 
 	UE_LOG(LogTemp, Warning, TEXT("attack"));
 
-	if (EnemyAttackType == EEnemyAttackType::Melee)
+	if (EnemyAttackType == EEnemyAttackType::Range)
 	{
-
-	}
-	else if (EnemyAttackType == EEnemyAttackType::Range)
-	{
-
+		bIsCanTurn = false;
 	}
 	
 }
@@ -240,6 +236,11 @@ bool ADDEnemyBase::GetIsAggroState() const noexcept
 void ADDEnemyBase::SetIsAggroState(bool bNewAggroState)
 {
 	bIsAggroState = bNewAggroState;
+}
+
+float ADDEnemyBase::GetAITurnSpeed() const noexcept
+{
+	return TurnSpeed;
 }
 
 void ADDEnemyBase::SetupCharacterWidget(UDDUserWidget* InUserWidget)
@@ -469,7 +470,7 @@ void ADDEnemyBase::Stun(FTimerHandle& TimerHandle, float Time, float Amount)
 	,0.01f, false, Time);
 }
 
-void ADDEnemyBase::BindingNotifyAttackFinished()
+void ADDEnemyBase::BindingAnimNotify()
 {
 	if (AttackMontage)
 	{
@@ -477,9 +478,20 @@ void ADDEnemyBase::BindingNotifyAttackFinished()
 
 		for (FAnimNotifyEvent eventNotify : notifyEvents)
 		{
-			if (UAttackFinishedAnimNotify* startNotify = Cast<UAttackFinishedAnimNotify>(eventNotify.Notify))
+			if (UAttackFinishedAnimNotify* AttackFinishedNotify = Cast<UAttackFinishedAnimNotify>(eventNotify.Notify))
 			{
-				startNotify->onNotified.AddUObject(this, &ADDEnemyBase::AttackFinished);
+				AttackFinishedNotify->OnNotified.AddUObject(this, &ADDEnemyBase::AttackFinished);
+			}
+			else if (UAttackTraceAnimNotify* AttackTraceNotify = Cast<UAttackTraceAnimNotify>(eventNotify.Notify))
+			{
+				if (EnemyAttackType == EEnemyAttackType::Melee)
+				{
+					AttackTraceNotify->OnNotified.AddUObject(this, &ADDEnemyBase::MeleeAttack);
+				}
+				else if(EnemyAttackType == EEnemyAttackType::Range)
+				{
+					AttackTraceNotify->OnNotified.AddUObject(this, &ADDEnemyBase::RangeAttack);
+				}			
 			}
 		}
 	}
@@ -488,5 +500,41 @@ void ADDEnemyBase::BindingNotifyAttackFinished()
 void ADDEnemyBase::AttackFinished()
 {
 	ChangeMaxWalkSpeed(MovementSpeed);
+	bIsCanTurn = true;
 	OnAttackFinished.ExecuteIfBound();
+}
+
+void ADDEnemyBase::MeleeAttack()
+{
+	TArray<AActor*> IgnoreActors;
+	FHitResult OutHit;
+	bool bHit = UKismetSystemLibrary::SphereTraceSingle(GetWorld(), GetActorLocation(), GetActorLocation(), AttackRange, ETraceTypeQuery::TraceTypeQuery7, false, IgnoreActors, EDrawDebugTrace::ForDuration, OutHit, true);
+	// TODO : YSY Change TraceTypeQuery to name
+
+	if (bHit)
+	{
+		if (OutHit.GetActor()->GetClass()->ImplementsInterface(UDamageInterface::StaticClass()))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("PlayerHit"));
+		}
+	}
+}
+
+void ADDEnemyBase::RangeAttack()
+{
+	TArray<AActor*> IgnoreActors;
+	FHitResult OutHit;
+
+	FVector Start = GetActorLocation();
+	FVector End = GetActorForwardVector() * 10000.0 + GetActorLocation(); // TODO : YSY MagicNumber, DataTable
+	bool bHit = UKismetSystemLibrary::LineTraceSingle(GetWorld(), Start, End, ETraceTypeQuery::TraceTypeQuery7, false, IgnoreActors, EDrawDebugTrace::ForDuration, OutHit, true);
+	// TODO : YSY Change TraceTypeQuery to name
+
+	if (bHit)
+	{
+		if (OutHit.GetActor()->GetClass()->ImplementsInterface(UDamageInterface::StaticClass()))
+		{
+			UE_LOG(LogTemp, Warning, TEXT("PlayerHit"));
+		}
+	}
 }

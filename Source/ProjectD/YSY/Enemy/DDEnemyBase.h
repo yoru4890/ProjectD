@@ -71,10 +71,16 @@ public:
 	void ChangeMaxWalkSpeed(float Amount);
 	void Stun(FTimerHandle& TimerHandle, float Time, float Amount);
 
-	void BindingNotifyAttackFinished();
+	void BindingAnimNotify();
 
 	UFUNCTION()
 	void AttackFinished();
+
+	UFUNCTION()
+	void MeleeAttack();
+
+	UFUNCTION()
+	void RangeAttack();
 
 #pragma region AIInterface
 
@@ -87,6 +93,8 @@ public:
 	virtual float GetAIAttackRange() const noexcept;
 	virtual bool GetIsAggroState() const noexcept;
 	virtual void SetIsAggroState(bool bNewAggroState);
+
+	virtual float GetAITurnSpeed() const noexcept;
 
 #pragma endregion
 
@@ -180,8 +188,9 @@ private:
 	TMap<EDebuffType, FDebuffState> DebuffStates;
 
 	bool bIsAggroState{};
+	bool bIsCanTurn{ true };
 
-	float TurnSpeed{ 5.0f };
+	float TurnSpeed{ 5.0f }; // TODO : YSY Magic Number, DataTable
 
 	UPROPERTY()
 	TObjectPtr<AActor> Player;

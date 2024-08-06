@@ -40,4 +40,6 @@ public:
 
 	virtual bool GetIsAggroState() const noexcept = 0;
 	virtual void SetIsAggroState(bool bNewAggroState) = 0;
+
+	virtual float GetAITurnSpeed() const noexcept = 0;
 };
