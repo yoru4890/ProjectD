@@ -13,6 +13,7 @@
 #include "Animation/AnimInstance.h"
 
 
+
 ADDCharacterPlayer::ADDCharacterPlayer()
 {
 	//Control
@@ -38,7 +39,8 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 	//Weapon System Component
 	WeaponSystem = CreateDefaultSubobject<UDDWeaponSystemComponent>(TEXT("WeaponSystem"));
 	
-	
+	//PlayerMode
+	CurrentPlayerMode = EPlayerMode::CombatMode;
 
 #pragma region Init Input
 
@@ -101,6 +103,7 @@ void ADDCharacterPlayer::BeginPlay()
 	
 	SetCharacterControl();
 	
+	//Montage Delegate
 	GetMesh()->GetAnimInstance()->OnMontageEnded.AddDynamic(this, &ADDCharacterPlayer::OnUnequipMontageEnded);
 }
 
@@ -130,6 +133,8 @@ void ADDCharacterPlayer::SetupPlayerInputComponent(class UInputComponent* Player
 	EnhancedInputComponent->BindAction(EquipMeleeAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::EquipMelee);
 	EnhancedInputComponent->BindAction(EquipRangeAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::EquipRange);
 	EnhancedInputComponent->BindAction(SubSkillAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::WeaponSubSkill);
+	EnhancedInputComponent->BindAction(SubSkillAction, ETriggerEvent::Triggered, this, &ADDCharacterPlayer::WeaponAiming);
+	
 }
 
 void ADDCharacterPlayer::SetCharacterControl()
@@ -231,8 +236,6 @@ void ADDCharacterPlayer::EquipMelee()
 	{
 		WeaponSystem->EquipMeleeWeapon();
 	}
-	//Montage
-	
 }
 
 void ADDCharacterPlayer::EquipRange()
@@ -245,19 +248,24 @@ void ADDCharacterPlayer::EquipRange()
 
 void ADDCharacterPlayer::WeaponSubSkill()
 {
-	//if (!(GetMesh()->GetAnimInstance()->Montage_IsPlaying()) && CanMeleeSubSkill());
-	//{
-	//	WeaponSystem->EquipRangeWeapon();
-	//}
+	//Enum
+	if (CurrentPlayerMode == EPlayerMode::CombatMode)
+	{
+		WeaponSystem->WeaponSubSkill();
+		
+	}
 }
 
-bool ADDCharacterPlayer::CanMeleeSubSkill()
+void ADDCharacterPlayer::WeaponAiming()
 {
-	//Skill 사용 중 불가능
+	//Enum
+	if (CurrentPlayerMode == EPlayerMode::CombatMode)
+	{
+		WeaponSystem->WeaponAiming();
+	}
 	
-	//Weapon Change 중 불가능
-	//점프 중 불가능
-	//죽어있을 때 불가능
-	return !GetCharacterMovement()->IsFalling();
 }
+
+
+
 

@@ -26,6 +26,7 @@ public:
 	void EnableWeapon();
 
 	//Equip, Unequip GET/SET
+
 	FORCEINLINE UAnimMontage* GetEquipWeaponMontage() const noexcept{ return EquipWeaponAnim; }
 	void SetEquipWeaponMontage(UAnimMontage* InMontage) { EquipWeaponAnim = InMontage; }
 
@@ -34,6 +35,9 @@ public:
 
 	FORCEINLINE UAnimMontage* GetSkillWeaponMontage() const noexcept { return SkillWeaponAnim; }
 	void SetSkillWeaponMontage(UAnimMontage* InMontage) { SkillWeaponAnim = InMontage; }
+
+	FORCEINLINE UAnimMontage* GetAttackMontage() const noexcept { return AttackAnim; }
+	void SetAttackMontage(UAnimMontage* InMontage) { AttackAnim = InMontage; }
 
 	virtual void SubSkill() {};
 
@@ -84,4 +88,8 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon)
 	TObjectPtr<UAnimMontage> SkillWeaponAnim;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon)
+	TObjectPtr<UAnimMontage> AttackAnim;
+	
 };

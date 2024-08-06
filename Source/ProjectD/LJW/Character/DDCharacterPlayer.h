@@ -7,9 +7,15 @@
 #include "InputActionValue.h"
 #include "DDCharacterPlayer.generated.h"
 
-/**
- * 
- */
+UENUM(BlueprintType)
+enum class EPlayerMode : uint8
+{
+	CombatMode UMETA(DisplayName = "CombatMode"),
+	BuildMode UMETA(DisplayName = "BuildMode"),
+	ManagementMode UMETA(DisplayName = "ManagementMode"),
+	Unknow UMETA(DisplayName = "Unknown")
+};
+
 UCLASS()
 class PROJECTD_API ADDCharacterPlayer : public ADDCharacterBase
 {
@@ -22,11 +28,12 @@ protected:
 	
 	virtual void BeginPlay() override;
 
-
-
 public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon)
+	EPlayerMode CurrentPlayerMode;
 
 //Character Control Section
 protected:
@@ -91,9 +98,9 @@ protected:
 	void EquipMelee();
 	void EquipRange();
 	void WeaponSubSkill();
-
+	void WeaponAiming();
 private :
-	bool CanMeleeSubSkill();
+
 
 protected:
 

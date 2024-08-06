@@ -34,8 +34,7 @@ void ADDWeaponBase::EnableWeapon()
 }
 
 void ADDWeaponBase::InitData(const FName& RowName, const FDDWeaponData& WeaponData)
-{
-	//TODO : Init Data
+{	
 	WeaponRowName = RowName;
 	WeaponDisplayName = WeaponData.WeaponName;
 	WeaponInformation = WeaponData.WeaponInformation;
@@ -95,6 +94,10 @@ void ADDWeaponBase::InitData(const FName& RowName, const FDDWeaponData& WeaponDa
 	if (WeaponData.SkillMontage)
 	{
 		SkillWeaponAnim = WeaponData.SkillMontage;
+	}
+	if (WeaponData.AttackMontage)
+	{
+		AttackAnim = WeaponData.AttackMontage;
 	}
 }
 

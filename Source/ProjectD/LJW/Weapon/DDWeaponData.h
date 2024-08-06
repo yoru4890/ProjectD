@@ -63,4 +63,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
 	TObjectPtr<UAnimMontage> SkillMontage;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
+	TObjectPtr<UAnimMontage> AttackMontage;
 };

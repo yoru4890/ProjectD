@@ -47,8 +47,12 @@ public:
 	void PlayUnequipMontage();
 
 	void WeaponSubSkill();
+	void WeaponAiming();
 
+	//조건 모음
 	bool IsUnequipMontage(const UAnimMontage* Montage) const;
+	bool CanMeleeSubSkill();
+	bool CanRangeAiming();
 
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon, meta = (AllowPrivateAccess = "true"))
@@ -69,4 +73,8 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Animation, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<USkeletalMeshComponent> ParentSkeletal;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Animation, meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class ACharacter> PlayerCharacter;
+
 }; 

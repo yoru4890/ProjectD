@@ -4,7 +4,10 @@
 #include "LJW/Weapon/DDWeaponSystemComponent.h"
 #include "YSY/Game/DDGameSingleton.h"
 #include "LJW/Weapon/DDWeaponBase.h"
+#include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include <Kismet/KismetSystemLibrary.h>
+
 
 
 
@@ -46,7 +49,7 @@ void UDDWeaponSystemComponent::InitializeWeapon()
 		{
 			//FindComponentByClass -> 여러 개일 경우 가장 첫 번째 메쉬 반환
 			ParentSkeletal = GetOwner()->FindComponentByClass<USkeletalMeshComponent>();
-			
+			PlayerCharacter = Cast<ACharacter>(GetOwner());
 			TempWeapon->AttachToComponent(ParentSkeletal, FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("RifleSocket"));
 		}
 		else 
@@ -110,17 +113,72 @@ void UDDWeaponSystemComponent::PlayUnequipMontage()
 
 void UDDWeaponSystemComponent::WeaponSubSkill()
 {
-	if (CurrentWeapon == CurrentMeleeWeapon)
+	UE_LOG(LogTemp, Warning, TEXT("CanMeleeSubSkill %s"), CanMeleeSubSkill() ? TEXT("true") : TEXT("False"));
+	if (CurrentWeapon == Weapons[CurrentRangeWeapon])
+	{
+		return;
+	}
+
+	if (CurrentWeapon == Weapons[CurrentMeleeWeapon] && CanMeleeSubSkill())
 	{
 		ParentSkeletal->GetAnimInstance()->Montage_Play(CurrentWeapon->GetSkillWeaponMontage());
 		CurrentWeapon->SubSkill();
+		
+		UE_LOG(LogTemp, Warning, TEXT("Use Skill : %s"), *CurrentWeapon->GetFName().ToString());
 	}
+
 }
 
+void UDDWeaponSystemComponent::WeaponAiming()
+{
+	if (CurrentWeapon == Weapons[CurrentMeleeWeapon])
+	{
+		return;
+	}
+
+	if (CurrentWeapon == Weapons[CurrentRangeWeapon] && CanRangeAiming())
+	{
+		
+	}
+
+}
+
+//조건 모음
 bool UDDWeaponSystemComponent::IsUnequipMontage(const UAnimMontage* Montage) const
 {
 	return CurrentWeapon->GetUnequipWeaponMontage() == Montage;
 }
 
+bool UDDWeaponSystemComponent::CanMeleeSubSkill()
+{
+	//Skill 사용 중 불가능
+	//Weapon Change 중 불가능
+	//점프 중 불가능
+	//죽어있을 때 불가능
+	if (PlayerCharacter->GetCharacterMovement()->IsFalling())
+	{
+		return false;
+	} 
+
+	if (ParentSkeletal->GetAnimInstance()->IsAnyMontagePlaying())
+	{
+		if (!(ParentSkeletal->GetAnimInstance()->Montage_IsPlaying(CurrentWeapon->GetAttackMontage())))
+		{
+			return false;
+		}
+		
+	}
+	return true;
+	
+}
+
+bool UDDWeaponSystemComponent::CanRangeAiming()
+{
+	//
+	//Weapon Change 중 불가능
+	// 점프 중 불가능
+	//죽어있을 때 불가능
+	return false;
+}
 
 

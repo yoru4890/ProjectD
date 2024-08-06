@@ -22,6 +22,8 @@ void UDDPlayerAnimInstance::NativeInitializeAnimation()
 	{
 		Movement = Owner->GetCharacterMovement();
 	}
+
+	bIsAiming = false;
 }
 
 void UDDPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
