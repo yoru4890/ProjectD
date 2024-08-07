@@ -2,21 +2,28 @@
 
 
 #include "LSM/Manager/DDAssetManager.h"
-#include "LSM/BaseStruct.h"
+#include "LSM/Building/DDBuildingBaseData.h"
 #include "YSY/Game/DDGameInstance.h"
 #include "YSY/Game/DDGameSingleton.h"
 #include "Engine/StreamableManager.h"
 #include "Engine/AssetManager.h"
-#include "LSM/DDLoadedAsset.h"
 #include "Kismet/GameplayStatics.h"
+#include "LSM/Manager/DDBuildingManager.h"
 
 void UDDAssetManager::Initialize()
 {
-	TMap<FName, FDDTrapStruct>& TrapDataTable = UDDGameSingleton::Get().GetTrapDataTable();
+	check(GetWorld());
+	UDDGameInstance* GameInstance = CastChecked<UDDGameInstance>(GetWorld()->GetGameInstance());
+	check(GameInstance);
+
+	UDDBuildingManager* BuildingManager = GameInstance->GetBuildingManager();
+	check(BuildingManager);
+
+	const TMap<FName, FDDBuildingBaseData*>& BuildingDataTable = BuildingManager->GetBuildingDataTable();
 	UE_LOG(LogTemp, Warning, TEXT("Initialize AssetManager"));
-	for (auto& Elem : TrapDataTable) {
-		UE_LOG(LogTemp, Warning, TEXT("%s is Unlock? : %s"), *Elem.Key.ToString(), Elem.Value.bIsTrapUnlocked ? TEXT("true") : TEXT("false"));
-		if (Elem.Value.bIsTrapUnlocked) {
+	for (auto& Elem : BuildingDataTable) {
+		UE_LOG(LogTemp, Warning, TEXT("%s is Unlock? : %s"), *Elem.Key.ToString(), Elem.Value->bIsUnlocked ? TEXT("true") : TEXT("false"));
+		if (Elem.Value->bIsUnlocked) {
 			LoadAssetsAsync(Elem.Key);
 			UE_LOG(LogTemp, Warning, TEXT(" %s : Init"), *Elem.Key.ToString());
 		}
@@ -25,7 +32,7 @@ void UDDAssetManager::Initialize()
 
 void UDDAssetManager::LoadAssetsAsync(const FName& RowName)
 {
-	FBaseStruct* ObjectStruct = GetObjectBaseData(RowName);
+	FDDBuildingBaseData* ObjectStruct = GetObjectBaseData(RowName);
 	if (!ObjectStruct)
 	{
 		return;
@@ -45,49 +52,42 @@ void UDDAssetManager::LoadAssetsAsync(const FName& RowName)
 		return;
 	}
 
+	UE_LOG(LogTemp, Warning, TEXT("%s : LoadAssetsAsync is Started."), *RowName.ToString());
 	ObjectStruct->bIsLoading = true;
 
 	// Asset의 경로를 저장하고 있는 Array
 	TArray<FSoftObjectPath> SoftObjectPaths;
 
 	// MeshType의 종류에 따라서
-	if (ObjectStruct->MeshType == EMeshType::StaticMesh) // StaticMesh라면
+	for (const TSoftObjectPtr<UStaticMesh>& StaticMesh : ObjectStruct->StaticMeshs)
 	{
-		// 경로에 추가
-		for (const TSoftObjectPtr<UStaticMesh>& StaticMesh : ObjectStruct->StaticMeshs)
-		{
-			SoftObjectPaths.Add(StaticMesh.ToSoftObjectPath());
-			UE_LOG(LogTemp, Warning, TEXT(" %s : StaticMesh Added"), *RowName.ToString());
-		}
+		SoftObjectPaths.Add(StaticMesh.ToSoftObjectPath());
+		UE_LOG(LogTemp, Warning, TEXT(" %s : StaticMesh Added"), *RowName.ToString());
 	}
-	else if (ObjectStruct->MeshType == EMeshType::SkeletalMesh) // SkeletalMesh라면
+	for (const TSoftObjectPtr<USkeletalMesh>& SkeletalMesh : ObjectStruct->SkeletalMeshs)
 	{
-		// SkletalMesh와 AnimBluePrint를 추가
-		for (const TSoftObjectPtr<USkeletalMesh>& SkeletalMesh : ObjectStruct->SkeletalMeshs)
+		if (SkeletalMesh.IsValid())
 		{
-			if (SkeletalMesh.IsValid())
-			{
-				UE_LOG(LogTemp, Warning, TEXT(" %s : SkeletalMesh isAlready Loaded"), *RowName.ToString());
-			}
-			SoftObjectPaths.Add(SkeletalMesh.ToSoftObjectPath());
-			UE_LOG(LogTemp, Warning, TEXT(" %s : USkeletalMesh Added"), *RowName.ToString());
+			UE_LOG(LogTemp, Warning, TEXT(" %s : SkeletalMesh isAlready Loaded"), *RowName.ToString());
 		}
-		if (ObjectStruct->MyAnimBlueprint.IsValid())
-		{
-			UE_LOG(LogTemp, Warning, TEXT(" %s : AnimBlueprint isAlready Loaded"), *RowName.ToString());
-		}
-		SoftObjectPaths.Add(ObjectStruct->MyAnimBlueprint.ToSoftObjectPath());
-		UE_LOG(LogTemp, Warning, TEXT(" %s : AnimBlueprint Added"), *RowName.ToString());
+		SoftObjectPaths.Add(SkeletalMesh.ToSoftObjectPath());
+		UE_LOG(LogTemp, Warning, TEXT(" %s : USkeletalMesh Added"), *RowName.ToString());
+	}
+	if (ObjectStruct->MyAnimBlueprint.IsValid())
+	{
+		UE_LOG(LogTemp, Warning, TEXT(" %s : AnimBlueprint isAlready Loaded"), *RowName.ToString());
+	}
+	SoftObjectPaths.Add(ObjectStruct->MyAnimBlueprint.ToSoftObjectPath());
+	UE_LOG(LogTemp, Warning, TEXT(" %s : AnimBlueprint Added"), *RowName.ToString());
 
-		for (const TSoftObjectPtr<UAnimMontage>& Montage : ObjectStruct->AnimMontages)
+	for (const TSoftObjectPtr<UAnimMontage>& Montage : ObjectStruct->AttackMontages)
+	{
+		if (Montage.IsValid())
 		{
-			if (Montage.IsValid())
-			{
-				UE_LOG(LogTemp, Warning, TEXT(" %s : Montage isAlready Loaded"), *RowName.ToString());
-			}
-			SoftObjectPaths.Add(Montage.ToSoftObjectPath());
-			UE_LOG(LogTemp, Warning, TEXT(" %s : MyAnimMontage Added"), *RowName.ToString());
+			UE_LOG(LogTemp, Warning, TEXT(" %s : Montage isAlready Loaded"), *RowName.ToString());
 		}
+		SoftObjectPaths.Add(Montage.ToSoftObjectPath());
+		UE_LOG(LogTemp, Warning, TEXT(" %s : MyAnimMontage Added"), *RowName.ToString());
 	}
 	// 파티클도 추가
 	for (const TSoftObjectPtr<UParticleSystem>& Effect : ObjectStruct->Effects)
@@ -116,10 +116,10 @@ void UDDAssetManager::LoadAssetsAsync(const FName& RowName)
 	StreamableManager.RequestAsyncLoad(SoftObjectPaths, FStreamableDelegate::CreateLambda(OnAssetsLoadedCallback));
 }
 
-FBaseStruct* UDDAssetManager::GetLoadedAssetByName(const FName& RowName)
+FDDBuildingBaseData* UDDAssetManager::GetLoadedAssetByName(const FName& RowName)
 {
 	UE_LOG(LogTemp, Warning, TEXT("GetLoadedAssetByName is Called"));
-	FBaseStruct* ObjectStruct = GetObjectBaseData(RowName);
+	FDDBuildingBaseData* ObjectStruct = GetObjectBaseData(RowName);
 	if (!ObjectStruct)
 	{
 		return nullptr;
@@ -135,7 +135,7 @@ FBaseStruct* UDDAssetManager::GetLoadedAssetByName(const FName& RowName)
 
 void UDDAssetManager::RemoveLoadedAssetByName(const FName& RowName)
 {
-	FBaseStruct* ObjectStruct = GetObjectBaseData(RowName);
+	FDDBuildingBaseData* ObjectStruct = GetObjectBaseData(RowName);
 	if (!ObjectStruct)
 	{
 		return;
@@ -168,7 +168,7 @@ void UDDAssetManager::RemoveLoadedAssetByName(const FName& RowName)
 	UE_LOG(LogTemp, Warning, TEXT("AnimBlueprint IsValid after Reset: %s"), ObjectStruct->MyAnimBlueprint.IsValid() ? TEXT("true") : TEXT("false"));
 
 	// AnimMontage 언로드
-	for (TSoftObjectPtr<UAnimMontage>& Montage : ObjectStruct->AnimMontages)
+	for (TSoftObjectPtr<UAnimMontage>& Montage : ObjectStruct->AttackMontages)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Unloading AnimMontage: %s"), *Montage.ToString());
 		StreamableManager.Unload(Montage.ToSoftObjectPath());
@@ -195,13 +195,21 @@ void UDDAssetManager::RemoveLoadedAssetByName(const FName& RowName)
 
 void UDDAssetManager::RemoveLoadedAssetAll()
 {
+	check(GetWorld());
+	UDDGameInstance* GameInstance = CastChecked<UDDGameInstance>(GetWorld()->GetGameInstance());
+	check(GameInstance);
+
+	UDDBuildingManager* BuildingManager = GameInstance->GetBuildingManager();
+	check(BuildingManager);
+
+	const TMap<FName, FDDBuildingBaseData*>& BuildingDataTable = BuildingManager->GetBuildingDataTable();
+
 	FStreamableManager& StreamableManager = UAssetManager::GetStreamableManager();
-	TMap<FName, FDDTrapStruct>& TrapDataTable = UDDGameSingleton::Get().GetTrapDataTable();
 	TArray<FName> KeyArray;
-	TrapDataTable.GenerateKeyArray(KeyArray);
+	BuildingDataTable.GenerateKeyArray(KeyArray);
 	for (FName& RowName : KeyArray)
 	{
-		FBaseStruct* ObjectStruct = GetObjectBaseData(RowName);
+		FDDBuildingBaseData* ObjectStruct = GetObjectBaseData(RowName);
 
 		// 각 타입별로 로드된 에셋을 언로드
 		for (TSoftObjectPtr<UStaticMesh>& StaticMesh : ObjectStruct->StaticMeshs)
@@ -216,7 +224,7 @@ void UDDAssetManager::RemoveLoadedAssetAll()
 		}
 		StreamableManager.Unload(ObjectStruct->MyAnimBlueprint.ToSoftObjectPath());
 		ObjectStruct->MyAnimBlueprint.ResetWeakPtr();
-		for (TSoftObjectPtr<UAnimMontage>& Montage : ObjectStruct->AnimMontages)
+		for (TSoftObjectPtr<UAnimMontage>& Montage : ObjectStruct->AttackMontages)
 		{
 			StreamableManager.Unload(Montage.ToSoftObjectPath());
 			Montage.ResetWeakPtr();
@@ -229,11 +237,20 @@ void UDDAssetManager::RemoveLoadedAssetAll()
 	}
 }
 
-FBaseStruct* UDDAssetManager::GetObjectBaseData(const FName& RowName)
+FDDBuildingBaseData* UDDAssetManager::GetObjectBaseData(const FName& RowName)
 {
-	FBaseStruct* ObjectStruct;
-	if (UDDGameSingleton::Get().GetTrapDataTable().Find(RowName)) {
-		ObjectStruct = UDDGameSingleton::Get().GetTrapDataTable().Find(RowName);
+	check(GetWorld());
+	UDDGameInstance* GameInstance = CastChecked<UDDGameInstance>(GetWorld()->GetGameInstance());
+	check(GameInstance);
+
+	UDDBuildingManager* BuildingManager = GameInstance->GetBuildingManager();
+	check(BuildingManager);
+
+	TMap<FName, FDDBuildingBaseData*>& BuildingDataTable = BuildingManager->GetBuildingDataTable();
+
+	FDDBuildingBaseData* ObjectStruct;
+	if (BuildingDataTable.Find(RowName)) {
+		ObjectStruct = *BuildingDataTable.Find(RowName);
 		return ObjectStruct;
 	}
 	else {

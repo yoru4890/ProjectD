@@ -3,7 +3,7 @@
 
 #include "YSY/Game/DDGameInstance.h"
 #include "LSM/Manager/DDAssetManager.h"
-#include "LSM/Manager/DDTrapManager.h"
+#include "LSM/Manager/DDBuildingManager.h"
 #include "LSM/Manager/DDFactoryManager.h"
 #include "YSY/Manager/DDEnemySpawnManager.h"
 #include "YSY/Manager/DDWaveManager.h"
@@ -11,11 +11,12 @@
 void UDDGameInstance::Init()
 {
 	Super::Init();
-	TrapManager = NewObject<UDDTrapManager>(this);
+	BuildingManager = NewObject<UDDBuildingManager>(this);
 	FactoryManager = NewObject<UDDFactoryManager>(this);
 	AssetManager = NewObject<UDDAssetManager>(this);
 
-	FactoryManager->Initialize(TrapManager->GetTrapDataTable());
+	BuildingManager->Initialize();
+	FactoryManager->Initialize(BuildingManager->GetBuildingDataTable());
 	AssetManager->Initialize();
 	
 	EnemySpawnManager = NewObject<UDDEnemySpawnManager>(this);

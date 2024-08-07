@@ -20,7 +20,7 @@ public:
 
 	FORCEINLINE class UDDAssetManager* GetAssetManager() const { return AssetManager; }
 
-	FORCEINLINE class UDDTrapManager* GetTrapManager() const { return TrapManager; }
+	FORCEINLINE class UDDBuildingManager* GetBuildingManager() const { return BuildingManager; }
 
 	FORCEINLINE class UDDFactoryManager* GetFactoryManager() const { return FactoryManager; }
 
@@ -37,7 +37,7 @@ private:
 	TObjectPtr<class UDDAssetManager> AssetManager;
 
 	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<class UDDTrapManager> TrapManager;
+	TObjectPtr<class UDDBuildingManager> BuildingManager;
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UDDFactoryManager> FactoryManager;
