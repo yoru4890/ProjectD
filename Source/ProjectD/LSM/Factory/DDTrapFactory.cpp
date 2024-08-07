@@ -2,22 +2,31 @@
 
 
 #include "LSM/Factory/DDTrapFactory.h"
-#include "LSM/Trap/DDTrapBase.h"
-#include "LSM/Trap/DDTrapStruct.h"
+#include "LSM/Building/Trap/DDTrap.h"
+#include "LSM/Building/Trap/DDTrapData.h"
 #include "LSM/Manager/DDAssetManager.h"
 #include "YSY/Game/DDGameInstance.h"
 
-UObject* UDDTrapFactory::CreateObject(UWorld* World, const FName& RowName, const FBaseStruct& ObjectStruct, const FVector& Location, const FRotator& Rotation, AActor* Owner, APawn* Instigator)
+UObject* UDDTrapFactory::CreateObject(UWorld* World, const FName& RowName, const FDDBuildingBaseData& ObjectStruct, const FVector& Location, const FRotator& Rotation, AActor* Owner, APawn* Instigator)
 {
 	check(World);
-	
-	const FDDTrapStruct* TrapStruct = static_cast<const FDDTrapStruct*>(&ObjectStruct);
+
+	const FDDTrapData* TrapStruct = nullptr;
+	if (ObjectStruct.BuildingType == EBuildingType::Trap) 
+	{
+		TrapStruct = static_cast<const FDDTrapData*>(&ObjectStruct);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s is Not Trap"), *RowName.ToString());
+	}
+
 	UClass* TrapClass = TrapStruct->TrapClass;
 
 	
 	check(TrapClass);
 	// TrapClass를 사용하여 NewTrap 생성
-	ADDTrapBase* NewTrap = World->SpawnActor<ADDTrapBase>(TrapClass);
+	ADDTrap* NewTrap = World->SpawnActor<ADDTrap>(TrapClass);
 	check(NewTrap);
 
 	UDDGameInstance* MyGameInstance = Cast<UDDGameInstance>(GetWorld()->GetGameInstance());
@@ -26,7 +35,7 @@ UObject* UDDTrapFactory::CreateObject(UWorld* World, const FName& RowName, const
 	UDDAssetManager* AssetManager = MyGameInstance->GetAssetManager();
 	check(AssetManager);
 
-	FBaseStruct* LoadedAsset = AssetManager->GetLoadedAssetByName(RowName);
+	FDDBuildingBaseData* LoadedAsset = AssetManager->GetLoadedAssetByName(RowName);
 
 	if (!LoadedAsset)
 	{
@@ -34,7 +43,7 @@ UObject* UDDTrapFactory::CreateObject(UWorld* World, const FName& RowName, const
 		return nullptr;
 	}
 	NewTrap->InitFromDataTable(RowName, *TrapStruct);
-	NewTrap->SetTrapAssets(*LoadedAsset);
+	NewTrap->SetAssets(*LoadedAsset);
 
 	NewTrap->SetActorLocation(Location);
 	NewTrap->SetActorRotation(Rotation);
