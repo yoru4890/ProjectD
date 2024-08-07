@@ -19,65 +19,51 @@ UDDBuildingManager::UDDBuildingManager()
 
 void UDDBuildingManager::Initialize()
 {
-	const TMap<FName, FDDTrapData>& TrapDataTable = GetTrapDataTable();
-	const TMap<FName, FDDTowerData>& TowerDataTable = GetTowerDataTable();
-
-	const FDDBuildingBaseData& test = *TrapDataTable.Find("ThornTrap");
-	const FDDTrapData* test2 = static_cast<const FDDTrapData*>(&test);
-
-	if (test2->TrapClass)
-	{
-
-	}
+	TMap<FName, FDDTrapData>& TrapDataTable = GetTrapDataTable();
+	TMap<FName, FDDTowerData>& TowerDataTable = GetTowerDataTable();
 
 	for (auto& TrapData : TrapDataTable)
 	{
-		BuildingDataTable.Add(TrapData.Key, TrapData.Value);
+		BuildingDataTable.Add(TrapData.Key, &TrapData.Value);
 	}
 
 	for (auto& TowerData : TowerDataTable)
 	{
-		BuildingDataTable.Add(TowerData.Key, TowerData.Value);
+		BuildingDataTable.Add(TowerData.Key, &TowerData.Value);
 	}
-
-	const FDDTrapData* test3 = static_cast<const FDDTrapData*>(BuildingDataTable.Find("ThornTrap"));
-
-	if (test3->TrapClass)
-	{
-
-	}
-
 }
 
 bool UDDBuildingManager::IsBuildingUnlocked(const FName& RowName) const
 {
-	const FDDBuildingBaseData& BuildingStruct = GetBuildingData(RowName);
+	const FDDBuildingBaseData* BuildingStruct = GetBuildingData(RowName);
+	
+	bool bIsUnlocked = BuildingStruct->bIsUnlocked;
 
-	return BuildingStruct.bIsUnlocked;
+	return bIsUnlocked;
 
 }
 
 bool UDDBuildingManager::UnlockBuilding(const FName& RowName)
 {
-	FDDBuildingBaseData& BuildingStruct = GetBuildingData(RowName);
+	FDDBuildingBaseData* BuildingStruct = GetBuildingData(RowName);
 
-	FName ParentName = BuildingStruct.ParentRowName;
+	FName ParentName = BuildingStruct->ParentRowName;
 
 	while (ParentName != FName("None")) {
-		if (!GetBuildingData(ParentName).bIsUnlocked) 
+		if (!GetBuildingData(ParentName)->bIsUnlocked) 
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Parent Trap is Not Unlocked"));
 			return false;
 		}
-		ParentName = GetBuildingData(ParentName).ParentRowName;
+		ParentName = GetBuildingData(ParentName)->ParentRowName;
 		
 	}
 	ADDPlayerState* PlayerState = CastChecked<ADDPlayerState>(UGameplayStatics::GetPlayerState(GetWorld(), 0));
 	check(PlayerState);
 
-	if (PlayerState->CheckLikePoint(BuildingStruct.UnlockCost)) {
-		PlayerState->SubtractLikePoint(BuildingStruct.UnlockCost);
-		BuildingStruct.bIsUnlocked = true;
+	if (PlayerState->CheckLikePoint(BuildingStruct->UnlockCost)) {
+		PlayerState->SubtractLikePoint(BuildingStruct->UnlockCost);
+		BuildingStruct->bIsUnlocked = true;
 		UDDGameInstance* MyGameInstance = Cast<UDDGameInstance>(GetWorld()->GetGameInstance());
 		check(MyGameInstance);
 
@@ -97,11 +83,11 @@ bool UDDBuildingManager::LockBuilding(const FName& RowName)
 
 	while (Stack.Num()>0) {
 		FName CurrentName = Stack.Pop();
-		FDDBuildingBaseData& CurrentBuildingStruct = GetBuildingData(CurrentName);
+		FDDBuildingBaseData* CurrentBuildingStruct = GetBuildingData(CurrentName);
 
-		for (auto& ChildName : CurrentBuildingStruct.ChildRowNames)
+		for (auto& ChildName : CurrentBuildingStruct->ChildRowNames)
 		{
-			if (!GetBuildingData(ChildName).bIsUnlocked)
+			if (!GetBuildingData(ChildName)->bIsUnlocked)
 			{
 				UE_LOG(LogTemp, Warning, TEXT("Child Trap %s is Not Unlocked"), *ChildName.ToString());
 				return false;
@@ -112,10 +98,10 @@ bool UDDBuildingManager::LockBuilding(const FName& RowName)
 	ADDPlayerState* PlayerState = CastChecked<ADDPlayerState>(UGameplayStatics::GetPlayerState(GetWorld(), 0));
 	check(PlayerState);
 
-	FDDBuildingBaseData& LockBuildingData = GetBuildingData(RowName);
+	FDDBuildingBaseData* LockBuildingData = GetBuildingData(RowName);
 
-	PlayerState->AddLikePoint(LockBuildingData.UnlockCost);
-	LockBuildingData.bIsUnlocked = false;
+	PlayerState->AddLikePoint(LockBuildingData->UnlockCost);
+	LockBuildingData->bIsUnlocked = false;
 
 	UDDGameInstance* MyGameInstance = Cast<UDDGameInstance>(GetWorld()->GetGameInstance());
 	check(MyGameInstance);
@@ -147,21 +133,13 @@ ADDBuildingBase* UDDBuildingManager::SpawnBuilding(UWorld* World, const FName& R
 		check(World);
 
 		// 트랩 데이터를 가져옵니다.
-		const FDDBuildingBaseData& BuildingStruct = *BuildingDataTable.Find(RowName);
+		FDDBuildingBaseData* BuildingStruct = GetBuildingData(RowName);
 
-		const FDDTrapData* TrapStruct = static_cast<const FDDTrapData*>(&BuildingStruct);
-
-		if (TrapStruct->TrapClass)
+		if (!BuildingStruct)
 		{
 			return nullptr;
 		}
-
-		//const FDDTrapData& TrapStruct = GetTrapData(RowName);
-
-		//if (TrapStruct.TrapClass) {
-		//	UE_LOG(LogTemp, Warning, TEXT("Class : %s"), *TrapStruct.TrapClass->GetFName().ToString());
-		//	return nullptr;
-		//}
+		const FDDTrapData* TrapStruct = static_cast<const FDDTrapData*>(BuildingStruct);
 
 
 		UDDGameInstance* MyGameInstance = Cast<UDDGameInstance>(World->GetGameInstance());
@@ -173,7 +151,7 @@ ADDBuildingBase* UDDBuildingManager::SpawnBuilding(UWorld* World, const FName& R
 		IDDFactoryInterface* BuildingFactory = FactoryManager->GetFactory(RowName);
 		check(BuildingFactory);
 
-		UObject* CreatedObject = BuildingFactory->CreateObject(World, RowName, BuildingStruct, Location, Rotation, Owner, Instigator);
+		UObject* CreatedObject = BuildingFactory->CreateObject(World, RowName, *BuildingStruct, Location, Rotation, Owner, Instigator);
 		if (!CreatedObject)
 		{
 			return nullptr;
@@ -199,28 +177,67 @@ void UDDBuildingManager::DestroyBuilding(ADDBuildingBase& Building)
 }
 
 
-const FDDBuildingBaseData& UDDBuildingManager::GetBuildingData(const FName& RowName) const
+const FDDBuildingBaseData* UDDBuildingManager::GetBuildingData(const FName& RowName) const
 {
-	return *BuildingDataTable.Find(RowName);
+	if (!BuildingDataTable.Find(RowName))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Building data for RowName %s not found!"), *RowName.ToString());
+		return nullptr;
+	}
+	if (const FDDBuildingBaseData* FoundData = *BuildingDataTable.Find(RowName))
+	{
+		return FoundData;
+	}
+	// Log an error if the data is not found
+	UE_LOG(LogTemp, Warning, TEXT("Building data for RowName %s not found!"), *RowName.ToString());
+	
+	return nullptr;
 }
 
-FDDBuildingBaseData& UDDBuildingManager::GetBuildingData(const FName& RowName)
+FDDBuildingBaseData* UDDBuildingManager::GetBuildingData(const FName& RowName)
 {
-	return *BuildingDataTable.Find(RowName);
+	if (!BuildingDataTable.Find(RowName))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Building data for RowName %s not found!"), *RowName.ToString());
+		return nullptr;
+	}
+	if (FDDBuildingBaseData* FoundData = *BuildingDataTable.Find(RowName))
+	{
+		return FoundData;
+	}
+	// Log an error if the data is not found
+	UE_LOG(LogTemp, Warning, TEXT("Building data for RowName %s not found!"), *RowName.ToString());
+
+	return nullptr;
 
 }
 
-const FDDTrapData& UDDBuildingManager::GetTrapData(const FName& RowName) const
+const FDDTrapData* UDDBuildingManager::GetTrapData(const FName& RowName) const
 {
-	return *UDDGameSingleton::Get().GetTrapDataTable().Find(RowName);
+	const FDDTrapData* FoundData = UDDGameSingleton::Get().GetTrapDataTable().Find(RowName);
+	if (!FoundData)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Trap data for RowName %s not found!"), *RowName.ToString());
+	}
+	return FoundData;
 }
 
-const FDDTowerData& UDDBuildingManager::GetTowerData(const FName& RowName) const
+const FDDTowerData* UDDBuildingManager::GetTowerData(const FName& RowName) const
 {
-	return *UDDGameSingleton::Get().GetTowerDataTable().Find(RowName);
+	const FDDTowerData* FoundData = UDDGameSingleton::Get().GetTowerDataTable().Find(RowName);
+	if (!FoundData)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Tower data for RowName %s not found!"), *RowName.ToString());
+	}
+	return FoundData;
 }
 
 const TMap<FName, FDDTrapData>& UDDBuildingManager::GetTrapDataTable() const
+{
+	return UDDGameSingleton::Get().GetTrapDataTable();
+}
+
+TMap<FName, FDDTrapData>& UDDBuildingManager::GetTrapDataTable()
 {
 	return UDDGameSingleton::Get().GetTrapDataTable();
 }
@@ -230,12 +247,17 @@ const TMap<FName, FDDTowerData>& UDDBuildingManager::GetTowerDataTable() const
 	return UDDGameSingleton::Get().GetTowerDataTable();
 }
 
-const TMap<FName, FDDBuildingBaseData>& UDDBuildingManager::GetBuildingDataTable() const
+TMap<FName, FDDTowerData>& UDDBuildingManager::GetTowerDataTable()
+{
+	return UDDGameSingleton::Get().GetTowerDataTable();
+}
+
+const TMap<FName, FDDBuildingBaseData*>& UDDBuildingManager::GetBuildingDataTable() const
 {
 	return BuildingDataTable;
 }
 
-TMap<FName, FDDBuildingBaseData>& UDDBuildingManager::GetBuildingDataTable()
+TMap<FName, FDDBuildingBaseData*>& UDDBuildingManager::GetBuildingDataTable()
 {
 	return BuildingDataTable;
 }

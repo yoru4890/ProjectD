@@ -38,21 +38,25 @@ public:
 
 	bool LockBuilding(const FName& RowName);
 
-	const FDDBuildingBaseData& GetBuildingData(const FName& RowName) const;
+	const FDDBuildingBaseData* GetBuildingData(const FName& RowName) const;
 
-	FDDBuildingBaseData& GetBuildingData(const FName& RowName);
+	FDDBuildingBaseData* GetBuildingData(const FName& RowName);
 
-	const FDDTrapData& GetTrapData(const FName& RowName) const;
+	const FDDTrapData* GetTrapData(const FName& RowName) const;
 
-	const FDDTowerData& GetTowerData(const FName& RowName) const;
+	const FDDTowerData* GetTowerData(const FName& RowName) const;
 
 	const TMap<FName, FDDTrapData>& GetTrapDataTable() const;
 
+	TMap<FName, FDDTrapData>& GetTrapDataTable();
+
 	const TMap<FName, FDDTowerData>& GetTowerDataTable() const;
 
-	const TMap<FName, FDDBuildingBaseData>& GetBuildingDataTable() const;
+	TMap<FName, FDDTowerData>& GetTowerDataTable();
 
-	TMap<FName, FDDBuildingBaseData>& GetBuildingDataTable();
+	const TMap<FName, FDDBuildingBaseData*>& GetBuildingDataTable() const;
+
+	TMap<FName, FDDBuildingBaseData*>& GetBuildingDataTable();
 
 	// 트랩 스폰 메서드
 	UFUNCTION(BlueprintCallable)
@@ -63,6 +67,6 @@ public:
 private:
 	TMap<FName, FBuildingList> BuildingPool;
 
-	TMap<FName, FDDBuildingBaseData> BuildingDataTable;
+	TMap<FName, FDDBuildingBaseData*> BuildingDataTable;
 
 };

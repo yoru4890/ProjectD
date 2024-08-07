@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "DDFactoryInterface.h"
-#include "LSM/Building/Trap/DDTrapBase.h"
 #include "DDTrapFactory.generated.h"
 
 /**

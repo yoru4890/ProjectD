@@ -26,6 +26,7 @@ protected:
 public:
 	FORCEINLINE const FName& GetRowName() const { return RowName; }
 	FORCEINLINE const int32 GetCellWidth() const { return CellWidth; }
+	FORCEINLINE const EBuildingType GetBuildingType() const { return BuildingType;}
 
 public:	
 	// Called every frame
@@ -44,49 +45,53 @@ protected:
 
 	UFUNCTION()
 	void OnBoxCollisionEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+	virtual void ModifyMeshAndAttackCollision() const;
 private:
 	void SetParticeEffects(FDDBuildingBaseData& LoadedAsset);
 	void SetMeshs(FDDBuildingBaseData& LoadedAsset);
-	void ModifyScaleAndLocation() const;
 
 
 protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FString DisplayName; // 트랩의 이름
+	FString DisplayName; // 의 이름
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName RowName; // 트랩의 이름
+	FName RowName; // 빌딩의 이름
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 CellWidth; // 트랩이 차지하는 셀의 크기
+	EBuildingType BuildingType; // 빌딩의 이름
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 CellWidth; // 빌딩이 차지하는 셀의 크기
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 GridCellSize; // 셀 한칸이 차지하는 길이
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bCanAttack; // 트랩이 공격할 수 있는지
+	bool bCanAttack; // 빌딩이 공격할 수 있는지
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float MeshZAxisModify; // 트랩 메쉬 z축 조정
+	float MeshZAxisModify; // 빌딩 메쉬 z축 조정
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSet<TObjectPtr<AActor>> EnemiesInRanged; // 트랩의 공격 범위 안에 들어와있는 적들
+	TSet<TObjectPtr<AActor>> EnemiesInRanged; // 빌딩의 공격 범위 안에 들어와있는 적들
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 AttackCoolTime; // 트랩의 공격 쿨타임
+	int32 AttackCoolTime; // 빌딩의 공격 쿨타임
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float TimeSinceLastAttack; // 트랩의 공격 쿨타임
+	float TimeSinceLastAttack; // 빌딩의 공격 쿨타임
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 Damage; // 트랩의 데미지
+	int32 Damage; // 빌딩의 데미지
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bIsAnimated; // 트랩의 메쉬 타입
+	bool bIsAnimated; // 빌딩의 메쉬 타입
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bIsDot; // 도트 공격 트랩 여부
+	bool bIsDot; // 도트 공격 빌딩 여부
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bIsDot"))
 	float DotDamage; // 도트 공격 데미지
@@ -98,7 +103,7 @@ protected:
 	float DotInterval; // 도트 공격 간격
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bIsSlow; // 이동 속도 감소 트랩 여부
+	bool bIsSlow; // 이동 속도 감소 빌딩 여부
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bIsSlow"))
 	float SlowAmount; // 이동 속도 감소 비율 (0.0 ~ 1.0, 예: 0.5는 50% 감소)
@@ -107,7 +112,7 @@ protected:
 	float SlowDuration; // 이동 속도 감소 지속 시간
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<UDamageType> DamageType; // 트랩의 데미지 타입
+	TSubclassOf<UDamageType> DamageType; // 빌딩의 데미지 타입
 
 	UPROPERTY(EditAnywhere)
 	TArray<TObjectPtr<UParticleSystemComponent>> ParticleEffectComponents;

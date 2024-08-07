@@ -13,7 +13,8 @@ UCLASS()
 class PROJECTD_API ADDTrap : public ADDBuildingBase
 {
 	GENERATED_BODY()
-	
+public:
+	ADDTrap();
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -24,4 +25,5 @@ public:
 
 protected:
 	virtual void Attack() override;
+	virtual void ModifyMeshAndAttackCollision() const override;
 };

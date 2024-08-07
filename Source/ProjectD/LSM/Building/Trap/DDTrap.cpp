@@ -3,6 +3,12 @@
 
 #include "LSM/Building/Trap/DDTrap.h"
 #include "LSM/Building/Trap/DDTrapAnimInstance.h"
+#include "Components/BoxComponent.h"
+
+ADDTrap::ADDTrap()
+{
+
+}
 
 void ADDTrap::BeginPlay()
 {
@@ -39,4 +45,13 @@ void ADDTrap::Attack()
 			}
 		}
 	}
+}
+
+void ADDTrap::ModifyMeshAndAttackCollision() const
+{
+	Super::ModifyMeshAndAttackCollision();
+	FVector AttackRange = FVector(GridCellSize * CellWidth/2, GridCellSize * CellWidth/2, 50);
+	UE_LOG(LogTemp, Warning, TEXT("GridCellSize: %d"), GridCellSize);
+	UE_LOG(LogTemp, Warning, TEXT("CellWidth: %d"), CellWidth);
+	AttackCollisionComponent->SetBoxExtent(AttackRange);
 }

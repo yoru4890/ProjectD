@@ -18,5 +18,5 @@ struct FDDTowerData : public FDDBuildingBaseData
 	
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<class ADDTowerBase> TowerClass; // 타워 클래스
+	TSubclassOf<class ADDTower> TowerClass; // 타워 클래스
 };

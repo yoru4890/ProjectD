@@ -14,6 +14,11 @@ ADDBuildingBase::ADDBuildingBase()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	// Create a default scene root component
+	USceneComponent* DefaultRoot = CreateDefaultSubobject<USceneComponent>(TEXT("DefaultRoot"));
+	RootComponent = DefaultRoot;
+
 	AttackCollisionComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("AttackCollisionComponent"));
 	AttackCollisionComponent->SetupAttachment(RootComponent);
 
@@ -52,9 +57,6 @@ void ADDBuildingBase::BeginPlay()
 
 	GridCellSize = GridBuildManager->GetGridCellSize();
 
-	//FVector ActorExtent = FVector(GridCellSize * CellWidth / 2, GridCellSize * CellWidth / 2, 50);
-	//BoxCollisionComponent->SetBoxExtent(ActorExtent);
-
 }
 
 // Called every frame
@@ -89,6 +91,7 @@ void ADDBuildingBase::InitFromDataTable(const FName& InRowName, const FDDBuildin
 {
 	RowName = InRowName;
 	DisplayName = BuildingData.DisplayName;
+	BuildingType = BuildingData.BuildingType;
 	CellWidth = BuildingData.OccupiedCellWidth;
 	AttackCoolTime = BuildingData.AttackCoolTime;
 	Damage = BuildingData.Damage;
@@ -110,7 +113,7 @@ void ADDBuildingBase::SetAssets(FDDBuildingBaseData& LoadedAsset)
 {
 	SetParticeEffects(LoadedAsset);
 	SetMeshs(LoadedAsset);
-	ModifyScaleAndLocation();
+	ModifyMeshAndAttackCollision();
 
 }
 
@@ -184,6 +187,7 @@ void ADDBuildingBase::SetMeshs(FDDBuildingBaseData& LoadedAsset)
 		}
 		SkeletalMeshComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
 		SkeletalMeshComponent->SetCollisionResponseToChannel(GTCHANNEL_MANAGETRACE, ECR_Block);
+		SkeletalMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 		SkeletalMeshComponent->RegisterComponent();
 
 		MeshComponents.Add(SkeletalMeshComponent);
@@ -221,6 +225,7 @@ void ADDBuildingBase::SetMeshs(FDDBuildingBaseData& LoadedAsset)
 		}
 		StaticMeshComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
 		StaticMeshComponent->SetCollisionResponseToChannel(GTCHANNEL_MANAGETRACE, ECR_Block);
+		StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 		StaticMeshComponent->RegisterComponent();
 
 		MeshComponents.Add(StaticMeshComponent);
@@ -230,32 +235,76 @@ void ADDBuildingBase::SetMeshs(FDDBuildingBaseData& LoadedAsset)
 	}
 }
 
-void ADDBuildingBase::ModifyScaleAndLocation() const
+void ADDBuildingBase::ModifyMeshAndAttackCollision() const
 {
+	if (!MeshContainerComponent)
+	{
+		UE_LOG(LogTemp, Error, TEXT("MeshContainerComponent is not valid."));
+		return;
+	}
+
+	if (MeshComponents.Num() == 0)
+	{
+		UE_LOG(LogTemp, Error, TEXT("MeshComponents array is empty."));
+		return;
+	}
+
 	FBox CombinedBox(ForceInit); // 빈 경계로 초기화
+
+
 
 	// 각 자식 컴포넌트에 대해 경계를 계산하고 합침
 	for (UMeshComponent* MeshComponent : MeshComponents)
 	{
-		// 현재 컴포넌트의 경계를 계산
-		FBoxSphereBounds ComponentBounds = MeshComponent->CalcBounds(MeshComponent->GetComponentTransform());
+		if (!MeshComponent)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("MeshComponent is not valid."));
+			continue;
+		}
 
-		// 경계를 합침
-		CombinedBox += ComponentBounds.GetBox();
+		FBox ComponentBox(ForceInit);
+
+		if (UStaticMeshComponent* StaticMeshComponent = Cast<UStaticMeshComponent>(MeshComponent))
+		{
+			if (UStaticMesh* StaticMesh = StaticMeshComponent->GetStaticMesh())
+			{
+				ComponentBox = StaticMesh->GetBoundingBox();
+			}
+		}
+		else if (USkeletalMeshComponent* SkeletalMeshComponent = Cast<USkeletalMeshComponent>(MeshComponent))
+		{
+			ComponentBox = SkeletalMeshComponent->Bounds.GetBox();
+		}
+
+		if (ComponentBox.IsValid)
+		{
+			// 경계를 합침
+			CombinedBox += ComponentBox.TransformBy(MeshComponent->GetComponentTransform());
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("ComponentBox is not valid for %s."), *MeshComponent->GetName());
+		}
 	}
+
 	FVector CurrentSize = CombinedBox.GetSize();
 	FVector TargetSize(CellWidth * GridCellSize, CellWidth * GridCellSize, CellWidth * GridCellSize);
 	FVector ScaleFactor = TargetSize / CurrentSize;
 
+	UE_LOG(LogTemp, Warning, TEXT("CurrentSize X:%f Y:%f Z:%f"), CurrentSize.X, CurrentSize.Y, CurrentSize.Z);
+	UE_LOG(LogTemp, Warning, TEXT("TargetSize X:%f Y:%f Z:%f"), TargetSize.X, TargetSize.Y, TargetSize.Z);
+	UE_LOG(LogTemp, Warning, TEXT("ScaleFactor X:%f Y:%f Z:%f"), ScaleFactor.X, ScaleFactor.Y, ScaleFactor.Z);
+
 	// 스케일 팩터 중 가장 작은 값을 사용하여 균등하게 스케일 조정
-	float UniformScaleFactor = FMath::Min3(ScaleFactor.X, ScaleFactor.X, ScaleFactor.X);
+	float UniformScaleFactor = FMath::Min(ScaleFactor.X, ScaleFactor.Y);
 
 	// MeshContainerComponent에 스케일 적용
 	MeshContainerComponent->SetWorldScale3D(FVector(UniformScaleFactor));
 
+	// MeshContainerComponent의 위치 설정
+	MeshContainerComponent->SetRelativeLocation(FVector(0, 0, MeshZAxisModify));
 
-	MeshContainerComponent->SetRelativeLocation(FVector(0,0, MeshZAxisModify));
-
+	UE_LOG(LogTemp, Warning, TEXT("UniformScaleFactor: %f"), UniformScaleFactor);
 
 }
 

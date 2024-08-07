@@ -104,7 +104,7 @@ const FIntPoint ADDGridBuildManager::ConvertWorldLocationToGridCell(const FVecto
 	return FIntPoint(CellY, CellX);
 }
 
-const bool ADDGridBuildManager::CanPlaceTrapAtLocation(const FVector& HitLocation, const int32 OccupiedCellWidth) const
+const bool ADDGridBuildManager::CanPlaceBuildingAtLocation(const FVector& HitLocation, const int32 OccupiedCellWidth, const bool bIsTower) const
 {
 	int32 Length = OccupiedCellWidth / 2;
 	FIntPoint Cell = ConvertWorldLocationToGridCell(HitLocation);
@@ -128,7 +128,7 @@ const bool ADDGridBuildManager::CanPlaceTrapAtLocation(const FVector& HitLocatio
 					return false;
 				}
 
-				if (GridCellMap[TempPoint].bIsTowerArea)
+				if (GridCellMap[TempPoint].bIsTowerArea != bIsTower)
 				{
 					return false;
 				}
@@ -224,17 +224,17 @@ const bool ADDGridBuildManager::IsPointOnSamePlane(const FVector& InPointWorldLo
 void ADDGridBuildManager::AddTowerZone()
 {
 	UBoxComponent* NewTowerZone = NewObject<UBoxComponent>(this);
-	NewTowerZone->RegisterComponent();
+	// 이름 설정
+	FName TowerZoneName = FName(*FString::Printf(TEXT("%s:TowerZone"), *NewTowerZone->GetFName().ToString()));
+	NewTowerZone->Rename(*TowerZoneName.ToString());
+
 	NewTowerZone->SetBoxExtent(FVector(100.0f, 100.0f, 50.0f));
 	NewTowerZone->SetupAttachment(RootComponent);
 	NewTowerZone->SetCollisionResponseToAllChannels(ECR_Ignore);
 	NewTowerZone->SetCollisionResponseToChannel(GTCHANNEL_BUILDINGTRACE, ECR_Block);
 
 
-	// 이름 설정
-	FName TowerZoneName = FName(*FString::Printf(TEXT("%s:TowerZone"), *NewTowerZone->GetFName().ToString()));
-	NewTowerZone->Rename(*TowerZoneName.ToString());
-
+	NewTowerZone->RegisterComponent();
 	TowerZones.Add(NewTowerZone);
 }
 

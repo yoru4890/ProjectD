@@ -15,7 +15,7 @@ class PROJECTD_API UDDFactoryManager : public UObject
 {
 	GENERATED_BODY()
 public:
-	void Initialize(const TMap<FName, FDDBuildingBaseData>& BuildingDataTable /* other DataTable can Add*/);
+	void Initialize(const TMap<FName, FDDBuildingBaseData*>& BuildingDataTable /* other DataTable can Add*/);
 
 	class IDDFactoryInterface* GetFactory(const FName& RowName);
 

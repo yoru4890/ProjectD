@@ -78,7 +78,7 @@ private:
 public:
 	FORCEINLINE const float GetGridCellSize() const { return GridCellSize; };
 	const FVector GetNearestGridCellLocation(const FVector& HitLocation) const;
-	const bool CanPlaceTrapAtLocation(const FVector& HitLocation, const int32 OccupiedCellWidth) const;
+	const bool CanPlaceBuildingAtLocation(const FVector& HitLocation, const int32 OccupiedCellWidth, const bool bIsTower) const;
 	const bool CanPlaceTowerAtLocation(const FVector& HitLocation, const int32 OccupiedCellWidth) const;
 	const FVector GetGridCellNormalVector(const FVector& HitLocation) const;
 	bool SetGridCellAsOccupied(const FVector& HitLocation, const int32 OccupiedCellWidth);

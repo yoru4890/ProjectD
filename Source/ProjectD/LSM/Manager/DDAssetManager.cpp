@@ -19,11 +19,11 @@ void UDDAssetManager::Initialize()
 	UDDBuildingManager* BuildingManager = GameInstance->GetBuildingManager();
 	check(BuildingManager);
 
-	const TMap<FName, FDDBuildingBaseData>& BuildingDataTable = BuildingManager->GetBuildingDataTable();
+	const TMap<FName, FDDBuildingBaseData*>& BuildingDataTable = BuildingManager->GetBuildingDataTable();
 	UE_LOG(LogTemp, Warning, TEXT("Initialize AssetManager"));
 	for (auto& Elem : BuildingDataTable) {
-		UE_LOG(LogTemp, Warning, TEXT("%s is Unlock? : %s"), *Elem.Key.ToString(), Elem.Value.bIsUnlocked ? TEXT("true") : TEXT("false"));
-		if (Elem.Value.bIsUnlocked) {
+		UE_LOG(LogTemp, Warning, TEXT("%s is Unlock? : %s"), *Elem.Key.ToString(), Elem.Value->bIsUnlocked ? TEXT("true") : TEXT("false"));
+		if (Elem.Value->bIsUnlocked) {
 			LoadAssetsAsync(Elem.Key);
 			UE_LOG(LogTemp, Warning, TEXT(" %s : Init"), *Elem.Key.ToString());
 		}
@@ -202,7 +202,7 @@ void UDDAssetManager::RemoveLoadedAssetAll()
 	UDDBuildingManager* BuildingManager = GameInstance->GetBuildingManager();
 	check(BuildingManager);
 
-	const TMap<FName, FDDBuildingBaseData>& BuildingDataTable = BuildingManager->GetBuildingDataTable();
+	const TMap<FName, FDDBuildingBaseData*>& BuildingDataTable = BuildingManager->GetBuildingDataTable();
 
 	FStreamableManager& StreamableManager = UAssetManager::GetStreamableManager();
 	TArray<FName> KeyArray;
@@ -246,11 +246,11 @@ FDDBuildingBaseData* UDDAssetManager::GetObjectBaseData(const FName& RowName)
 	UDDBuildingManager* BuildingManager = GameInstance->GetBuildingManager();
 	check(BuildingManager);
 
-	TMap<FName, FDDBuildingBaseData>& BuildingDataTable = BuildingManager->GetBuildingDataTable();
+	TMap<FName, FDDBuildingBaseData*>& BuildingDataTable = BuildingManager->GetBuildingDataTable();
 
 	FDDBuildingBaseData* ObjectStruct;
 	if (BuildingDataTable.Find(RowName)) {
-		ObjectStruct = BuildingDataTable.Find(RowName);
+		ObjectStruct = *BuildingDataTable.Find(RowName);
 		return ObjectStruct;
 	}
 	else {

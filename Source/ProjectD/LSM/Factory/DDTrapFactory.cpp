@@ -15,20 +15,10 @@ UObject* UDDTrapFactory::CreateObject(UWorld* World, const FName& RowName, const
 	if (ObjectStruct.BuildingType == EBuildingType::Trap) 
 	{
 		TrapStruct = static_cast<const FDDTrapData*>(&ObjectStruct);
-
-		UE_LOG(LogTemp, Warning, TEXT("%s is Trap"), *RowName.ToString());
 	}
-
-	if (TrapStruct->TrapClass) 
+	else
 	{
-
-	}
-
-
-	if (TrapStruct->AttackCoolTime)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Attack CoolTime is %f"), TrapStruct->AttackCoolTime);
-		return nullptr;
+		UE_LOG(LogTemp, Warning, TEXT("%s is Not Trap"), *RowName.ToString());
 	}
 
 	UClass* TrapClass = TrapStruct->TrapClass;

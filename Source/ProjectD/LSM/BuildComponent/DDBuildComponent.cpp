@@ -151,7 +151,7 @@ void UDDBuildComponent::CancelPlacedBuilding()
 	if (!ManagedBuilding) {
 		return;
 	}
-	FDDBuildingBaseData& ManagedBuildingData = BuildingManager->GetBuildingData(ManagedBuilding->GetRowName());
+	FDDBuildingBaseData& ManagedBuildingData = *BuildingManager->GetBuildingData(ManagedBuilding->GetRowName());
 	GridBuildManager->SetGridCellAsBlank(ManagedBuilding->GetActorLocation(), ManagedBuilding->GetCellWidth());
 	PlayerState->AddGold(ManagedBuildingData.BuildCost * 0.8f);
 	BuildingManager->DestroyBuilding(*ManagedBuilding);
@@ -165,7 +165,7 @@ bool UDDBuildComponent::UpgradeBuilding(const FName& RowName)
 		UE_LOG(LogTemp, Warning, TEXT("Upgrade Failed : ManagedBuilding is null"));
 		return false;
 	}
-	FDDBuildingBaseData& UpgradeBuildingData = BuildingManager->GetBuildingData(RowName);
+	FDDBuildingBaseData& UpgradeBuildingData = *BuildingManager->GetBuildingData(RowName);
 	if (!UpgradeBuildingData.bIsUnlocked)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Upgrade Failed : UpgradeBuildingData is Lock"));
@@ -178,7 +178,7 @@ bool UDDBuildComponent::UpgradeBuilding(const FName& RowName)
 		return false;
 	}
 
-	FDDBuildingBaseData& ManagedBuildingData = BuildingManager->GetBuildingData(ManagedBuilding->GetRowName());
+	FDDBuildingBaseData& ManagedBuildingData = *BuildingManager->GetBuildingData(ManagedBuilding->GetRowName());
 
 	if (!ManagedBuildingData.ChildRowNames.Contains(RowName))
 	{
@@ -278,17 +278,42 @@ void UDDBuildComponent::PerformBuildTrace()
 
 		if (bHit)
 		{
-			FVector HitLocation = HitResult.Location;
+			FVector BuildLocation = HitResult.Location;
+			FRotator TowerRotation;
+			bool CanBuildAtLoction = false;
 			check(GridBuildManager);
 			check(HitWarningWidgetInstance);
 
-			check(PreviewBuilding);
+			if (PreviewBuilding->GetBuildingType() == EBuildingType::Trap)
+			{
+				CanBuildAtLoction = GridBuildManager->CanPlaceBuildingAtLocation(BuildLocation, PreviewBuilding->GetCellWidth(), false);
+			}
+			else if (PreviewBuilding->GetBuildingType() == EBuildingType::Tower)
+			{
+				UPrimitiveComponent* HitComponent = HitResult.GetComponent();
+				if (HitComponent)
+				{
+					BuildLocation = HitComponent->GetComponentLocation();
+					CanBuildAtLoction = GridBuildManager->CanPlaceBuildingAtLocation(BuildLocation, PreviewBuilding->GetCellWidth(), true);
+					TowerRotation = HitComponent->GetComponentRotation();
+				}
+				else
+				{
+					CanBuildAtLoction = false;
+				}
+			}
 
-			if (GridBuildManager->CanPlaceTrapAtLocation(HitLocation, PreviewBuilding->GetCellWidth())) {
-				FVector NearestCellLocation = GridBuildManager->GetNearestGridCellLocation(HitLocation);
+
+
+			if (CanBuildAtLoction) {
+				FVector NearestCellLocation = GridBuildManager->GetNearestGridCellLocation(BuildLocation);
 				PreviewBuilding->SetActorLocation(NearestCellLocation);
-				FVector NormalVector = GridBuildManager->GetGridCellNormalVector(HitLocation);
+				FVector NormalVector = GridBuildManager->GetGridCellNormalVector(BuildLocation);
 				FRotator ActorRotation = FRotationMatrix::MakeFromZ(NormalVector).Rotator();
+				if (PreviewBuilding->GetBuildingType() == EBuildingType::Tower)
+				{
+					ActorRotation = TowerRotation;
+				}
 				PreviewBuilding->SetActorRotation(ActorRotation);
 				PreviewBuilding->SetActorHiddenInGame(false);
 
@@ -377,28 +402,28 @@ void UDDBuildComponent::PerformManageTrace()
 
 bool UDDBuildComponent::CanPayBuildCost(const FName& RowName) const
 {
-	const FDDBuildingBaseData& BuildingData = BuildingManager->GetBuildingData(RowName);
+	const FDDBuildingBaseData& BuildingData = *BuildingManager->GetBuildingData(RowName);
 	bool bCanPay = PlayerState->CheckGold(BuildingData.BuildCost);
 	return bCanPay;
 }
 
 bool UDDBuildComponent::PayBuildCost(const FName& RowName) const
 {
-	const FDDBuildingBaseData& BuildingData = BuildingManager->GetBuildingData(RowName);
+	const FDDBuildingBaseData& BuildingData = *BuildingManager->GetBuildingData(RowName);
 	bool bIsPay = PlayerState->SubtractGold(BuildingData.BuildCost);
 	return bIsPay;
 }
 
 bool UDDBuildComponent::CanPayUpgradeCost(const FName& RowName) const
 {
-	const FDDBuildingBaseData& BuildingData = BuildingManager->GetBuildingData(RowName);
+	const FDDBuildingBaseData& BuildingData = *BuildingManager->GetBuildingData(RowName);
 	bool bCanPay = PlayerState->CheckGold(BuildingData.UpgradeCost);
 	return bCanPay;
 }
 
 bool UDDBuildComponent::PayUpgradeCost(const FName& RowName) const
 {
-	const FDDBuildingBaseData& BuildingData = BuildingManager->GetBuildingData(RowName);
+	const FDDBuildingBaseData& BuildingData = *BuildingManager->GetBuildingData(RowName);
 	bool bIsPay = PlayerState->SubtractGold(BuildingData.UpgradeCost);
 	return bIsPay;
 }
