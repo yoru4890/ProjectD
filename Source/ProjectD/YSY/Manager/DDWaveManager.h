@@ -18,6 +18,8 @@ class PROJECTD_API UDDWaveManager : public UObject
 public:
 	UDDWaveManager();
 
+	void InitStage(int32 StageNum);
+
 	UFUNCTION(BlueprintCallable)
 	void SetSplines();
 
@@ -27,9 +29,19 @@ public:
 	UFUNCTION(BlueprintCallable)
 	TArray<FDDWaveData>& GetStageWaveInfos() { return StageWaveInfo; }
 
-private:
+	void WaveStart(int32 WaveNum);
 
+private:
 	TArray<FDDWaveData> StageWaveInfo;
 
+	TArray<FName> EnemyOrder;
+	TArray<int32> PathOrder;
+
 	TArray<class AAISplineRoute*> Splines;
+
+	int32 CurrentStage{};
+	int32 CurrentWave{};
+	int32 EnemyIndex{};
+
+	FTimerHandle TimerHandle;
 };

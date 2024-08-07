@@ -37,10 +37,9 @@ void UDDBTService_CaculateDirection::TickNode(UBehaviorTreeComponent& OwnerComp,
 	FVector TargetDirection = (Target->GetActorLocation() - ControllingPawn->GetActorLocation()).GetSafeNormal2D();
 	FVector ForwardDirection = ControllingPawn->GetActorForwardVector();
 
-	double Temp = FVector::DotProduct(TargetDirection, ForwardDirection);
-	UE_LOG(LogTemp, Warning, TEXT("%f"), Temp);
+	double DotResult = FVector::DotProduct(TargetDirection, ForwardDirection);
 
-	if (Temp > 0.9)
+	if (DotResult > 0.9)
 	{
 		OwnerComp.GetBlackboardComponent()->SetValueAsBool(BBKEY_ISFRONT, true);
 	}

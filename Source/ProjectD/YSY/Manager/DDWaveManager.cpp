@@ -26,6 +26,16 @@ UDDWaveManager::UDDWaveManager()
 	}
 }
 
+void UDDWaveManager::InitStage(int32 StageNum)
+{
+	CurrentStage = StageNum;
+	CurrentWave = 1;
+	SetSplines();
+
+	EnemyOrder = StageWaveInfo[StageNum].EnemyOrder;
+	PathOrder = StageWaveInfo[StageNum].PathOrder;
+}
+
 void UDDWaveManager::SetSplines()
 {
 	TArray<AActor*> OutActors;
@@ -35,4 +45,9 @@ void UDDWaveManager::SetSplines()
 	{
 		Splines.Add(CastChecked<AAISplineRoute>(Actor));
 	}
+}
+
+void UDDWaveManager::WaveStart(int32 WaveNum)
+{
+
 }

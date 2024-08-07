@@ -40,6 +40,7 @@ ADDEnemyBase::ADDEnemyBase()
 		HpBar->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 	//GetCharacterMovement()->bUseRVOAvoidance = true;
 	//GetCharacterMovement()->AvoidanceConsiderationRadius = 300.0f;
 	//GetCharacterMovement()->bConstrainToPlane = true;
@@ -148,6 +149,7 @@ void ADDEnemyBase::InitializeEnemy(const FDDEnemyData& EnemyData)
 	Stat->SetMaxHp(MaxHP);
 	Stat->SetCurrentHp(MaxHP);
 	MovementSpeed = EnemyData.MovementSpeed;
+	ChangeMaxWalkSpeed(1.0f);
 	AttackSpeed = EnemyData.AttackSpeed;
 	Damage = EnemyData.Damage;
 	AttackRange = EnemyData.AttackRange;
@@ -156,6 +158,9 @@ void ADDEnemyBase::InitializeEnemy(const FDDEnemyData& EnemyData)
 	GoldDropAmount = EnemyData.GoldDropAmount;
 	bIsBoss = EnemyData.bIsBoss;
 	bIsElite = EnemyData.bIsElite;
+
+	float EnemyScale = EnemyData.ScaleSize;
+	SetActorScale3D({ EnemyScale, EnemyScale, EnemyScale });
 
 	if (!EnemyData.SkeletalMesh.IsValid())
 	{
@@ -203,8 +208,6 @@ void ADDEnemyBase::AttackByAI()
 	// TODO : YSY Complete Attack
 	ChangeMaxWalkSpeed(0.0f);
 	GetMesh()->GetAnimInstance()->Montage_Play(AttackMontage);
-
-	UE_LOG(LogTemp, Warning, TEXT("attack"));
 
 	if (EnemyAttackType == EEnemyAttackType::Range)
 	{
@@ -499,7 +502,7 @@ void ADDEnemyBase::BindingAnimNotify()
 
 void ADDEnemyBase::AttackFinished()
 {
-	ChangeMaxWalkSpeed(MovementSpeed);
+	ChangeMaxWalkSpeed(1.0f);
 	bIsCanTurn = true;
 	OnAttackFinished.ExecuteIfBound();
 }
@@ -515,7 +518,7 @@ void ADDEnemyBase::MeleeAttack()
 	{
 		if (OutHit.GetActor()->GetClass()->ImplementsInterface(UDamageInterface::StaticClass()))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("PlayerHit"));
+			
 		}
 	}
 }
@@ -534,7 +537,7 @@ void ADDEnemyBase::RangeAttack()
 	{
 		if (OutHit.GetActor()->GetClass()->ImplementsInterface(UDamageInterface::StaticClass()))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("PlayerHit"));
+			
 		}
 	}
 }

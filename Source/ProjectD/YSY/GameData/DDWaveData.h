@@ -19,6 +19,9 @@ public:
 	int32 MaxWaveNum;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	TArray<int32> EnemyCountsPerWave;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
 	TArray<FName> EnemyOrder;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)

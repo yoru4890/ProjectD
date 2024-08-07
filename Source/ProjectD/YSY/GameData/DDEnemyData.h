@@ -45,6 +45,9 @@ public:
 	EEnemyAttackType EnemyAttackType;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	float ScaleSize;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
 	float MaxHP;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
