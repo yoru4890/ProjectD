@@ -5,7 +5,10 @@
 #include "CoreMinimal.h"
 #include "LJW/Character/DDCharacterBase.h"
 #include "InputActionValue.h"
+#include "LJW/Interface/CameraFOVInterface.h"
 #include "DDCharacterPlayer.generated.h"
+
+
 
 UENUM(BlueprintType)
 enum class EPlayerMode : uint8
@@ -17,7 +20,7 @@ enum class EPlayerMode : uint8
 };
 
 UCLASS()
-class PROJECTD_API ADDCharacterPlayer : public ADDCharacterBase
+class PROJECTD_API ADDCharacterPlayer : public ADDCharacterBase, public ICameraFOVInterface
 {
 	GENERATED_BODY()
 	
@@ -27,6 +30,7 @@ public:
 protected:
 	
 	virtual void BeginPlay() override;
+	virtual void PostInitializeComponents() override;
 
 public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -94,12 +98,14 @@ public:
 	UFUNCTION()
 	void OnUnequipMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
+
+
 protected:
 	void EquipMelee();
 	void EquipRange();
 	void WeaponSubSkill();
-	void WeaponAiming();
-private :
+	void WeaponStartAiming();
+	void WeaponEndAiming();
 
 
 protected:

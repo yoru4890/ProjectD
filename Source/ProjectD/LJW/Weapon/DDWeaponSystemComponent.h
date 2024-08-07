@@ -7,7 +7,11 @@
 #include "LJW/Weapon/DDWeaponBase.h"
 #include "DDWeaponSystemComponent.generated.h"
 
-
+DECLARE_DELEGATE_RetVal(bool, FOnGetIsAimingSignature);
+DECLARE_DELEGATE_OneParam(FOnSetIsAimingSignature, bool);
+DECLARE_DELEGATE_RetVal(bool, FOnGetIsDeadSignature);
+DECLARE_DELEGATE_OneParam(FOnSetIsDeadSignature, bool);
+DECLARE_DELEGATE_OneParam(FOnSetWeaponIndexSignature, int32);
 
 UENUM(BlueprintType)
 enum class EWeaponType : uint8
@@ -47,12 +51,20 @@ public:
 	void PlayUnequipMontage();
 
 	void WeaponSubSkill();
-	void WeaponAiming();
+	void WeaponStartAiming();
+	void WeaponEndAiming();
 
 	//조건 모음
 	bool IsUnequipMontage(const UAnimMontage* Montage) const;
 	bool CanMeleeSubSkill();
 	bool CanRangeAiming();
+
+public:
+	FOnGetIsAimingSignature OnGetAimingDelegate;
+	FOnSetIsAimingSignature OnSetAimingDelegate;
+	FOnGetIsDeadSignature OnGetDeadDelegate;
+	FOnSetIsDeadSignature OnSetDeadDelegate;
+	FOnSetWeaponIndexSignature OnSetWeaponIndexDelegate;
 
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon, meta = (AllowPrivateAccess = "true"))
@@ -76,5 +88,4 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Animation, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class ACharacter> PlayerCharacter;
-
 }; 

@@ -18,6 +18,15 @@ class PROJECTD_API UDDPlayerAnimInstance : public UAnimInstance
 public :
 	UDDPlayerAnimInstance();
 
+	FORCEINLINE bool GetIsAiming() const noexcept { return bIsAiming; }
+	void SetIsAiming(bool NewbIsAiming) { bIsAiming = NewbIsAiming; }
+
+	FORCEINLINE bool GetIsDead() const noexcept { return bIsDead; }
+	void SetIsDead(bool NewbIsDead) { bIsDead = NewbIsDead;  }
+
+	FORCEINLINE int32 GetWeaponIndex() const noexcept { return WeaponIndex; }
+	void SetWeaponIndex(int32 Index) { WeaponIndex = Index; UE_LOG(LogTemp, Warning, TEXT("WeaponIndex : %d"), WeaponIndex); }
+
 protected:
 	virtual void NativeInitializeAnimation() override;
 
@@ -56,5 +65,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
 	uint8 bIsAiming : 1;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
+	uint8 bIsDead : 1;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
+	int32 WeaponIndex;
 };

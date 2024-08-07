@@ -10,7 +10,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "DDCharacterControlData.h"
 #include "LJW/Weapon/DDWeaponSystemComponent.h"
-#include "Animation/AnimInstance.h"
+#include "LJW/Animation/DDPlayerAnimInstance.h"
 
 
 
@@ -103,8 +103,21 @@ void ADDCharacterPlayer::BeginPlay()
 	
 	SetCharacterControl();
 	
-	//Montage Delegate
+	
+}
+
+void ADDCharacterPlayer::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	//Montage Delegate Bind
 	GetMesh()->GetAnimInstance()->OnMontageEnded.AddDynamic(this, &ADDCharacterPlayer::OnUnequipMontageEnded);
+
+	//AnimInstance Delegate Bind
+	UDDPlayerAnimInstance* PlayerAnimInstance = Cast<UDDPlayerAnimInstance>(GetMesh()->GetAnimInstance());
+	WeaponSystem->OnSetAimingDelegate.BindUObject(PlayerAnimInstance, &UDDPlayerAnimInstance::SetIsAiming);
+	WeaponSystem->OnSetWeaponIndexDelegate.BindUObject(PlayerAnimInstance, &UDDPlayerAnimInstance::SetWeaponIndex);
+
 }
 
 void ADDCharacterPlayer::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
@@ -132,8 +145,12 @@ void ADDCharacterPlayer::SetupPlayerInputComponent(class UInputComponent* Player
 	//Weapon System
 	EnhancedInputComponent->BindAction(EquipMeleeAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::EquipMelee);
 	EnhancedInputComponent->BindAction(EquipRangeAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::EquipRange);
+	
 	EnhancedInputComponent->BindAction(SubSkillAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::WeaponSubSkill);
-	EnhancedInputComponent->BindAction(SubSkillAction, ETriggerEvent::Triggered, this, &ADDCharacterPlayer::WeaponAiming);
+	EnhancedInputComponent->BindAction(SubSkillAction, ETriggerEvent::Triggered, this, &ADDCharacterPlayer::WeaponStartAiming);
+	EnhancedInputComponent->BindAction(SubSkillAction, ETriggerEvent::Canceled, this, &ADDCharacterPlayer::WeaponEndAiming);
+	EnhancedInputComponent->BindAction(SubSkillAction, ETriggerEvent::Completed, this, &ADDCharacterPlayer::WeaponEndAiming);
+
 	
 }
 
@@ -163,6 +180,7 @@ void ADDCharacterPlayer::SetCharacterControlData(const UDDCharacterControlData* 
 	Super::SetCharacterControlData(CharacterControlData);
 
 	CameraBoom->TargetArmLength = CharacterControlData->TargetArmLength;
+	CameraBoom->TargetOffset = CharacterControlData->TargetOffset;
 	CameraBoom->SetRelativeRotation(CharacterControlData->RelativeRotation);
 	CameraBoom->bUsePawnControlRotation = CharacterControlData->bUsePawnControlRotation;
 	CameraBoom->bInheritPitch = CharacterControlData->bInheritPitch;
@@ -235,6 +253,7 @@ void ADDCharacterPlayer::EquipMelee()
 	if (!(GetMesh()->GetAnimInstance()->IsAnyMontagePlaying()))
 	{
 		WeaponSystem->EquipMeleeWeapon();
+
 	}
 }
 
@@ -256,16 +275,22 @@ void ADDCharacterPlayer::WeaponSubSkill()
 	}
 }
 
-void ADDCharacterPlayer::WeaponAiming()
+void ADDCharacterPlayer::WeaponStartAiming()
 {
 	//Enum
 	if (CurrentPlayerMode == EPlayerMode::CombatMode)
 	{
-		WeaponSystem->WeaponAiming();
+		WeaponSystem->WeaponStartAiming();
 	}
 	
 }
 
-
-
+void ADDCharacterPlayer::WeaponEndAiming()
+{
+	//Enum
+	if (CurrentPlayerMode == EPlayerMode::CombatMode)
+	{
+		WeaponSystem->WeaponEndAiming();
+	}
+}
 

@@ -15,7 +15,6 @@
 UDDWeaponSystemComponent::UDDWeaponSystemComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
-	
 }
 
 void UDDWeaponSystemComponent::BeginPlay()
@@ -75,6 +74,7 @@ void UDDWeaponSystemComponent::EquipMeleeWeapon()
 {
 	if (CurrentWeapon != Weapons[CurrentMeleeWeapon])
 	{
+		OnSetWeaponIndexDelegate.Execute(CurrentMeleeWeapon);
 		PlayUnequipMontage();
 
 		UE_LOG(LogTemp, Warning, TEXT("Current Weapon : %s"), *CurrentWeapon->GetFName().ToString());
@@ -86,6 +86,7 @@ void UDDWeaponSystemComponent::EquipRangeWeapon()
 {
 	if (CurrentWeapon != Weapons[CurrentRangeWeapon])
 	{
+		OnSetWeaponIndexDelegate.Execute(CurrentRangeWeapon);
 		PlayUnequipMontage();
 
 		UE_LOG(LogTemp, Warning, TEXT("Current Weapon : %s"), *CurrentWeapon->GetFName().ToString());
@@ -129,7 +130,25 @@ void UDDWeaponSystemComponent::WeaponSubSkill()
 
 }
 
-void UDDWeaponSystemComponent::WeaponAiming()
+void UDDWeaponSystemComponent::WeaponStartAiming()
+{
+	if (CurrentWeapon == Weapons[CurrentMeleeWeapon])
+	{	
+		return;
+	}
+
+	if (CurrentWeapon == Weapons[CurrentRangeWeapon] && CanRangeAiming())
+	{
+		if (OnSetAimingDelegate.IsBound())
+		{
+			OnSetAimingDelegate.Execute(true);
+
+		}
+	}
+
+}
+
+void UDDWeaponSystemComponent::WeaponEndAiming()
 {
 	if (CurrentWeapon == Weapons[CurrentMeleeWeapon])
 	{
@@ -138,9 +157,12 @@ void UDDWeaponSystemComponent::WeaponAiming()
 
 	if (CurrentWeapon == Weapons[CurrentRangeWeapon] && CanRangeAiming())
 	{
-		
-	}
+		if (OnSetAimingDelegate.IsBound())
+		{
+			OnSetAimingDelegate.Execute(false);
 
+		}
+	}
 }
 
 //조건 모음
@@ -174,11 +196,12 @@ bool UDDWeaponSystemComponent::CanMeleeSubSkill()
 
 bool UDDWeaponSystemComponent::CanRangeAiming()
 {
-	//
+	//캐릭터 스킬 사용중 불가능
 	//Weapon Change 중 불가능
-	// 점프 중 불가능
 	//죽어있을 때 불가능
-	return false;
+
+	return true;
 }
+
 
 
