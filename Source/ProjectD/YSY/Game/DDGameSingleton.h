@@ -5,7 +5,9 @@
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "YSY/GameData/DDEnemyData.h"
-#include "LSM/Trap/DDTrapStruct.h"
+#include "LSM/Building/DDBuildingBaseData.h"
+#include "LSM/Building/Trap/DDTrapData.h"
+#include "LSM/Building/Tower/DDTowerData.h"
 #include "LJW/Weapon/DDWeaponData.h"
 #include "DDGameSingleton.generated.h"
 
@@ -24,13 +26,16 @@ public:
 	static UDDGameSingleton& Get();
 
 	FORCEINLINE TMap<FName, FDDEnemyData>& GetEnemyDataTable() { return EnemyDataTable; }
-	FORCEINLINE TMap<FName, FDDTrapStruct>& GetTrapDataTable() { return TrapDataTable; }
+	FORCEINLINE TMap<FName, FDDTrapData>& GetTrapDataTable() { return TrapDataTable; }
+	FORCEINLINE TMap<FName, FDDTowerData>& GetTowerDataTable() { return TowerDataTable; }
 	FORCEINLINE TMap<FName, FDDWeaponData>& GetWeaponDataTable() { return WeaponDataTable; }
-	
+
 private:
 	TMap<FName, FDDEnemyData> EnemyDataTable;
-	TMap<FName, FDDTrapStruct> TrapDataTable;
+	TMap<FName, FDDTrapData> TrapDataTable;
+	TMap<FName, FDDTowerData> TowerDataTable;
 	TMap<FName, FDDWeaponData> WeaponDataTable;
+	
 
 	template<typename T>
 	void LoadDataTable(TMap<FName, T>& DataTable, const FString& Path)

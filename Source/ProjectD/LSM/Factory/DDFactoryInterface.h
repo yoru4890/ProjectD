@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
-#include "LSM/BaseStruct.h"
+#include "LSM/Building/DDBuildingBaseData.h"
 #include "DDFactoryInterface.generated.h"
 
 // This class does not need to be modified.
@@ -23,5 +23,5 @@ class PROJECTD_API IDDFactoryInterface
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual UObject* CreateObject(UWorld* World, const FName& RowName, const FBaseStruct& ObjectStruct, const FVector& Location, const FRotator& Rotation, AActor* Owner, APawn* Instigator) = 0;
+	virtual UObject* CreateObject(UWorld* World, const FName& RowName, const FDDBuildingBaseData& ObjectData, const FVector& Location, const FRotator& Rotation, AActor* Owner, APawn* Instigator) = 0;
 };
