@@ -9,6 +9,7 @@
 #include "Engine/AssetManager.h"
 #include "Kismet/GameplayStatics.h"
 #include "LSM/Manager/DDBuildingManager.h"
+#include "Particles/ParticleSystem.h"
 
 void UDDAssetManager::Initialize()
 {
