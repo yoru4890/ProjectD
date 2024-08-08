@@ -2,4 +2,20 @@
 
 
 #include "YSY/Game/DDGameInstance.h"
+#include "LSM/Manager/DDAssetManager.h"
+#include "LSM/Manager/DDBuildingManager.h"
+#include "LSM/Manager/DDFactoryManager.h"
 
+void UDDGameInstance::Init()
+{
+	Super::Init();
+	BuildingManager = NewObject<UDDBuildingManager>(this);
+	FactoryManager = NewObject<UDDFactoryManager>(this);
+	AssetManager = NewObject<UDDAssetManager>(this);
+
+	BuildingManager->Initialize();
+	FactoryManager->Initialize(BuildingManager->GetBuildingDataTable());
+	AssetManager->Initialize();
+	
+
+}
