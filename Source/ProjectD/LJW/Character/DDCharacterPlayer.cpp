@@ -116,7 +116,9 @@ void ADDCharacterPlayer::PostInitializeComponents()
 	//AnimInstance Delegate Bind
 	UDDPlayerAnimInstance* PlayerAnimInstance = Cast<UDDPlayerAnimInstance>(GetMesh()->GetAnimInstance());
 	WeaponSystem->OnSetAimingDelegate.BindUObject(PlayerAnimInstance, &UDDPlayerAnimInstance::SetIsAiming);
+	WeaponSystem->OnGetAimingDelegate.BindUObject(PlayerAnimInstance, &UDDPlayerAnimInstance::GetIsAiming);
 	WeaponSystem->OnSetWeaponIndexDelegate.BindUObject(PlayerAnimInstance, &UDDPlayerAnimInstance::SetWeaponIndex);
+
 
 }
 
@@ -246,6 +248,11 @@ void ADDCharacterPlayer::OnUnequipMontageEnded(UAnimMontage* Montage, bool bInte
 	{
 		WeaponSystem->PlayEquipMontage();
 	}
+}
+
+void ADDCharacterPlayer::SetCameraFOV(const float& Amount)
+{
+	FollowCamera->SetFieldOfView(Amount);
 }
 
 void ADDCharacterPlayer::EquipMelee()

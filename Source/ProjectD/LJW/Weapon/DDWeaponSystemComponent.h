@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "LJW/Weapon/DDWeaponBase.h"
+#include "Components/TimeLineComponent.h"
 #include "DDWeaponSystemComponent.generated.h"
 
 DECLARE_DELEGATE_RetVal(bool, FOnGetIsAimingSignature);
@@ -59,6 +60,13 @@ public:
 	bool CanMeleeSubSkill();
 	bool CanRangeAiming();
 
+	UFUNCTION()
+	void UpdateRifleZoom(); //Timeline Update(Tick)
+	UFUNCTION()
+	void FinishRifleZoom(); //Timeline Finish(End)
+	UFUNCTION()
+	void InitTimeline();
+
 public:
 	FOnGetIsAimingSignature OnGetAimingDelegate;
 	FOnSetIsAimingSignature OnSetAimingDelegate;
@@ -88,4 +96,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Animation, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class ACharacter> PlayerCharacter;
+
+	FTimeline RifleZoomTL;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon, meta = (AllowPrivateAccess = "true"))
+	UCurveFloat* ZoomCurve;
 }; 

@@ -7,7 +7,7 @@
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include <Kismet/KismetSystemLibrary.h>
-
+#include "LJW/Interface/CameraFOVInterface.h"
 
 
 
@@ -15,17 +15,27 @@
 UDDWeaponSystemComponent::UDDWeaponSystemComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
+
+	//Rifle Zoom Timeline Curve
+	static ConstructorHelpers::FObjectFinder<UCurveFloat>ZoomCurveRef(TEXT("/Script/Engine.CurveFloat'/Game/0000/LJW/Blueprints/Data/FloatCurve_RifleZoom.FloatCurve_RifleZoom'"));
+	if (nullptr != ZoomCurveRef.Object)
+	{
+		ZoomCurve = ZoomCurveRef.Object;
+	}
 }
 
 void UDDWeaponSystemComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	InitializeWeapon();
+	InitTimeline();
 }
 
 void UDDWeaponSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	RifleZoomTL.TickTimeline(DeltaTime);
 }
 
 void UDDWeaponSystemComponent::InitializeWeapon()
@@ -139,10 +149,15 @@ void UDDWeaponSystemComponent::WeaponStartAiming()
 
 	if (CurrentWeapon == Weapons[CurrentRangeWeapon] && CanRangeAiming())
 	{
+		if (OnGetAimingDelegate.Execute())
+		{
+			return;
+		}
+
 		if (OnSetAimingDelegate.IsBound())
 		{
 			OnSetAimingDelegate.Execute(true);
-
+			RifleZoomTL.PlayFromStart();
 		}
 	}
 
@@ -160,7 +175,7 @@ void UDDWeaponSystemComponent::WeaponEndAiming()
 		if (OnSetAimingDelegate.IsBound())
 		{
 			OnSetAimingDelegate.Execute(false);
-
+			RifleZoomTL.Reverse();
 		}
 	}
 }
@@ -201,6 +216,35 @@ bool UDDWeaponSystemComponent::CanRangeAiming()
 	//죽어있을 때 불가능
 
 	return true;
+}
+
+void UDDWeaponSystemComponent::UpdateRifleZoom()
+{
+	float CurveTime = RifleZoomTL.GetPlaybackPosition();
+	float CurveValue = ZoomCurve->GetFloatValue(CurveTime);
+	float InFieldOfViewValue = FMath::Lerp(90.0f, 70.0f, CurveValue);
+
+	ICameraFOVInterface* CameraFOVInterface = Cast<ICameraFOVInterface>(GetOwner());
+	CameraFOVInterface->SetCameraFOV(InFieldOfViewValue);
+}
+
+void UDDWeaponSystemComponent::FinishRifleZoom()
+{
+
+}
+
+void UDDWeaponSystemComponent::InitTimeline()
+{
+	FOnTimelineFloat OnTimelineFloatDelegate;
+	FOnTimelineEventStatic OnTimelineEventDelegate;
+
+	OnTimelineFloatDelegate.BindUFunction(this, FName("UpdateRifleZoom"));
+	OnTimelineEventDelegate.BindUObject(this, &UDDWeaponSystemComponent::FinishRifleZoom);
+	
+	RifleZoomTL.AddInterpFloat(ZoomCurve, OnTimelineFloatDelegate);
+	RifleZoomTL.SetTimelineFinishedFunc(OnTimelineEventDelegate);
+
+	
 }
 
 

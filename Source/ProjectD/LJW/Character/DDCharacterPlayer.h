@@ -98,7 +98,8 @@ public:
 	UFUNCTION()
 	void OnUnequipMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
-
+	// ICameraFOVInterface
+	virtual void SetCameraFOV(const float& Amount) override;
 
 protected:
 	void EquipMelee();
@@ -112,4 +113,6 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, Category = Weapon)
 	TObjectPtr<class UDDWeaponSystemComponent> WeaponSystem;
+
+
 };
