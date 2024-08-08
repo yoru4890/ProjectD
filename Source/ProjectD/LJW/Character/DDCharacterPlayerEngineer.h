@@ -24,26 +24,22 @@ public :
 	//Mesh
 	//Character
 	UPROPERTY(VisibleAnywhere, Category = "CharacterMesh")
-	USkeletalMeshComponent* Hair;
+	TObjectPtr<USkeletalMeshComponent> Hair;
 	
 	UPROPERTY(VisibleAnywhere, Category = "CharacterMesh")
-	USkeletalMeshComponent* Feet;
+	TObjectPtr<USkeletalMeshComponent> Feet;
 	
 	UPROPERTY(VisibleAnywhere, Category = "CharacterMesh")
-	USkeletalMeshComponent* HandL;
+	TObjectPtr<USkeletalMeshComponent> HandL;
 	
 	UPROPERTY(VisibleAnywhere, Category = "CharacterMesh")
-	USkeletalMeshComponent* HandR;
+	TObjectPtr<USkeletalMeshComponent> HandR;
 	
 	UPROPERTY(VisibleAnywhere, Category = "CharacterMesh")
-	USkeletalMeshComponent* BottomBody;
+	TObjectPtr<USkeletalMeshComponent> BottomBody;
 
 	UPROPERTY(VisibleAnywhere, Category = "CharacterMesh")
-	USkeletalMeshComponent* UpperBody;
+	TObjectPtr<USkeletalMeshComponent> UpperBody;
 
-
-	//Rifle
-	UPROPERTY(VisibleAnywhere, Category = Rifle)
-	class USkeletalMeshComponent* RifleMesh;
 
 };

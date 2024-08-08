@@ -27,4 +27,7 @@ public:
 
 	 UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Stat)
 	 float MovementSpeed;
+
+	 UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Stat)
+	 float SprintSpeed;
 };

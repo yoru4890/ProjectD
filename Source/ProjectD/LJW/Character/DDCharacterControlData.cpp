@@ -6,5 +6,6 @@
 UDDCharacterControlData::UDDCharacterControlData()
 {
 	TargetArmLength = 400.0f;
+	TargetOffset = FVector(0,40.0,100.0);
 	MouseSpeed = 0;
 }
