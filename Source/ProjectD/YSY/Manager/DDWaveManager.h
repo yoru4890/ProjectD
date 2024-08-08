@@ -18,6 +18,9 @@ class PROJECTD_API UDDWaveManager : public UObject
 public:
 	UDDWaveManager();
 
+	void Initialize(class UDDGameInstance* GameInstance);
+
+	UFUNCTION(BlueprintCallable)
 	void InitStage(int32 StageNum);
 
 	UFUNCTION(BlueprintCallable)
@@ -29,19 +32,23 @@ public:
 	UFUNCTION(BlueprintCallable)
 	TArray<FDDWaveData>& GetStageWaveInfos() { return StageWaveInfo; }
 
-	void WaveStart(int32 WaveNum);
+	UFUNCTION(BlueprintCallable)
+	void WaveStart();
+	void WaveEnd();
+
+	void StageEnd();
 
 private:
 	TArray<FDDWaveData> StageWaveInfo;
-
-	TArray<FName> EnemyOrder;
-	TArray<int32> PathOrder;
 
 	TArray<class AAISplineRoute*> Splines;
 
 	int32 CurrentStage{};
 	int32 CurrentWave{};
 	int32 EnemyIndex{};
+	int32 TotalEnemyCount{};
+	FTimerHandle WaveTimerHandle;
 
-	FTimerHandle TimerHandle;
+	UPROPERTY()
+	TObjectPtr<class UDDEnemySpawnManager> EnemySpawnManager{};
 };

@@ -4,6 +4,8 @@
 #include "YSY/Manager/DDWaveManager.h"
 #include "Kismet/GameplayStatics.h"
 #include "YSY/AI/AISplineRoute.h"
+#include "YSY/Manager/DDEnemySpawnManager.h"
+#include "YSY/Game/DDGameInstance.h"
 
 UDDWaveManager::UDDWaveManager()
 {
@@ -26,14 +28,20 @@ UDDWaveManager::UDDWaveManager()
 	}
 }
 
+void UDDWaveManager::Initialize(UDDGameInstance* GameInstance)
+{
+	EnemySpawnManager = GameInstance->GetEnemySpawnManager();
+}
+
 void UDDWaveManager::InitStage(int32 StageNum)
 {
 	CurrentStage = StageNum;
 	CurrentWave = 1;
+	EnemyIndex = 0;
+	TotalEnemyCount = 0;
 	SetSplines();
 
-	EnemyOrder = StageWaveInfo[StageNum].EnemyOrder;
-	PathOrder = StageWaveInfo[StageNum].PathOrder;
+	EnemySpawnManager->SetupEnemyPools(StageWaveInfo[StageNum].EnemyPoolSizes);
 }
 
 void UDDWaveManager::SetSplines()
@@ -47,7 +55,34 @@ void UDDWaveManager::SetSplines()
 	}
 }
 
-void UDDWaveManager::WaveStart(int32 WaveNum)
+void UDDWaveManager::WaveStart()
 {
+	TotalEnemyCount = 0;
 
+	GetWorld()->GetTimerManager().SetTimer(WaveTimerHandle, [&]()
+		{
+			EnemySpawnManager->Activate(StageWaveInfo[CurrentStage].EnemyOrder[EnemyIndex], StageWaveInfo[CurrentStage].PathOrder[EnemyIndex]);
+			EnemyIndex++;
+
+			if (++TotalEnemyCount >= StageWaveInfo[CurrentStage].EnemyCountsPerWave[CurrentWave])
+			{
+				WaveEnd();
+			}
+
+		}, 3.0f, true, 0.1f);
+}
+
+void UDDWaveManager::WaveEnd()
+{
+	GetWorld()->GetTimerManager().ClearTimer(WaveTimerHandle);
+
+	if (++CurrentWave >= StageWaveInfo[CurrentStage].MaxWaveNum)
+	{
+		StageEnd();
+	}
+}
+
+void UDDWaveManager::StageEnd()
+{
+	UE_LOG(LogTemp, Warning, TEXT("StageEnd"));
 }

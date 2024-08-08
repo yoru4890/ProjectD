@@ -21,4 +21,6 @@ void UDDGameInstance::Init()
 	
 	EnemySpawnManager = NewObject<UDDEnemySpawnManager>(this);
 	WaveManager = NewObject<UDDWaveManager>(this);
+
+	WaveManager->Initialize(this);
 }
