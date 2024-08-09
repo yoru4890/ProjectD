@@ -3,36 +3,47 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
-#include "DDTowerData.h"
+#include "LSM/Building/DDBuildingBase.h"
 #include "DDTowerBase.generated.h"
 
 UCLASS()
-class PROJECTD_API ADDTowerBase : public AActor
+class PROJECTD_API ADDTowerBase : public ADDBuildingBase
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
 	ADDTowerBase();
-	virtual ~ADDTowerBase() override;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-
-//public:
-//	FORCEINLINE const FName& GetTowerRowName() const { return TowerRowName; }
-//	FORCEINLINE const int32 GetTowerCellWidth() const { return TowerCellWidth; }
-//
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-//	virtual void InitFromDataTable(const FName& RowName, const FDDTowerData& TowerData);
-//	void  SetTowerCanAttack(const bool bInCanAttack);
-//	virtual void SetTowerAssets(FDDBuildingBaseData& LoadedAsset) override;
-//	void SetMaterialToPreview(bool bCanPay);
-//	void SetMaterialToOriginal();
+
+protected:
+	virtual void Attack() override;
+	virtual void SetTargetEnemy(AActor* NewTargetEnemy);
+
+private:
+	virtual void ModifyMeshAndAttackCollision() const override;
+	virtual void OnBoxCollisionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) override;
+
+	virtual void OnBoxCollisionEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex) override;
+
+	AActor* GetNearstEnemy();
+
+public:
+	virtual void InitFromDataTable(const FName& InRowName, const FDDBuildingBaseData& BuildingData);
+
+	virtual void SetAssets(FDDBuildingBaseData& LoadedAsset) override;
+
+protected:
+	float TowerAttackRange;
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<AActor> TargetEnemy;
 
 };

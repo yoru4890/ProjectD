@@ -11,6 +11,8 @@
 /**
  * 
  */
+
+
 USTRUCT(BlueprintType)
 struct FDDTowerData : public FDDBuildingBaseData
 {
@@ -18,5 +20,9 @@ struct FDDTowerData : public FDDBuildingBaseData
 	
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<class ADDTower> TowerClass; // 타워 클래스
+	TSubclassOf<class ADDTowerBase> TowerClass; // 타워 클래스
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float TowerAttackRange; // 타워 공격범위
+
 };

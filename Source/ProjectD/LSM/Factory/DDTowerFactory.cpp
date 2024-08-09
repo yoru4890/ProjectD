@@ -3,7 +3,7 @@
 
 #include "LSM/Factory/DDTowerFactory.h"
 #include "LSM/Building/Tower/DDTowerData.h"
-#include "LSM/Building/Tower/DDTower.h"
+#include "LSM/Building/Tower/DDTowerBase.h"
 #include "YSY/Game/DDGameInstance.h"
 #include "LSM/Manager/DDAssetManager.h"
 
@@ -26,7 +26,7 @@ UObject* UDDTowerFactory::CreateObject(UWorld* World, const FName& RowName, cons
 
 	check(TowerClass);
 	// TrapClass를 사용하여 NewTrap 생성
-	ADDTower* NewTower = World->SpawnActor<ADDTower>(TowerClass);
+	ADDTowerBase* NewTower = World->SpawnActor<ADDTowerBase>(TowerClass);
 	check(NewTower);
 
 	UDDGameInstance* MyGameInstance = Cast<UDDGameInstance>(GetWorld()->GetGameInstance());

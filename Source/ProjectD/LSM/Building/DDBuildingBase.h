@@ -32,19 +32,21 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	virtual void InitFromDataTable(const FName& InRowName, const FDDBuildingBaseData& BuildingData);
-	void  SetCanAttack(const bool bInCanAttack);
-	virtual void SetAssets(FDDBuildingBaseData& LoadedAsset) override;
+	virtual void  SetCanAttack(const bool bInCanAttack);
+	virtual void SetAssets(FDDBuildingBaseData& LoadedAsset);
 	void SetMaterialToPreview(bool bCanPay);
 	void SetMaterialToOriginal();
 
 protected:
 	virtual void Attack();
 
-	UFUNCTION()
-	void OnBoxCollisionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	void SetupAttackCollisionResponses();
 
 	UFUNCTION()
-	void OnBoxCollisionEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	virtual void OnBoxCollisionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+	virtual void OnBoxCollisionEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 	virtual void ModifyMeshAndAttackCollision() const;
 private:
@@ -79,7 +81,7 @@ protected:
 	TSet<TObjectPtr<AActor>> EnemiesInRanged; // 빌딩의 공격 범위 안에 들어와있는 적들
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 AttackCoolTime; // 빌딩의 공격 쿨타임
+	float AttackCoolTime; // 빌딩의 공격 쿨타임
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float TimeSinceLastAttack; // 빌딩의 공격 쿨타임
@@ -115,10 +117,13 @@ protected:
 	TSubclassOf<UDamageType> DamageType; // 빌딩의 데미지 타입
 
 	UPROPERTY(EditAnywhere)
-	TArray<TObjectPtr<UParticleSystemComponent>> ParticleEffectComponents;
+	TObjectPtr<class UFXSystemAsset> AttackEffect;
 
 	UPROPERTY(EditAnywhere)
-	TObjectPtr<class UBoxComponent> AttackCollisionComponent;
+	TObjectPtr<class UFXSystemAsset> HitEffect;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class UShapeComponent> AttackCollisionComponent;
 
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<class USceneComponent> MeshContainerComponent;
@@ -129,7 +134,10 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	TArray<TObjectPtr<USkeletalMeshComponent>> SkeletalMeshComponents;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AnimMontages", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+	TArray<TObjectPtr<UStaticMeshComponent>> StaticMeshComponents;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AttackMontages", meta = (AllowPrivateAccess = "true"))
 	TArray<TObjectPtr<UAnimMontage>> AttackMontages;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")

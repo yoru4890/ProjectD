@@ -104,7 +104,10 @@ public:
 	TArray<TSoftObjectPtr<UAnimMontage>> AttackMontages;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<TSoftObjectPtr<UParticleSystem>> Effects; // 공격 이펙트
+	TSoftObjectPtr<class UFXSystemAsset> AttackEffect; // 공격 이펙트
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSoftObjectPtr<class UFXSystemAsset> HitEffect; // 공격 이펙트
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<UObject> FactoryClass; // 팩토리 클래스

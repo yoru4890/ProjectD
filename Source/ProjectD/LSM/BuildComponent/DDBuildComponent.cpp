@@ -17,7 +17,7 @@ UDDBuildComponent::UDDBuildComponent()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
 
 	// ...
 
@@ -62,12 +62,6 @@ void UDDBuildComponent::BeginPlay()
 void UDDBuildComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	if (PreviewBuilding) {
-
-	}
-
-	// ...
 }
 
 AActor* UDDBuildComponent::ReadyBuilding(const FName& RowName)
@@ -317,20 +311,24 @@ void UDDBuildComponent::PerformBuildTrace()
 				PreviewBuilding->SetActorRotation(ActorRotation);
 				PreviewBuilding->SetActorHiddenInGame(false);
 
-
-				// Hide the warning widget if there is a hit
-				if (HitWarningWidgetInstance && HitWarningWidgetInstance->IsInViewport())
+				if (CanPayBuildCost(PreviewBuilding->GetRowName()))
 				{
-					if (CanPayBuildCost(PreviewBuilding->GetRowName()))
+					if (HitWarningWidgetInstance && HitWarningWidgetInstance->IsInViewport())
 					{
 						HitWarningWidgetInstance->RemoveFromParent();
 					}
-					else
+				}
+				else
+				{
+					if (HitWarningWidgetInstance)
 					{
+						if (!HitWarningWidgetInstance->IsInViewport())
+						{
+							HitWarningWidgetInstance->AddToViewport();
+						}
 						HitWarningWidgetInstance->ShowCantPayImage();
 					}
 				}
-
 			}
 			else
 			{

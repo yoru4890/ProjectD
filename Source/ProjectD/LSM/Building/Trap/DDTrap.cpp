@@ -2,12 +2,14 @@
 
 
 #include "LSM/Building/Trap/DDTrap.h"
-#include "LSM/Building/Trap/DDTrapAnimInstance.h"
 #include "Components/BoxComponent.h"
+#include "Engine/DamageEvents.h"
 
 ADDTrap::ADDTrap()
 {
-
+	AttackCollisionComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("AttackCollisionComponent"));
+	AttackCollisionComponent->SetupAttachment(RootComponent);
+	SetupAttackCollisionResponses();
 }
 
 void ADDTrap::BeginPlay()
@@ -24,26 +26,12 @@ void ADDTrap::Attack()
 {
 	Super::Attack();
 
-	if (AttackMontages.IsEmpty() || SkeletalMeshComponents.IsEmpty())
+	FDamageEvent DamageEvent{};
+	DamageEvent.DamageTypeClass = DamageType;
+	for (AActor* Enemy : EnemiesInRanged)
 	{
-		return;
-	}
-
-	for (int index = 0; index < SkeletalMeshComponents.Num(); index++)
-	{
-		UAnimInstance* AnimInstance = SkeletalMeshComponents[index]->GetAnimInstance();
-		if (AnimInstance)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("AnimInstance Exist"));
-			// UDDTrapAnimInstance로 캐스팅합니다.
-			UDDTrapAnimInstance* TrapAnimInstance = Cast<UDDTrapAnimInstance>(AnimInstance);
-			if (TrapAnimInstance && AttackMontages.IsValidIndex(index))
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Trap AnimInstance Exist"));
-				// PlayAnimationMontage를 호출합니다.
-				TrapAnimInstance->PlayAnimationMontage(AttackMontages[index]);
-			}
-		}
+		Enemy->TakeDamage(Damage, DamageEvent, nullptr, this);
+		UE_LOG(LogTemp, Warning, TEXT("Trap Attack : %d , Damage Type: %s"), Damage, *DamageType->GetDisplayNameText().ToString());
 	}
 }
 
@@ -53,5 +41,5 @@ void ADDTrap::ModifyMeshAndAttackCollision() const
 	FVector AttackRange = FVector(GridCellSize * CellWidth/2, GridCellSize * CellWidth/2, 50);
 	UE_LOG(LogTemp, Warning, TEXT("GridCellSize: %d"), GridCellSize);
 	UE_LOG(LogTemp, Warning, TEXT("CellWidth: %d"), CellWidth);
-	AttackCollisionComponent->SetBoxExtent(AttackRange);
+	Cast<UBoxComponent>(AttackCollisionComponent)->SetBoxExtent(AttackRange);
 }
