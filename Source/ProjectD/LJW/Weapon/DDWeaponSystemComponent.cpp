@@ -59,17 +59,18 @@ void UDDWeaponSystemComponent::InitializeWeapon()
 			//FindComponentByClass -> 여러 개일 경우 가장 첫 번째 메쉬 반환
 			ParentSkeletal = GetOwner()->FindComponentByClass<USkeletalMeshComponent>();
 			PlayerCharacter = Cast<ACharacter>(GetOwner());
-			TempWeapon->AttachToComponent(ParentSkeletal, FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("RifleSocket"));
+			
+			//무기 Data
+			TempWeapon->InitData(WeaponDataName,WeaponDataValue);
+			Weapons.Emplace(TempWeapon);
+			TempWeapon->AttachToComponent(ParentSkeletal, FAttachmentTransformRules::SnapToTargetNotIncludingScale, TempWeapon->GetSocketName());
 		}
 		else 
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Owner is null"));
 		}
 		
-		//무기 Data
-		TempWeapon->InitData(WeaponDataName,WeaponDataValue);
-		Weapons.Emplace(TempWeapon);
-
+		
 	}
 
 	//Initializing current weapon

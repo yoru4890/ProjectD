@@ -44,6 +44,7 @@ void ADDWeaponBase::InitData(const FName& RowName, const FDDWeaponData& WeaponDa
 	AttackCooltime = WeaponData.AttackCooltime;
 	AttackDamage = WeaponData.AttackDamage;
 	AttackRange = WeaponData.AttackRange;
+	WeaponSocketName = WeaponData.WeaponSocketName;
 
 	//Equip Montage
 	if (WeaponData.EquipMontage)
