@@ -12,8 +12,12 @@ UDDEnemySpawnManager::UDDEnemySpawnManager()
 {
 }
 
-void UDDEnemySpawnManager::SetupEnemyPools(const TMap<FName, int32>& EnemyPoolSizes)
+void UDDEnemySpawnManager::SetupEnemyPools(int32 StageNum)
 {
+	FString StringNum = FString::Printf(TEXT("%d"), StageNum);
+	FName StageName(*StringNum);
+	const TMap<FName, int32>& EnemyPoolSizes = UDDGameSingleton::Get().GetWaveDataTable().Find(StageName)->EnemyPoolSizes;
+
 	Pools.Empty();
 	ActiveObjects.Empty();
 	InactiveObjects.Empty();
@@ -42,6 +46,7 @@ AActor* UDDEnemySpawnManager::Activate(const FName& EnemyName, int32 SplineIndex
 		UDDGameInstance* DDGameInstance = Cast<UDDGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
 		Enemy->SetAIMoveRoute(DDGameInstance->GetWaveManager()->GetSplines(), SplineIndex);
 		Enemy->Activate();
+		OnAddEnemySignature.ExecuteIfBound();
 		return Enemy;
 	}
 	else
@@ -60,7 +65,7 @@ void UDDEnemySpawnManager::Deactivate(const FName& EnemyName, ADDEnemyBase* Enem
 	{
 		InactiveObjects[EnemyName].Add(Enemy);
 		Enemy->Deactivate();
-
+		OnSubEnemySignature.ExecuteIfBound();
 		// TODO : YSY Player should get Gold, Score
 	}
 }

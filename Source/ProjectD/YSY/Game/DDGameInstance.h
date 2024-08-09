@@ -32,6 +32,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	FORCEINLINE class UDDWaveManager* GetWaveManager() const { return WaveManager; }
 
+	void InitializeManagerDelegates();
+
 private:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UDDAssetManager> AssetManager;

@@ -6,31 +6,22 @@
 #include "YSY/AI/AISplineRoute.h"
 #include "YSY/Manager/DDEnemySpawnManager.h"
 #include "YSY/Game/DDGameInstance.h"
+#include "YSY/Game/DDGameSingleton.h"
 
 UDDWaveManager::UDDWaveManager()
 {
-	ConstructorHelpers::FObjectFinder<UDataTable> WaveDataTableRef(TEXT("/Script/Engine.DataTable'/Game/0000/YSY/Data/YSY_DT_WaveData.YSY_DT_WaveData'"));
-
-	if (WaveDataTableRef.Object)
-	{
-		const UDataTable* DataTableObject = WaveDataTableRef.Object;
-		check(DataTableObject->GetRowMap().Num() > 0);
-
-		StageWaveInfo.SetNum(DataTableObject->GetRowMap().Num() + 1);
-
-		auto& DataMap = DataTableObject->GetRowMap();
-		for (auto& [RowName, Data] : DataMap)
-		{
-			auto WaveData = reinterpret_cast<FDDWaveData*>(Data);
-			StageWaveInfo[WaveData->Stage] = *WaveData;
-		}
-
-	}
 }
 
-void UDDWaveManager::Initialize(UDDGameInstance* GameInstance)
+void UDDWaveManager::Initialize()
 {
-	EnemySpawnManager = GameInstance->GetEnemySpawnManager();
+	auto& TempData = UDDGameSingleton::Get().GetWaveDataTable();
+
+	StageWaveInfo.SetNum(TempData.Num() + 1);
+
+	for (const auto& [Name, Data] : TempData)
+	{
+		StageWaveInfo[Data.Stage] = Data;
+	}
 }
 
 void UDDWaveManager::InitStage(int32 StageNum)
@@ -38,10 +29,9 @@ void UDDWaveManager::InitStage(int32 StageNum)
 	CurrentStage = StageNum;
 	CurrentWave = 1;
 	EnemyIndex = 0;
-	TotalEnemyCount = 0;
+	TotalSpawnEnemyCount = 0;
 	SetSplines();
-
-	EnemySpawnManager->SetupEnemyPools(StageWaveInfo[StageNum].EnemyPoolSizes);
+	OnSetupEnemyPoolSignature.ExecuteIfBound(StageNum);
 }
 
 void UDDWaveManager::SetSplines()
@@ -57,32 +47,76 @@ void UDDWaveManager::SetSplines()
 
 void UDDWaveManager::WaveStart()
 {
-	TotalEnemyCount = 0;
+	if (bIsWaveInProgress || CurrentWave >= StageWaveInfo[CurrentStage].EnemyCountsPerWave.Num())
+	{
+		return;
+	}
+
+	bIsWaveInProgress = true;
+
+	TotalSpawnEnemyCount = 0;
 
 	GetWorld()->GetTimerManager().SetTimer(WaveTimerHandle, [&]()
 		{
-			EnemySpawnManager->Activate(StageWaveInfo[CurrentStage].EnemyOrder[EnemyIndex], StageWaveInfo[CurrentStage].PathOrder[EnemyIndex]);
+			OnActivateEnemySignature.Execute(StageWaveInfo[CurrentStage].EnemyOrder[EnemyIndex], StageWaveInfo[CurrentStage].PathOrder[EnemyIndex]);
 			EnemyIndex++;
 
-			if (++TotalEnemyCount >= StageWaveInfo[CurrentStage].EnemyCountsPerWave[CurrentWave])
+			if (++TotalSpawnEnemyCount >= StageWaveInfo[CurrentStage].EnemyCountsPerWave[CurrentWave])
 			{
-				WaveEnd();
+				SpawnEnd();
 			}
 
 		}, 3.0f, true, 0.1f);
 }
 
+void UDDWaveManager::SpawnEnd()
+{
+	UE_LOG(LogTemp, Warning, TEXT("WaveSpawnEnd"));
+
+	GetWorld()->GetTimerManager().ClearTimer(WaveTimerHandle);
+}
+
 void UDDWaveManager::WaveEnd()
 {
-	GetWorld()->GetTimerManager().ClearTimer(WaveTimerHandle);
+	bIsWaveInProgress = false;
+	UE_LOG(LogTemp, Warning, TEXT("WaveEnd"));
 
-	if (++CurrentWave >= StageWaveInfo[CurrentStage].MaxWaveNum)
+	if (CurrentWave++ >= StageWaveInfo[CurrentStage].EnemyCountsPerWave.Num() - 1)
 	{
 		StageEnd();
 	}
+
 }
 
 void UDDWaveManager::StageEnd()
 {
 	UE_LOG(LogTemp, Warning, TEXT("StageEnd"));
+}
+
+void UDDWaveManager::AddEnemyNumber()
+{
+	TotalEnemyCount++;
+}
+
+void UDDWaveManager::SubEnemyNumber()
+{
+	TotalEnemyCount--;
+	if (TotalEnemyCount <= 0)
+	{
+		WaveEnd();
+	}
+}
+
+// TODO : YSY Need Change DataInit way
+void UDDWaveManager::InitEnemyNames()
+{
+	EnemyNames.SetNum(7);
+	
+	EnemyNames.Add("Error");
+	EnemyNames.Add("Ironclad");
+	EnemyNames.Add("Pushfire");
+	EnemyNames.Add("Doomshot");
+	EnemyNames.Add("Legio");
+	EnemyNames.Add("ShockBomber");
+	EnemyNames.Add("Obliterator");
 }

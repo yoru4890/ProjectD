@@ -6,6 +6,9 @@
 #include "UObject/NoExportTypes.h"
 #include "DDEnemySpawnManager.generated.h"
 
+DECLARE_DELEGATE(FOnAddEnemySignature);
+DECLARE_DELEGATE(FOnSubEnemySignature);
+
 class ADDEnemyBase;
 
 UCLASS()
@@ -17,13 +20,17 @@ public:
 	UDDEnemySpawnManager();
 
 	UFUNCTION(BlueprintCallable)
-	void SetupEnemyPools(const TMap<FName, int32>& EnemyPoolSizes);
+	void SetupEnemyPools(int32 StageNum);
 	UFUNCTION(BlueprintCallable)
 	AActor* Activate(const FName& EnemyName, int32 SplineIndex);
 	UFUNCTION(BlueprintCallable)
 	void Deactivate(const FName& EnemyName, ADDEnemyBase* Enemy);
 
 	void SpawnEnemy(const FName& EnemyName);
+
+public:
+	FOnAddEnemySignature OnAddEnemySignature;
+	FOnSubEnemySignature OnSubEnemySignature;
 
 private:
 	TMap<FName, TArray<ADDEnemyBase*>> Pools;

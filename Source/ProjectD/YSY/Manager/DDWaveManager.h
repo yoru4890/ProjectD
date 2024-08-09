@@ -7,9 +7,9 @@
 #include "YSY/GameData/DDWaveData.h"
 #include "DDWaveManager.generated.h"
 
-/**
- * 
- */
+DECLARE_DELEGATE_RetVal_TwoParams(AActor*, FOnActivateEnemySignature, const FName&, int32);
+DECLARE_DELEGATE_OneParam(FOnSetupEnemyPoolSignature, int32);
+
 UCLASS()
 class PROJECTD_API UDDWaveManager : public UObject
 {
@@ -18,7 +18,7 @@ class PROJECTD_API UDDWaveManager : public UObject
 public:
 	UDDWaveManager();
 
-	void Initialize(class UDDGameInstance* GameInstance);
+	void Initialize();
 
 	UFUNCTION(BlueprintCallable)
 	void InitStage(int32 StageNum);
@@ -34,9 +34,19 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void WaveStart();
+	void SpawnEnd();
 	void WaveEnd();
 
 	void StageEnd();
+
+	void AddEnemyNumber();
+	void SubEnemyNumber();
+
+	void InitEnemyNames();
+
+public:
+	FOnActivateEnemySignature OnActivateEnemySignature;
+	FOnSetupEnemyPoolSignature OnSetupEnemyPoolSignature;
 
 private:
 	TArray<FDDWaveData> StageWaveInfo;
@@ -46,9 +56,11 @@ private:
 	int32 CurrentStage{};
 	int32 CurrentWave{};
 	int32 EnemyIndex{};
+	int32 TotalSpawnEnemyCount{};
 	int32 TotalEnemyCount{};
 	FTimerHandle WaveTimerHandle;
 
-	UPROPERTY()
-	TObjectPtr<class UDDEnemySpawnManager> EnemySpawnManager{};
+	bool bIsWaveInProgress{};
+
+	TArray<FName> EnemyNames;
 };
