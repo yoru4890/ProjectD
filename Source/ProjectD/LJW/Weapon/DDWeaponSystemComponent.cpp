@@ -215,12 +215,20 @@ bool UDDWeaponSystemComponent::CanRangeAiming()
 	//캐릭터 스킬 사용중 불가능
 	//Weapon Change 중 불가능
 	//죽어있을 때 불가능
+	if (ParentSkeletal->GetAnimInstance()->IsAnyMontagePlaying() && !bIsOnTimeline)
+	{
+		if (!(ParentSkeletal->GetAnimInstance()->Montage_IsPlaying(CurrentWeapon->GetAttackMontage())))
+		{
+			return false;
+		}
 
+	}
 	return true;
 }
 
 void UDDWeaponSystemComponent::UpdateRifleZoom()
 {
+	bIsOnTimeline = true;
 	float CurveTime = RifleZoomTL.GetPlaybackPosition();
 	float CurveValue = ZoomCurve->GetFloatValue(CurveTime);
 	float InFieldOfViewValue = FMath::Lerp(90.0f, 70.0f, CurveValue);
@@ -231,7 +239,7 @@ void UDDWeaponSystemComponent::UpdateRifleZoom()
 
 void UDDWeaponSystemComponent::FinishRifleZoom()
 {
-
+	bIsOnTimeline = false;
 }
 
 void UDDWeaponSystemComponent::InitTimeline()
@@ -245,7 +253,7 @@ void UDDWeaponSystemComponent::InitTimeline()
 	RifleZoomTL.AddInterpFloat(ZoomCurve, OnTimelineFloatDelegate);
 	RifleZoomTL.SetTimelineFinishedFunc(OnTimelineEventDelegate);
 
-	
+	bIsOnTimeline = false;
 }
 
 

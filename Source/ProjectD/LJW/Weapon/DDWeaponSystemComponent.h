@@ -101,4 +101,6 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon, meta = (AllowPrivateAccess = "true"))
 	UCurveFloat* ZoomCurve;
+
+	uint32 bIsOnTimeline : 1;
 }; 
