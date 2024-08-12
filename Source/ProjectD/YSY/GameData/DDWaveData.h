@@ -19,10 +19,13 @@ public:
 	TArray<int32> EnemyCountsPerWave;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
-	TArray<FName> EnemyOrder;
+	TArray<FString> EnemyOrder;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
-	TArray<int32> PathOrder;
+	TArray<FString> GateOrder;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	TArray<int32> GatePathMappings;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
 	TMap<FName, int32> EnemyPoolSizes;

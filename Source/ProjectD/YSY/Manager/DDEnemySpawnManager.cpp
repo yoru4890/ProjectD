@@ -40,6 +40,7 @@ AActor* UDDEnemySpawnManager::Activate(const FName& EnemyName, int32 SplineIndex
 {
 	if (InactiveObjects.Contains(EnemyName) && InactiveObjects[EnemyName].Num() > 0)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("YES"));
 		ADDEnemyBase* Enemy = InactiveObjects[EnemyName].Last();
 		InactiveObjects[EnemyName].Pop();
 		ActiveObjects[EnemyName].Add(Enemy);
@@ -52,7 +53,7 @@ AActor* UDDEnemySpawnManager::Activate(const FName& EnemyName, int32 SplineIndex
 	else
 	{
 		// TODO : YSY No Enemy in Pools. Need to Add Enemy
-
+		UE_LOG(LogTemp, Warning, TEXT("NO"));
 		return nullptr;
 	}
 

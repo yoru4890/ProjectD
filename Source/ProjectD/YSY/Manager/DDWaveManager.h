@@ -63,4 +63,9 @@ private:
 	bool bIsWaveInProgress{};
 
 	TArray<FName> EnemyNames;
+
+	TArray<int32> EnemyOrders;
+	TArray<int32> GateOrders;
+
+	TArray<TArray<int32>> PathGateMappings;
 };

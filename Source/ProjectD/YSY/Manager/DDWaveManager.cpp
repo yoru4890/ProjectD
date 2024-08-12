@@ -3,6 +3,7 @@
 
 #include "YSY/Manager/DDWaveManager.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "YSY/AI/AISplineRoute.h"
 #include "YSY/Manager/DDEnemySpawnManager.h"
 #include "YSY/Game/DDGameInstance.h"
@@ -22,16 +23,68 @@ void UDDWaveManager::Initialize()
 	{
 		StageWaveInfo[Data.Stage] = Data;
 	}
+
+	InitEnemyNames();
 }
 
 void UDDWaveManager::InitStage(int32 StageNum)
 {
+	EnemyOrders.Reset();
+	GateOrders.Reset();
+	PathGateMappings.Reset();
+
 	CurrentStage = StageNum;
 	CurrentWave = 1;
 	EnemyIndex = 0;
 	TotalSpawnEnemyCount = 0;
 	SetSplines();
 	OnSetupEnemyPoolSignature.ExecuteIfBound(StageNum);
+
+	for (auto& Elem : StageWaveInfo[StageNum].EnemyOrder)
+	{
+		TArray<FString> OutArray{};
+		Elem.ParseIntoArray(OutArray, TEXT("#"));
+
+		if (OutArray.Num() >= 2)
+		{
+			int32 TargetCount = FCString::Atoi(*(OutArray[0]));
+			int32 TargetID = FCString::Atoi(*(OutArray[1]));
+
+			while (TargetCount--)
+			{
+				EnemyOrders.Add(TargetID);
+			}
+		}
+
+	}
+
+	for (auto& Elem : StageWaveInfo[StageNum].GateOrder)
+	{
+		TArray<FString> OutArray{};
+		Elem.ParseIntoArray(OutArray, TEXT("#"));
+
+		if (OutArray.Num() >= 2)
+		{
+			int32 TargetCount = FCString::Atoi(*(OutArray[0]));
+			int32 TargetID = FCString::Atoi(*(OutArray[1]));
+
+			while (TargetCount--)
+			{
+				GateOrders.Add(TargetID);
+			}
+
+		}
+	}
+
+	auto& TempGatePathMappings = StageWaveInfo[StageNum].GatePathMappings;
+	int32 PathGateSize = TempGatePathMappings.Num();
+	PathGateMappings.SetNum(PathGateSize);
+
+	for (int32 i{}; i < TempGatePathMappings.Num(); i++)
+	{
+		PathGateMappings[TempGatePathMappings[i]].Add(i);
+	}
+
 }
 
 void UDDWaveManager::SetSplines()
@@ -58,7 +111,13 @@ void UDDWaveManager::WaveStart()
 
 	GetWorld()->GetTimerManager().SetTimer(WaveTimerHandle, [&]()
 		{
-			OnActivateEnemySignature.Execute(StageWaveInfo[CurrentStage].EnemyOrder[EnemyIndex], StageWaveInfo[CurrentStage].PathOrder[EnemyIndex]);
+			int32 EnemyOrderIndex = EnemyOrders[EnemyIndex];
+
+			int32 RandomSize = PathGateMappings[GateOrders[EnemyIndex]].Num();
+
+			int32 PathOrderIndex = UKismetMathLibrary::RandomInteger(RandomSize);
+
+			OnActivateEnemySignature.Execute(EnemyNames[EnemyOrderIndex], PathGateMappings[GateOrders[EnemyIndex]][PathOrderIndex]);
 			EnemyIndex++;
 
 			if (++TotalSpawnEnemyCount >= StageWaveInfo[CurrentStage].EnemyCountsPerWave[CurrentWave])
@@ -110,13 +169,11 @@ void UDDWaveManager::SubEnemyNumber()
 // TODO : YSY Need Change DataInit way
 void UDDWaveManager::InitEnemyNames()
 {
-	EnemyNames.SetNum(7);
-	
-	EnemyNames.Add("Error");
-	EnemyNames.Add("Ironclad");
-	EnemyNames.Add("Pushfire");
-	EnemyNames.Add("Doomshot");
-	EnemyNames.Add("Legio");
-	EnemyNames.Add("ShockBomber");
-	EnemyNames.Add("Obliterator");
+	EnemyNames.Add(FName("Error"));
+	EnemyNames.Add(FName("Ironclad"));
+	EnemyNames.Add(FName("Pushfire"));
+	EnemyNames.Add(FName("Doomshot"));
+	EnemyNames.Add(FName("Legio"));
+	EnemyNames.Add(FName("ShockBomber"));
+	EnemyNames.Add(FName("Obliterator"));
 }
