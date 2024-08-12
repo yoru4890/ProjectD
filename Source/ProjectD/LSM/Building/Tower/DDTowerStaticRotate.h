@@ -17,7 +17,9 @@ class PROJECTD_API ADDTowerStaticRotate : public ADDTowerBase
 public:
 	ADDTowerStaticRotate();
 
-	virtual void SetCanAttack(bool bIsCanAttack) override;
+public:
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
 
 private:
 	// 타이머로 호출될 함수
@@ -26,6 +28,4 @@ private:
 private:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UDDRotationComponent> DDRotationComponent;
-
-	FTimerHandle RotationTimerHandle;
 };

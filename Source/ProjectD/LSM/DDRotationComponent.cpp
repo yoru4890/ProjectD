@@ -47,7 +47,16 @@ void UDDRotationComponent::RotateStaticMeshTowardsTarget(UStaticMeshComponent* M
 	FVector Direction = (TargetLocation - CurrentLocation).GetSafeNormal();
 	TargetRotation = Direction.Rotation();
 
+	// Pitch와 Roll을 0으로 설정하고, Yaw만 유지
+	TargetRotation.Pitch = 0.0f;
+	TargetRotation.Roll = 0.0f;
+
 	FRotator CurrentRotation = MeshComponent->GetRelativeRotation();
+
+	// CurrentRotation의 Pitch와 Roll을 0으로 설정하고, Yaw만 유지
+	CurrentRotation.Pitch = 0.0f;
+	CurrentRotation.Roll = 0.0f;
+
 	FRotator NewRotation = FMath::RInterpTo(CurrentRotation, TargetRotation, GetWorld()->GetDeltaSeconds(), RotationSpeed);
 
 	// 액터가 아닌 메쉬 컴포넌트에 회전을 적용
@@ -91,35 +100,4 @@ void UDDRotationComponent::StopRotateSkeletalMeshTowardsTarget(USkeletalMeshComp
 		}
 	}
 }
-
-//void UDDRotationComponent::RotateTowards(const AActor* Target, const float RotationSpeed, const bool bIsRotateBone = false, const FName BoneName = NAME_None) const
-//{
-//	if (!Target)
-//	{
-//		return;
-//	}
-//
-//    FRotator TargetRotation;
-//    FVector TargetLocation = Target->GetActorLocation();
-//    FVector CurrentLocation = GetOwner()->GetActorLocation();
-//    FVector Direction = (TargetLocation - CurrentLocation).GetSafeNormal();
-//    TargetRotation = Direction.Rotation();
-//
-//    if (!bIsRotateBone)
-//    {
-//        FRotator CurrentRotation = GetOwner()->GetActorRotation();
-//        FRotator NewRotation = FMath::RInterpTo(CurrentRotation, TargetRotation, GetWorld()->GetDeltaSeconds(), RotationSpeed);
-//        GetOwner()->SetActorRotation(NewRotation);
-//    }
-//    else
-//    {
-//        USkeletalMeshComponent* SkeletalMeshComponent = GetOwner()->FindComponentByClass<USkeletalMeshComponent>();
-//        if (SkeletalMeshComponent && SkeletalMeshComponent->DoesSocketExist(BoneName))
-//        {
-//            FRotator CurrentBoneRotation = SkeletalMeshComponent->GetSocketRotation(BoneName);
-//            FRotator NewBoneRotation = FMath::RInterpTo(CurrentBoneRotation, TargetRotation, GetWorld()->GetDeltaSeconds(), RotationSpeed);
-//            SkeletalMeshComponent->SetBoneRotationByName(BoneName, NewBoneRotation, EBoneSpaces::ComponentSpace);
-//        }
-//    }
-//}
 

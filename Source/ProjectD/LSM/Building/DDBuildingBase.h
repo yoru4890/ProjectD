@@ -27,6 +27,8 @@ public:
 	FORCEINLINE const FName& GetRowName() const { return RowName; }
 	FORCEINLINE const int32 GetCellWidth() const { return CellWidth; }
 	FORCEINLINE const EBuildingType GetBuildingType() const { return BuildingType;}
+	FORCEINLINE const float GetDamage() const { return Damage; }
+	FORCEINLINE const TSubclassOf<UDamageType> GetDamageType() const { return DamageType; }
 
 public:	
 	// Called every frame
@@ -57,13 +59,13 @@ private:
 protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FString DisplayName; // 의 이름
+	FString DisplayName; // 빌딩의 위젯 표시 이름
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName RowName; // 빌딩의 이름
+	FName RowName; // 빌딩의 데이터테이블 이름
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EBuildingType BuildingType; // 빌딩의 이름
+	EBuildingType BuildingType; // 빌딩의 타입
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 CellWidth; // 빌딩이 차지하는 셀의 크기
@@ -87,7 +89,7 @@ protected:
 	float TimeSinceLastAttack; // 빌딩의 공격 쿨타임
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 Damage; // 빌딩의 데미지
+	float Damage; // 빌딩의 데미지
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsAnimated; // 빌딩의 메쉬 타입

@@ -115,6 +115,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<UDamageType> DamageType; // 데미지 타입
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<class UDDBuildingAttackStrategyInterface> AttackStrategy; // 공격 전략
+
 	bool bIsLoading = false;
 	bool bIsLoaded = false;
 };

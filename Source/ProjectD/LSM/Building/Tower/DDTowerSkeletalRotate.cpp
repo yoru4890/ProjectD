@@ -9,6 +9,11 @@ ADDTowerSkeletalRotate::ADDTowerSkeletalRotate()
 	DDRotationComponent = CreateDefaultSubobject<UDDRotationComponent>(TEXT("DDRotationComponent"));
 }
 
+void ADDTowerSkeletalRotate::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+}
+
 void ADDTowerSkeletalRotate::SetTargetEnemy(AActor* NewTargetEnemy)
 {
 	Super::SetTargetEnemy(NewTargetEnemy);

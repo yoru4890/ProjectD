@@ -20,6 +20,15 @@ void ADDTrap::BeginPlay()
 void ADDTrap::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	TimeSinceLastAttack += DeltaTime;
+
+	if (bCanAttack && !EnemiesInRanged.IsEmpty() && TimeSinceLastAttack >= AttackCoolTime)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Attack"));
+		Attack();
+		TimeSinceLastAttack = 0.f;
+	}
 }
 
 void ADDTrap::Attack()

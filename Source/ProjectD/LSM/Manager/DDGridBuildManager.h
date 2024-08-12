@@ -68,7 +68,7 @@ private:
 	// Array to store grid cell locations
 	TMap<FIntPoint, FGridCell> GridCellMap;
 
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere)
 	TArray<TObjectPtr<UBoxComponent>> TowerZones;
 
 public:

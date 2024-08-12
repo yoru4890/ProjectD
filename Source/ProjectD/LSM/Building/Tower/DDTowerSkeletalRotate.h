@@ -17,6 +17,8 @@ class PROJECTD_API ADDTowerSkeletalRotate : public ADDTowerBase
 public:
 	ADDTowerSkeletalRotate();
 
+	virtual void Tick(float DeltaTime) override;
+
 private:
 	virtual void SetTargetEnemy(AActor* NewTargetEnemy) override;
 
