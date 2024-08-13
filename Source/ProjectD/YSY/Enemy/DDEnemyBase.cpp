@@ -5,12 +5,15 @@
 #include "Components/CapsuleComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/DamageEvents.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "YSY/AI/DDEnemyAIController.h"
 #include "YSY/AI/AISplineRoute.h"
 #include "YSY/UI/DDHpBarWidget.h"
 #include "YSY/UI/DDWidgetComponent.h"
 #include "YSY/Stat/DDEnemyStatComponent.h"
 #include "YSY/DamageType/AllDamageType.h"
+#include "YSY/Animation/AttackFinishedAnimNotify.h"
+#include "YSY/Animation/AttackTraceAnimNotify.h"
 
 // Sets default values
 ADDEnemyBase::ADDEnemyBase()
@@ -36,13 +39,37 @@ ADDEnemyBase::ADDEnemyBase()
 		HpBar->SetDrawSize(FVector2D(150.0f, 15.0f));
 		HpBar->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
+
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	//GetCharacterMovement()->bUseRVOAvoidance = true;
+	//GetCharacterMovement()->AvoidanceConsiderationRadius = 300.0f;
+	//GetCharacterMovement()->bConstrainToPlane = true;
+
+	//GetCharacterMovement()->bEnablePhysicsInteraction = false;
+	//GetCharacterMovement()->bPushForceUsingZOffset = true;
+	//GetCharacterMovement()->bPushForceScaledToMass = true;
+	//GetCharacterMovement()->PushForceFactor = 0.0f;
 }
 
 void ADDEnemyBase::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 
+	ensure(Stat);
+
 	Stat->OnHpZero.AddUObject(this, &ADDEnemyBase::Die);
+	Stat->OnMovementSpeedChange.AddUObject(this, &ADDEnemyBase::ChangeMaxWalkSpeed);
+
+	DebuffStates.Add(EDebuffType::Stun, FDebuffState());
+	DebuffStates.Add(EDebuffType::Slow, FDebuffState());
+	DebuffStates.Add(EDebuffType::DamageIncrease, FDebuffState());
+
+	if (Stat)
+	{
+		DebuffStates[EDebuffType::Stun].OnDebuffDelegate.AddUObject(this, &ADDEnemyBase::Stun);
+		DebuffStates[EDebuffType::Slow].OnDebuffDelegate.AddUObject(Stat, &UDDEnemyStatComponent::ApplySlow);
+		DebuffStates[EDebuffType::DamageIncrease].OnDebuffDelegate.AddUObject(Stat, &UDDEnemyStatComponent::ApplyDamageReceiveIncrease);
+	}
 }
 
 float ADDEnemyBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -68,34 +95,32 @@ float ADDEnemyBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 	{
 		FPointDamageEvent* PointDamageEvent = (FPointDamageEvent*)(&DamageEvent);
 
-		if (PointDamageEvent->HitInfo.BoneName == "laser_01") // TODO : YSY WeakPoint Name
+		UE_LOG(LogTemp, Warning, TEXT("%s"), *(PointDamageEvent->HitInfo.BoneName.ToString()));
+
+		for (const FName& Weakpoint : WeakPoints)
 		{
-			ActualDamage *= 1.5f; // TODO : YSY WeakPoint Caculation
-			UE_LOG(LogTemp, Warning, TEXT("WeakPoint"));
+			if (PointDamageEvent->HitInfo.BoneName == Weakpoint)
+			{
+				ActualDamage *= 1.5f; // TODO : YSY WeakPoint Caculation
+				UE_LOG(LogTemp, Warning, TEXT("WeakPoint"));
+			}
 		}
 	}
 
-	Stat->ApplyDamage(ActualDamage);
-
-	return Super::TakeDamage(ActualDamage, DamageEvent, EventInstigator, DamageCauser);
+	Stat->ApplyStatDamage(ActualDamage * Stat->GetDamageReceiveRate());
+	return ActualDamage;
 }
 
 void ADDEnemyBase::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	EnemyAIController = Cast<ADDEnemyAIController>(GetController());
 	check(EnemyAIController);
 
 	EnemyAIController->OnMoveFinished.BindUObject(this, &ADDEnemyBase::SplineMoveFinish);
 
-	FTimerHandle TempTH;
-	GetWorld()->GetTimerManager().SetTimer(TempTH, [this]()
-		{
-			EnemyAIController->RunAI();
-		}, 0.1f, false, 2.0f);
-	
-
+	Player = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 }
 
 void ADDEnemyBase::Tick(float DeltaTime)
@@ -103,35 +128,67 @@ void ADDEnemyBase::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	UpdateWidgetScale(); // TODO : YSY Doesn't work. Move to SetTimerEvent
+
+	if (bIsAggroState && bIsCanTurn)
+	{
+		auto RotateTemp = (Player->GetActorLocation() - GetActorLocation()).Rotation();
+		RotateTemp.Pitch = 0;
+
+		SetActorRotation(FMath::RInterpTo(GetActorRotation(), RotateTemp, DeltaTime, TurnSpeed));
+	}
 }
 
 void ADDEnemyBase::InitializeEnemy(const FDDEnemyData& EnemyData)
 {
+
 	EnemyName = EnemyData.EnemyName;
-	WeakPoint = EnemyData.WeakPoint;
+	WeakPoints = EnemyData.WeakPoints;
 	EnemyType = EnemyData.EnemyType;
+	EnemyAttackType = EnemyData.EnemyAttackType;
 	MaxHP = EnemyData.MaxHP;
+	Stat->SetMaxHp(MaxHP);
+	Stat->SetCurrentHp(MaxHP);
 	MovementSpeed = EnemyData.MovementSpeed;
+	ChangeMaxWalkSpeed(1.0f);
 	AttackSpeed = EnemyData.AttackSpeed;
 	Damage = EnemyData.Damage;
 	AttackRange = EnemyData.AttackRange;
 	AggroRange = EnemyData.AggroRange;
-	//HealthWidgetHeight = EnemyData.HealthWidgetHeight; TODO : YSY Setting HpWidget Height
+	HpBar->SetRelativeLocation({ 0.0f,0.0f,EnemyData.HealthWidgetHeight });
 	GoldDropAmount = EnemyData.GoldDropAmount;
 	bIsBoss = EnemyData.bIsBoss;
 	bIsElite = EnemyData.bIsElite;
 
-	ConstructorHelpers::FObjectFinder<USkeletalMesh> MeshRef(*EnemyData.MeshPath);
-	if (MeshRef.Object)
+	float EnemyScale = EnemyData.ScaleSize;
+	SetActorScale3D({ EnemyScale, EnemyScale, EnemyScale });
+
+	if (!EnemyData.SkeletalMesh.IsValid())
 	{
-		GetMesh()->SetSkeletalMesh(MeshRef.Object);
+		EnemyData.SkeletalMesh.LoadSynchronous();
 	}
 
-	ConstructorHelpers::FClassFinder<UAnimInstance> AnimInstanceClassRef(*EnemyData.AnimationBlueprintPath);
-	if (AnimInstanceClassRef.Class)
+	USkeletalMesh* EnemySkeletalMesh = EnemyData.SkeletalMesh.Get();
+	GetMesh()->SetSkeletalMesh(EnemySkeletalMesh);
+	GetMesh()->SetRelativeLocationAndRotation({ 0,0,-90 }, { 0,-90,0 });
+	GetMesh()->SetCollisionProfileName(FName("Enemy"));
+
+	if (!EnemyData.AnimationBlueprint.IsValid())
 	{
-		GetMesh()->SetAnimInstanceClass(AnimInstanceClassRef.Class);
+		EnemyData.AnimationBlueprint.LoadSynchronous();
 	}
+
+	UAnimBlueprint* AnimBP = EnemyData.AnimationBlueprint.Get();
+	GetMesh()->SetAnimInstanceClass(AnimBP->GeneratedClass);
+
+	if (!EnemyData.AttackMontage.IsValid())
+	{
+		EnemyData.AttackMontage.LoadSynchronous();
+	}
+
+	UAnimMontage* EnemyAttackMontage = EnemyData.AttackMontage.Get();
+	AttackMontage = DuplicateObject<UAnimMontage>(EnemyAttackMontage, this);
+
+	BindingAnimNotify();
 }
 
 void ADDEnemyBase::SplineMove()
@@ -149,19 +206,14 @@ void ADDEnemyBase::SetAIMoveFinishedDelegate(const FAISplineMoveOnFinishedSignat
 void ADDEnemyBase::AttackByAI()
 {
 	// TODO : YSY Complete Attack
+	ChangeMaxWalkSpeed(0.0f);
+	GetMesh()->GetAnimInstance()->Montage_Play(AttackMontage);
 
-	UE_LOG(LogTemp, Warning, TEXT("Attack"));
-
-	FTimerHandle AttackTimer;
-	GetWorld()->GetTimerManager().SetTimer(AttackTimer, [this]()
-		{
-			OnAttackFinished.ExecuteIfBound();
-		}, 0.1f, false, 2.0f);
-
-	/*AActor* Player{};
-	float DamageAmount{};
-	FDamageEvent DamageEvent{};
-	Player->TakeDamage(DamageAmount, DamageEvent, GetController(), this);*/
+	if (EnemyAttackType == EEnemyAttackType::Range)
+	{
+		bIsCanTurn = false;
+	}
+	
 }
 
 void ADDEnemyBase::SetAIAttackFinsihedDelegate(const FAIAttackOnFinishedSignature& InOnAttackFinished)
@@ -171,16 +223,27 @@ void ADDEnemyBase::SetAIAttackFinsihedDelegate(const FAIAttackOnFinishedSignatur
 
 float ADDEnemyBase::GetAIDetectRange() const noexcept
 {
-	// TODO : YSY Setting AIDetectRange
-
-	return 350.0f;
+	return AggroRange;
 }
 
 float ADDEnemyBase::GetAIAttackRange() const noexcept
 {
-	// TODO : YSY Setting AILoseAggroRange
+	return AttackRange;
+}
 
-	return 200.0f;
+bool ADDEnemyBase::GetIsAggroState() const noexcept
+{
+	return bIsAggroState;
+}
+
+void ADDEnemyBase::SetIsAggroState(bool bNewAggroState)
+{
+	bIsAggroState = bNewAggroState;
+}
+
+float ADDEnemyBase::GetAITurnSpeed() const noexcept
+{
+	return TurnSpeed;
 }
 
 void ADDEnemyBase::SetupCharacterWidget(UDDUserWidget* InUserWidget)
@@ -188,23 +251,62 @@ void ADDEnemyBase::SetupCharacterWidget(UDDUserWidget* InUserWidget)
 	UDDHpBarWidget* HpBarWidget = Cast<UDDHpBarWidget>(InUserWidget);
 	if (HpBarWidget)
 	{
-		HpBarWidget->UpdateStat(100.0f); // TODO : YSY Setting MaxHp
-		HpBarWidget->UpdateHpBar(100.0f); // TODO : YSY StatComponent
+		HpBarWidget->UpdateStat(Stat->GetMaxHp());
+		HpBarWidget->UpdateHpBar(Stat->GetMaxHp());
 		Stat->OnHpChanged.AddUObject(HpBarWidget, &UDDHpBarWidget::UpdateHpBar);
 		// TODO : YSY StatComponent
+ 	}
+}
+
+float ADDEnemyBase::ApplyDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	return TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+}
+
+void ADDEnemyBase::ApplyDamageOverTime(EDotDamageType DamageType, float Time, float TimeInterval, float DamageAmount)
+{
+	FDotEffectState& DotEffectState = DotEffectStates.FindOrAdd(DamageType);
+
+	
+	if (DotEffectState.ElapsedTime > 0.0f && DamageAmount < DotEffectState.DamageAmount)
+	{
+		return;
 	}
+	
+	DotEffectState.ElapsedTime = 0.0f;
+	DotEffectState.DamageAmount = DamageAmount;
+	
+	GetWorld()->GetTimerManager().SetTimer(DotEffectState.TimerHandle, [this, &DotEffectState, TimeInterval, Time, DamageType]()
+		{
+			Stat->ApplyStatDamage(DotEffectState.DamageAmount * Stat->GetDamageReceiveRate());
+			DotEffectState.ElapsedTime += TimeInterval;
+			if (DotEffectState.ElapsedTime >= Time)
+			{
+				ClearDotEffect(DamageType);
+			}
+		},
+		TimeInterval, true, 0.01f);
+
 }
 
-void ADDEnemyBase::ApplyStun(float Time)
+void ADDEnemyBase::ApplyChainDamage(int DamageAmount, int NumberOfChain)
 {
-	// TODO : YSY ApplyStun
-	UE_LOG(LogTemp, Warning, TEXT("Stun"));
 }
 
-void ADDEnemyBase::ApplySlow(float Time, float SlowRate)
+// Stun case : Time == DebuffRate
+void ADDEnemyBase::ApplyDebuff(EDebuffType DebuffType, float Time, float DebuffRate)
 {
-	// TODO : YSY ApplySlow
-	UE_LOG(LogTemp, Warning, TEXT("Slow"));
+	FDebuffState& DebuffState = DebuffStates[DebuffType];
+
+	if (DebuffState.ElapsedTime > 0.0f && DebuffRate < DebuffState.AmountRate)
+	{
+		return;
+	}
+
+	DebuffState.ElapsedTime = 0.0f;
+	DebuffState.AmountRate = DebuffRate;
+
+	DebuffState.OnDebuffDelegate.Broadcast(DebuffState.TimerHandle, Time, DebuffState.AmountRate);
 }
 
 void ADDEnemyBase::SplineMoveFinish()
@@ -223,6 +325,7 @@ void ADDEnemyBase::ArrivalAtGoal()
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	EnemyAIController->StopAI();
+	OnDie.Broadcast(EnemyName, this);
 
 	// TODO : YSY Caculate Potal Count
 }
@@ -230,6 +333,8 @@ void ADDEnemyBase::ArrivalAtGoal()
 void ADDEnemyBase::Die()
 {
 	// TODO : YSY Player get gold, Drop Item
+
+	OnDie.Broadcast(EnemyName, this);
 }
 
 void ADDEnemyBase::UpdateWidgetScale()
@@ -315,5 +420,129 @@ void ADDEnemyBase::CaculateCorrosionDamage(float& ActualDamage)
 		break;
 	default:
 		break;
+	}
+}
+
+void ADDEnemyBase::Activate()
+{
+	Stat->SetCurrentHp(MaxHP);
+	SetActorHiddenInGame(false);
+	GetMesh()->SetVisibility(true, true);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	SetActorEnableCollision(true);
+	SetActorLocation(AIMoveRoute->GetSplinePointasWorldPosition(0));
+	EnemyAIController->RunAI();
+}
+
+void ADDEnemyBase::Deactivate()
+{
+	SetActorHiddenInGame(true);
+	SetActorEnableCollision(false);
+	RouteIndex = 0;
+}
+
+void ADDEnemyBase::SetAIMoveRoute(TArray<class AAISplineRoute*> Splines, int32 Index)
+{
+	AIMoveRoute = Splines[Index];
+}
+
+void ADDEnemyBase::ClearDotEffect(EDotDamageType DamageType)
+{
+	FDotEffectState* DotEffectState = DotEffectStates.Find(DamageType);
+	if (DotEffectState)
+	{
+		GetWorld()->GetTimerManager().ClearTimer(DotEffectState->TimerHandle);
+		DotEffectState->DamageAmount = 0.0f;
+		DotEffectState->ElapsedTime = 0.0f;
+	}
+}
+
+void ADDEnemyBase::ChangeMaxWalkSpeed(float Amount)
+{
+	GetCharacterMovement()->MaxWalkSpeed = MovementSpeed * Amount;
+}
+
+void ADDEnemyBase::Stun(FTimerHandle& TimerHandle, float Time, float Amount)
+{
+	// TODO : YSY High Cost, Need to Fix Algorithm.
+
+	EnemyAIController->StopAI();
+	UE_LOG(LogTemp, Warning, TEXT("StunStart"));
+
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this]()
+		{
+			EnemyAIController->RunAI();
+			UE_LOG(LogTemp, Warning, TEXT("StunEnd"));
+		}
+	,0.01f, false, Time);
+}
+
+void ADDEnemyBase::BindingAnimNotify()
+{
+	if (AttackMontage)
+	{
+		TArray<FAnimNotifyEvent> notifyEvents{ AttackMontage->Notifies };
+
+		for (FAnimNotifyEvent eventNotify : notifyEvents)
+		{
+			if (UAttackFinishedAnimNotify* AttackFinishedNotify = Cast<UAttackFinishedAnimNotify>(eventNotify.Notify))
+			{
+				AttackFinishedNotify->OnNotified.AddUObject(this, &ADDEnemyBase::AttackFinished);
+			}
+			else if (UAttackTraceAnimNotify* AttackTraceNotify = Cast<UAttackTraceAnimNotify>(eventNotify.Notify))
+			{
+				if (EnemyAttackType == EEnemyAttackType::Melee)
+				{
+					AttackTraceNotify->OnNotified.AddUObject(this, &ADDEnemyBase::MeleeAttack);
+				}
+				else if(EnemyAttackType == EEnemyAttackType::Range)
+				{
+					AttackTraceNotify->OnNotified.AddUObject(this, &ADDEnemyBase::RangeAttack);
+				}			
+			}
+		}
+	}
+}
+
+void ADDEnemyBase::AttackFinished()
+{
+	ChangeMaxWalkSpeed(1.0f);
+	bIsCanTurn = true;
+	OnAttackFinished.ExecuteIfBound();
+}
+
+void ADDEnemyBase::MeleeAttack()
+{
+	TArray<AActor*> IgnoreActors;
+	FHitResult OutHit;
+	bool bHit = UKismetSystemLibrary::SphereTraceSingle(GetWorld(), GetActorLocation(), GetActorLocation(), AttackRange, ETraceTypeQuery::TraceTypeQuery7, false, IgnoreActors, EDrawDebugTrace::ForDuration, OutHit, true);
+	// TODO : YSY Change TraceTypeQuery to name
+
+	if (bHit)
+	{
+		if (OutHit.GetActor()->GetClass()->ImplementsInterface(UDamageInterface::StaticClass()))
+		{
+			
+		}
+	}
+}
+
+void ADDEnemyBase::RangeAttack()
+{
+	TArray<AActor*> IgnoreActors;
+	FHitResult OutHit;
+
+	FVector Start = GetActorLocation();
+	FVector End = GetActorForwardVector() * 10000.0 + GetActorLocation(); // TODO : YSY MagicNumber, DataTable
+	bool bHit = UKismetSystemLibrary::LineTraceSingle(GetWorld(), Start, End, ETraceTypeQuery::TraceTypeQuery7, false, IgnoreActors, EDrawDebugTrace::ForDuration, OutHit, true);
+	// TODO : YSY Change TraceTypeQuery to name
+
+	if (bHit)
+	{
+		if (OutHit.GetActor()->GetClass()->ImplementsInterface(UDamageInterface::StaticClass()))
+		{
+			
+		}
 	}
 }
