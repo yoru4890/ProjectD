@@ -97,7 +97,7 @@ public:
 
 	// Animation blueprint, visible only if MeshType is SkeletalMesh
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bIsAnimated == true"))
-	TSoftObjectPtr<UAnimBlueprint> MyAnimBlueprint;
+	TArray<TSoftObjectPtr<UAnimBlueprint>> AnimBlueprints;
 
 	// Animation blueprint, visible only if MeshType is SkeletalMesh
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bIsAnimated == true"))

@@ -8,9 +8,10 @@
 #include "Particles/ParticleSystemComponent.h"
 #include "YSY/Collision/CollisionChannel.h"
 #include "DDBuildingAnimInstance.h"
-#include "Particles/ParticleSystemComponent.h"
 #include "NiagaraSystem.h"
+#include "NiagaraComponent.h"
 
+#pragma region ConstructorAndInitialization
 // Sets default values
 ADDBuildingBase::ADDBuildingBase()
 {
@@ -30,28 +31,29 @@ ADDBuildingBase::ADDBuildingBase()
 	MeshContainerComponent = CreateDefaultSubobject<USceneComponent>(TEXT("MashContainerComponent"));
 	MeshContainerComponent->SetupAttachment(RootComponent);
 
+	// 파티클 시스템 컴포넌트 생성
+	AttackParticleSystemComponent = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("ParticleSystemComponent"));
+	AttackParticleSystemComponent->SetupAttachment(RootComponent);
+	AttackParticleSystemComponent->SetAutoActivate(false);  // 기본적으로 비활성화
+
+	// 나이아가라 시스템 컴포넌트 생성
+	AttackNiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("NiagaraComponent"));
+	AttackNiagaraComponent->SetupAttachment(RootComponent);
+	AttackNiagaraComponent->SetAutoActivate(false);  // 기본적으로 비활성화
+
+
 }
 
 ADDBuildingBase::~ADDBuildingBase()
 {
 }
 
-void ADDBuildingBase::SetupAttackCollisionResponses()
-{
-	if (AttackCollisionComponent)
-	{
-		AttackCollisionComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
-		AttackCollisionComponent->SetCollisionResponseToChannel(GTCHANNEL_ENEMY, ECollisionResponse::ECR_Overlap); // Assuming Enemy uses ECC_Pawn
-		AttackCollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &ADDBuildingBase::OnBoxCollisionBeginOverlap);
-		AttackCollisionComponent->OnComponentEndOverlap.AddDynamic(this, &ADDBuildingBase::OnBoxCollisionEndOverlap);
-	}
-}
-
 // Called when the game starts or when spawned
 void ADDBuildingBase::BeginPlay()
 {
 	Super::BeginPlay();
-	if (PreviewMaterial) {
+	if (PreviewMaterial)
+	{
 		DynamicMaterialInstance = UMaterialInstanceDynamic::Create(PreviewMaterial, this);
 	}
 
@@ -63,24 +65,28 @@ void ADDBuildingBase::BeginPlay()
 
 }
 
+#pragma endregion ConstructorAndInitialization
+
+#pragma region TickAndUpdate
+
 // Called every frame
 void ADDBuildingBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 }
 
-void ADDBuildingBase::SetCanAttack(const bool bInCanAttack)
-{
-	bCanAttack = bInCanAttack;
-	TimeSinceLastAttack = 0;
+#pragma endregion TickAndUpdate
 
-	if (!bInCanAttack)
+#pragma region SetupAndInitialization
+
+void ADDBuildingBase::SetupAttackCollisionResponses()
+{
+	if (AttackCollisionComponent)
 	{
-		AttackCollisionComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	}
-	else
-	{
-		AttackCollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		AttackCollisionComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
+		AttackCollisionComponent->SetCollisionResponseToChannel(GTCHANNEL_ENEMY, ECollisionResponse::ECR_Overlap); // Assuming Enemy uses ECC_Pawn
+		AttackCollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &ADDBuildingBase::OnBoxCollisionBeginOverlap);
+		AttackCollisionComponent->OnComponentEndOverlap.AddDynamic(this, &ADDBuildingBase::OnBoxCollisionEndOverlap);
 	}
 }
 
@@ -108,39 +114,18 @@ void ADDBuildingBase::InitFromDataTable(const FName& InRowName, const FDDBuildin
 
 void ADDBuildingBase::SetAssets(FDDBuildingBaseData& LoadedAsset)
 {
-	SetParticeEffects(LoadedAsset);
 	SetMeshs(LoadedAsset);
+	SetParticeEffects(LoadedAsset);
 	ModifyMeshAndAttackCollision();
 
 }
 
+#pragma endregion SetupAndInitialization
+
+#pragma region EffectsAndMeshes
+
 void ADDBuildingBase::SetParticeEffects(FDDBuildingBaseData& LoadedAsset)
 {
-	//// 기존 ParticleEffectComponents 배열 초기화
-	//for (UParticleSystemComponent* ParticleEffectComponent : ParticleEffectComponents)
-	//{
-	//	if (ParticleEffectComponent)
-	//	{
-	//		ParticleEffectComponent->DestroyComponent();
-	//	}
-	//}
-
-	//UParticleSystemComponent* ParticleEffectComponent = NewObject<UParticleSystemComponent>(this);
-	//check(ParticleEffectComponent);
-	//// ParticleRootComponent에 부착
-	//ParticleEffectComponent->SetupAttachment(RootComponent);
-	//if (LoadedAsset.AttackEffect.IsValid())
-	//{
-	//	ParticleEffectComponent->SetTemplate(LoadedAsset.AttackEffect.Get());
-	//}
-	//else
-	//{
-	//	UE_LOG(LogTemp, Warning, TEXT("%s : ParticleEffect not loaded"), RowName);
-	//}
-	//ParticleEffectComponent->RegisterComponent();
-
-	//ParticleEffectComponents.Add(ParticleEffectComponent);
-
 	if (LoadedAsset.AttackEffect.IsValid())
 	{
 		AttackEffect = LoadedAsset.AttackEffect.Get();
@@ -157,6 +142,48 @@ void ADDBuildingBase::SetParticeEffects(FDDBuildingBaseData& LoadedAsset)
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("%s : HitEffect not loaded"), RowName);
+	}
+
+	FName SocketName = TEXT("FirePoint");
+	USceneComponent* TargetComponent = nullptr;
+
+	if (SkeletalMeshComponents.Num() > 0 && SkeletalMeshComponents[0]->DoesSocketExist(SocketName))
+	{
+		TargetComponent = SkeletalMeshComponents[0];
+	}
+	else if (StaticMeshComponents.Num() > 0 && StaticMeshComponents[0]->DoesSocketExist(SocketName))
+	{
+		TargetComponent = StaticMeshComponents[0];
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Socket %s not found on any mesh components."), *SocketName.ToString());
+		return;
+	}
+	// AttackEffect가 UParticleSystem인지, UNiagaraSystem인지 확인하고 적절한 이펙트를 설정
+	if (UParticleSystem* ParticleSystem = Cast<UParticleSystem>(AttackEffect))
+	{
+		// ParticleSystem 설정 및 활성화
+		if (AttackParticleSystemComponent)
+		{
+			AttackParticleSystemComponent->SetTemplate(ParticleSystem);
+			AttackParticleSystemComponent->SetupAttachment(TargetComponent, SocketName);
+			AttackParticleSystemComponent->RegisterComponentWithWorld(GetWorld());
+		}
+	}
+	else if (UNiagaraSystem* NiagaraSystem = Cast<UNiagaraSystem>(AttackEffect))
+	{
+		// NiagaraSystem 설정 및 활성화
+		if (AttackNiagaraComponent)
+		{
+			AttackNiagaraComponent->SetAsset(NiagaraSystem);
+			AttackNiagaraComponent->SetupAttachment(TargetComponent, SocketName);
+			AttackNiagaraComponent->RegisterComponentWithWorld(GetWorld());
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AttackEffect is of unknown type."));
 	}
 }
 
@@ -183,7 +210,7 @@ void ADDBuildingBase::SetMeshs(FDDBuildingBaseData& LoadedAsset)
 		}
 	}
 
-	for (TSoftObjectPtr<USkeletalMesh>& SkeletalMeshSoftPtr : LoadedAsset.SkeletalMeshs) 
+	for (TSoftObjectPtr<USkeletalMesh>& SkeletalMeshSoftPtr : LoadedAsset.SkeletalMeshs)
 	{
 		USkeletalMeshComponent* SkeletalMeshComponent = NewObject<USkeletalMeshComponent>(this);
 		check(SkeletalMeshComponent);
@@ -209,16 +236,12 @@ void ADDBuildingBase::SetMeshs(FDDBuildingBaseData& LoadedAsset)
 		OriginalMaterials.Add(SkeletalMeshComponent, MaterialStruct);
 	}
 
-	if (LoadedAsset.MyAnimBlueprint.IsValid())
+	for (int index = 0; index < LoadedAsset.AnimBlueprints.Num(); index++)
 	{
-		for (auto& SkeletalMeshComponent : SkeletalMeshComponents) 
+		if (SkeletalMeshComponents.IsValidIndex(index))
 		{
-			SkeletalMeshComponent->SetAnimInstanceClass(LoadedAsset.MyAnimBlueprint->GeneratedClass);
+			SkeletalMeshComponents[index]->SetAnimInstanceClass(LoadedAsset.AnimBlueprints[index]->GeneratedClass);
 		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("%s : AnimBluePrint not loaded"), RowName);
 	}
 
 	for (TSoftObjectPtr<UStaticMesh>& StaticMeshSoftPtr : LoadedAsset.StaticMeshs)
@@ -247,6 +270,74 @@ void ADDBuildingBase::SetMeshs(FDDBuildingBaseData& LoadedAsset)
 		OriginalMaterials.Add(StaticMeshComponent, MaterialStruct);
 	}
 }
+
+#pragma endregion EffectsAndMeshes
+
+#pragma region AttackAndCollision
+
+void ADDBuildingBase::SetCanAttack(const bool bInCanAttack)
+{
+	bCanAttack = bInCanAttack;
+	TimeSinceLastAttack = 0;
+
+	if (!bInCanAttack)
+	{
+		AttackCollisionComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+	else
+	{
+		AttackCollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	}
+}
+
+void ADDBuildingBase::Attack()
+{
+	if (!AttackMontages.IsEmpty() && !SkeletalMeshComponents.IsEmpty())
+	{
+		for (int index = 0; index < SkeletalMeshComponents.Num(); index++)
+		{
+			UAnimInstance* AnimInstance = SkeletalMeshComponents[index]->GetAnimInstance();
+			if (AnimInstance)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("AnimInstance Exist"));
+				// UDDTrapAnimInstance로 캐스팅합니다.
+				UDDBuildingAnimInstance* BuildingAnimInstance = Cast<UDDBuildingAnimInstance>(AnimInstance);
+				if (BuildingAnimInstance && AttackMontages.IsValidIndex(index))
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Trap AnimInstance Exist"));
+					// PlayAnimationMontage를 호출합니다.
+					BuildingAnimInstance->PlayAnimationMontage(AttackMontages[index]);
+				}
+			}
+		}
+	}
+	PlayAttackEffectAtSocket();
+}
+
+void ADDBuildingBase::PlayAttackEffectAtSocket()
+{
+	AttackParticleSystemComponent->SetActive(true);
+	AttackNiagaraComponent->SetActive(true);
+
+}
+
+#pragma endregion AttackAndCollision
+
+#pragma region CollisionCallbacks
+
+void ADDBuildingBase::OnBoxCollisionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	EnemiesInRanged.Add(OtherActor);
+}
+
+void ADDBuildingBase::OnBoxCollisionEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	EnemiesInRanged.Remove(OtherActor);
+}
+
+#pragma endregion CollisionCallbacks
+
+#pragma region UtilityFunctions
 
 void ADDBuildingBase::ModifyMeshAndAttackCollision() const
 {
@@ -324,10 +415,12 @@ void ADDBuildingBase::ModifyMeshAndAttackCollision() const
 
 void ADDBuildingBase::SetMaterialToPreview(bool bCanPay)
 {
-	if (bCanPay) {
+	if (bCanPay)
+	{
 		DynamicMaterialInstance->SetVectorParameterValue("Param", FLinearColor(0, 0, 0.6f, 1));
 	}
-	else {
+	else
+	{
 		DynamicMaterialInstance->SetVectorParameterValue("Param", FLinearColor(0.6, 0, 0, 1));
 	}
 
@@ -351,35 +444,4 @@ void ADDBuildingBase::SetMaterialToOriginal()
 	}
 }
 
-void ADDBuildingBase::Attack()
-{
-	if (!AttackMontages.IsEmpty() && !SkeletalMeshComponents.IsEmpty())
-	{
-		for (int index = 0; index < SkeletalMeshComponents.Num(); index++)
-		{
-			UAnimInstance* AnimInstance = SkeletalMeshComponents[index]->GetAnimInstance();
-			if (AnimInstance)
-			{
-				UE_LOG(LogTemp, Warning, TEXT("AnimInstance Exist"));
-				// UDDTrapAnimInstance로 캐스팅합니다.
-				UDDBuildingAnimInstance* BuildingAnimInstance = Cast<UDDBuildingAnimInstance>(AnimInstance);
-				if (BuildingAnimInstance && AttackMontages.IsValidIndex(index))
-				{
-					UE_LOG(LogTemp, Warning, TEXT("Trap AnimInstance Exist"));
-					// PlayAnimationMontage를 호출합니다.
-					BuildingAnimInstance->PlayAnimationMontage(AttackMontages[index]);
-				}
-			}
-		}
-	}
-}
-
-void ADDBuildingBase::OnBoxCollisionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	EnemiesInRanged.Add(OtherActor);
-}
-
-void ADDBuildingBase::OnBoxCollisionEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
-{
-	EnemiesInRanged.Remove(OtherActor);
-}
+#pragma endregion UtilityFunctions

@@ -22,6 +22,8 @@ public:
 private:
 	virtual void SetTargetEnemy(AActor* NewTargetEnemy) override;
 
+	const bool IsEnemyInSight(float CosTheta = 0.97f) const;
+
 private:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UDDRotationComponent> DDRotationComponent;

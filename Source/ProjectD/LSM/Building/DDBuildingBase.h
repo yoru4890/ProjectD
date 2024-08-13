@@ -54,6 +54,7 @@ protected:
 private:
 	void SetParticeEffects(FDDBuildingBaseData& LoadedAsset);
 	void SetMeshs(FDDBuildingBaseData& LoadedAsset);
+	void PlayAttackEffectAtSocket();
 
 
 protected:
@@ -117,6 +118,12 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<UDamageType> DamageType; // 빌딩의 데미지 타입
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<UParticleSystemComponent> AttackParticleSystemComponent;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class UNiagaraComponent> AttackNiagaraComponent;
 
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<class UFXSystemAsset> AttackEffect;

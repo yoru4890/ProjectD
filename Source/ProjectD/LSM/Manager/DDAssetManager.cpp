@@ -74,12 +74,15 @@ void UDDAssetManager::LoadAssetsAsync(const FName& RowName)
 		SoftObjectPaths.Add(SkeletalMesh.ToSoftObjectPath());
 		UE_LOG(LogTemp, Warning, TEXT(" %s : USkeletalMesh Added"), *RowName.ToString());
 	}
-	if (ObjectStruct->MyAnimBlueprint.IsValid())
+	for (const TSoftObjectPtr<UAnimBlueprint>& AnimBlueprint : ObjectStruct->AnimBlueprints)
 	{
-		UE_LOG(LogTemp, Warning, TEXT(" %s : AnimBlueprint isAlready Loaded"), *RowName.ToString());
+		if (AnimBlueprint.IsValid())
+		{
+			UE_LOG(LogTemp, Warning, TEXT(" %s : AnimBlueprint isAlready Loaded"), *RowName.ToString());
+		}
+		SoftObjectPaths.Add(AnimBlueprint.ToSoftObjectPath());
+		UE_LOG(LogTemp, Warning, TEXT(" %s : AnimBlueprint Added"), *RowName.ToString());
 	}
-	SoftObjectPaths.Add(ObjectStruct->MyAnimBlueprint.ToSoftObjectPath());
-	UE_LOG(LogTemp, Warning, TEXT(" %s : AnimBlueprint Added"), *RowName.ToString());
 
 	for (const TSoftObjectPtr<UAnimMontage>& Montage : ObjectStruct->AttackMontages)
 	{
@@ -171,11 +174,13 @@ void UDDAssetManager::RemoveLoadedAssetByName(const FName& RowName)
 		UE_LOG(LogTemp, Warning, TEXT("SkeletalMesh IsValid after Reset: %s"), SkeletalMesh.IsNull() ? TEXT("false") : TEXT("true"));
 	}
 
-	// AnimBlueprint 언로드
-	UE_LOG(LogTemp, Warning, TEXT("Unloading AnimBlueprint: %s"), *ObjectStruct->MyAnimBlueprint.ToString());
-	StreamableManager.Unload(ObjectStruct->MyAnimBlueprint.ToSoftObjectPath());
-	ObjectStruct->MyAnimBlueprint.ResetWeakPtr();
-	UE_LOG(LogTemp, Warning, TEXT("AnimBlueprint IsValid after Reset: %s"), ObjectStruct->MyAnimBlueprint.IsValid() ? TEXT("true") : TEXT("false"));
+	for (TSoftObjectPtr<UAnimBlueprint>& AnimBlueprint : ObjectStruct->AnimBlueprints)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Unloading AnimBlueprint: %s"), *AnimBlueprint.ToString());
+		StreamableManager.Unload(AnimBlueprint.ToSoftObjectPath());
+		AnimBlueprint.ResetWeakPtr();
+		UE_LOG(LogTemp, Warning, TEXT("SkeletalMesh IsValid after Reset: %s"), AnimBlueprint.IsNull() ? TEXT("false") : TEXT("true"));
+	}
 
 	// AnimMontage 언로드
 	for (TSoftObjectPtr<UAnimMontage>& Montage : ObjectStruct->AttackMontages)
@@ -241,8 +246,12 @@ void UDDAssetManager::RemoveLoadedAssetAll()
 			StreamableManager.Unload(SkeletalMesh.ToSoftObjectPath());
 			SkeletalMesh.ResetWeakPtr();
 		}
-		StreamableManager.Unload(ObjectStruct->MyAnimBlueprint.ToSoftObjectPath());
-		ObjectStruct->MyAnimBlueprint.ResetWeakPtr();
+
+		for (TSoftObjectPtr<UAnimBlueprint>& AnimBlueprint : ObjectStruct->AnimBlueprints)
+		{
+			StreamableManager.Unload(AnimBlueprint.ToSoftObjectPath());
+			AnimBlueprint.ResetWeakPtr();
+		}
 		for (TSoftObjectPtr<UAnimMontage>& Montage : ObjectStruct->AttackMontages)
 		{
 			StreamableManager.Unload(Montage.ToSoftObjectPath());
