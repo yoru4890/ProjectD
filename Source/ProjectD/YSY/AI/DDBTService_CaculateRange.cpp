@@ -29,7 +29,6 @@ void UDDBTService_CaculateRange::TickNode(UBehaviorTreeComponent& OwnerComp, uin
 		return;
 	}
 
-	FVector Center{ ControllingPawn->GetActorLocation() };
 	UWorld* World{ ControllingPawn->GetWorld() };
 	if (!World)
 	{

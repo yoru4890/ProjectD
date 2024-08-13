@@ -26,6 +26,8 @@ ADDEnemyAIController::ADDEnemyAIController()
 	}
 
 	ReceiveMoveCompleted.AddDynamic(this, &ADDEnemyAIController::OnMoveCompleted);
+
+
 }
 
 void ADDEnemyAIController::BeginPlay()

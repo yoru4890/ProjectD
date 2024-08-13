@@ -13,16 +13,33 @@ class UDamageInterface : public UInterface
 	GENERATED_BODY()
 };
 
-/**
- * 
- */
+UENUM(BlueprintType)
+enum class EDotDamageType : uint8
+{
+	Acid UMETA(DisplayName = "Acid"),
+	Fire UMETA(DisplayName = "Fire"),
+
+	Unknown
+};
+
+UENUM(BlueprintType)
+enum class EDebuffType : uint8
+{
+	Slow UMETA(DisplayName = "Slow"),
+	Stun UMETA(DisplayName = "Stun"),
+	DamageIncrease UMETA(DisplayName = "DamageIncrease"),
+
+	Unknown
+};
+
 class PROJECTD_API IDamageInterface
 {
 	GENERATED_BODY()
 
-	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 
-	virtual void ApplyStun(float Time) = 0;
-	virtual void ApplySlow(float Time, float SlowRate) = 0;
+	virtual float ApplyDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) = 0;
+	virtual void ApplyDamageOverTime(EDotDamageType DamageType, float Time, float TimeInterval, float DamageAmount) = 0;
+	virtual void ApplyChainDamage(int DamageAmount, int NumberOfChain) = 0;
+	virtual void ApplyDebuff(EDebuffType DebuffType, float Time, float DebuffRate) = 0;
 };
