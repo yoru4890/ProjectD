@@ -41,6 +41,8 @@ AActor* UDDEnemySpawnManager::Activate(const FName& EnemyName, int32 SplineIndex
 	if (InactiveObjects.Contains(EnemyName) && InactiveObjects[EnemyName].Num() > 0)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("YES"));
+		UE_LOG(LogTemp, Warning, TEXT("%d"), InactiveObjects[EnemyName].Num());
+		UE_LOG(LogTemp, Warning, TEXT("%d"), ActiveObjects[EnemyName].Num());
 		ADDEnemyBase* Enemy = InactiveObjects[EnemyName].Last();
 		InactiveObjects[EnemyName].Pop();
 		ActiveObjects[EnemyName].Add(Enemy);
@@ -53,7 +55,6 @@ AActor* UDDEnemySpawnManager::Activate(const FName& EnemyName, int32 SplineIndex
 	else
 	{
 		// TODO : YSY No Enemy in Pools. Need to Add Enemy
-		UE_LOG(LogTemp, Warning, TEXT("NO"));
 		return nullptr;
 	}
 
@@ -68,6 +69,10 @@ void UDDEnemySpawnManager::Deactivate(const FName& EnemyName, ADDEnemyBase* Enem
 		Enemy->Deactivate();
 		OnSubEnemySignature.ExecuteIfBound();
 		// TODO : YSY Player should get Gold, Score
+
+		UE_LOG(LogTemp, Warning, TEXT("%d"), InactiveObjects[EnemyName].Num());
+		UE_LOG(LogTemp, Warning, TEXT("%d"), ActiveObjects[EnemyName].Num());
+
 	}
 }
 

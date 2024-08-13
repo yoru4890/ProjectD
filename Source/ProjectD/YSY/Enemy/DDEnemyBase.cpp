@@ -427,6 +427,9 @@ void ADDEnemyBase::Activate()
 {
 	Stat->SetCurrentHp(MaxHP);
 	SetActorHiddenInGame(false);
+	GetMesh()->SetVisibility(true, true);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	SetActorEnableCollision(true);
 	SetActorLocation(AIMoveRoute->GetSplinePointasWorldPosition(0));
 	EnemyAIController->RunAI();
@@ -436,6 +439,7 @@ void ADDEnemyBase::Deactivate()
 {
 	SetActorHiddenInGame(true);
 	SetActorEnableCollision(false);
+	RouteIndex = 0;
 }
 
 void ADDEnemyBase::SetAIMoveRoute(TArray<class AAISplineRoute*> Splines, int32 Index)
