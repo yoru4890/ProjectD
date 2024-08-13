@@ -10,6 +10,24 @@
 #include "YSY/Interface/DamageInterface.h"
 #include "DDEnemyBase.generated.h"
 
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnDieSignature, const FName&, ADDEnemyBase*);
+DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnDebuffSignature, FTimerHandle&, float, float);
+
+struct FDotEffectState
+{
+	float DamageAmount = 0.0f;
+	float ElapsedTime = 0.0f;
+	FTimerHandle TimerHandle;
+};
+
+struct FDebuffState
+{
+	float AmountRate = 0.0f;
+	float ElapsedTime = 0.0f;
+	FTimerHandle TimerHandle;
+	FOnDebuffSignature OnDebuffDelegate;
+};
+
 UCLASS()
 class PROJECTD_API ADDEnemyBase : public ACharacter, public IDDEnemyAIInterface, public IDDCharacterWidgetInterface, public IDamageInterface
 {
@@ -43,6 +61,27 @@ public:
 	void CaculatePiercingDamage(float& ActualDamage);
 	void CaculateCorrosionDamage(float& ActualDamage);
 
+	void Activate();
+	void Deactivate();
+
+	void SetAIMoveRoute(TArray<class AAISplineRoute*> Splines, int32 Index);
+
+	void ClearDotEffect(EDotDamageType DamageType);
+
+	void ChangeMaxWalkSpeed(float Amount);
+	void Stun(FTimerHandle& TimerHandle, float Time, float Amount);
+
+	void BindingAnimNotify();
+
+	UFUNCTION()
+	void AttackFinished();
+
+	UFUNCTION()
+	void MeleeAttack();
+
+	UFUNCTION()
+	void RangeAttack();
+
 #pragma region AIInterface
 
 	virtual void SplineMove() override;
@@ -52,6 +91,11 @@ public:
 
 	virtual float GetAIDetectRange() const noexcept;
 	virtual float GetAIAttackRange() const noexcept;
+	virtual bool GetIsAggroState() const noexcept;
+	virtual void SetIsAggroState(bool bNewAggroState);
+
+	virtual float GetAITurnSpeed() const noexcept;
+
 #pragma endregion
 
 #pragma region WidgetInterface
@@ -62,10 +106,19 @@ public:
 
 #pragma region DamageInterface
 
-	virtual void ApplyStun(float Time);
-	virtual void ApplySlow(float Time, float SlowRate);
+	UFUNCTION(BlueprintCallable)
+	virtual float ApplyDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser);
+	UFUNCTION(BlueprintCallable)
+	virtual void ApplyDamageOverTime(EDotDamageType DamageType, float Time, float TimeInterval, float DamageAmount);
+	UFUNCTION(BlueprintCallable)
+	virtual void ApplyChainDamage(int DamageAmount, int NumberOfChain);
+	UFUNCTION(BlueprintCallable)
+	virtual void ApplyDebuff(EDebuffType DebuffType, float Time, float DebuffRate);
 
 #pragma endregion
+
+public:
+	FOnDieSignature OnDie{};
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "DD", Meta = (AllowPrivateAccess = "true"))
@@ -80,10 +133,13 @@ private:
 	FName EnemyName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DD", meta = (AllowPrivateAccess = "true"))
-	FName WeakPoint;
+	TArray<FName> WeakPoints;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DD", meta = (AllowPrivateAccess = "true"))
 	EEnemyType EnemyType;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DD", meta = (AllowPrivateAccess = "true"))
+	EEnemyAttackType EnemyAttackType;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DD", meta = (AllowPrivateAccess = "true"))
 	float MaxHP;
@@ -112,15 +168,30 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DD", meta = (AllowPrivateAccess = "true"))
 	uint8 bIsElite : 1;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DD", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UAnimMontage> AttackMontage;
+
 #pragma endregion
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DD", meta = (AllowPrivateAccess = "true"));
 	TObjectPtr<class AAISplineRoute> AIMoveRoute;
 
+	UPROPERTY()
 	TObjectPtr<class ADDEnemyAIController> EnemyAIController;
 
 	int32 RouteIndex;
 
 	FAISplineMoveOnFinishedSignature OnSplineMoveFinished{};
 	FAIAttackOnFinishedSignature OnAttackFinished{};
+
+	TMap<EDotDamageType, FDotEffectState> DotEffectStates;
+	TMap<EDebuffType, FDebuffState> DebuffStates;
+
+	bool bIsAggroState{};
+	bool bIsCanTurn{ true };
+
+	float TurnSpeed{ 5.0f }; // TODO : YSY Magic Number, DataTable
+
+	UPROPERTY()
+	TObjectPtr<AActor> Player;
 };
