@@ -21,6 +21,7 @@ void UDDBuildingBaseAttackStrategy::Initialize(ADDBuildingBase* InOwningTower)
 
 void UDDBuildingBaseAttackStrategy::Attack(AActor* TargetEnemy)
 {
+	
 
 }
 
