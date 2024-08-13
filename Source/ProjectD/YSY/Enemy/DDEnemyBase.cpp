@@ -74,6 +74,8 @@ void ADDEnemyBase::PostInitializeComponents()
 
 float ADDEnemyBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
+	ShowHpBar();
+
 	const UDamageType* DamageType = DamageEvent.DamageTypeClass.GetDefaultObject();
 
 	float ActualDamage = DamageAmount;
@@ -108,6 +110,7 @@ float ADDEnemyBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 	}
 
 	Stat->ApplyStatDamage(ActualDamage * Stat->GetDamageReceiveRate());
+	
 	return ActualDamage;
 }
 
@@ -121,13 +124,15 @@ void ADDEnemyBase::BeginPlay()
 	EnemyAIController->OnMoveFinished.BindUObject(this, &ADDEnemyBase::SplineMoveFinish);
 
 	Player = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+
+	OnSetVisibleHpBarDelegate.ExecuteIfBound(false);
 }
 
 void ADDEnemyBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	UpdateWidgetScale(); // TODO : YSY Doesn't work. Move to SetTimerEvent
+	//UpdateWidgetScale(); // TODO : YSY Doesn't work. Move to SetTimerEvent
 
 	if (bIsAggroState && bIsCanTurn)
 	{
@@ -253,7 +258,10 @@ void ADDEnemyBase::SetupCharacterWidget(UDDUserWidget* InUserWidget)
 	{
 		HpBarWidget->UpdateStat(Stat->GetMaxHp());
 		HpBarWidget->UpdateHpBar(Stat->GetMaxHp());
+		HpBarWidget->SetOwnerName(EnemyName);
 		Stat->OnHpChanged.AddUObject(HpBarWidget, &UDDHpBarWidget::UpdateHpBar);
+
+		OnSetVisibleHpBarDelegate.BindUObject(HpBarWidget, &UDDHpBarWidget::SetVisiblePorgressBar);
 		// TODO : YSY StatComponent
  	}
 }
@@ -333,7 +341,7 @@ void ADDEnemyBase::ArrivalAtGoal()
 void ADDEnemyBase::Die()
 {
 	// TODO : YSY Player get gold, Drop Item
-
+	OnSetVisibleHpBarDelegate.ExecuteIfBound(false);
 	OnDie.Broadcast(EnemyName, this);
 }
 
@@ -427,7 +435,7 @@ void ADDEnemyBase::Activate()
 {
 	Stat->SetCurrentHp(MaxHP);
 	SetActorHiddenInGame(false);
-	GetMesh()->SetVisibility(true, true);
+	GetMesh()->SetVisibility(true);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	SetActorEnableCollision(true);
@@ -545,4 +553,14 @@ void ADDEnemyBase::RangeAttack()
 			
 		}
 	}
+}
+
+void ADDEnemyBase::ShowHpBar()
+{
+	OnSetVisibleHpBarDelegate.ExecuteIfBound(true);
+
+	GetWorld()->GetTimerManager().SetTimer(HpBarTH, [this]()
+		{
+			OnSetVisibleHpBarDelegate.ExecuteIfBound(false);
+		}, 0.1f, false, 4.0f);
 }

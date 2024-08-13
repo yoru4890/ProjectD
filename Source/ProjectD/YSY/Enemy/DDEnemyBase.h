@@ -13,6 +13,8 @@
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnDieSignature, const FName&, ADDEnemyBase*);
 DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnDebuffSignature, FTimerHandle&, float, float);
 
+DECLARE_DELEGATE_OneParam(FOnSetVisibleHpBarSignature, bool);
+
 struct FDotEffectState
 {
 	float DamageAmount = 0.0f;
@@ -81,6 +83,8 @@ public:
 
 	UFUNCTION()
 	void RangeAttack();
+
+	void ShowHpBar();
 
 #pragma region AIInterface
 
@@ -184,6 +188,8 @@ private:
 	FAISplineMoveOnFinishedSignature OnSplineMoveFinished{};
 	FAIAttackOnFinishedSignature OnAttackFinished{};
 
+	FOnSetVisibleHpBarSignature OnSetVisibleHpBarDelegate{};
+
 	TMap<EDotDamageType, FDotEffectState> DotEffectStates;
 	TMap<EDebuffType, FDebuffState> DebuffStates;
 
@@ -194,4 +200,6 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<AActor> Player;
+
+	FTimerHandle HpBarTH{};
 };
