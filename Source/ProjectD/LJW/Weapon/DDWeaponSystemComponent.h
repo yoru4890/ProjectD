@@ -54,6 +54,8 @@ public:
 	void WeaponSubSkill();
 	void WeaponStartAiming();
 	void WeaponEndAiming();
+	
+	void WeaponAttack();
 
 	//조건 모음
 	bool IsUnequipMontage(const UAnimMontage* Montage) const;

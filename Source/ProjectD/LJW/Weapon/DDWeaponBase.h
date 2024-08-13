@@ -43,7 +43,7 @@ public:
 
 	
 	virtual void SubSkill() {};
-
+	virtual void Attack() {};
 	
 protected:
 	// Called when the game starts or when spawned

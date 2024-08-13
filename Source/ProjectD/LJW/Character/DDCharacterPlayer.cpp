@@ -11,6 +11,7 @@
 #include "DDCharacterControlData.h"
 #include "LJW/Weapon/DDWeaponSystemComponent.h"
 #include "LJW/Animation/DDPlayerAnimInstance.h"
+#include "Components/CapsuleComponent.h"
 
 
 
@@ -40,7 +41,10 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 	WeaponSystem = CreateDefaultSubobject<UDDWeaponSystemComponent>(TEXT("WeaponSystem"));
 	
 	//PlayerMode
-	CurrentPlayerMode = EPlayerMode::CombatMode;
+	CurrentPlayerMode = EPlayerMode::CombatMode; 
+
+	//Collision
+	GetCapsuleComponent()->SetCollisionProfileName(TEXT("Player"));
 
 #pragma region Init Input
 
@@ -86,6 +90,13 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 	{
 		SubSkillAction = SubSkillRef.Object;
 	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction>AttackRef(TEXT("/Script/EnhancedInput.InputAction'/Game/0000/LJW/Input/IA_Player_Attack.IA_Player_Attack'"));
+	if (nullptr != AttackRef.Object)
+	{
+		AttackAction = AttackRef.Object;
+	}
+
 #pragma endregion
 
 }
@@ -152,6 +163,9 @@ void ADDCharacterPlayer::SetupPlayerInputComponent(class UInputComponent* Player
 	EnhancedInputComponent->BindAction(SubSkillAction, ETriggerEvent::Triggered, this, &ADDCharacterPlayer::WeaponStartAiming);
 	EnhancedInputComponent->BindAction(SubSkillAction, ETriggerEvent::Canceled, this, &ADDCharacterPlayer::WeaponEndAiming);
 	EnhancedInputComponent->BindAction(SubSkillAction, ETriggerEvent::Completed, this, &ADDCharacterPlayer::WeaponEndAiming);
+
+	EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Completed, this, &ADDCharacterPlayer::WeaponAttack);
+
 
 	
 }
@@ -300,4 +314,15 @@ void ADDCharacterPlayer::WeaponEndAiming()
 		WeaponSystem->WeaponEndAiming();
 	}
 }
+
+void ADDCharacterPlayer::WeaponAttack()
+{
+	//Enum
+	if (CurrentPlayerMode == EPlayerMode::CombatMode)
+	{
+		WeaponSystem->WeaponAttack();
+	}
+}
+
+
 

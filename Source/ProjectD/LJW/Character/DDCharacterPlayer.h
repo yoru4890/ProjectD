@@ -61,6 +61,7 @@ protected:
 	void Sprint(const FInputActionValue& Value);
 	void Walk(const FInputActionValue& Value);
 
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> JumpAction;
 
@@ -81,6 +82,10 @@ protected:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> SubSkillAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> AttackAction;
+
 
 	UPROPERTY(EditAnywhere, Category = Character)
 	float MouseSpeed;
@@ -107,7 +112,7 @@ protected:
 	void WeaponSubSkill();
 	void WeaponStartAiming();
 	void WeaponEndAiming();
-
+	void WeaponAttack();
 
 protected:
 

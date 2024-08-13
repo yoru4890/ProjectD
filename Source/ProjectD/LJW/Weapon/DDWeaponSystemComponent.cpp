@@ -181,6 +181,13 @@ void UDDWeaponSystemComponent::WeaponEndAiming()
 	}
 }
 
+void UDDWeaponSystemComponent::WeaponAttack()
+{
+	ParentSkeletal->GetAnimInstance()->Montage_Play(CurrentWeapon->GetAttackMontage());
+	CurrentWeapon->Attack();
+
+}
+
 //조건 모음
 bool UDDWeaponSystemComponent::IsUnequipMontage(const UAnimMontage* Montage) const
 {

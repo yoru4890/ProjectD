@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "LJW/Weapon/DDWeaponBase.h"
-#include "Components/BoxComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "DDWeaponCudgel.generated.h"
 
 /**
@@ -19,10 +19,14 @@ class PROJECTD_API ADDWeaponCudgel : public ADDWeaponBase
 	
 public:
 	virtual void SubSkill() override;
+	virtual void Attack() override;
 
+private:
+	UFUNCTION()
+	void OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 public: 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Collision)
-	UBoxComponent* CollisionBox;
+	UCapsuleComponent* CollisionCapsule;
 
 };
