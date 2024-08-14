@@ -10,5 +10,17 @@ UCLASS()
 class PROJECTD_API UDDPlayerAttackComboNotifyState : public UAnimNotifyState
 {
 	GENERATED_BODY()
+
+
 	
+	virtual void NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration, const FAnimNotifyEventReference& EventReference) override;
+
+	virtual void NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference) override;
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
+	FName SectionIndex;
+
+private:
+	FName* WeaponCompSectionIndex;
 };

@@ -269,6 +269,13 @@ void ADDCharacterPlayer::SetCameraFOV(const float& Amount)
 	FollowCamera->SetFieldOfView(Amount);
 }
 
+UDDWeaponSystemComponent* ADDCharacterPlayer::GetWeaponComp()
+{
+	return WeaponSystem;
+}
+
+
+
 void ADDCharacterPlayer::EquipMelee()
 {
 	if (!(GetMesh()->GetAnimInstance()->IsAnyMontagePlaying()))

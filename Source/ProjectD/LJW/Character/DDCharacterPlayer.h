@@ -6,6 +6,7 @@
 #include "LJW/Character/DDCharacterBase.h"
 #include "InputActionValue.h"
 #include "LJW/Interface/CameraFOVInterface.h"
+#include "LJW/Interface/DDPlayerComponentsAnimInterface.h"
 #include "DDCharacterPlayer.generated.h"
 
 
@@ -20,7 +21,7 @@ enum class EPlayerMode : uint8
 };
 
 UCLASS()
-class PROJECTD_API ADDCharacterPlayer : public ADDCharacterBase, public ICameraFOVInterface
+class PROJECTD_API ADDCharacterPlayer : public ADDCharacterBase, public ICameraFOVInterface, public IDDPlayerComponentsAnimInterface
 {
 	GENERATED_BODY()
 	
@@ -105,6 +106,8 @@ public:
 
 	// ICameraFOVInterface
 	virtual void SetCameraFOV(const float& Amount) override;
+
+	virtual class UDDWeaponSystemComponent* GetWeaponComp() override;
 
 protected:
 	void EquipMelee();

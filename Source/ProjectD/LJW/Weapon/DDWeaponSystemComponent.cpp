@@ -22,6 +22,8 @@ UDDWeaponSystemComponent::UDDWeaponSystemComponent()
 	{
 		ZoomCurve = ZoomCurveRef.Object;
 	}
+
+	
 }
 
 void UDDWeaponSystemComponent::BeginPlay()
@@ -29,6 +31,7 @@ void UDDWeaponSystemComponent::BeginPlay()
 	Super::BeginPlay();
 	InitializeWeapon();
 	InitTimeline();
+	ComboSectionIndex = FName("A");
 }
 
 void UDDWeaponSystemComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -183,8 +186,29 @@ void UDDWeaponSystemComponent::WeaponEndAiming()
 
 void UDDWeaponSystemComponent::WeaponAttack()
 {
-	ParentSkeletal->GetAnimInstance()->Montage_Play(CurrentWeapon->GetAttackMontage());
-	CurrentWeapon->Attack();
+	if (CurrentWeapon == Weapons[CurrentMeleeWeapon])
+	{
+		if (ParentSkeletal->GetAnimInstance()->Montage_IsPlaying(CurrentWeapon->GetAttackMontage()))
+		{
+			if (ParentSkeletal->GetAnimInstance()->Montage_GetCurrentSection() == ComboSectionIndex || ComboSectionIndex == FName("A"))
+			{
+				return;
+			}
+			ParentSkeletal->GetAnimInstance()->Montage_JumpToSection(ComboSectionIndex, CurrentWeapon->GetAttackMontage());
+			CurrentWeapon->Attack();
+		}
+		else
+		{
+			ParentSkeletal->GetAnimInstance()->Montage_Play(CurrentWeapon->GetAttackMontage());
+		}
+		
+	}
+
+	if (CurrentWeapon == Weapons[CurrentRangeWeapon])
+	{
+		
+	}
+	
 
 }
 

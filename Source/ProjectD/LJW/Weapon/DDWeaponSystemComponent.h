@@ -76,6 +76,8 @@ public:
 	FOnSetIsDeadSignature OnSetDeadDelegate;
 	FOnSetWeaponIndexSignature OnSetWeaponIndexDelegate;
 
+	FName ComboSectionIndex;
+
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon, meta = (AllowPrivateAccess = "true"))
 	TArray<ADDWeaponBase*> Weapons;
@@ -105,4 +107,6 @@ private:
 	UCurveFloat* ZoomCurve;
 
 	uint32 bIsOnTimeline : 1;
+
+	
 }; 
