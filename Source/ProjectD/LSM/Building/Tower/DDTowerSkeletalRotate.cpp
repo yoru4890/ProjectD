@@ -3,6 +3,8 @@
 
 #include "LSM/Building/Tower/DDTowerSkeletalRotate.h"
 #include "LSM/DDRotationComponent.h"
+#include "NiagaraComponent.h"
+#include "LSM/Building/AttackStrategies/DDBuildingBaseAttackStrategy.h"
 
 ADDTowerSkeletalRotate::ADDTowerSkeletalRotate()
 {
@@ -16,15 +18,25 @@ void ADDTowerSkeletalRotate::Tick(float DeltaTime)
 
 	if (!bCanAttack || !TargetEnemy)
 	{
+		SetIsNowAttack(false);
 		return;
 	}
 	else
 	{
-		if (TimeSinceLastAttack >= AttackCoolTime && IsEnemyInSight())
+		if (TimeSinceLastAttack >= AttackCoolTime)
 		{
-			Attack();
-			TimeSinceLastAttack = 0.f;
-			UE_LOG(LogTemp, Warning, TEXT("Attack"));
+			bool bIsEnemyInSight = IsEnemyInSight();
+			if (bIsEnemyInSight)
+			{
+				ExecuteAttackEffects();
+				AttackStrategy->Attack(TargetEnemy);
+				SetIsNowAttack(true);
+				TimeSinceLastAttack = 0.f;
+			}
+			else
+			{
+				SetIsNowAttack(false);
+			}
 		}
 	}
 }
@@ -67,9 +79,18 @@ const bool ADDTowerSkeletalRotate::IsEnemyInSight(float CosTheta) const
 
 	float DotProduct = FVector::DotProduct(DirectionToEnemy, FirePointDirection);
 
-
-	UE_LOG(LogTemp, Warning, TEXT("DotProduct : %f"),DotProduct);
-
 	return DotProduct >= CosTheta;
 
+}
+
+void ADDTowerSkeletalRotate::SetIsNowAttack(bool InIsNowAttack)
+{
+	if (IsNowAttack == true)
+	{
+		if (InIsNowAttack == false)
+		{
+			StopAttackEffect();
+		}
+	}
+	IsNowAttack = InIsNowAttack;
 }

@@ -24,8 +24,11 @@ private:
 
 	const bool IsEnemyInSight(float CosTheta = 0.97f) const;
 
+	void SetIsNowAttack(bool InIsNowAttack);
 private:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UDDRotationComponent> DDRotationComponent;
+
+	bool IsNowAttack = false;
 	
 };

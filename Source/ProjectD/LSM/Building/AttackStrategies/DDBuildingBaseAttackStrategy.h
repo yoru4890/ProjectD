@@ -10,7 +10,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Blueprintable)
 class PROJECTD_API UDDBuildingBaseAttackStrategy : public UObject, public IDDBuildingAttackStrategyInterface
 {
 	GENERATED_BODY()
@@ -24,6 +24,8 @@ protected:
 	void ApplyDotDamge(AActor* TargetEnemy);
 	void ApplyDirectDamage(AActor* TargetEnemy);
 	void ApplySlowEffect(AActor* TargetEnemy);
+
+	void PlayHitEffect(AActor* TargetEnemy, FVector Location = FVector(), FRotator Rotation = FRotator(), FName SocketName = NAME_None, bool bAttachToTarget = true);
 
 protected:
 	UPROPERTY()

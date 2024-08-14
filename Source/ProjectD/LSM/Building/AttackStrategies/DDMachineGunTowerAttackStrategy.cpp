@@ -10,4 +10,5 @@ void UDDMachineGunTowerAttackStrategy::Attack(AActor* TargetEnemy)
 	Super::Attack(TargetEnemy);
 
 	ApplyDirectDamage(TargetEnemy);
+	PlayHitEffect(TargetEnemy);
 }

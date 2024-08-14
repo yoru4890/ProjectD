@@ -24,7 +24,6 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 protected:
-	virtual void Attack() override;
 	virtual void SetTargetEnemy(AActor* NewTargetEnemy);
 
 private:

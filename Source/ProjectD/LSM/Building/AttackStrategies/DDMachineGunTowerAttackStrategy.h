@@ -10,7 +10,7 @@
 /**
  * 
  */
-UCLASS(Blueprintable)
+UCLASS()
 class PROJECTD_API UDDMachineGunTowerAttackStrategy : public UDDBuildingBaseAttackStrategy
 {
 	GENERATED_BODY()
@@ -19,6 +19,5 @@ public:
 	virtual void Attack(AActor* TargetEnemy) override;
 	
 private:
-
 
 };

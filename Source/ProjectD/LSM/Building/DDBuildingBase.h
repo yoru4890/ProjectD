@@ -10,11 +10,11 @@
 #include "DDBuildingBase.generated.h"
 
 UCLASS()
-class PROJECTD_API ADDBuildingBase : public AActor,public IDDSetAssetInterface
+class PROJECTD_API ADDBuildingBase : public AActor, public IDDSetAssetInterface
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	// Sets default values for this actor's properties
 	ADDBuildingBase();
 	virtual ~ADDBuildingBase();
@@ -26,11 +26,12 @@ protected:
 public:
 	FORCEINLINE const FName& GetRowName() const { return RowName; }
 	FORCEINLINE const int32 GetCellWidth() const { return CellWidth; }
-	FORCEINLINE const EBuildingType GetBuildingType() const { return BuildingType;}
+	FORCEINLINE const EBuildingType GetBuildingType() const { return BuildingType; }
 	FORCEINLINE const float GetDamage() const { return Damage; }
 	FORCEINLINE const TSubclassOf<UDamageType> GetDamageType() const { return DamageType; }
+	FORCEINLINE class UNiagaraSystem* GetHitEffect() const { return HitEffect; }
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	virtual void InitFromDataTable(const FName& InRowName, const FDDBuildingBaseData& BuildingData);
@@ -40,7 +41,7 @@ public:
 	void SetMaterialToOriginal();
 
 protected:
-	virtual void Attack();
+	virtual void ExecuteAttackEffects();
 
 	void SetupAttackCollisionResponses();
 
@@ -51,10 +52,16 @@ protected:
 	virtual void OnBoxCollisionEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 	virtual void ModifyMeshAndAttackCollision() const;
+
+	void StopAttackEffect();
+
 private:
 	void SetParticeEffects(FDDBuildingBaseData& LoadedAsset);
 	void SetMeshs(FDDBuildingBaseData& LoadedAsset);
+	void SetAttackStrategy(TSubclassOf<class UDDBuildingBaseAttackStrategy> AttackStrategyClass);
 	void PlayAttackEffectAtSocket();
+	void PlayAttackAnimation();
+	void PlayAttackSound();
 
 
 protected:
@@ -126,10 +133,10 @@ protected:
 	TObjectPtr<class UNiagaraComponent> AttackNiagaraComponent;
 
 	UPROPERTY(EditAnywhere)
-	TObjectPtr<class UFXSystemAsset> AttackEffect;
+	TObjectPtr<class UNiagaraSystem> AttackEffect;
 
 	UPROPERTY(EditAnywhere)
-	TObjectPtr<class UFXSystemAsset> HitEffect;
+	TObjectPtr<class UNiagaraSystem> HitEffect;
 
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<class UShapeComponent> AttackCollisionComponent;
@@ -153,8 +160,11 @@ protected:
 	TObjectPtr<UMaterialInterface> PreviewMaterial;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
-	TMap<UMeshComponent*,FDDMaterials> OriginalMaterials;
+	TMap<UMeshComponent*, FDDMaterials> OriginalMaterials;
 
 	UPROPERTY()
 	TObjectPtr<UMaterialInstanceDynamic> DynamicMaterialInstance;
+
+	UPROPERTY()
+	TObjectPtr<class UDDBuildingBaseAttackStrategy> AttackStrategy;
 };

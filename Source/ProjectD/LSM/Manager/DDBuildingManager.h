@@ -18,7 +18,7 @@ public:
 	TArray<TObjectPtr<ADDBuildingBase>> Buildings;
 };
 
-UCLASS()
+UCLASS(BlueprintType)
 class PROJECTD_API UDDBuildingManager : public UObject
 {
 	GENERATED_BODY()
@@ -36,6 +36,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool UnlockBuilding(const FName& RowName);
 
+	UFUNCTION(BlueprintCallable)
 	bool LockBuilding(const FName& RowName);
 
 	const FDDBuildingBaseData* GetBuildingData(const FName& RowName) const;
@@ -48,10 +49,12 @@ public:
 
 	const TMap<FName, FDDTrapData>& GetTrapDataTable() const;
 
+	UFUNCTION(BlueprintCallable)
 	TMap<FName, FDDTrapData>& GetTrapDataTable();
 
 	const TMap<FName, FDDTowerData>& GetTowerDataTable() const;
 
+	UFUNCTION(BlueprintCallable)
 	TMap<FName, FDDTowerData>& GetTowerDataTable();
 
 	const TMap<FName, FDDBuildingBaseData*>& GetBuildingDataTable() const;

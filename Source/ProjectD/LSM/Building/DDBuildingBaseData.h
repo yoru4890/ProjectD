@@ -104,10 +104,10 @@ public:
 	TArray<TSoftObjectPtr<UAnimMontage>> AttackMontages;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSoftObjectPtr<class UFXSystemAsset> AttackEffect; // 공격 이펙트
+	TSoftObjectPtr<class UNiagaraSystem> AttackEffect; // 공격 이펙트
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSoftObjectPtr<class UFXSystemAsset> HitEffect; // 공격 이펙트
+	TSoftObjectPtr<class UNiagaraSystem> HitEffect; // 공격 이펙트
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<UObject> FactoryClass; // 팩토리 클래스
@@ -116,7 +116,7 @@ public:
 	TSubclassOf<UDamageType> DamageType; // 데미지 타입
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<class UDDBuildingAttackStrategyInterface> AttackStrategy; // 공격 전략
+	TSubclassOf<class UDDBuildingBaseAttackStrategy> AttackStrategy; // 공격 전략
 
 	bool bIsLoading = false;
 	bool bIsLoaded = false;

@@ -5,11 +5,11 @@
 #include "Components/BoxComponent.h"
 #include "LSM/Manager/DDGridBuildManager.h"
 #include "Kismet/GameplayStatics.h"
-#include "Particles/ParticleSystemComponent.h"
 #include "YSY/Collision/CollisionChannel.h"
 #include "DDBuildingAnimInstance.h"
 #include "NiagaraSystem.h"
 #include "NiagaraComponent.h"
+#include "LSM/Building/AttackStrategies/DDBuildingBaseAttackStrategy.h"
 
 #pragma region ConstructorAndInitialization
 // Sets default values
@@ -30,11 +30,6 @@ ADDBuildingBase::ADDBuildingBase()
 
 	MeshContainerComponent = CreateDefaultSubobject<USceneComponent>(TEXT("MashContainerComponent"));
 	MeshContainerComponent->SetupAttachment(RootComponent);
-
-	// 파티클 시스템 컴포넌트 생성
-	AttackParticleSystemComponent = CreateDefaultSubobject<UParticleSystemComponent>(TEXT("ParticleSystemComponent"));
-	AttackParticleSystemComponent->SetupAttachment(RootComponent);
-	AttackParticleSystemComponent->SetAutoActivate(false);  // 기본적으로 비활성화
 
 	// 나이아가라 시스템 컴포넌트 생성
 	AttackNiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("NiagaraComponent"));
@@ -112,11 +107,24 @@ void ADDBuildingBase::InitFromDataTable(const FName& InRowName, const FDDBuildin
 	UE_LOG(LogTemp, Warning, TEXT("MeshZAxisModify is : %f"), BuildingData.MeshZAxisModify);
 }
 
+void ADDBuildingBase::SetAttackStrategy(TSubclassOf<class UDDBuildingBaseAttackStrategy> AttackStrategyClass)
+{
+	if (AttackStrategyClass)
+	{
+		UDDBuildingBaseAttackStrategy* StrategyInstance = NewObject<UDDBuildingBaseAttackStrategy>(this, AttackStrategyClass);
+
+		AttackStrategy = StrategyInstance;
+		AttackStrategy->Initialize(this);
+	}
+}
+
+
 void ADDBuildingBase::SetAssets(FDDBuildingBaseData& LoadedAsset)
 {
 	SetMeshs(LoadedAsset);
 	SetParticeEffects(LoadedAsset);
 	ModifyMeshAndAttackCollision();
+	SetAttackStrategy(LoadedAsset.AttackStrategy);
 
 }
 
@@ -160,25 +168,18 @@ void ADDBuildingBase::SetParticeEffects(FDDBuildingBaseData& LoadedAsset)
 		UE_LOG(LogTemp, Warning, TEXT("Socket %s not found on any mesh components."), *SocketName.ToString());
 		return;
 	}
-	// AttackEffect가 UParticleSystem인지, UNiagaraSystem인지 확인하고 적절한 이펙트를 설정
-	if (UParticleSystem* ParticleSystem = Cast<UParticleSystem>(AttackEffect))
+
+	if (AttackNiagaraComponent)
 	{
-		// ParticleSystem 설정 및 활성화
-		if (AttackParticleSystemComponent)
-		{
-			AttackParticleSystemComponent->SetTemplate(ParticleSystem);
-			AttackParticleSystemComponent->SetupAttachment(TargetComponent, SocketName);
-			AttackParticleSystemComponent->RegisterComponentWithWorld(GetWorld());
-		}
+		AttackNiagaraComponent->AttachToComponent(TargetComponent, FAttachmentTransformRules::SnapToTargetIncludingScale, SocketName);
+		AttackNiagaraComponent->RegisterComponent();
 	}
-	else if (UNiagaraSystem* NiagaraSystem = Cast<UNiagaraSystem>(AttackEffect))
+	if (UNiagaraSystem* NiagaraSystem = Cast<UNiagaraSystem>(AttackEffect))
 	{
 		// NiagaraSystem 설정 및 활성화
 		if (AttackNiagaraComponent)
 		{
 			AttackNiagaraComponent->SetAsset(NiagaraSystem);
-			AttackNiagaraComponent->SetupAttachment(TargetComponent, SocketName);
-			AttackNiagaraComponent->RegisterComponentWithWorld(GetWorld());
 		}
 	}
 	else
@@ -270,7 +271,6 @@ void ADDBuildingBase::SetMeshs(FDDBuildingBaseData& LoadedAsset)
 		OriginalMaterials.Add(StaticMeshComponent, MaterialStruct);
 	}
 }
-
 #pragma endregion EffectsAndMeshes
 
 #pragma region AttackAndCollision
@@ -290,7 +290,26 @@ void ADDBuildingBase::SetCanAttack(const bool bInCanAttack)
 	}
 }
 
-void ADDBuildingBase::Attack()
+void ADDBuildingBase::ExecuteAttackEffects()
+{
+	PlayAttackEffectAtSocket();
+	PlayAttackAnimation();
+	PlayAttackSound();
+	UE_LOG(LogTemp, Warning, TEXT("Execute Attack Effect"));
+}
+
+void ADDBuildingBase::PlayAttackEffectAtSocket()
+{
+	AttackNiagaraComponent->SetActive(true);
+
+}
+
+void ADDBuildingBase::StopAttackEffect()
+{
+	AttackNiagaraComponent->SetActive(false);
+}
+
+void ADDBuildingBase::PlayAttackAnimation()
 {
 	if (!AttackMontages.IsEmpty() && !SkeletalMeshComponents.IsEmpty())
 	{
@@ -311,14 +330,10 @@ void ADDBuildingBase::Attack()
 			}
 		}
 	}
-	PlayAttackEffectAtSocket();
 }
 
-void ADDBuildingBase::PlayAttackEffectAtSocket()
+void ADDBuildingBase::PlayAttackSound()
 {
-	AttackParticleSystemComponent->SetActive(true);
-	AttackNiagaraComponent->SetActive(true);
-
 }
 
 #pragma endregion AttackAndCollision

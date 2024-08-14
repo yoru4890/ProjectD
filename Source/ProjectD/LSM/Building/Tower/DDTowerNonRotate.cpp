@@ -12,7 +12,7 @@ void ADDTowerNonRotate::Tick(float DeltaTime)
 	if (bCanAttack && !EnemiesInRanged.IsEmpty() && TimeSinceLastAttack >= AttackCoolTime)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Attack"));
-		Attack();
+		ExecuteAttackEffects();
 		TimeSinceLastAttack = 0.f;
 	}
 }

@@ -24,11 +24,6 @@ void ADDTowerBase::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void ADDTowerBase::Attack()
-{
-	Super::Attack();
-}
-
 void ADDTowerBase::SetTargetEnemy(AActor* NewTargetEnemy)
 {
 	TargetEnemy = NewTargetEnemy;

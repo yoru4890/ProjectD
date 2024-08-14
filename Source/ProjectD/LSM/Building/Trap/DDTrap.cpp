@@ -26,21 +26,8 @@ void ADDTrap::Tick(float DeltaTime)
 	if (bCanAttack && !EnemiesInRanged.IsEmpty() && TimeSinceLastAttack >= AttackCoolTime)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Attack"));
-		Attack();
+		ExecuteAttackEffects();
 		TimeSinceLastAttack = 0.f;
-	}
-}
-
-void ADDTrap::Attack()
-{
-	Super::Attack();
-
-	FDamageEvent DamageEvent{};
-	DamageEvent.DamageTypeClass = DamageType;
-	for (AActor* Enemy : EnemiesInRanged)
-	{
-		Enemy->TakeDamage(Damage, DamageEvent, nullptr, this);
-		UE_LOG(LogTemp, Warning, TEXT("Trap Attack : %d , Damage Type: %s"), Damage, *DamageType->GetDisplayNameText().ToString());
 	}
 }
 
