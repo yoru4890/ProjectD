@@ -8,6 +8,7 @@
 #include "YSY/Interface/DDEnemyAIInterface.h"
 #include "YSY/Interface/DDCharacterWidgetInterface.h"
 #include "YSY/Interface/DamageInterface.h"
+#include "YSY/Interface/EnemyHpVisibleInterface.h"
 #include "DDEnemyBase.generated.h"
 
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnDieSignature, const FName&, ADDEnemyBase*);
@@ -31,7 +32,7 @@ struct FDebuffState
 };
 
 UCLASS()
-class PROJECTD_API ADDEnemyBase : public ACharacter, public IDDEnemyAIInterface, public IDDCharacterWidgetInterface, public IDamageInterface
+class PROJECTD_API ADDEnemyBase : public ACharacter, public IDDEnemyAIInterface, public IDDCharacterWidgetInterface, public IDamageInterface, public IEnemyHpVisibleInterface
 {
 	GENERATED_BODY()
 
@@ -84,7 +85,7 @@ public:
 	UFUNCTION()
 	void RangeAttack();
 
-	void ShowHpBar();
+	void ShowHpBarbyAttack();
 
 #pragma region AIInterface
 
@@ -118,6 +119,12 @@ public:
 	virtual void ApplyChainDamage(int DamageAmount, int NumberOfChain);
 	UFUNCTION(BlueprintCallable)
 	virtual void ApplyDebuff(EDebuffType DebuffType, float Time, float DebuffRate);
+
+#pragma endregion
+
+#pragma region EnemyHpVisibleInterface
+
+	virtual void SetVisibleHpBar(bool bIsVisible) override;
 
 #pragma endregion
 

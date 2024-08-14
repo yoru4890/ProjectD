@@ -74,7 +74,7 @@ void ADDEnemyBase::PostInitializeComponents()
 
 float ADDEnemyBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	ShowHpBar();
+	ShowHpBarbyAttack();
 
 	const UDamageType* DamageType = DamageEvent.DamageTypeClass.GetDefaultObject();
 
@@ -555,12 +555,17 @@ void ADDEnemyBase::RangeAttack()
 	}
 }
 
-void ADDEnemyBase::ShowHpBar()
+void ADDEnemyBase::ShowHpBarbyAttack()
 {
-	OnSetVisibleHpBarDelegate.ExecuteIfBound(true);
+	SetVisibleHpBar(true);
 
 	GetWorld()->GetTimerManager().SetTimer(HpBarTH, [this]()
 		{
-			OnSetVisibleHpBarDelegate.ExecuteIfBound(false);
+			SetVisibleHpBar(false);
 		}, 0.1f, false, 4.0f);
+}
+
+void ADDEnemyBase::SetVisibleHpBar(bool bIsVisible)
+{
+	OnSetVisibleHpBarDelegate.ExecuteIfBound(bIsVisible);
 }

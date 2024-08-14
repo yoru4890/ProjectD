@@ -27,6 +27,7 @@ void UDDEnemyAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	if (charMoveComp)
 	{
 		velocity = charMoveComp->Velocity;
+		UE_LOG(LogTemp, Warning, TEXT("%f"), charMoveComp->RotationRate.Yaw);
 		FVector direction{ owner->GetActorRotation().Vector() };
 		FVector rightDirection{ FRotationMatrix(owner->GetActorRotation()).GetScaledAxis(EAxis::Y).GetSafeNormal2D() };
 		FVector normalVelocity{ velocity.GetSafeNormal2D() };
