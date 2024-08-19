@@ -31,6 +31,30 @@ void UDDBuildingManager::Initialize()
 	{
 		BuildingDataTable.Add(TowerData.Key, &TowerData.Value);
 	}
+
+	SetBuildingSellCost();
+}
+
+void UDDBuildingManager::SetBuildingSellCost(float Ratio)
+{
+	for (auto& BuildingDataMap : BuildingDataTable)
+	{
+		FName BuildingName = BuildingDataMap.Key;
+		FDDBuildingBaseData* BuildingData = BuildingDataMap.Value;
+
+		FName ParentName = BuildingData->ParentRowName;
+		int32 TotalCost = BuildingData->BuildCost;
+
+		while (ParentName != FName("None"))
+		{
+			TotalCost += BuildingData->BuildCost;
+			ParentName = (*BuildingDataTable.Find(ParentName))->ParentRowName;
+		}
+
+		TotalCost = TotalCost * Ratio;
+
+		BuildingData->SellCost = TotalCost;
+	}
 }
 
 bool UDDBuildingManager::IsBuildingUnlocked(const FName& RowName) const
@@ -132,15 +156,8 @@ ADDBuildingBase* UDDBuildingManager::SpawnBuilding(UWorld* World, const FName& R
 		// World가 null이면 실행 중지
 		check(World);
 
-		// 트랩 데이터를 가져옵니다.
-		FDDBuildingBaseData* BuildingStruct = GetBuildingData(RowName);
-
-		if (!BuildingStruct)
-		{
-			return nullptr;
-		}
-		const FDDTrapData* TrapStruct = static_cast<const FDDTrapData*>(BuildingStruct);
-
+		// 빌딩 데이터 가져오기
+		const TMap<FName, FDDBuildingBaseData*>& OutBuildingDataTable = GetBuildingDataTable();
 
 		UDDGameInstance* MyGameInstance = Cast<UDDGameInstance>(World->GetGameInstance());
 		check(MyGameInstance);
@@ -151,7 +168,7 @@ ADDBuildingBase* UDDBuildingManager::SpawnBuilding(UWorld* World, const FName& R
 		IDDFactoryInterface* BuildingFactory = FactoryManager->GetFactory(RowName);
 		check(BuildingFactory);
 
-		UObject* CreatedObject = BuildingFactory->CreateObject(World, RowName, *BuildingStruct, Location, Rotation, Owner, Instigator);
+		UObject* CreatedObject = BuildingFactory->CreateObject(World, RowName, OutBuildingDataTable, Location, Rotation, Owner, Instigator);
 		if (!CreatedObject)
 		{
 			return nullptr;

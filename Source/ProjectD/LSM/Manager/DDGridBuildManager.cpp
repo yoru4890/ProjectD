@@ -72,12 +72,6 @@ void ADDGridBuildManager::InitializeGridCells()
 			GridCellMap.Add(FIntPoint(Row, Column), GridCell);
 		}
 	}
-
-	// Debug: Print the grid cell locations
-	for (auto& Cell : GridCellMap)
-	{
-		DrawDebugSphere(GetWorld(), Cell.Value.WorldLocation, 10.0f, 3, FColor::Red, true);
-	}
 }
 
 const FVector ADDGridBuildManager::GetNearestGridCellLocation(const FVector& HitLocation) const
@@ -238,6 +232,29 @@ void ADDGridBuildManager::AddTowerZone()
 	TowerZones.Add(NewTowerZone);
 }
 
+void ADDGridBuildManager::ShowDeugGrid()
+{
+	// Debug: Print the grid cell locations
+	for (auto& Cell : GridCellMap)
+	{
+		if (Cell.Value.bCanBuild)
+		{
+			if (Cell.Value.bIsTowerArea)
+			{
+				DrawDebugSphere(GetWorld(), Cell.Value.WorldLocation, 10.0f, 3, FColor::Blue, false,5.0f);
+			}
+			else
+			{
+				DrawDebugSphere(GetWorld(), Cell.Value.WorldLocation, 10.0f, 3, FColor::Green, false, 5.0f);
+			}
+		}
+		else
+		{
+			DrawDebugSphere(GetWorld(), Cell.Value.WorldLocation, 10.0f, 3, FColor::Red, false, 5.0f);
+		}
+	}
+}
+
 void ADDGridBuildManager::UpdateTowerZone()
 {
 	for (UBoxComponent* TowerZone : TowerZones)
@@ -258,7 +275,6 @@ void ADDGridBuildManager::UpdateTowerZone()
 				if (GridCellMap.Contains(CellIndex))
 				{
 					GridCellMap[CellIndex].bIsTowerArea = true;
-					DrawDebugSphere(GetWorld(), GridCellMap[CellIndex].WorldLocation, 10.0f, 3, FColor::Green, true);
 				}
 			}
 		}
