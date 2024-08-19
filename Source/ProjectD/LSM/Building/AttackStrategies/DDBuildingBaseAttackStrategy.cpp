@@ -29,12 +29,12 @@ void UDDBuildingBaseAttackStrategy::Attack(AActor* TargetEnemy)
 
 void UDDBuildingBaseAttackStrategy::ApplyDotDamge(AActor* TargetEnemy)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Apply Dot Damage"));
+	//UE_LOG(LogTemp, Warning, TEXT("Apply Dot Damage"));
 }
 
 void UDDBuildingBaseAttackStrategy::ApplyDirectDamage(AActor* TargetEnemy)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Apply Direct Damage"));
+	//UE_LOG(LogTemp, Warning, TEXT("Apply Direct Damage"));
 	FDamageEvent DamageEvent{};
 	DamageEvent.DamageTypeClass = DamageType;
 	TargetEnemy->TakeDamage(Damage, DamageEvent, nullptr, OwningTower);
@@ -42,7 +42,7 @@ void UDDBuildingBaseAttackStrategy::ApplyDirectDamage(AActor* TargetEnemy)
 
 void UDDBuildingBaseAttackStrategy::ApplySlowEffect(AActor* TargetEnemy)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Apply Slow Effect"));
+	//UE_LOG(LogTemp, Warning, TEXT("Apply Slow Effect"));
 }
 
 void UDDBuildingBaseAttackStrategy::PlayHitEffect(AActor* TargetEnemy, FVector Location, FRotator Rotation, FName SocketName, bool bAttachToTarget)
@@ -72,7 +72,7 @@ void UDDBuildingBaseAttackStrategy::PlayHitEffect(AActor* TargetEnemy, FVector L
 
     if (bAttachToTarget && TargetEnemy)
     {
-        // 히트 이펙트를 특정 위치에 생성 (땅에 터지는 효과 등)
+        // 히트 이펙트를 적에게 생성 (땅에 터지는 효과 등)
         UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
             GetWorld(),
             NiagaraEffect,

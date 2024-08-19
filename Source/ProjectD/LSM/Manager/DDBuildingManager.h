@@ -28,6 +28,8 @@ public:
 
 	void Initialize();
 
+	void SetBuildingSellCost(float Ratio = 0.8f);
+
 	// 함정이 해금이 되었는지 체크하는 메서드
 	UFUNCTION(BlueprintCallable)
 	bool IsBuildingUnlocked(const FName& RowName) const;

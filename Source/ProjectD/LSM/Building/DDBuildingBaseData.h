@@ -28,10 +28,13 @@ public:
 	FString DisplayName; // 오브젝트의 이름
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 ID; // 오브젝트의 고유 식별자
+	EBuildingType BuildingType; // 빌딩의 타입
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EBuildingType BuildingType; // 오브젝트의 고유 식별자
+	FString BuildingInfo; // 빌딩의 정보
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TObjectPtr<UTexture2D> BuildingImage; // 빌딩의 이미지
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 OccupiedCellWidth; // 그리드를 차지하는 크기
@@ -46,7 +49,7 @@ public:
 	int32 BuildCost; //설치비용
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 UpgradeCost; //업그레이드 비용
+	int32 SellCost; //설치비용
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 UnlockCost; //언락 비용

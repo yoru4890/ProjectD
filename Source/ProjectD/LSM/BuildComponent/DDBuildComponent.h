@@ -89,7 +89,7 @@ private:
 
 	bool CanPayBuildCost(const FName& RowName) const;
 	bool PayBuildCost(const FName& RowName) const;
-	bool CanPayUpgradeCost(const FName& RowName) const;
-	bool PayUpgradeCost(const FName& RowName) const;
+	//bool CanPayUpgradeCost(const FName& RowName) const;
+	//bool PayUpgradeCost(const FName& RowName) const;
 
 };

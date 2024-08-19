@@ -145,9 +145,13 @@ void UDDBuildComponent::CancelPlacedBuilding()
 	if (!ManagedBuilding) {
 		return;
 	}
-	FDDBuildingBaseData& ManagedBuildingData = *BuildingManager->GetBuildingData(ManagedBuilding->GetRowName());
+	const FDDBuildingBaseData& BuildingData = *BuildingManager->GetBuildingData(ManagedBuilding->GetRowName());
+
+	int32 SellCost = BuildingData.SellCost;
+
+	UE_LOG(LogTemp, Warning, TEXT("SellCost is %d"), SellCost);
 	GridBuildManager->SetGridCellAsBlank(ManagedBuilding->GetActorLocation(), ManagedBuilding->GetCellWidth());
-	PlayerState->AddGold(ManagedBuildingData.BuildCost * 0.8f);
+	PlayerState->AddGold(SellCost);
 	BuildingManager->DestroyBuilding(*ManagedBuilding);
 	ManagedBuilding = nullptr;
 }
@@ -166,7 +170,7 @@ bool UDDBuildComponent::UpgradeBuilding(const FName& RowName)
 		return false;
 	}
 
-	if (!CanPayUpgradeCost(RowName))
+	if (!CanPayBuildCost(RowName))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Upgrade Failed : Cost Lacked"));
 		return false;
@@ -180,7 +184,7 @@ bool UDDBuildComponent::UpgradeBuilding(const FName& RowName)
 		return false;
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("Upgrade Gold : %d"), UpgradeBuildingData.UpgradeCost);
+	UE_LOG(LogTemp, Warning, TEXT("Upgrade Gold : %d"), UpgradeBuildingData.BuildCost);
 
 	UWorld* World = GetWorld();
 	check(World);
@@ -203,7 +207,7 @@ bool UDDBuildComponent::UpgradeBuilding(const FName& RowName)
 	ManagedBuilding = NewBuilding;
 	ManagedBuilding->SetCanAttack(true);
 	ManagedBuilding->SetMaterialToPreview(true);
-	PayUpgradeCost(RowName);
+	PayBuildCost(RowName);
 	return true;
 }
 
@@ -400,7 +404,7 @@ void UDDBuildComponent::PerformManageTrace()
 
 bool UDDBuildComponent::CanPayBuildCost(const FName& RowName) const
 {
-	const FDDBuildingBaseData& BuildingData = *BuildingManager->GetBuildingData(RowName);
+	const FDDBuildingBaseData& BuildingData = *BuildingManager->GetBuildingData(RowName); 
 	bool bCanPay = PlayerState->CheckGold(BuildingData.BuildCost);
 	return bCanPay;
 }
@@ -412,16 +416,16 @@ bool UDDBuildComponent::PayBuildCost(const FName& RowName) const
 	return bIsPay;
 }
 
-bool UDDBuildComponent::CanPayUpgradeCost(const FName& RowName) const
-{
-	const FDDBuildingBaseData& BuildingData = *BuildingManager->GetBuildingData(RowName);
-	bool bCanPay = PlayerState->CheckGold(BuildingData.UpgradeCost);
-	return bCanPay;
-}
-
-bool UDDBuildComponent::PayUpgradeCost(const FName& RowName) const
-{
-	const FDDBuildingBaseData& BuildingData = *BuildingManager->GetBuildingData(RowName);
-	bool bIsPay = PlayerState->SubtractGold(BuildingData.UpgradeCost);
-	return bIsPay;
-}
+//bool UDDBuildComponent::CanPayUpgradeCost(const FName& RowName) const
+//{
+//	const FDDBuildingBaseData& BuildingData = *BuildingManager->GetBuildingData(RowName);
+//	bool bCanPay = PlayerState->CheckGold(BuildingData.UpgradeCost);
+//	return bCanPay;
+//}
+//
+//bool UDDBuildComponent::PayUpgradeCost(const FName& RowName) const
+//{
+//	const FDDBuildingBaseData& BuildingData = *BuildingManager->GetBuildingData(RowName);
+//	bool bIsPay = PlayerState->SubtractGold(BuildingData.UpgradeCost);
+//	return bIsPay;
+//}

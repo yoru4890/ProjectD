@@ -128,6 +128,7 @@ void ADDBuildingBase::SetAssets(FDDBuildingBaseData& LoadedAsset)
 
 }
 
+
 #pragma endregion SetupAndInitialization
 
 #pragma region EffectsAndMeshes
@@ -295,7 +296,6 @@ void ADDBuildingBase::ExecuteAttackEffects()
 	PlayAttackEffectAtSocket();
 	PlayAttackAnimation();
 	PlayAttackSound();
-	UE_LOG(LogTemp, Warning, TEXT("Execute Attack Effect"));
 }
 
 void ADDBuildingBase::PlayAttackEffectAtSocket()
