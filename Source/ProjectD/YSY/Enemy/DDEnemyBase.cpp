@@ -6,6 +6,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Engine/DamageEvents.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 #include "YSY/AI/DDEnemyAIController.h"
 #include "YSY/AI/AISplineRoute.h"
 #include "YSY/UI/DDHpBarWidget.h"
@@ -14,6 +16,7 @@
 #include "YSY/DamageType/AllDamageType.h"
 #include "YSY/Animation/AttackFinishedAnimNotify.h"
 #include "YSY/Animation/AttackTraceAnimNotify.h"
+#include "YSY/Animation/DDPlayEffectAnimNotify.h"
 
 // Sets default values
 ADDEnemyBase::ADDEnemyBase()
@@ -145,7 +148,6 @@ void ADDEnemyBase::Tick(float DeltaTime)
 
 void ADDEnemyBase::InitializeEnemy(const FDDEnemyData& EnemyData)
 {
-
 	EnemyName = EnemyData.EnemyName;
 	WeakPoints = EnemyData.WeakPoints;
 	EnemyType = EnemyData.EnemyType;
@@ -509,6 +511,10 @@ void ADDEnemyBase::BindingAnimNotify()
 					AttackTraceNotify->OnNotified.AddUObject(this, &ADDEnemyBase::RangeAttack);
 				}			
 			}
+			else if (UDDPlayEffectAnimNotify* PlayEffectNotify = Cast<UDDPlayEffectAnimNotify>(eventNotify.Notify))
+			{
+				PlayEffectNotify->OnNotified.AddUObject(this, &ADDEnemyBase::PlayAttackEffect);
+			}
 		}
 	}
 }
@@ -563,6 +569,27 @@ void ADDEnemyBase::ShowHpBarbyAttack()
 		{
 			SetVisibleHpBar(false);
 		}, 0.1f, false, 4.0f);
+}
+
+void ADDEnemyBase::PlayAttackEffect()
+{
+	for (const auto& LocationName : AttackLocations)
+	{
+		// TODO : Change to Location , ObjectPooling
+		auto Location = GetMesh()->GetBoneLocation(LocationName);
+
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), AttackSound, Location);
+
+		if (AttackCascadeEffect)
+		{
+			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), AttackCascadeEffect, Location);
+		}
+
+		if (AttackNiagaraEffect)
+		{
+			UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), AttackNiagaraEffect, Location);
+		}
+	}
 }
 
 void ADDEnemyBase::SetVisibleHpBar(bool bIsVisible)

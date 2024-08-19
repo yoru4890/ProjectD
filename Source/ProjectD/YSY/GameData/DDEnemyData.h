@@ -85,4 +85,16 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = Data)
 	TSoftObjectPtr<UAnimMontage> AttackMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	TSoftObjectPtr<USoundBase> AttackSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	TSoftObjectPtr<UParticleSystem> AttackCascadeEffect;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	TSoftObjectPtr<class UNiagaraSystem> AttackNiagaraEffect;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	TArray<FName> AttackLocations;
 };

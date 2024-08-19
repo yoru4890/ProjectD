@@ -87,6 +87,9 @@ public:
 
 	void ShowHpBarbyAttack();
 
+	UFUNCTION()
+	void PlayAttackEffect();
+
 #pragma region AIInterface
 
 	virtual void SplineMove() override;
@@ -181,6 +184,18 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DD", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UAnimMontage> AttackMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DD", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<USoundBase> AttackSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DD", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UParticleSystem> AttackCascadeEffect;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DD", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UNiagaraSystem> AttackNiagaraEffect;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DD", meta = (AllowPrivateAccess = "true"))
+	TArray<FName> AttackLocations;
 
 #pragma endregion
 
