@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "LJW/Weapon/DDWeaponData.h"
+#include "Components/CapsuleComponent.h"
 #include "DDWeaponBase.generated.h"
 
 

@@ -4,6 +4,7 @@
 #include "LJW/Weapon/DDWeaponSystemComponent.h"
 #include "YSY/Game/DDGameSingleton.h"
 #include "LJW/Weapon/DDWeaponBase.h"
+#include "LJW/Weapon/DDWeaponCudgel.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include <Kismet/KismetSystemLibrary.h>
@@ -82,6 +83,8 @@ void UDDWeaponSystemComponent::InitializeWeapon()
 	CurrentWeapon = Weapons[CurrentMeleeWeapon];
 	CurrentWeapon->EnableWeapon();
 
+	//Init Cudgel Collision
+	CudgelCollision = Cast<ADDWeaponCudgel>(CurrentWeapon)->CollisionCapsule;
 }
 
 void UDDWeaponSystemComponent::EquipMeleeWeapon()

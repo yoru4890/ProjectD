@@ -26,7 +26,7 @@ enum class EWeaponType : uint8
 	Bazooka UMETA(DisplayName = "Bazooka"),
 	Machinegun UMETA(DisplayName = "Machinegun"),
 	
-	Unknown UMETA(DisplayName = "Unknown")
+ 	Unknown UMETA(DisplayName = "Unknown")
 };
 
 
@@ -77,6 +77,9 @@ public:
 	FOnSetWeaponIndexSignature OnSetWeaponIndexDelegate;
 
 	FName ComboSectionIndex;
+
+	UPROPERTY()
+	TObjectPtr<UCapsuleComponent> CudgelCollision;
 
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon, meta = (AllowPrivateAccess = "true"))

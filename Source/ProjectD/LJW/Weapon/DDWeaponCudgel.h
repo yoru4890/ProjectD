@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "LJW/Weapon/DDWeaponBase.h"
-#include "Components/CapsuleComponent.h"
 #include "DDWeaponCudgel.generated.h"
 
 /**
@@ -27,6 +26,6 @@ private:
 
 public: 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Collision)
-	UCapsuleComponent* CollisionCapsule;
+	TObjectPtr<UCapsuleComponent> CollisionCapsule;
 
 };
