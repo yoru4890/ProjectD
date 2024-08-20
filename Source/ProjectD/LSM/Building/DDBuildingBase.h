@@ -10,11 +10,11 @@
 #include "DDBuildingBase.generated.h"
 
 UCLASS()
-class PROJECTD_API ADDBuildingBase : public AActor,public IDDSetAssetInterface
+class PROJECTD_API ADDBuildingBase : public AActor, public IDDSetAssetInterface
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	// Sets default values for this actor's properties
 	ADDBuildingBase();
 	virtual ~ADDBuildingBase();
@@ -26,42 +26,54 @@ protected:
 public:
 	FORCEINLINE const FName& GetRowName() const { return RowName; }
 	FORCEINLINE const int32 GetCellWidth() const { return CellWidth; }
-	FORCEINLINE const EBuildingType GetBuildingType() const { return BuildingType;}
+	FORCEINLINE const EBuildingType GetBuildingType() const { return BuildingType; }
+	FORCEINLINE const float GetDamage() const { return Damage; }
+	FORCEINLINE const TSubclassOf<UDamageType> GetDamageType() const { return DamageType; }
+	FORCEINLINE class UNiagaraSystem* GetHitEffect() const { return HitEffect; }
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	virtual void InitFromDataTable(const FName& InRowName, const FDDBuildingBaseData& BuildingData);
-	void  SetCanAttack(const bool bInCanAttack);
-	virtual void SetAssets(FDDBuildingBaseData& LoadedAsset) override;
+	virtual void  SetCanAttack(const bool bInCanAttack);
+	virtual void SetAssets(FDDBuildingBaseData& LoadedAsset);
 	void SetMaterialToPreview(bool bCanPay);
 	void SetMaterialToOriginal();
 
 protected:
-	virtual void Attack();
+	virtual void ExecuteAttackEffects();
+
+	void SetupAttackCollisionResponses();
 
 	UFUNCTION()
-	void OnBoxCollisionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	virtual void OnBoxCollisionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	UFUNCTION()
-	void OnBoxCollisionEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	virtual void OnBoxCollisionEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 	virtual void ModifyMeshAndAttackCollision() const;
+
+	void StopAttackEffect();
+
 private:
 	void SetParticeEffects(FDDBuildingBaseData& LoadedAsset);
 	void SetMeshs(FDDBuildingBaseData& LoadedAsset);
+	void SetAttackStrategy(TSubclassOf<class UDDBuildingBaseAttackStrategy> AttackStrategyClass);
+	void PlayAttackEffectAtSocket();
+	void PlayAttackAnimation();
+	void PlayAttackSound();
 
 
 protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FString DisplayName; // 의 이름
+	FString DisplayName; // 빌딩의 위젯 표시 이름
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FName RowName; // 빌딩의 이름
+	FName RowName; // 빌딩의 데이터테이블 이름
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EBuildingType BuildingType; // 빌딩의 이름
+	EBuildingType BuildingType; // 빌딩의 타입
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 CellWidth; // 빌딩이 차지하는 셀의 크기
@@ -79,13 +91,13 @@ protected:
 	TSet<TObjectPtr<AActor>> EnemiesInRanged; // 빌딩의 공격 범위 안에 들어와있는 적들
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 AttackCoolTime; // 빌딩의 공격 쿨타임
+	float AttackCoolTime; // 빌딩의 공격 쿨타임
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float TimeSinceLastAttack; // 빌딩의 공격 쿨타임
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 Damage; // 빌딩의 데미지
+	float Damage; // 빌딩의 데미지
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsAnimated; // 빌딩의 메쉬 타입
@@ -115,10 +127,19 @@ protected:
 	TSubclassOf<UDamageType> DamageType; // 빌딩의 데미지 타입
 
 	UPROPERTY(EditAnywhere)
-	TArray<TObjectPtr<UParticleSystemComponent>> ParticleEffectComponents;
+	TObjectPtr<UParticleSystemComponent> AttackParticleSystemComponent;
 
 	UPROPERTY(EditAnywhere)
-	TObjectPtr<class UBoxComponent> AttackCollisionComponent;
+	TObjectPtr<class UNiagaraComponent> AttackNiagaraComponent;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class UNiagaraSystem> AttackEffect;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class UNiagaraSystem> HitEffect;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class UShapeComponent> AttackCollisionComponent;
 
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<class USceneComponent> MeshContainerComponent;
@@ -129,15 +150,21 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	TArray<TObjectPtr<USkeletalMeshComponent>> SkeletalMeshComponents;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AnimMontages", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+	TArray<TObjectPtr<UStaticMeshComponent>> StaticMeshComponents;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AttackMontages", meta = (AllowPrivateAccess = "true"))
 	TArray<TObjectPtr<UAnimMontage>> AttackMontages;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
 	TObjectPtr<UMaterialInterface> PreviewMaterial;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Materials")
-	TMap<UMeshComponent*,FDDMaterials> OriginalMaterials;
+	TMap<UMeshComponent*, FDDMaterials> OriginalMaterials;
 
 	UPROPERTY()
 	TObjectPtr<UMaterialInstanceDynamic> DynamicMaterialInstance;
+
+	UPROPERTY()
+	TObjectPtr<class UDDBuildingBaseAttackStrategy> AttackStrategy;
 };

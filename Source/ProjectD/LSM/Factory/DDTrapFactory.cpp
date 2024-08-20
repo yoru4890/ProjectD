@@ -7,14 +7,15 @@
 #include "LSM/Manager/DDAssetManager.h"
 #include "YSY/Game/DDGameInstance.h"
 
-UObject* UDDTrapFactory::CreateObject(UWorld* World, const FName& RowName, const FDDBuildingBaseData& ObjectStruct, const FVector& Location, const FRotator& Rotation, AActor* Owner, APawn* Instigator)
+UObject* UDDTrapFactory::CreateObject(UWorld* World, const FName& RowName, const TMap<FName, FDDBuildingBaseData*>& ObjectDataTable, const FVector& Location, const FRotator& Rotation, AActor* Owner, APawn* Instigator)
 {
 	check(World);
 
+	const FDDBuildingBaseData* BuildingData = *ObjectDataTable.Find(RowName);
 	const FDDTrapData* TrapStruct = nullptr;
-	if (ObjectStruct.BuildingType == EBuildingType::Trap) 
+	if (BuildingData && BuildingData->BuildingType == EBuildingType::Trap)
 	{
-		TrapStruct = static_cast<const FDDTrapData*>(&ObjectStruct);
+		TrapStruct = static_cast<const FDDTrapData*>(BuildingData);
 	}
 	else
 	{
@@ -44,7 +45,6 @@ UObject* UDDTrapFactory::CreateObject(UWorld* World, const FName& RowName, const
 	}
 	NewTrap->InitFromDataTable(RowName, *TrapStruct);
 	NewTrap->SetAssets(*LoadedAsset);
-
 	NewTrap->SetActorLocation(Location);
 	NewTrap->SetActorRotation(Rotation);
 	NewTrap->SetOwner(Owner);

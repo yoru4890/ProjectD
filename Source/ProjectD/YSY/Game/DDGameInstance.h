@@ -20,6 +20,7 @@ public:
 
 	FORCEINLINE class UDDAssetManager* GetAssetManager() const { return AssetManager; }
 
+	UFUNCTION(BlueprintCallable)
 	FORCEINLINE class UDDBuildingManager* GetBuildingManager() const { return BuildingManager; }
 
 	FORCEINLINE class UDDFactoryManager* GetFactoryManager() const { return FactoryManager; }

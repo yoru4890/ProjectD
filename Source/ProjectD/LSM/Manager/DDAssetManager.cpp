@@ -74,12 +74,15 @@ void UDDAssetManager::LoadAssetsAsync(const FName& RowName)
 		SoftObjectPaths.Add(SkeletalMesh.ToSoftObjectPath());
 		UE_LOG(LogTemp, Warning, TEXT(" %s : USkeletalMesh Added"), *RowName.ToString());
 	}
-	if (ObjectStruct->MyAnimBlueprint.IsValid())
+	for (const TSoftObjectPtr<UAnimBlueprint>& AnimBlueprint : ObjectStruct->AnimBlueprints)
 	{
-		UE_LOG(LogTemp, Warning, TEXT(" %s : AnimBlueprint isAlready Loaded"), *RowName.ToString());
+		if (AnimBlueprint.IsValid())
+		{
+			UE_LOG(LogTemp, Warning, TEXT(" %s : AnimBlueprint isAlready Loaded"), *RowName.ToString());
+		}
+		SoftObjectPaths.Add(AnimBlueprint.ToSoftObjectPath());
+		UE_LOG(LogTemp, Warning, TEXT(" %s : AnimBlueprint Added"), *RowName.ToString());
 	}
-	SoftObjectPaths.Add(ObjectStruct->MyAnimBlueprint.ToSoftObjectPath());
-	UE_LOG(LogTemp, Warning, TEXT(" %s : AnimBlueprint Added"), *RowName.ToString());
 
 	for (const TSoftObjectPtr<UAnimMontage>& Montage : ObjectStruct->AttackMontages)
 	{
@@ -88,18 +91,27 @@ void UDDAssetManager::LoadAssetsAsync(const FName& RowName)
 			UE_LOG(LogTemp, Warning, TEXT(" %s : Montage isAlready Loaded"), *RowName.ToString());
 		}
 		SoftObjectPaths.Add(Montage.ToSoftObjectPath());
-		UE_LOG(LogTemp, Warning, TEXT(" %s : MyAnimMontage Added"), *RowName.ToString());
 	}
-	// 파티클도 추가
-	for (const TSoftObjectPtr<UParticleSystem>& Effect : ObjectStruct->Effects)
+	if (ObjectStruct->AttackEffect.IsValid())
 	{
-		if (Effect.IsValid())
-		{
-			UE_LOG(LogTemp, Warning, TEXT(" %s : Effect isAlready Loaded"), *RowName.ToString());
-		}
-		SoftObjectPaths.Add(Effect.ToSoftObjectPath());
-		UE_LOG(LogTemp, Warning, TEXT(" %s : Effect Added"), *RowName.ToString());
+		UE_LOG(LogTemp, Warning, TEXT(" %s : Attack Effects isAlready Loaded"), *RowName.ToString());
 	}
+	SoftObjectPaths.Add(ObjectStruct->AttackEffect.ToSoftObjectPath());
+
+	if (ObjectStruct->HitEffect.IsValid())
+	{
+		UE_LOG(LogTemp, Warning, TEXT(" %s :  Effects isAlready Loaded"), *RowName.ToString());
+	}
+	SoftObjectPaths.Add(ObjectStruct->HitEffect.ToSoftObjectPath());
+	// 파티클도 추가
+	//for (const TSoftObjectPtr<UParticleSystem>& Effect : ObjectStruct->Effects)
+	//{
+	//	if (Effect.IsValid())
+	//	{
+	//		UE_LOG(LogTemp, Warning, TEXT(" %s : Effect isAlready Loaded"), *RowName.ToString());
+	//	}
+	//	SoftObjectPaths.Add(Effect.ToSoftObjectPath());
+	//}
 
 	// Object에 들어있는 Asset의 비동기 로드가 안료되면 호출되는 콜백 함수
 	TFunction<void()> OnAssetsLoadedCallback = [this, RowName, ObjectStruct, SoftObjectPaths]()
@@ -162,11 +174,13 @@ void UDDAssetManager::RemoveLoadedAssetByName(const FName& RowName)
 		UE_LOG(LogTemp, Warning, TEXT("SkeletalMesh IsValid after Reset: %s"), SkeletalMesh.IsNull() ? TEXT("false") : TEXT("true"));
 	}
 
-	// AnimBlueprint 언로드
-	UE_LOG(LogTemp, Warning, TEXT("Unloading AnimBlueprint: %s"), *ObjectStruct->MyAnimBlueprint.ToString());
-	StreamableManager.Unload(ObjectStruct->MyAnimBlueprint.ToSoftObjectPath());
-	ObjectStruct->MyAnimBlueprint.ResetWeakPtr();
-	UE_LOG(LogTemp, Warning, TEXT("AnimBlueprint IsValid after Reset: %s"), ObjectStruct->MyAnimBlueprint.IsValid() ? TEXT("true") : TEXT("false"));
+	for (TSoftObjectPtr<UAnimBlueprint>& AnimBlueprint : ObjectStruct->AnimBlueprints)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Unloading AnimBlueprint: %s"), *AnimBlueprint.ToString());
+		StreamableManager.Unload(AnimBlueprint.ToSoftObjectPath());
+		AnimBlueprint.ResetWeakPtr();
+		UE_LOG(LogTemp, Warning, TEXT("SkeletalMesh IsValid after Reset: %s"), AnimBlueprint.IsNull() ? TEXT("false") : TEXT("true"));
+	}
 
 	// AnimMontage 언로드
 	for (TSoftObjectPtr<UAnimMontage>& Montage : ObjectStruct->AttackMontages)
@@ -179,14 +193,23 @@ void UDDAssetManager::RemoveLoadedAssetByName(const FName& RowName)
 		UE_LOG(LogTemp, Warning, TEXT("Montage Path: %s"), *Montage.ToSoftObjectPath().ToString());
 	}
 
+	UE_LOG(LogTemp, Warning, TEXT("Unloading Attack Effect: %s"), *ObjectStruct->AttackEffect.ToString());
+	StreamableManager.Unload(ObjectStruct->AttackEffect.ToSoftObjectPath());
+	ObjectStruct->AttackEffect.ResetWeakPtr();
+	UE_LOG(LogTemp, Warning, TEXT("Attack Effect IsValid after Reset: %s"), ObjectStruct->AttackEffect.IsValid() ? TEXT("true") : TEXT("false"));
+
+	UE_LOG(LogTemp, Warning, TEXT("Unloading Hit Effect: %s"), *ObjectStruct->HitEffect.ToString());
+	StreamableManager.Unload(ObjectStruct->HitEffect.ToSoftObjectPath());
+	ObjectStruct->HitEffect.ResetWeakPtr();
+	UE_LOG(LogTemp, Warning, TEXT("HitEffect IsValid after Reset: %s"), ObjectStruct->HitEffect.IsValid() ? TEXT("true") : TEXT("false"));
 	// ParticleSystem 언로드
-	for (TSoftObjectPtr<UParticleSystem>& Effect : ObjectStruct->Effects)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Unloading Effect: %s"), *Effect.ToString());
-		StreamableManager.Unload(Effect.ToSoftObjectPath());
-		Effect.ResetWeakPtr();
-		UE_LOG(LogTemp, Warning, TEXT("Effect IsValid after Reset: %s"), Effect.IsValid() ? TEXT("true") : TEXT("false"));
-	}
+	//for (TSoftObjectPtr<UParticleSystem>& Effect : ObjectStruct->Effects)
+	//{
+	//	UE_LOG(LogTemp, Warning, TEXT("Unloading Effect: %s"), *Effect.ToString());
+	//	StreamableManager.Unload(Effect.ToSoftObjectPath());
+	//	Effect.ResetWeakPtr();
+	//	UE_LOG(LogTemp, Warning, TEXT("Effect IsValid after Reset: %s"), Effect.IsValid() ? TEXT("true") : TEXT("false"));
+	//}
 
 	ObjectStruct->bIsLoaded = false;
 
@@ -223,18 +246,23 @@ void UDDAssetManager::RemoveLoadedAssetAll()
 			StreamableManager.Unload(SkeletalMesh.ToSoftObjectPath());
 			SkeletalMesh.ResetWeakPtr();
 		}
-		StreamableManager.Unload(ObjectStruct->MyAnimBlueprint.ToSoftObjectPath());
-		ObjectStruct->MyAnimBlueprint.ResetWeakPtr();
+
+		for (TSoftObjectPtr<UAnimBlueprint>& AnimBlueprint : ObjectStruct->AnimBlueprints)
+		{
+			StreamableManager.Unload(AnimBlueprint.ToSoftObjectPath());
+			AnimBlueprint.ResetWeakPtr();
+		}
 		for (TSoftObjectPtr<UAnimMontage>& Montage : ObjectStruct->AttackMontages)
 		{
 			StreamableManager.Unload(Montage.ToSoftObjectPath());
 			Montage.ResetWeakPtr();
 		}
-		for (TSoftObjectPtr<UParticleSystem>& Effect : ObjectStruct->Effects)
-		{
-			StreamableManager.Unload(Effect.ToSoftObjectPath());
-			Effect.ResetWeakPtr();
-		}
+
+		StreamableManager.Unload(ObjectStruct->AttackEffect.ToSoftObjectPath());
+		ObjectStruct->AttackEffect.ResetWeakPtr();
+
+		StreamableManager.Unload(ObjectStruct->HitEffect.ToSoftObjectPath());
+		ObjectStruct->HitEffect.ResetWeakPtr();
 	}
 }
 

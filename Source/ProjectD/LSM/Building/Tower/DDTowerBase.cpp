@@ -2,30 +2,103 @@
 
 
 #include "LSM/Building/Tower/DDTowerBase.h"
+#include "Components/SphereComponent.h"
+#include "DDTowerData.h"
+#include "Kismet/KismetMathLibrary.h"
 
 // Sets default values
 ADDTowerBase::ADDTowerBase()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-
+	AttackCollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("AttackCollisionComponent"));
+	AttackCollisionComponent->SetupAttachment(RootComponent);
+	SetupAttackCollisionResponses();
 }
 
-ADDTowerBase::~ADDTowerBase()
-{
-}
-
-// Called when the game starts or when spawned
 void ADDTowerBase::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
-// Called every frame
 void ADDTowerBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+}
 
+void ADDTowerBase::SetTargetEnemy(AActor* NewTargetEnemy)
+{
+	TargetEnemy = NewTargetEnemy;
+}
+
+void ADDTowerBase::ModifyMeshAndAttackCollision() const
+{
+	Super::ModifyMeshAndAttackCollision();
+	Cast<USphereComponent>(AttackCollisionComponent)->SetSphereRadius(TowerAttackRange);
+}
+
+void ADDTowerBase::OnBoxCollisionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	Super::OnBoxCollisionBeginOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
+	if (!TargetEnemy)
+	{
+		SetTargetEnemy(OtherActor);
+	}
+}
+
+void ADDTowerBase::OnBoxCollisionEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	Super::OnBoxCollisionEndOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex);
+
+	if (TargetEnemy && TargetEnemy == OtherActor)
+	{
+		SetTargetEnemy(GetNearstEnemy());
+	}
+
+}
+
+AActor* ADDTowerBase::GetNearstEnemy()
+{
+	AActor* NearestEnemy = nullptr;
+	float NearestDistance = TNumericLimits<float>::Max();
+	for (AActor* Enemies : EnemiesInRanged)
+	{
+		for (AActor* Enemy : EnemiesInRanged)
+		{
+			if (Enemy)
+			{
+				// 적과의 거리를 계산
+				float Distance = FVector::Dist(this->GetActorLocation(), Enemy->GetActorLocation());
+
+				// 계산된 거리가 현재까지 찾은 가장 가까운 거리보다 짧은지 확인
+				if (Distance < NearestDistance)
+				{
+					NearestDistance = Distance;
+					NearestEnemy = Enemy;
+				}
+			}
+		}
+	}
+	return NearestEnemy;
+}
+
+void ADDTowerBase::SetAssets(FDDBuildingBaseData& LoadedAsset)
+{
+	Super::SetAssets(LoadedAsset);
+}
+
+void ADDTowerBase::InitFromDataTable(const FName& InRowName, const FDDBuildingBaseData& BuildingData)
+{
+	Super::InitFromDataTable(InRowName, BuildingData);
+
+	const FDDTowerData* TowerData = nullptr;
+	if (BuildingData.BuildingType == EBuildingType::Tower)
+	{
+		TowerData = static_cast<const FDDTowerData*>(&BuildingData);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s is Not Tower"), *RowName.ToString());
+	}
+
+	this->TowerAttackRange = TowerData->TowerAttackRange;
 }
 
