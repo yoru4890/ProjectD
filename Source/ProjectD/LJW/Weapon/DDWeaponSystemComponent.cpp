@@ -47,6 +47,19 @@ void UDDWeaponSystemComponent::InitializeWeapon()
 	// 싱글톤에서 data들을 얻음, 데이터 순서 중요
 	auto WeaponDatas = UDDGameSingleton::Get().GetWeaponDataTable();
 	
+	//Player에 무기 장착
+	if (GetOwner())
+	{
+		//FindComponentByClass -> 여러 개일 경우 가장 첫 번째 메쉬 반환
+		ParentSkeletal = GetOwner()->FindComponentByClass<USkeletalMeshComponent>();
+		PlayerCharacter = Cast<ACharacter>(GetOwner());
+		PlayerAnimInstance = ParentSkeletal->GetAnimInstance();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Owner is null"));
+	}
+
 	for (auto& [WeaponDataName, WeaponDataValue] : WeaponDatas)
 	{
 		UClass* TempClass = WeaponDataValue.WeaponClass;
@@ -57,23 +70,11 @@ void UDDWeaponSystemComponent::InitializeWeapon()
 		check(TempWeapon);
 		UE_LOG(LogTemp, Warning, TEXT("Spawn Weapon : %s"), *WeaponDataName.ToString());
 
-		//Player에 무기 장착
-		if (GetOwner())
-		{
-			//FindComponentByClass -> 여러 개일 경우 가장 첫 번째 메쉬 반환
-			ParentSkeletal = GetOwner()->FindComponentByClass<USkeletalMeshComponent>();
-			PlayerCharacter = Cast<ACharacter>(GetOwner());
-			
-			//무기 Data
-			TempWeapon->InitData(WeaponDataName,WeaponDataValue);
-			Weapons.Emplace(TempWeapon);
-			TempWeapon->AttachToComponent(ParentSkeletal, FAttachmentTransformRules::SnapToTargetNotIncludingScale, TempWeapon->GetSocketName());
-		}
-		else 
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Owner is null"));
-		}
 		
+		//무기 Data
+		TempWeapon->InitData(WeaponDataName,WeaponDataValue);
+		Weapons.Emplace(TempWeapon);
+		TempWeapon->AttachToComponent(ParentSkeletal, FAttachmentTransformRules::SnapToTargetNotIncludingScale, TempWeapon->GetSocketName());
 		
 	}
 
@@ -117,7 +118,7 @@ void UDDWeaponSystemComponent::PlayEquipMontage()
 	{
 		CurrentWeapon = (CurrentWeapon == Weapons[CurrentMeleeWeapon] ? Weapons[CurrentRangeWeapon] : Weapons[CurrentMeleeWeapon]);
 
-		ParentSkeletal->GetAnimInstance()->Montage_Play(CurrentWeapon->GetEquipWeaponMontage());
+		PlayerAnimInstance->Montage_Play(CurrentWeapon->GetEquipWeaponMontage());
 	}
 }
 
@@ -125,7 +126,7 @@ void UDDWeaponSystemComponent::PlayUnequipMontage()
 {
 	if (CurrentWeapon->GetUnequipWeaponMontage())
 	{
-		ParentSkeletal->GetAnimInstance()->Montage_Play(CurrentWeapon->GetUnequipWeaponMontage());
+		PlayerAnimInstance->Montage_Play(CurrentWeapon->GetUnequipWeaponMontage());
 	}
 }
 
@@ -139,7 +140,7 @@ void UDDWeaponSystemComponent::WeaponSubSkill()
 
 	if (CurrentWeapon == Weapons[CurrentMeleeWeapon] && CanMeleeSubSkill())
 	{
-		ParentSkeletal->GetAnimInstance()->Montage_Play(CurrentWeapon->GetSkillWeaponMontage());
+		PlayerAnimInstance->Montage_Play(CurrentWeapon->GetSkillWeaponMontage());
 		CurrentWeapon->SubSkill();
 		
 		UE_LOG(LogTemp, Warning, TEXT("Use Skill : %s"), *CurrentWeapon->GetFName().ToString());
@@ -164,7 +165,7 @@ void UDDWeaponSystemComponent::WeaponStartAiming()
 		if (OnSetAimingDelegate.IsBound())
 		{
 			OnSetAimingDelegate.Execute(true);
-			RifleZoomTL.PlayFromStart();
+			RifleZoomTL.Play();
 		}
 	}
 
@@ -181,7 +182,12 @@ void UDDWeaponSystemComponent::WeaponEndAiming()
 	{
 		if (OnSetAimingDelegate.IsBound())
 		{
+			//Attack Montage가 Aim Animation을 덮어 씌우는 현상 해결
 			OnSetAimingDelegate.Execute(false);
+			if (PlayerAnimInstance->Montage_IsPlaying(CurrentWeapon->GetAttackMontage()))
+			{
+				PlayerAnimInstance->Montage_Stop(0.25f);
+			}
 			RifleZoomTL.Reverse();
 		}
 	}
@@ -189,27 +195,35 @@ void UDDWeaponSystemComponent::WeaponEndAiming()
 
 void UDDWeaponSystemComponent::WeaponAttack()
 {
-	if (CurrentWeapon == Weapons[CurrentMeleeWeapon])
+	//Melee
+	if (CurrentWeapon == Weapons[CurrentMeleeWeapon] && CanAttacking())
 	{
-		if (ParentSkeletal->GetAnimInstance()->Montage_IsPlaying(CurrentWeapon->GetAttackMontage()))
+		if (PlayerAnimInstance->Montage_IsPlaying(CurrentWeapon->GetAttackMontage()))
 		{
-			if (ParentSkeletal->GetAnimInstance()->Montage_GetCurrentSection() == ComboSectionIndex || ComboSectionIndex == FName("A"))
+			if (PlayerAnimInstance->Montage_GetCurrentSection() == ComboSectionIndex || ComboSectionIndex == FName("A"))
 			{
 				return;
 			}
-			ParentSkeletal->GetAnimInstance()->Montage_JumpToSection(ComboSectionIndex, CurrentWeapon->GetAttackMontage());
+			PlayerAnimInstance->Montage_JumpToSection(ComboSectionIndex, CurrentWeapon->GetAttackMontage());
 			CurrentWeapon->Attack();
 		}
 		else
 		{
-			ParentSkeletal->GetAnimInstance()->Montage_Play(CurrentWeapon->GetAttackMontage());
+			PlayerAnimInstance->Montage_Play(CurrentWeapon->GetAttackMontage());
 		}
 		
 	}
 
+	//Range
 	if (CurrentWeapon == Weapons[CurrentRangeWeapon])
 	{
-		
+		//Aim 중 일 때만 가능
+		if (OnGetAimingDelegate.Execute())
+		{
+			PlayerAnimInstance->Montage_Play(CurrentWeapon->GetAttackMontage());
+			CurrentWeapon->Attack();
+
+		}
 	}
 	
 
@@ -232,9 +246,9 @@ bool UDDWeaponSystemComponent::CanMeleeSubSkill()
 		return false;
 	} 
 
-	if (ParentSkeletal->GetAnimInstance()->IsAnyMontagePlaying())
+	if (PlayerAnimInstance->IsAnyMontagePlaying())
 	{
-		if (!(ParentSkeletal->GetAnimInstance()->Montage_IsPlaying(CurrentWeapon->GetAttackMontage())))
+		if (!(PlayerAnimInstance->Montage_IsPlaying(CurrentWeapon->GetAttackMontage())))
 		{
 			return false;
 		}
@@ -246,16 +260,28 @@ bool UDDWeaponSystemComponent::CanMeleeSubSkill()
 
 bool UDDWeaponSystemComponent::CanRangeAiming()
 {
-	//캐릭터 스킬 사용중 불가능
+	//스킬 사용중 불가능
 	//Weapon Change 중 불가능
 	//죽어있을 때 불가능
-	if (ParentSkeletal->GetAnimInstance()->IsAnyMontagePlaying() && !bIsOnTimeline)
+	//Attack 중에 가능
+	if (PlayerAnimInstance->IsAnyMontagePlaying() && !bIsOnTimeline)
 	{
-		if (!(ParentSkeletal->GetAnimInstance()->Montage_IsPlaying(CurrentWeapon->GetAttackMontage())))
+		if (!(PlayerAnimInstance->Montage_IsPlaying(CurrentWeapon->GetAttackMontage())))
 		{
 			return false;
 		}
 
+	}
+	return true;
+}
+
+bool UDDWeaponSystemComponent::CanAttacking()
+{
+	//스킬 사용 중에 불가능
+	//Weapon Change 중 불가능
+	if (PlayerAnimInstance->IsAnyMontagePlaying())
+	{
+		return false;
 	}
 	return true;
 }

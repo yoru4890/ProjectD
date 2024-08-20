@@ -61,6 +61,7 @@ public:
 	bool IsUnequipMontage(const UAnimMontage* Montage) const;
 	bool CanMeleeSubSkill();
 	bool CanRangeAiming();
+	bool CanAttacking();
 
 	UFUNCTION()
 	void UpdateRifleZoom(); //Timeline Update(Tick)
@@ -103,6 +104,10 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Animation, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class ACharacter> PlayerCharacter;
+
+
+	UPROPERTY()
+	TObjectPtr<UAnimInstance> PlayerAnimInstance;
 
 	FTimeline RifleZoomTL;
 
