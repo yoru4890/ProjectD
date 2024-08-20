@@ -22,7 +22,6 @@
 ADDEnemyBase::ADDEnemyBase()
 {
 	PrimaryActorTick.bCanEverTick = true;
-
 	AIControllerClass = ADDEnemyAIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
@@ -196,6 +195,30 @@ void ADDEnemyBase::InitializeEnemy(const FDDEnemyData& EnemyData)
 	AttackMontage = DuplicateObject<UAnimMontage>(EnemyAttackMontage, this);
 
 	BindingAnimNotify();
+
+	if (!EnemyData.AttackSound.IsValid())
+	{
+		EnemyData.AttackSound.LoadSynchronous();
+	}
+
+	AttackSound = EnemyData.AttackSound.Get();
+
+	if (!EnemyData.AttackCascadeEffect.IsValid())
+	{
+		EnemyData.AttackCascadeEffect.LoadSynchronous();
+	}
+
+	AttackCascadeEffect = EnemyData.AttackCascadeEffect.Get();
+
+	if (!EnemyData.AttackNiagaraEffect.IsValid())
+	{
+		EnemyData.AttackNiagaraEffect.LoadSynchronous();
+	}
+
+	AttackNiagaraEffect = EnemyData.AttackNiagaraEffect.Get();
+
+	AttackLocations = EnemyData.AttackLocations;
+	AttackSoundStartTime = EnemyData.AttackSoundStartTime;
 }
 
 void ADDEnemyBase::SplineMove()
@@ -576,9 +599,9 @@ void ADDEnemyBase::PlayAttackEffect()
 	for (const auto& LocationName : AttackLocations)
 	{
 		// TODO : Change to Location , ObjectPooling
-		auto Location = GetMesh()->GetBoneLocation(LocationName);
+		auto Location = GetMesh()->GetSocketLocation(LocationName);
 
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), AttackSound, Location);
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), AttackSound, Location, 1.0f, 1.0f, AttackSoundStartTime);
 
 		if (AttackCascadeEffect)
 		{

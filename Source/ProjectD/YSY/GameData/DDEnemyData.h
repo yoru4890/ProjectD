@@ -69,6 +69,9 @@ public:
 	float HealthWidgetHeight;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	float AttackSoundStartTime;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
 	int32 GoldDropAmount;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
