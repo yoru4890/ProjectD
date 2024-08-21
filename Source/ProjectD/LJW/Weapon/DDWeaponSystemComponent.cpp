@@ -166,6 +166,7 @@ void UDDWeaponSystemComponent::WeaponStartAiming()
 		{
 			OnSetAimingDelegate.Execute(true);
 			RifleZoomTL.Play();
+
 		}
 	}
 

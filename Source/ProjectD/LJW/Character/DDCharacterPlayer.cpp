@@ -196,7 +196,7 @@ void ADDCharacterPlayer::SetCharacterControlData(const UDDCharacterControlData* 
 	Super::SetCharacterControlData(CharacterControlData);
 
 	CameraBoom->TargetArmLength = CharacterControlData->TargetArmLength;
-	CameraBoom->TargetOffset = CharacterControlData->TargetOffset;
+	CameraBoom->SocketOffset = CharacterControlData->SocketOffset;
 	CameraBoom->SetRelativeRotation(CharacterControlData->RelativeRotation);
 	CameraBoom->bUsePawnControlRotation = CharacterControlData->bUsePawnControlRotation;
 	CameraBoom->bInheritPitch = CharacterControlData->bInheritPitch;

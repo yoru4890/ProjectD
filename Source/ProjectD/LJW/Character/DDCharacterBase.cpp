@@ -59,6 +59,13 @@ void ADDCharacterBase::SetCharacterControlData(const UDDCharacterControlData* Ch
 	GetCharacterMovement()->bOrientRotationToMovement = CharacterControlData->bOrientRotationToMovement;
 	GetCharacterMovement()->bUseControllerDesiredRotation = CharacterControlData->bUseControllerDesiredRotation;
 	GetCharacterMovement()->RotationRate = CharacterControlData->RotationRate;
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+	GetCharacterMovement()->RotationRate = CharacterControlData->RotationRate;
+	GetCharacterMovement()->JumpZVelocity = CharacterControlData->JumpZVelocity;
+	GetCharacterMovement()->AirControl = CharacterControlData->AirControl;
+	GetCharacterMovement()->MaxWalkSpeed = CharacterControlData->MaxWalkSpeed;
+	GetCharacterMovement()->MinAnalogWalkSpeed = CharacterControlData->MinAnalogWalkSpeed;
+	GetCharacterMovement()->BrakingDecelerationWalking = CharacterControlData->BrakingDecelerationWalking;
 
 }
 
