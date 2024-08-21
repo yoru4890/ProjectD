@@ -164,6 +164,7 @@ void ADDEnemyBase::InitializeEnemy(const FDDEnemyData& EnemyData)
 	GoldDropAmount = EnemyData.GoldDropAmount;
 	bIsBoss = EnemyData.bIsBoss;
 	bIsElite = EnemyData.bIsElite;
+	AttackEffects = EnemyData.AttackEffects;
 
 	float EnemyScale = EnemyData.ScaleSize;
 	SetActorScale3D({ EnemyScale, EnemyScale, EnemyScale });
@@ -195,30 +196,6 @@ void ADDEnemyBase::InitializeEnemy(const FDDEnemyData& EnemyData)
 	AttackMontage = DuplicateObject<UAnimMontage>(EnemyAttackMontage, this);
 
 	BindingAnimNotify();
-
-	if (!EnemyData.AttackSound.IsValid())
-	{
-		EnemyData.AttackSound.LoadSynchronous();
-	}
-
-	AttackSound = EnemyData.AttackSound.Get();
-
-	if (!EnemyData.AttackCascadeEffect.IsValid())
-	{
-		EnemyData.AttackCascadeEffect.LoadSynchronous();
-	}
-
-	AttackCascadeEffect = EnemyData.AttackCascadeEffect.Get();
-
-	if (!EnemyData.AttackNiagaraEffect.IsValid())
-	{
-		EnemyData.AttackNiagaraEffect.LoadSynchronous();
-	}
-
-	AttackNiagaraEffect = EnemyData.AttackNiagaraEffect.Get();
-
-	AttackLocations = EnemyData.AttackLocations;
-	AttackSoundStartTime = EnemyData.AttackSoundStartTime;
 }
 
 void ADDEnemyBase::SplineMove()
@@ -596,21 +573,23 @@ void ADDEnemyBase::ShowHpBarbyAttack()
 
 void ADDEnemyBase::PlayAttackEffect()
 {
-	for (const auto& LocationName : AttackLocations)
+	for (const auto& AttackEffectInfo : AttackEffects)
 	{
-		// TODO : Change to Location , ObjectPooling
-		auto Location = GetMesh()->GetSocketLocation(LocationName);
-
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), AttackSound, Location, 1.0f, 1.0f, AttackSoundStartTime);
-
-		if (AttackCascadeEffect)
+		for (const auto& LocationName : AttackEffectInfo.LocationNames)
 		{
-			UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), AttackCascadeEffect, Location);
-		}
+			auto Location = GetMesh()->GetSocketLocation(LocationName);
 
-		if (AttackNiagaraEffect)
-		{
-			UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), AttackNiagaraEffect, Location);
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), AttackEffectInfo.SoundEffect, Location, 1.0f, 1.0f, AttackEffectInfo.SoundStartTime);
+
+			if (AttackEffectInfo.CascadeEffect)
+			{
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), AttackEffectInfo.CascadeEffect, Location);
+			}
+
+			if (AttackEffectInfo.NiagaraEffect)
+			{
+				UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), AttackEffectInfo.NiagaraEffect, Location);
+			}
 		}
 	}
 }

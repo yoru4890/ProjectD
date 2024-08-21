@@ -112,21 +112,6 @@ void UDDEnemySpawnManager::ClearEnemyPool()
 		{
 			AssetLoader.Unload(EnemyData->AttackMontage.ToSoftObjectPath());
 		}
-
-		if (EnemyData->AttackSound.IsValid())
-		{
-			AssetLoader.Unload(EnemyData->AttackSound.ToSoftObjectPath());
-		}
-
-		if (EnemyData->AttackCascadeEffect.IsValid())
-		{
-			AssetLoader.Unload(EnemyData->AttackCascadeEffect.ToSoftObjectPath());
-		}
-
-		if (EnemyData->AttackNiagaraEffect.IsValid())
-		{
-			AssetLoader.Unload(EnemyData->AttackNiagaraEffect.ToSoftObjectPath());
-		}
 	}
 
 	ActiveObjects.Empty();

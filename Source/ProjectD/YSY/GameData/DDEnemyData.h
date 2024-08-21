@@ -3,6 +3,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
+#include "YSY/GameData/DDEffectData.h"
 #include "DDEnemyData.generated.h"
 
 UENUM(BlueprintType)
@@ -69,9 +70,6 @@ public:
 	float HealthWidgetHeight;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
-	float AttackSoundStartTime;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
 	int32 GoldDropAmount;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
@@ -89,15 +87,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = Data)
 	TSoftObjectPtr<UAnimMontage> AttackMontage;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
-	TSoftObjectPtr<USoundBase> AttackSound;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
-	TSoftObjectPtr<UParticleSystem> AttackCascadeEffect;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
-	TSoftObjectPtr<class UNiagaraSystem> AttackNiagaraEffect;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
-	TArray<FName> AttackLocations;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = Data)
+	TArray<FEffectData> AttackEffects;
 };

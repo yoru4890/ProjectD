@@ -174,9 +174,6 @@ private:
 	float AggroRange;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DD", meta = (AllowPrivateAccess = "true"))
-	float AttackSoundStartTime;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DD", meta = (AllowPrivateAccess = "true"))
 	int32 GoldDropAmount;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DD", meta = (AllowPrivateAccess = "true"))
@@ -189,16 +186,7 @@ private:
 	TObjectPtr<UAnimMontage> AttackMontage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DD", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<USoundBase> AttackSound;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DD", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UParticleSystem> AttackCascadeEffect;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DD", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UNiagaraSystem> AttackNiagaraEffect;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DD", meta = (AllowPrivateAccess = "true"))
-	TArray<FName> AttackLocations;
+	TArray<FEffectData> AttackEffects;
 
 #pragma endregion
 
