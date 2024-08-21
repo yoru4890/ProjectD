@@ -12,13 +12,9 @@ struct FGridCell
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(VisibleAnywhere)
 	FVector WorldLocation;
-	UPROPERTY(VisibleAnywhere)
 	FVector NormalVector;
-	UPROPERTY(VisibleAnywhere)
 	bool bCanBuild;
-	UPROPERTY(VisibleAnywhere)
 	bool bIsTowerArea;
 
 	FGridCell()
@@ -68,11 +64,11 @@ private:
 	// Function to initialize grid cells
 	void InitializeGridCells();
 
-	UPROPERTY(EditAnywhere, Category = "Init")
+	UPROPERTY()
 	// Array to store grid cell locations
 	TMap<FIntPoint, FGridCell> GridCellMap;
 
-	UPROPERTY(EditAnywhere, Category = "Init")
+	UPROPERTY(VisibleAnywhere)
 	TArray<TObjectPtr<UBoxComponent>> TowerZones;
 
 public:
@@ -90,6 +86,9 @@ private:
 
 	UFUNCTION(CallInEditor, Category = "Init")
 	void AddTowerZone();
+
+	UFUNCTION(CallInEditor, Category = "Debug")
+	void ShowDeugGrid();
 
 	void UpdateTowerZone();
 	

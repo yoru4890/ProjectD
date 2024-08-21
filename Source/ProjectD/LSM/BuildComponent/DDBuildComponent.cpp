@@ -17,7 +17,7 @@ UDDBuildComponent::UDDBuildComponent()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
 
 	// ...
 
@@ -62,12 +62,6 @@ void UDDBuildComponent::BeginPlay()
 void UDDBuildComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	if (PreviewBuilding) {
-
-	}
-
-	// ...
 }
 
 AActor* UDDBuildComponent::ReadyBuilding(const FName& RowName)
@@ -151,9 +145,13 @@ void UDDBuildComponent::CancelPlacedBuilding()
 	if (!ManagedBuilding) {
 		return;
 	}
-	FDDBuildingBaseData& ManagedBuildingData = *BuildingManager->GetBuildingData(ManagedBuilding->GetRowName());
+	const FDDBuildingBaseData& BuildingData = *BuildingManager->GetBuildingData(ManagedBuilding->GetRowName());
+
+	int32 SellCost = BuildingData.SellCost;
+
+	UE_LOG(LogTemp, Warning, TEXT("SellCost is %d"), SellCost);
 	GridBuildManager->SetGridCellAsBlank(ManagedBuilding->GetActorLocation(), ManagedBuilding->GetCellWidth());
-	PlayerState->AddGold(ManagedBuildingData.BuildCost * 0.8f);
+	PlayerState->AddGold(SellCost);
 	BuildingManager->DestroyBuilding(*ManagedBuilding);
 	ManagedBuilding = nullptr;
 }
@@ -172,7 +170,7 @@ bool UDDBuildComponent::UpgradeBuilding(const FName& RowName)
 		return false;
 	}
 
-	if (!CanPayUpgradeCost(RowName))
+	if (!CanPayBuildCost(RowName))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Upgrade Failed : Cost Lacked"));
 		return false;
@@ -186,7 +184,7 @@ bool UDDBuildComponent::UpgradeBuilding(const FName& RowName)
 		return false;
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("Upgrade Gold : %d"), UpgradeBuildingData.UpgradeCost);
+	UE_LOG(LogTemp, Warning, TEXT("Upgrade Gold : %d"), UpgradeBuildingData.BuildCost);
 
 	UWorld* World = GetWorld();
 	check(World);
@@ -209,7 +207,7 @@ bool UDDBuildComponent::UpgradeBuilding(const FName& RowName)
 	ManagedBuilding = NewBuilding;
 	ManagedBuilding->SetCanAttack(true);
 	ManagedBuilding->SetMaterialToPreview(true);
-	PayUpgradeCost(RowName);
+	PayBuildCost(RowName);
 	return true;
 }
 
@@ -317,20 +315,24 @@ void UDDBuildComponent::PerformBuildTrace()
 				PreviewBuilding->SetActorRotation(ActorRotation);
 				PreviewBuilding->SetActorHiddenInGame(false);
 
-
-				// Hide the warning widget if there is a hit
-				if (HitWarningWidgetInstance && HitWarningWidgetInstance->IsInViewport())
+				if (CanPayBuildCost(PreviewBuilding->GetRowName()))
 				{
-					if (CanPayBuildCost(PreviewBuilding->GetRowName()))
+					if (HitWarningWidgetInstance && HitWarningWidgetInstance->IsInViewport())
 					{
 						HitWarningWidgetInstance->RemoveFromParent();
 					}
-					else
+				}
+				else
+				{
+					if (HitWarningWidgetInstance)
 					{
+						if (!HitWarningWidgetInstance->IsInViewport())
+						{
+							HitWarningWidgetInstance->AddToViewport();
+						}
 						HitWarningWidgetInstance->ShowCantPayImage();
 					}
 				}
-
 			}
 			else
 			{
@@ -402,7 +404,7 @@ void UDDBuildComponent::PerformManageTrace()
 
 bool UDDBuildComponent::CanPayBuildCost(const FName& RowName) const
 {
-	const FDDBuildingBaseData& BuildingData = *BuildingManager->GetBuildingData(RowName);
+	const FDDBuildingBaseData& BuildingData = *BuildingManager->GetBuildingData(RowName); 
 	bool bCanPay = PlayerState->CheckGold(BuildingData.BuildCost);
 	return bCanPay;
 }
@@ -414,16 +416,16 @@ bool UDDBuildComponent::PayBuildCost(const FName& RowName) const
 	return bIsPay;
 }
 
-bool UDDBuildComponent::CanPayUpgradeCost(const FName& RowName) const
-{
-	const FDDBuildingBaseData& BuildingData = *BuildingManager->GetBuildingData(RowName);
-	bool bCanPay = PlayerState->CheckGold(BuildingData.UpgradeCost);
-	return bCanPay;
-}
-
-bool UDDBuildComponent::PayUpgradeCost(const FName& RowName) const
-{
-	const FDDBuildingBaseData& BuildingData = *BuildingManager->GetBuildingData(RowName);
-	bool bIsPay = PlayerState->SubtractGold(BuildingData.UpgradeCost);
-	return bIsPay;
-}
+//bool UDDBuildComponent::CanPayUpgradeCost(const FName& RowName) const
+//{
+//	const FDDBuildingBaseData& BuildingData = *BuildingManager->GetBuildingData(RowName);
+//	bool bCanPay = PlayerState->CheckGold(BuildingData.UpgradeCost);
+//	return bCanPay;
+//}
+//
+//bool UDDBuildComponent::PayUpgradeCost(const FName& RowName) const
+//{
+//	const FDDBuildingBaseData& BuildingData = *BuildingManager->GetBuildingData(RowName);
+//	bool bIsPay = PlayerState->SubtractGold(BuildingData.UpgradeCost);
+//	return bIsPay;
+//}
