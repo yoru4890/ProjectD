@@ -10,7 +10,7 @@
 #include "DDBuildingBase.generated.h"
 
 UCLASS()
-class PROJECTD_API ADDBuildingBase : public AActor, public IDDSetAssetInterface
+class PROJECTD_API ADDBuildingBase : public AActor
 {
 	GENERATED_BODY()
 
@@ -36,7 +36,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void InitFromDataTable(const FName& InRowName, const FDDBuildingBaseData& BuildingData);
 	virtual void  SetCanAttack(const bool bInCanAttack);
-	virtual void SetAssets(FDDBuildingBaseData& LoadedAsset);
+	void SetAssets(const FDDBuildingBaseData& LoadedAsset);
 	void SetMaterialToPreview(bool bCanPay);
 	void SetMaterialToOriginal();
 
@@ -56,8 +56,9 @@ protected:
 	void StopAttackEffect();
 
 private:
-	void SetParticeEffects(FDDBuildingBaseData& LoadedAsset);
-	void SetMeshs(FDDBuildingBaseData& LoadedAsset);
+	void SetParticeEffects(const FDDBuildingBaseData& LoadedAsset);
+	void SetSound(const FDDBuildingBaseData& LoadedAsset);
+	void SetMeshs(const FDDBuildingBaseData& LoadedAsset);
 	void SetAttackStrategy(TSubclassOf<class UDDBuildingBaseAttackStrategy> AttackStrategyClass);
 	void PlayAttackEffectAtSocket();
 	void PlayAttackAnimation();
@@ -137,6 +138,9 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<class UNiagaraSystem> HitEffect;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class USoundBase> AttackSound;
 
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<class UShapeComponent> AttackCollisionComponent;
