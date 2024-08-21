@@ -37,8 +37,6 @@ private:
 public:
 	virtual void InitFromDataTable(const FName& InRowName, const FDDBuildingBaseData& BuildingData);
 
-	virtual void SetAssets(FDDBuildingBaseData& LoadedAsset) override;
-
 protected:
 	float TowerAttackRange;
 

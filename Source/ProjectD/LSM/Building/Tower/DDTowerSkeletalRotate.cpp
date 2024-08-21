@@ -29,7 +29,10 @@ void ADDTowerSkeletalRotate::Tick(float DeltaTime)
 			if (bIsEnemyInSight)
 			{
 				ExecuteAttackEffects();
-				AttackStrategy->Attack(TargetEnemy);
+				if (AttackStrategy)
+				{
+					AttackStrategy->Attack(TargetEnemy);
+				}
 				SetIsNowAttack(true);
 				TimeSinceLastAttack = 0.f;
 			}

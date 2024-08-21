@@ -33,6 +33,20 @@ void UDDBuildingManager::Initialize()
 	}
 
 	SetBuildingSellCost();
+	SetupCommonReferences(GetWorld());
+	InitializeBuildings();
+}
+
+void UDDBuildingManager::SetupCommonReferences(UWorld* World)
+{
+	MyGameInstance = Cast<UDDGameInstance>(World->GetGameInstance());
+	check(MyGameInstance);
+
+	AssetManager = MyGameInstance->GetAssetManager();
+	check(AssetManager);
+
+	FactoryManager = MyGameInstance->GetFactoryManager();
+	check(FactoryManager);
 }
 
 void UDDBuildingManager::SetBuildingSellCost(float Ratio)
@@ -54,6 +68,27 @@ void UDDBuildingManager::SetBuildingSellCost(float Ratio)
 		TotalCost = TotalCost * Ratio;
 
 		BuildingData->SellCost = TotalCost;
+	}
+}
+
+void UDDBuildingManager::InitializeBuildings()
+{
+	for (auto& Elem : BuildingDataTable)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s is Unlock? : %s"), *Elem.Key.ToString(), Elem.Value->bIsUnlocked ? TEXT("true") : TEXT("false"));
+
+		if (Elem.Value->bIsUnlocked)
+		{
+			TArray<TSoftObjectPtr<UObject>> AssetsToLoad;
+			// 에셋 매니저에게 로딩 요청
+			GetSoftObjectPtrsInBuilding(Elem.Key, AssetsToLoad);
+			if (AssetManager)
+			{
+				AssetManager->LoadAssetsAsync(AssetsToLoad); // 에셋 리스트 전달
+			}
+
+			UE_LOG(LogTemp, Warning, TEXT("%s : Init"), *Elem.Key.ToString());
+		}
 	}
 }
 
@@ -88,12 +123,9 @@ bool UDDBuildingManager::UnlockBuilding(const FName& RowName)
 	if (PlayerState->CheckLikePoint(BuildingStruct->UnlockCost)) {
 		PlayerState->SubtractLikePoint(BuildingStruct->UnlockCost);
 		BuildingStruct->bIsUnlocked = true;
-		UDDGameInstance* MyGameInstance = Cast<UDDGameInstance>(GetWorld()->GetGameInstance());
-		check(MyGameInstance);
-
-		UDDAssetManager* AssetManager = MyGameInstance->GetAssetManager();
-		check(AssetManager);
-		AssetManager->LoadAssetsAsync(RowName);
+		TArray<TSoftObjectPtr<UObject>> AssetsToload;
+		GetSoftObjectPtrsInBuilding(RowName, AssetsToload);
+		AssetManager->LoadAssetsAsync(AssetsToload);
 
 		return true;
 	}
@@ -119,20 +151,18 @@ bool UDDBuildingManager::LockBuilding(const FName& RowName)
 			Stack.Push(ChildName);
 		}
 	}
-	ADDPlayerState* PlayerState = CastChecked<ADDPlayerState>(UGameplayStatics::GetPlayerState(GetWorld(), 0));
-	check(PlayerState);
 
 	FDDBuildingBaseData* LockBuildingData = GetBuildingData(RowName);
+
+	ADDPlayerState* PlayerState = CastChecked<ADDPlayerState>(UGameplayStatics::GetPlayerState(GetWorld(), 0));
+	check(PlayerState);
 
 	PlayerState->AddLikePoint(LockBuildingData->UnlockCost);
 	LockBuildingData->bIsUnlocked = false;
 
-	UDDGameInstance* MyGameInstance = Cast<UDDGameInstance>(GetWorld()->GetGameInstance());
-	check(MyGameInstance);
-
-	UDDAssetManager* AssetManager = MyGameInstance->GetAssetManager();
-	check(AssetManager);
-	AssetManager->RemoveLoadedAssetByName(RowName);
+	TArray<TSoftObjectPtr<UObject>> AssetsToUnload;
+	GetSoftObjectPtrsInBuilding(RowName, AssetsToUnload);
+	AssetManager->UnloadAsset(AssetsToUnload);
 	return true;
 }
 
@@ -156,24 +186,7 @@ ADDBuildingBase* UDDBuildingManager::SpawnBuilding(UWorld* World, const FName& R
 		// World가 null이면 실행 중지
 		check(World);
 
-		// 빌딩 데이터 가져오기
-		const TMap<FName, FDDBuildingBaseData*>& OutBuildingDataTable = GetBuildingDataTable();
-
-		UDDGameInstance* MyGameInstance = Cast<UDDGameInstance>(World->GetGameInstance());
-		check(MyGameInstance);
-
-		UDDFactoryManager* FactoryManager = MyGameInstance->GetFactoryManager();
-		check(FactoryManager);
-
-		IDDFactoryInterface* BuildingFactory = FactoryManager->GetFactory(RowName);
-		check(BuildingFactory);
-
-		UObject* CreatedObject = BuildingFactory->CreateObject(World, RowName, OutBuildingDataTable, Location, Rotation, Owner, Instigator);
-		if (!CreatedObject)
-		{
-			return nullptr;
-		}
-		NewBuilding = Cast<ADDBuildingBase>(CreatedObject);
+		NewBuilding = CreateBuildingInstance(World, RowName);
 	}
 
 	NewBuilding->SetActorHiddenInGame(false);
@@ -191,6 +204,115 @@ void UDDBuildingManager::DestroyBuilding(ADDBuildingBase& Building)
 	Building.SetActorEnableCollision(false);
 	Building.SetActorTickEnabled(false);
 	Building.SetCanAttack(false);
+}
+
+ADDBuildingBase* UDDBuildingManager::CreateBuildingInstance(UWorld* World, const FName& RowName)
+{
+	IDDFactoryInterface* BuildingFactory = FactoryManager->GetFactory(RowName);
+	UObject* CreatedObject = BuildingFactory->CreateObject(World, RowName, FVector::ZeroVector, FRotator::ZeroRotator, nullptr, nullptr);
+	return Cast<ADDBuildingBase>(CreatedObject);
+}
+
+void UDDBuildingManager::GetSoftObjectPtrsInBuilding(const FName& RowName, TArray<TSoftObjectPtr<UObject>>& AssetsToLoad)
+{
+	// TODO: 여기에 return 문을 삽입합니다.
+	const FDDBuildingBaseData* BuildingData = GetBuildingData(RowName);
+	if (!BuildingData)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Invalid Building Name"));
+	}
+
+	// Static Meshes
+	for (const TSoftObjectPtr<UStaticMesh>& StaticMesh : BuildingData->StaticMeshs)
+	{
+		AssetsToLoad.Add(StaticMesh);
+	}
+
+	// Skeletal Meshes
+	for (const TSoftObjectPtr<USkeletalMesh>& SkeletalMesh : BuildingData->SkeletalMeshs)
+	{
+		AssetsToLoad.Add(SkeletalMesh);
+	}
+
+	// Anim Blueprints
+	for (const TSoftObjectPtr<UAnimBlueprint>& AnimBlueprint : BuildingData->AnimBlueprints)
+	{
+		AssetsToLoad.Add(AnimBlueprint);
+	}
+
+	// Anim Montages
+	for (const TSoftObjectPtr<UAnimMontage>& Montage : BuildingData->AttackMontages)
+	{
+		AssetsToLoad.Add(Montage);
+	}
+
+	AssetsToLoad.Add(TSoftObjectPtr<UObject>(BuildingData->AttackEffect));
+
+	AssetsToLoad.Add(BuildingData->AttackSound);
+
+	AssetsToLoad.Add(BuildingData->AttackEffect);
+
+	AssetsToLoad.Add(BuildingData->HitEffect);
+
+}
+
+void UDDBuildingManager::HandleBuildingPoolsOnLevelChange()
+{
+	UWorld* World = GetWorld();
+	check(World);
+
+	for (auto& BuildingDataEntry : BuildingDataTable)
+	{
+		FDDBuildingBaseData* BuildingData = BuildingDataEntry.Value;
+		FName RowName = BuildingDataEntry.Key;
+
+		// 빌딩이 잠금 해제되었는지 확인
+		if (BuildingData->bIsUnlocked)
+		{
+
+			// 풀에 해당 빌딩이 없으면 추가
+			if (!BuildingPool.Contains(RowName))
+			{
+				BuildingPool.Add(RowName, FBuildingList());
+			}
+
+			int32 NumInstances = (BuildingData->BuildingType == EBuildingType::Trap) ? 10 : 3;
+			for (int32 i = 0; i < NumInstances; ++i)
+			{
+				ADDBuildingBase* NewBuilding = CreateBuildingInstance(World, RowName);
+				if (NewBuilding)
+				{
+					BuildingPool[RowName].Buildings.Add(NewBuilding);
+					NewBuilding->SetActorHiddenInGame(true);  // 일단 숨기기
+					NewBuilding->SetActorEnableCollision(false);  // 충돌 비활성화
+					NewBuilding->SetActorTickEnabled(false);  // 틱 비활성화
+					NewBuilding->SetCanAttack(false);
+				}
+			}
+		}
+		else
+		{
+			// BuildingPool에서 해당 RowName에 해당하는 항목을 찾음
+			if (FBuildingList* BuildingList = BuildingPool.Find(RowName))
+			{
+				// BuildingList 내의 모든 건물 인스턴스를 제거
+				for (ADDBuildingBase* Building : BuildingList->Buildings)
+				{
+					if (Building)
+					{
+						// 건물 인스턴스 제거 (필요에 따라 Destroy 또는 다른 방식 사용 가능)
+						Building->Destroy(); // 또는 적절한 정리 메서드 사용
+					}
+				}
+
+				// BuildingList 내의 모든 건물 인스턴스를 제거한 후, 배열도 비움
+				BuildingList->Buildings.Empty();
+
+				// BuildingPool에서 해당 RowName 제거
+				BuildingPool.Remove(RowName);
+			}
+		}
+	}
 }
 
 

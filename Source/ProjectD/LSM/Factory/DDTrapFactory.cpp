@@ -6,45 +6,31 @@
 #include "LSM/Building/Trap/DDTrapData.h"
 #include "LSM/Manager/DDAssetManager.h"
 #include "YSY/Game/DDGameInstance.h"
+#include "LSM/Manager/DDBuildingManager.h"
 
-UObject* UDDTrapFactory::CreateObject(UWorld* World, const FName& RowName, const TMap<FName, FDDBuildingBaseData*>& ObjectDataTable, const FVector& Location, const FRotator& Rotation, AActor* Owner, APawn* Instigator)
+UObject* UDDTrapFactory::CreateObject(UWorld* World, const FName& RowName, const FVector& Location, const FRotator& Rotation, AActor* Owner, APawn* Instigator)
 {
+
+	UDDGameInstance* MyGameInstance = Cast<UDDGameInstance>(GetWorld()->GetGameInstance());
+	check(MyGameInstance);
+
+	UDDBuildingManager* BuildingManager = MyGameInstance->GetBuildingManager();
+	check(BuildingManager);
+
+	const FDDTrapData* TrapData = BuildingManager->GetTrapData(RowName);
+	const FDDBuildingBaseData& BuildingData = *BuildingManager->GetBuildingData(RowName);
+	check(TrapData);
+
+	UClass* TrapClass = TrapData->TrapClass;
+
 	check(World);
-
-	const FDDBuildingBaseData* BuildingData = *ObjectDataTable.Find(RowName);
-	const FDDTrapData* TrapStruct = nullptr;
-	if (BuildingData && BuildingData->BuildingType == EBuildingType::Trap)
-	{
-		TrapStruct = static_cast<const FDDTrapData*>(BuildingData);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("%s is Not Trap"), *RowName.ToString());
-	}
-
-	UClass* TrapClass = TrapStruct->TrapClass;
-
-	
 	check(TrapClass);
 	// TrapClass를 사용하여 NewTrap 생성
 	ADDTrap* NewTrap = World->SpawnActor<ADDTrap>(TrapClass);
 	check(NewTrap);
 
-	UDDGameInstance* MyGameInstance = Cast<UDDGameInstance>(GetWorld()->GetGameInstance());
-	check(MyGameInstance);
-
-	UDDAssetManager* AssetManager = MyGameInstance->GetAssetManager();
-	check(AssetManager);
-
-	FDDBuildingBaseData* LoadedAsset = AssetManager->GetLoadedAssetByName(RowName);
-
-	if (!LoadedAsset)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Not Loaded At UDDTrapFactory"));
-		return nullptr;
-	}
-	NewTrap->InitFromDataTable(RowName, *TrapStruct);
-	NewTrap->SetAssets(*LoadedAsset);
+	NewTrap->InitFromDataTable(RowName, *TrapData);
+	NewTrap->SetAssets(BuildingData);
 	NewTrap->SetActorLocation(Location);
 	NewTrap->SetActorRotation(Rotation);
 	NewTrap->SetOwner(Owner);

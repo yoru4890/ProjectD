@@ -16,7 +16,7 @@ class PROJECTD_API UDDBuildingBaseAttackStrategy : public UObject, public IDDBui
 	GENERATED_BODY()
 	
 public:
-	void Initialize(class ADDBuildingBase* InOwningTower);
+	virtual void Initialize(class ADDBuildingBase* InOwningTower);
 
 	virtual void Attack(AActor* TargetEnemy) override;
 
