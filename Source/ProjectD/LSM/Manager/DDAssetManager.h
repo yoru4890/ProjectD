@@ -16,14 +16,12 @@ class PROJECTD_API UDDAssetManager : public UObject
 public:
     void Initialize();
 
-    void LoadAssetsAsync(const FName& RowName);
+    void LoadAssetsAsync(const TArray<TSoftObjectPtr<UObject>>& AssetsToLoad);
 
-    FDDBuildingBaseData* GetLoadedAssetByName(const FName& RowName);
+    void UnloadAsset(TArray<TSoftObjectPtr<UObject>>& AssetsToUnload);
 
-    void RemoveLoadedAssetByName(const FName& RowName);
-
-    void RemoveLoadedAssetAll();
+    //void RemoveLoadedAssetAll();
 
 private:
-    FDDBuildingBaseData* GetObjectBaseData(const FName& RowName);
+
 };

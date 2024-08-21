@@ -72,24 +72,13 @@ void UDDBuildingBaseAttackStrategy::PlayHitEffect(AActor* TargetEnemy, FVector L
 
     if (bAttachToTarget && TargetEnemy)
     {
-        // 히트 이펙트를 적에게 생성 (땅에 터지는 효과 등)
+        // 히트 이펙트를 적에게 생성
         UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
             GetWorld(),
             NiagaraEffect,
             ClosestPoint,
             EffectRotation.Rotation()
         );
-        //// 히트 이펙트를 적에게 부착
-        //UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAttached(
-        //    NiagaraEffect,
-        //    TargetEnemy->GetRootComponent(),
-        //    SocketName,
-        //    ClosestPoint, // 오프셋 벡터
-        //    Rotation, // 회전값
-        //    EAttachLocation::KeepRelativeOffset,
-        //    true,  // bAutoDestroy
-        //    true   // bAutoActivate
-        //);
     }
     else
     {

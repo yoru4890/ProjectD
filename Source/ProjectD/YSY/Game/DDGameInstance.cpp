@@ -15,9 +15,9 @@ void UDDGameInstance::Init()
 	FactoryManager = NewObject<UDDFactoryManager>(this);
 	AssetManager = NewObject<UDDAssetManager>(this);
 
+	AssetManager->Initialize();
 	BuildingManager->Initialize();
 	FactoryManager->Initialize(BuildingManager->GetBuildingDataTable());
-	AssetManager->Initialize();
 	
 	EnemySpawnManager = NewObject<UDDEnemySpawnManager>(this);
 	WaveManager = NewObject<UDDWaveManager>(this);

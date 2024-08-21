@@ -6,46 +6,35 @@
 #include "LSM/Building/Tower/DDTowerBase.h"
 #include "YSY/Game/DDGameInstance.h"
 #include "LSM/Manager/DDAssetManager.h"
+#include "LSM/Manager/DDBuildingManager.h"
 
-UObject* UDDTowerFactory::CreateObject(UWorld* World, const FName& RowName, const TMap<FName, FDDBuildingBaseData*>& ObjectDataTable, const FVector& Location, const FRotator& Rotation, AActor* Owner, APawn* Instigator)
+UObject* UDDTowerFactory::CreateObject(UWorld* World, const FName& RowName, const FVector& Location, const FRotator& Rotation, AActor* Owner, APawn* Instigator)
 {
-	check(World);
-	
-	const FDDBuildingBaseData* BuildingData = *ObjectDataTable.Find(RowName);
-	const FDDTowerData* TowerStruct = nullptr;
+	UDDGameInstance* MyGameInstance = Cast<UDDGameInstance>(GetWorld()->GetGameInstance());
+	check(MyGameInstance);
 
-	if (BuildingData && BuildingData->BuildingType == EBuildingType::Tower)
-	{
-		TowerStruct = static_cast<const FDDTowerData*>(BuildingData);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("%s is Not Trap"), *RowName.ToString());
-	}
+	UDDBuildingManager* BuildingManager = MyGameInstance->GetBuildingManager();
+	check(BuildingManager);
 
-	UClass* TowerClass = TowerStruct->TowerClass;
+	const FDDTowerData* TowerData = BuildingManager->GetTowerData(RowName);
+	const FDDBuildingBaseData& BuildingData = *BuildingManager->GetBuildingData(RowName);
 
-
+	UClass* TowerClass = TowerData->TowerClass;
 	check(TowerClass);
+
+	check(World);
 	// TrapClass를 사용하여 NewTrap 생성
 	ADDTowerBase* NewTower = World->SpawnActor<ADDTowerBase>(TowerClass);
 	check(NewTower);
 
-	UDDGameInstance* MyGameInstance = Cast<UDDGameInstance>(GetWorld()->GetGameInstance());
-	check(MyGameInstance);
+
+
 
 	UDDAssetManager* AssetManager = MyGameInstance->GetAssetManager();
 	check(AssetManager);
 
-	FDDBuildingBaseData* LoadedAsset = AssetManager->GetLoadedAssetByName(RowName);
-
-	if (!LoadedAsset)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Not Loaded At UDDTrapFactory"));
-		return nullptr;
-	}
-	NewTower->InitFromDataTable(RowName, *TowerStruct);
-	NewTower->SetAssets(*LoadedAsset);
+	NewTower->InitFromDataTable(RowName, *TowerData);
+	NewTower->SetAssets(BuildingData);
 	NewTower->SetActorLocation(Location);
 	NewTower->SetActorRotation(Rotation);
 	NewTower->SetOwner(Owner);
