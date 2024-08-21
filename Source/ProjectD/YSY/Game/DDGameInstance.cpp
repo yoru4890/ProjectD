@@ -5,6 +5,8 @@
 #include "LSM/Manager/DDAssetManager.h"
 #include "LSM/Manager/DDBuildingManager.h"
 #include "LSM/Manager/DDFactoryManager.h"
+#include "YSY/Manager/DDEnemySpawnManager.h"
+#include "YSY/Manager/DDWaveManager.h"
 
 void UDDGameInstance::Init()
 {
@@ -17,5 +19,18 @@ void UDDGameInstance::Init()
 	FactoryManager->Initialize(BuildingManager->GetBuildingDataTable());
 	AssetManager->Initialize();
 	
+	EnemySpawnManager = NewObject<UDDEnemySpawnManager>(this);
+	WaveManager = NewObject<UDDWaveManager>(this);
 
+	WaveManager->Initialize();
+	InitializeManagerDelegates();
+}
+
+void UDDGameInstance::InitializeManagerDelegates()
+{
+	WaveManager->OnActivateEnemySignature.BindUObject(EnemySpawnManager, &UDDEnemySpawnManager::Activate);
+	WaveManager->OnSetupEnemyPoolSignature.BindUObject(EnemySpawnManager, &UDDEnemySpawnManager::SetupEnemyPools);
+
+	EnemySpawnManager->OnAddEnemySignature.BindUObject(WaveManager, &UDDWaveManager::AddEnemyNumber);
+	EnemySpawnManager->OnSubEnemySignature.BindUObject(WaveManager, &UDDWaveManager::SubEnemyNumber);
 }

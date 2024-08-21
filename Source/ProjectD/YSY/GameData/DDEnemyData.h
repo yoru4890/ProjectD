@@ -15,6 +15,15 @@ enum class EEnemyType : uint8
 	Unknown
 };
 
+UENUM(BlueprintType)
+enum class EEnemyAttackType : uint8
+{
+	Melee UMETA(DisplayName = "Melee"),
+	Range UMETA(DisplayName = "Range"),
+
+	Unknown
+};
+
 USTRUCT(BlueprintType)
 struct FDDEnemyData : public FTableRowBase
 {
@@ -27,10 +36,16 @@ public:
 	FName EnemyName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
-	FName WeakPoint;
+	TArray<FName> WeakPoints;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
 	EEnemyType EnemyType;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	EEnemyAttackType EnemyAttackType;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	float ScaleSize;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
 	float MaxHP;
@@ -63,8 +78,11 @@ public:
 	uint8 bIsElite : 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = Data)
-	FString MeshPath;
+	TSoftObjectPtr<USkeletalMesh> SkeletalMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = Data)
-	FString AnimationBlueprintPath;
+	TSoftObjectPtr<UAnimBlueprint> AnimationBlueprint;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = Data)
+	TSoftObjectPtr<UAnimMontage> AttackMontage;
 };

@@ -18,7 +18,7 @@ public:
 	TArray<TObjectPtr<ADDBuildingBase>> Buildings;
 };
 
-UCLASS()
+UCLASS(BlueprintType)
 class PROJECTD_API UDDBuildingManager : public UObject
 {
 	GENERATED_BODY()
@@ -28,6 +28,8 @@ public:
 
 	void Initialize();
 
+	void SetBuildingSellCost(float Ratio = 0.8f);
+
 	// 함정이 해금이 되었는지 체크하는 메서드
 	UFUNCTION(BlueprintCallable)
 	bool IsBuildingUnlocked(const FName& RowName) const;
@@ -36,6 +38,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool UnlockBuilding(const FName& RowName);
 
+	UFUNCTION(BlueprintCallable)
 	bool LockBuilding(const FName& RowName);
 
 	const FDDBuildingBaseData* GetBuildingData(const FName& RowName) const;
@@ -48,10 +51,12 @@ public:
 
 	const TMap<FName, FDDTrapData>& GetTrapDataTable() const;
 
+	UFUNCTION(BlueprintCallable)
 	TMap<FName, FDDTrapData>& GetTrapDataTable();
 
 	const TMap<FName, FDDTowerData>& GetTowerDataTable() const;
 
+	UFUNCTION(BlueprintCallable)
 	TMap<FName, FDDTowerData>& GetTowerDataTable();
 
 	const TMap<FName, FDDBuildingBaseData*>& GetBuildingDataTable() const;

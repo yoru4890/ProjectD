@@ -9,6 +9,7 @@
 #include "LSM/Building/Trap/DDTrapData.h"
 #include "LSM/Building/Tower/DDTowerData.h"
 #include "LJW/Weapon/DDWeaponData.h"
+#include "YSY/GameData/DDWaveData.h"
 #include "DDGameSingleton.generated.h"
 
 DECLARE_LOG_CATEGORY_EXTERN(LogDDGameSingleton, Error, All);
@@ -29,13 +30,15 @@ public:
 	FORCEINLINE TMap<FName, FDDTrapData>& GetTrapDataTable() { return TrapDataTable; }
 	FORCEINLINE TMap<FName, FDDTowerData>& GetTowerDataTable() { return TowerDataTable; }
 	FORCEINLINE TMap<FName, FDDWeaponData>& GetWeaponDataTable() { return WeaponDataTable; }
+	FORCEINLINE TMap<FName, FDDWaveData>& GetWaveDataTable() { return WaveDataTable; }
 
 private:
 	TMap<FName, FDDEnemyData> EnemyDataTable;
 	TMap<FName, FDDTrapData> TrapDataTable;
 	TMap<FName, FDDTowerData> TowerDataTable;
 	TMap<FName, FDDWeaponData> WeaponDataTable;
-	
+	TMap<FName, FDDWaveData> WaveDataTable;
+
 
 	template<typename T>
 	void LoadDataTable(TMap<FName, T>& DataTable, const FString& Path)

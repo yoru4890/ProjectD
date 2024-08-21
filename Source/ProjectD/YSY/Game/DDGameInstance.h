@@ -20,11 +20,20 @@ public:
 
 	FORCEINLINE class UDDAssetManager* GetAssetManager() const { return AssetManager; }
 
+	UFUNCTION(BlueprintCallable)
 	FORCEINLINE class UDDBuildingManager* GetBuildingManager() const { return BuildingManager; }
 
 	FORCEINLINE class UDDFactoryManager* GetFactoryManager() const { return FactoryManager; }
 
 	FORCEINLINE FStreamableManager& GetStreamableManager() { return StreamableManager; }
+
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE class UDDEnemySpawnManager* GetEnemySpawnManager() const { return EnemySpawnManager; }
+
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE class UDDWaveManager* GetWaveManager() const { return WaveManager; }
+
+	void InitializeManagerDelegates();
 
 private:
 	UPROPERTY(VisibleAnywhere)
@@ -38,5 +47,9 @@ private:
 
 	FStreamableManager StreamableManager;
 
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<class UDDEnemySpawnManager> EnemySpawnManager;
 
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<class UDDWaveManager> WaveManager;
 };
