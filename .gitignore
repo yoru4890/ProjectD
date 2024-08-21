@@ -76,5 +76,5 @@ DerivedDataCache/*
 # Custom
 Content/*
 !Content/0000
-
+Content/0000/SYS/*
 

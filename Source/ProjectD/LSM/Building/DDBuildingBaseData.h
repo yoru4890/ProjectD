@@ -3,7 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Engine/DataTable.h" // Ensure this include is present for FTableRowBase
+#include "Engine/DataTable.h"
+#include "NiagaraSystem.h"
 #include "DDBuildingBaseData.generated.h"
 
 /**
@@ -28,10 +29,10 @@ public:
 	FString DisplayName; // 오브젝트의 이름
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	EBuildingType BuildingType; // 빌딩의 타입
+	FText ObjectInfo; // 오브젝트의 정보
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FString BuildingInfo; // 빌딩의 정보
+	EBuildingType BuildingType; // 빌딩의 타입
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TObjectPtr<UTexture2D> BuildingImage; // 빌딩의 이미지
@@ -107,10 +108,13 @@ public:
 	TArray<TSoftObjectPtr<UAnimMontage>> AttackMontages;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSoftObjectPtr<class UNiagaraSystem> AttackEffect; // 공격 이펙트
+	TSoftObjectPtr<UNiagaraSystem> AttackEffect; // 공격 이펙트
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSoftObjectPtr<class UNiagaraSystem> HitEffect; // 공격 이펙트
+	TSoftObjectPtr<USoundBase> AttackSound; // 공격 사운드
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSoftObjectPtr<UNiagaraSystem> HitEffect; // 공격 이펙트
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<UObject> FactoryClass; // 팩토리 클래스

@@ -80,11 +80,6 @@ AActor* ADDTowerBase::GetNearstEnemy()
 	return NearestEnemy;
 }
 
-void ADDTowerBase::SetAssets(FDDBuildingBaseData& LoadedAsset)
-{
-	Super::SetAssets(LoadedAsset);
-}
-
 void ADDTowerBase::InitFromDataTable(const FName& InRowName, const FDDBuildingBaseData& BuildingData)
 {
 	Super::InitFromDataTable(InRowName, BuildingData);

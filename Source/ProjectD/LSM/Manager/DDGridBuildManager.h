@@ -71,6 +71,9 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	TArray<TObjectPtr<UBoxComponent>> TowerZones;
 
+	UPROPERTY(EditAnywhere)
+	float PlaneTolerance = 5.f;
+
 public:
 	FORCEINLINE const float GetGridCellSize() const { return GridCellSize; };
 	const FVector GetNearestGridCellLocation(const FVector& HitLocation) const;
