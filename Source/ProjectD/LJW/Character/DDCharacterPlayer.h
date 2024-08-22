@@ -46,6 +46,9 @@ protected:
 
 	virtual void SetCharacterControlData(const class UDDCharacterControlData* CharacterControlData) override;
 
+	UPROPERTY(VisibleAnywhere, Category = Control)
+	TObjectPtr<APlayerController> PlayerController;
+
 //Camera Section
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, Meta = (AllowPrivateAccess = "true"))
@@ -58,6 +61,8 @@ protected:
 //Input Section
 protected:
 	void Move(const FInputActionValue& Value);
+	void BackMoveTrue();
+	void BackMoveFalse();
 	void Look(const FInputActionValue& Value);
 	void Sprint(const FInputActionValue& Value);
 	void Walk(const FInputActionValue& Value);
@@ -71,6 +76,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> MoveAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> BackMoveAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> SprintAction;
@@ -87,16 +95,26 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> AttackAction;
 
-
 	UPROPERTY(EditAnywhere, Category = Character)
 	float MouseSpeed;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
+	float WalkSpeed;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
+	float SprintSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
+	uint8 bIsBackMove;
 
 //Mesh Section
 protected:
 
 	void CreateLeaderPoseSkeletalMesh(USkeletalMeshComponent* USkeletalMesh, const FString& Name, const FString& Path );
 
+
+	UPROPERTY(VisibleAnywhere, Category = Anim)
+	TObjectPtr<class UDDPlayerAnimInstance> PlayerAnimInstance;
 
 //Weapon System
 
@@ -121,6 +139,5 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, Category = Weapon)
 	TObjectPtr<class UDDWeaponSystemComponent> WeaponSystem;
-
 
 };

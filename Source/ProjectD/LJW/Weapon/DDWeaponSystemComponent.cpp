@@ -223,7 +223,7 @@ void UDDWeaponSystemComponent::WeaponAttack()
 		{
 			PlayerAnimInstance->Montage_Play(CurrentWeapon->GetAttackMontage());
 			CurrentWeapon->Attack();
-
+			
 		}
 	}
 	
@@ -282,7 +282,10 @@ bool UDDWeaponSystemComponent::CanAttacking()
 	//Weapon Change 중 불가능
 	if (PlayerAnimInstance->IsAnyMontagePlaying())
 	{
-		return false;
+		if (!PlayerAnimInstance->Montage_IsPlaying(CurrentWeapon->GetAttackMontage()))
+		{
+			return false;
+		}
 	}
 	return true;
 }

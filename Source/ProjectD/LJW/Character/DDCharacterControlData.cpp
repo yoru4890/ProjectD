@@ -12,6 +12,7 @@ UDDCharacterControlData::UDDCharacterControlData()
 	JumpZVelocity = 700.f;
 	AirControl = 0.35f;
 	MaxWalkSpeed = 147.f;
+	MaxSprintSpeed = 427.f;
 	MinAnalogWalkSpeed = 20.f;
 	BrakingDecelerationWalking = 2000.f;
 }

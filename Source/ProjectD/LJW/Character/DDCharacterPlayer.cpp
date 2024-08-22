@@ -67,6 +67,12 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 		MoveAction = MoveRef.Object;
 	}
 
+	static ConstructorHelpers::FObjectFinder<UInputAction>BackRef(TEXT("/Script/EnhancedInput.InputAction'/Game/0000/LJW/Input/IA_Player_BackMove.IA_Player_BackMove'"));
+	if (nullptr != BackRef.Object)
+	{
+		BackMoveAction = BackRef.Object;
+	}
+
 	static ConstructorHelpers::FObjectFinder<UInputAction> SprintRef(TEXT("/Script/EnhancedInput.InputAction'/Game/0000/LJW/Input/IA_Player_Sprint.IA_Player_Sprint'"));
 	if (nullptr != SprintRef.Object)
 	{
@@ -79,7 +85,7 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 		EquipMeleeAction = MeleeRef.Object;
 	}
 
-	static ConstructorHelpers::FObjectFinder<UInputAction>RangeRef(TEXT("/Script/EnhancedInput.InputAction'/Game/0000/LJW/Input/IA_Player_EquipRange.IA_Player_EquipRange'"));
+	static ConstructorHelpers::FObjectFinder<UInputAction>RangeRef(TEXT("/Script/EnhancedInput.InputAction'/Game/0000/LJW/In put/IA_Player_EquipRange.IA_Player_EquipRange'"));
 	if (nullptr != RangeRef.Object)
 	{
 		EquipRangeAction = RangeRef.Object;
@@ -106,26 +112,26 @@ void ADDCharacterPlayer::BeginPlay()
 {
 	Super::BeginPlay();
 
-	APlayerController* PlayerController = Cast<APlayerController>(GetController());
+	PlayerController = Cast<APlayerController>(GetController());
 	if (PlayerController) 
 	{
 		EnableInput(PlayerController);
 	}
 	
 	SetCharacterControl();
-	
+		
 	
 }
 
 void ADDCharacterPlayer::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
+	//AnimInstance Delegate Bind
+	PlayerAnimInstance = Cast<UDDPlayerAnimInstance>(GetMesh()->GetAnimInstance());
 
 	//Montage Delegate Bind
-	GetMesh()->GetAnimInstance()->OnMontageEnded.AddDynamic(this, &ADDCharacterPlayer::OnUnequipMontageEnded);
+	PlayerAnimInstance->OnMontageEnded.AddDynamic(this, &ADDCharacterPlayer::OnUnequipMontageEnded);
 
-	//AnimInstance Delegate Bind
-	UDDPlayerAnimInstance* PlayerAnimInstance = Cast<UDDPlayerAnimInstance>(GetMesh()->GetAnimInstance());
 	WeaponSystem->OnSetAimingDelegate.BindUObject(PlayerAnimInstance, &UDDPlayerAnimInstance::SetIsAiming);
 	WeaponSystem->OnGetAimingDelegate.BindUObject(PlayerAnimInstance, &UDDPlayerAnimInstance::GetIsAiming);
 	WeaponSystem->OnSetWeaponIndexDelegate.BindUObject(PlayerAnimInstance, &UDDPlayerAnimInstance::SetWeaponIndex);
@@ -146,6 +152,9 @@ void ADDCharacterPlayer::SetupPlayerInputComponent(class UInputComponent* Player
 	
 	//Move
 	EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ADDCharacterPlayer::Move);
+	EnhancedInputComponent->BindAction(BackMoveAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::BackMoveTrue);
+	EnhancedInputComponent->BindAction(BackMoveAction, ETriggerEvent::Canceled, this, &ADDCharacterPlayer::BackMoveFalse);
+	EnhancedInputComponent->BindAction(BackMoveAction, ETriggerEvent::Completed, this, &ADDCharacterPlayer::BackMoveFalse);
 	
 	//Look
 	EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ADDCharacterPlayer::Look);
@@ -178,7 +187,7 @@ void ADDCharacterPlayer::SetCharacterControl()
 
 	SetCharacterControlData(NewPlayerControlData);
 
-	APlayerController* PlayerController = CastChecked<APlayerController>(GetController());
+	
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer())) 
 	{
 		Subsystem->ClearAllMappings();
@@ -203,7 +212,8 @@ void ADDCharacterPlayer::SetCharacterControlData(const UDDCharacterControlData* 
 	CameraBoom->bInheritYaw = CharacterControlData->bInheritYaw;
 	CameraBoom->bInheritRoll = CharacterControlData->bInheritRoll;
 	MouseSpeed = CharacterControlData->MouseSpeed;
-
+	SprintSpeed = CharacterControlData->MaxSprintSpeed;
+	WalkSpeed = CharacterControlData->MaxWalkSpeed;
 }
 
 void ADDCharacterPlayer::Move(const FInputActionValue& Value)
@@ -219,6 +229,20 @@ void ADDCharacterPlayer::Move(const FInputActionValue& Value)
 	AddMovementInput(ForwardDirection, MovementVector.X);
 	AddMovementInput(RightDirection, MovementVector.Y);
 
+	UE_LOG(LogTemp, Warning, TEXT("%d"), bIsBackMove);
+
+}
+
+void ADDCharacterPlayer::BackMoveTrue()
+{
+	bIsBackMove = true;
+	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+
+}
+
+void ADDCharacterPlayer::BackMoveFalse()
+{
+	bIsBackMove = false;
 }
 
 void ADDCharacterPlayer::Look(const FInputActionValue& Value)
@@ -228,17 +252,24 @@ void ADDCharacterPlayer::Look(const FInputActionValue& Value)
 	AddControllerYawInput(LookAxisVector.X * MouseSpeed);
 	AddControllerPitchInput(LookAxisVector.Y * MouseSpeed);
 
+	PlayerController->PlayerCameraManager->ViewPitchMin = -30.0f;
+	PlayerController->PlayerCameraManager->ViewPitchMax = 30.0f;
+
 }
 
 void ADDCharacterPlayer::Sprint(const FInputActionValue& Value)
 {
-	GetCharacterMovement()->MaxWalkSpeed = 427.f;
-	// Stat->BaseStat.RUnspeed;
+
+	if (PlayerAnimInstance->GetIsAiming() || bIsBackMove)
+	{
+		return;
+	}
+	GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
 }
 
 void ADDCharacterPlayer::Walk(const FInputActionValue& Value)
 {
-	GetCharacterMovement()->MaxWalkSpeed = 147.f;
+	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 }
 
 void ADDCharacterPlayer::CreateLeaderPoseSkeletalMesh(USkeletalMeshComponent* SkeletalMesh, const FString& Name, const FString& Path)
@@ -278,7 +309,7 @@ UDDWeaponSystemComponent* ADDCharacterPlayer::GetWeaponComp()
 
 void ADDCharacterPlayer::EquipMelee()
 {
-	if (!(GetMesh()->GetAnimInstance()->IsAnyMontagePlaying()))
+	if (!(PlayerAnimInstance->IsAnyMontagePlaying()))
 	{
 		WeaponSystem->EquipMeleeWeapon();
 
@@ -287,7 +318,7 @@ void ADDCharacterPlayer::EquipMelee()
 
 void ADDCharacterPlayer::EquipRange()
 {
-	if (!(GetMesh()->GetAnimInstance()->IsAnyMontagePlaying()))
+	if (!(PlayerAnimInstance->IsAnyMontagePlaying()))
 	{
 		WeaponSystem->EquipRangeWeapon();
 	}
@@ -309,6 +340,7 @@ void ADDCharacterPlayer::WeaponStartAiming()
 	if (CurrentPlayerMode == EPlayerMode::CombatMode)
 	{
 		WeaponSystem->WeaponStartAiming();
+		GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 	}
 	
 }

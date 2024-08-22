@@ -42,6 +42,9 @@ public:
 	float MaxWalkSpeed;
 
 	UPROPERTY(EditAnywhere, Category = CharacterMovement)
+	float MaxSprintSpeed;
+
+	UPROPERTY(EditAnywhere, Category = CharacterMovement)
 	float MinAnalogWalkSpeed;
 
 	UPROPERTY(EditAnywhere, Category = CharacterMovement)
