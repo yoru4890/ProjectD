@@ -14,6 +14,9 @@ struct FDDProjectileData : public FTableRowBase
 {
 	GENERATED_BODY()
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "class")
+	TSubclassOf<class ADDProjectileBase> ProjectileClass;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
 	TSoftObjectPtr<class UStaticMesh> StaticMesh;
 
@@ -28,5 +31,8 @@ struct FDDProjectileData : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
 	TSoftObjectPtr<class USoundBase> FlyingSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<UObject> FactoryClass; // 팩토리 클래스
 	
 };

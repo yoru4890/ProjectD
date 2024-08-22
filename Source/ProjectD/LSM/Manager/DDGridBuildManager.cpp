@@ -60,7 +60,7 @@ void ADDGridBuildManager::InitializeGridCells()
 
 			FCollisionQueryParams CollisionParams;
 			FGridCell GridCell;
-			if (GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, GTCHANNEL_BUILDINGTRACE, CollisionParams))
+			if (GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, GTCHANNEL_BUILDZONE, CollisionParams))
 			{
 				CellLocation.Z = HitResult.ImpactPoint.Z;
 				GridCell = FGridCell(CellLocation, HitResult.ImpactNormal.GetSafeNormal(), true);
