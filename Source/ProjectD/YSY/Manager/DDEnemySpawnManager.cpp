@@ -63,7 +63,7 @@ void UDDEnemySpawnManager::Deactivate(const FName& EnemyName, ADDEnemyBase* Enem
 		InactiveObjects[EnemyName].Add(Enemy);
 		Enemy->Deactivate();
 		OnSubEnemySignature.ExecuteIfBound();
-		// TODO : YSY Player should get Gold, Score
+		
 	}
 }
 

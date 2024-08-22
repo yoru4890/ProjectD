@@ -90,6 +90,9 @@ public:
 	UFUNCTION()
 	void PlayAttackEffect();
 
+	UFUNCTION()
+	void PlayDeathEffect();
+
 #pragma region AIInterface
 
 	virtual void SplineMove() override;
@@ -103,6 +106,8 @@ public:
 	virtual void SetIsAggroState(bool bNewAggroState);
 
 	virtual float GetAITurnSpeed() const noexcept;
+
+	virtual bool GetIsDead() const noexcept { return bIsDead; }
 
 #pragma endregion
 
@@ -188,6 +193,9 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DD", meta = (AllowPrivateAccess = "true"))
 	TArray<FEffectData> AttackEffects;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DD", meta = (AllowPrivateAccess = "true"))
+	TArray<FEffectData> DeathEffects;
+
 #pragma endregion
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DD", meta = (AllowPrivateAccess = "true"));
@@ -208,6 +216,7 @@ private:
 
 	bool bIsAggroState{};
 	bool bIsCanTurn{ true };
+	bool bIsDead{};
 
 	float TurnSpeed{ 5.0f }; // TODO : YSY Magic Number, DataTable
 

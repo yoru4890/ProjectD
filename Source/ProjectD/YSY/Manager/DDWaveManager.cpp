@@ -125,7 +125,7 @@ void UDDWaveManager::WaveStart()
 				SpawnEnd();
 			}
 
-		}, 3.0f, true, 0.1f);
+		}, 1.0f, true, 0.1f);
 }
 
 void UDDWaveManager::SpawnEnd()

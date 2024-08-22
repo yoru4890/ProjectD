@@ -89,4 +89,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = Data)
 	TArray<FEffectData> AttackEffects;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = Data)
+	TArray<FEffectData> DeathEffects;
 };
