@@ -41,6 +41,12 @@ void UDDBTService_CaculateRange::TickNode(UBehaviorTreeComponent& OwnerComp, uin
 		return;
 	}
 
+	if (AIPawn->GetIsDead())
+	{
+		OwnerComp.GetBlackboardComponent()->SetValueAsBool(BBKEY_CANATTACK, false);
+		return;
+	}
+
 	float DistanceToTarget = ControllingPawn->GetDistanceTo(Target);
 	float RangeWithRaduis = AIPawn->GetAIAttackRange();
 	if (DistanceToTarget <= RangeWithRaduis)

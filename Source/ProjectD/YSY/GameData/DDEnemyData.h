@@ -3,6 +3,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
+#include "YSY/GameData/DDEffectData.h"
 #include "DDEnemyData.generated.h"
 
 UENUM(BlueprintType)
@@ -85,4 +86,10 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = Data)
 	TSoftObjectPtr<UAnimMontage> AttackMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = Data)
+	TArray<FEffectData> AttackEffects;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = Data)
+	TArray<FEffectData> DeathEffects;
 };

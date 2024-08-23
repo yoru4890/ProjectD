@@ -26,6 +26,11 @@ EBTNodeResult::Type UDDBTT_DefaultAttack::ExecuteTask(UBehaviorTreeComponent& Ow
 		return EBTNodeResult::Failed;
 	}
 
+	if (AIPawn->GetIsDead())
+	{
+		return EBTNodeResult::Failed;
+	}
+
 	FAIAttackOnFinishedSignature OnAttackFinished;
 	OnAttackFinished.BindLambda(
 		[&]()

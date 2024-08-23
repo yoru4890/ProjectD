@@ -28,12 +28,14 @@ public:
 
 	void SpawnEnemy(const FName& EnemyName);
 
+	UFUNCTION(BlueprintCallable)
+	void ClearEnemyPool();
+
 public:
 	FOnAddEnemySignature OnAddEnemySignature;
 	FOnSubEnemySignature OnSubEnemySignature;
 
 private:
-	TMap<FName, TArray<ADDEnemyBase*>> Pools;
 	TMap<FName, TArray<ADDEnemyBase*>> ActiveObjects;
 	TMap<FName, TArray<ADDEnemyBase*>> InactiveObjects;
 };

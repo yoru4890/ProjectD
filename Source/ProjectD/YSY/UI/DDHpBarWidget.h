@@ -23,10 +23,16 @@ protected:
 public:
 	void UpdateStat(float InMaxHp);
 	void UpdateHpBar(float NewCurrentHp);
+	void SetVisiblePorgressBar(bool bIsVisible);
+	void SetOwnerName(const FName& EnemyName);
 
 protected:
 	UPROPERTY()
 	TObjectPtr<class UProgressBar> HpProgressBar;
+
+	UPROPERTY()
+	TObjectPtr<class UTextBlock> OwnerName;
+
 
 	UPROPERTY()
 	float CurrentHp;
