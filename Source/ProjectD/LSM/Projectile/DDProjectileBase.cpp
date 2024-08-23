@@ -53,6 +53,10 @@ void ADDProjectileBase::InitializeProjectile(float InDamageAmount, TSubclassOf<U
 
 }
 
+void ADDProjectileBase::OnCollisionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+}
+
 void ADDProjectileBase::SetAssets(const FDDProjectileData& LoadedAsset)
 {
 	SetMeshs(LoadedAsset);
