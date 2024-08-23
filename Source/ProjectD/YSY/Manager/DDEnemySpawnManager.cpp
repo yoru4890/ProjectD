@@ -7,6 +7,9 @@
 #include "YSY/Game/DDGameInstance.h"
 #include "YSY/Manager/DDWaveManager.h"
 #include "Kismet/GameplayStatics.h"
+#include "Engine/AssetManager.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 
 UDDEnemySpawnManager::UDDEnemySpawnManager()
 {
@@ -18,13 +21,8 @@ void UDDEnemySpawnManager::SetupEnemyPools(int32 StageNum)
 	FName StageName(*StringNum);
 	const TMap<FName, int32>& EnemyPoolSizes = UDDGameSingleton::Get().GetWaveDataTable().Find(StageName)->EnemyPoolSizes;
 
-	Pools.Empty();
-	ActiveObjects.Empty();
-	InactiveObjects.Empty();
-
 	for (auto& [EnemyName, PoolSize] : EnemyPoolSizes)
 	{
-		Pools.FindOrAdd(EnemyName, TArray<ADDEnemyBase*>());
 		ActiveObjects.FindOrAdd(EnemyName, TArray<ADDEnemyBase*>());
 		InactiveObjects.FindOrAdd(EnemyName, TArray<ADDEnemyBase*>());
 
@@ -40,9 +38,6 @@ AActor* UDDEnemySpawnManager::Activate(const FName& EnemyName, int32 SplineIndex
 {
 	if (InactiveObjects.Contains(EnemyName) && InactiveObjects[EnemyName].Num() > 0)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("YES"));
-		UE_LOG(LogTemp, Warning, TEXT("%d"), InactiveObjects[EnemyName].Num());
-		UE_LOG(LogTemp, Warning, TEXT("%d"), ActiveObjects[EnemyName].Num());
 		ADDEnemyBase* Enemy = InactiveObjects[EnemyName].Last();
 		InactiveObjects[EnemyName].Pop();
 		ActiveObjects[EnemyName].Add(Enemy);
@@ -68,11 +63,7 @@ void UDDEnemySpawnManager::Deactivate(const FName& EnemyName, ADDEnemyBase* Enem
 		InactiveObjects[EnemyName].Add(Enemy);
 		Enemy->Deactivate();
 		OnSubEnemySignature.ExecuteIfBound();
-		// TODO : YSY Player should get Gold, Score
-
-		UE_LOG(LogTemp, Warning, TEXT("%d"), InactiveObjects[EnemyName].Num());
-		UE_LOG(LogTemp, Warning, TEXT("%d"), ActiveObjects[EnemyName].Num());
-
+		
 	}
 }
 
@@ -89,7 +80,40 @@ void UDDEnemySpawnManager::SpawnEnemy(const FName& EnemyName)
 		Enemy->InitializeEnemy(*UDDGameSingleton::Get().GetEnemyDataTable().Find(EnemyName));
 		Enemy->FinishSpawning({});
 		Enemy->Deactivate();
-		Pools[EnemyName].Add(Enemy);
 		InactiveObjects[EnemyName].Add(Enemy);
 	}
+}
+
+void UDDEnemySpawnManager::ClearEnemyPool()
+{
+	auto& EnemyDataTable = UDDGameSingleton::Get().GetEnemyDataTable();
+
+	FStreamableManager& AssetLoader = UAssetManager::GetStreamableManager();
+
+	TArray<FName> AllEnemyNames;
+
+	ActiveObjects.GetKeys(AllEnemyNames);
+
+	for (const auto& EnemyName : AllEnemyNames)
+	{
+		const auto& EnemyData = EnemyDataTable.Find(EnemyName);
+
+		if (EnemyData->SkeletalMesh.IsValid())
+		{
+			AssetLoader.Unload(EnemyData->SkeletalMesh.ToSoftObjectPath());
+		}
+
+		if (EnemyData->AnimationBlueprint.IsValid())
+		{
+			AssetLoader.Unload(EnemyData->AnimationBlueprint.ToSoftObjectPath());
+		}
+
+		if (EnemyData->AttackMontage.IsValid())
+		{
+			AssetLoader.Unload(EnemyData->AttackMontage.ToSoftObjectPath());
+		}
+	}
+
+	ActiveObjects.Empty();
+	InactiveObjects.Empty();
 }

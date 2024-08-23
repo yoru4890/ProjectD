@@ -8,10 +8,13 @@
 #include "YSY/Interface/DDEnemyAIInterface.h"
 #include "YSY/Interface/DDCharacterWidgetInterface.h"
 #include "YSY/Interface/DamageInterface.h"
+#include "YSY/Interface/EnemyHpVisibleInterface.h"
 #include "DDEnemyBase.generated.h"
 
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnDieSignature, const FName&, ADDEnemyBase*);
 DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnDebuffSignature, FTimerHandle&, float, float);
+
+DECLARE_DELEGATE_OneParam(FOnSetVisibleHpBarSignature, bool);
 
 struct FDotEffectState
 {
@@ -29,7 +32,7 @@ struct FDebuffState
 };
 
 UCLASS()
-class PROJECTD_API ADDEnemyBase : public ACharacter, public IDDEnemyAIInterface, public IDDCharacterWidgetInterface, public IDamageInterface
+class PROJECTD_API ADDEnemyBase : public ACharacter, public IDDEnemyAIInterface, public IDDCharacterWidgetInterface, public IDamageInterface, public IEnemyHpVisibleInterface
 {
 	GENERATED_BODY()
 
@@ -82,6 +85,14 @@ public:
 	UFUNCTION()
 	void RangeAttack();
 
+	void ShowHpBarbyAttack();
+
+	UFUNCTION()
+	void PlayAttackEffect();
+
+	UFUNCTION()
+	void PlayDeathEffect();
+
 #pragma region AIInterface
 
 	virtual void SplineMove() override;
@@ -95,6 +106,8 @@ public:
 	virtual void SetIsAggroState(bool bNewAggroState);
 
 	virtual float GetAITurnSpeed() const noexcept;
+
+	virtual bool GetIsDead() const noexcept { return bIsDead; }
 
 #pragma endregion
 
@@ -114,6 +127,12 @@ public:
 	virtual void ApplyChainDamage(int DamageAmount, int NumberOfChain);
 	UFUNCTION(BlueprintCallable)
 	virtual void ApplyDebuff(EDebuffType DebuffType, float Time, float DebuffRate);
+
+#pragma endregion
+
+#pragma region EnemyHpVisibleInterface
+
+	virtual void SetVisibleHpBar(bool bIsVisible) override;
 
 #pragma endregion
 
@@ -171,6 +190,12 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DD", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UAnimMontage> AttackMontage;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DD", meta = (AllowPrivateAccess = "true"))
+	TArray<FEffectData> AttackEffects;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DD", meta = (AllowPrivateAccess = "true"))
+	TArray<FEffectData> DeathEffects;
+
 #pragma endregion
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DD", meta = (AllowPrivateAccess = "true"));
@@ -184,14 +209,19 @@ private:
 	FAISplineMoveOnFinishedSignature OnSplineMoveFinished{};
 	FAIAttackOnFinishedSignature OnAttackFinished{};
 
+	FOnSetVisibleHpBarSignature OnSetVisibleHpBarDelegate{};
+
 	TMap<EDotDamageType, FDotEffectState> DotEffectStates;
 	TMap<EDebuffType, FDebuffState> DebuffStates;
 
 	bool bIsAggroState{};
 	bool bIsCanTurn{ true };
+	bool bIsDead{};
 
 	float TurnSpeed{ 5.0f }; // TODO : YSY Magic Number, DataTable
 
 	UPROPERTY()
 	TObjectPtr<AActor> Player;
+
+	FTimerHandle HpBarTH{};
 };

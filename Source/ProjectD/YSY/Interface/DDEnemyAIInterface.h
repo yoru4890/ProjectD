@@ -42,4 +42,6 @@ public:
 	virtual void SetIsAggroState(bool bNewAggroState) = 0;
 
 	virtual float GetAITurnSpeed() const noexcept = 0;
+
+	virtual bool GetIsDead() const noexcept = 0;
 };

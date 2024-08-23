@@ -6,6 +6,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Engine/DamageEvents.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 #include "YSY/AI/DDEnemyAIController.h"
 #include "YSY/AI/AISplineRoute.h"
 #include "YSY/UI/DDHpBarWidget.h"
@@ -14,12 +16,12 @@
 #include "YSY/DamageType/AllDamageType.h"
 #include "YSY/Animation/AttackFinishedAnimNotify.h"
 #include "YSY/Animation/AttackTraceAnimNotify.h"
+#include "YSY/Animation/DDPlayEffectAnimNotify.h"
 
 // Sets default values
 ADDEnemyBase::ADDEnemyBase()
 {
 	PrimaryActorTick.bCanEverTick = true;
-
 	AIControllerClass = ADDEnemyAIController::StaticClass();
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 
@@ -74,6 +76,8 @@ void ADDEnemyBase::PostInitializeComponents()
 
 float ADDEnemyBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
+	ShowHpBarbyAttack();
+
 	const UDamageType* DamageType = DamageEvent.DamageTypeClass.GetDefaultObject();
 
 	float ActualDamage = DamageAmount;
@@ -108,6 +112,7 @@ float ADDEnemyBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 	}
 
 	Stat->ApplyStatDamage(ActualDamage * Stat->GetDamageReceiveRate());
+	
 	return ActualDamage;
 }
 
@@ -121,13 +126,15 @@ void ADDEnemyBase::BeginPlay()
 	EnemyAIController->OnMoveFinished.BindUObject(this, &ADDEnemyBase::SplineMoveFinish);
 
 	Player = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
+
+	OnSetVisibleHpBarDelegate.ExecuteIfBound(false);
 }
 
 void ADDEnemyBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	UpdateWidgetScale(); // TODO : YSY Doesn't work. Move to SetTimerEvent
+	//UpdateWidgetScale(); // TODO : YSY Doesn't work. Move to SetTimerEvent
 
 	if (bIsAggroState && bIsCanTurn)
 	{
@@ -140,7 +147,6 @@ void ADDEnemyBase::Tick(float DeltaTime)
 
 void ADDEnemyBase::InitializeEnemy(const FDDEnemyData& EnemyData)
 {
-
 	EnemyName = EnemyData.EnemyName;
 	WeakPoints = EnemyData.WeakPoints;
 	EnemyType = EnemyData.EnemyType;
@@ -158,6 +164,8 @@ void ADDEnemyBase::InitializeEnemy(const FDDEnemyData& EnemyData)
 	GoldDropAmount = EnemyData.GoldDropAmount;
 	bIsBoss = EnemyData.bIsBoss;
 	bIsElite = EnemyData.bIsElite;
+	AttackEffects = EnemyData.AttackEffects;
+	DeathEffects = EnemyData.DeathEffects;
 
 	float EnemyScale = EnemyData.ScaleSize;
 	SetActorScale3D({ EnemyScale, EnemyScale, EnemyScale });
@@ -253,7 +261,10 @@ void ADDEnemyBase::SetupCharacterWidget(UDDUserWidget* InUserWidget)
 	{
 		HpBarWidget->UpdateStat(Stat->GetMaxHp());
 		HpBarWidget->UpdateHpBar(Stat->GetMaxHp());
+		HpBarWidget->SetOwnerName(EnemyName);
 		Stat->OnHpChanged.AddUObject(HpBarWidget, &UDDHpBarWidget::UpdateHpBar);
+
+		OnSetVisibleHpBarDelegate.BindUObject(HpBarWidget, &UDDHpBarWidget::SetVisiblePorgressBar);
 		// TODO : YSY StatComponent
  	}
 }
@@ -333,7 +344,8 @@ void ADDEnemyBase::ArrivalAtGoal()
 void ADDEnemyBase::Die()
 {
 	// TODO : YSY Player get gold, Drop Item
-
+	PlayDeathEffect();
+	OnSetVisibleHpBarDelegate.ExecuteIfBound(false);
 	OnDie.Broadcast(EnemyName, this);
 }
 
@@ -425,21 +437,43 @@ void ADDEnemyBase::CaculateCorrosionDamage(float& ActualDamage)
 
 void ADDEnemyBase::Activate()
 {
+	RouteIndex = 0;
+	ensure(Stat);
+	if (!Stat)
+	{
+		return;
+	}
+	EnemyAIController->StopMovement();
 	Stat->SetCurrentHp(MaxHP);
 	SetActorHiddenInGame(false);
-	GetMesh()->SetVisibility(true, true);
+	GetMesh()->SetVisibility(true);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	SetActorEnableCollision(true);
 	SetActorLocation(AIMoveRoute->GetSplinePointasWorldPosition(0));
 	EnemyAIController->RunAI();
+	bIsDead = false;
+	GetCharacterMovement()->MaxWalkSpeed = MovementSpeed;
+
 }
 
 void ADDEnemyBase::Deactivate()
 {
+	if (AIMoveRoute)
+	{
+		SetActorLocation({ AIMoveRoute->GetSplinePointasWorldPosition(0) });
+		EnemyAIController->StopMovement();
+	}
+	GetMesh()->GetAnimInstance()->Montage_Stop(0.01f);
+	AttackFinished();
+	bIsAggroState = false;
+	bIsDead = true;
+	GetCharacterMovement()->MaxWalkSpeed = 0.0f;
+	//EnemyAIController->StopAI();
 	SetActorHiddenInGame(true);
 	SetActorEnableCollision(false);
 	RouteIndex = 0;
+	
 }
 
 void ADDEnemyBase::SetAIMoveRoute(TArray<class AAISplineRoute*> Splines, int32 Index)
@@ -501,6 +535,10 @@ void ADDEnemyBase::BindingAnimNotify()
 					AttackTraceNotify->OnNotified.AddUObject(this, &ADDEnemyBase::RangeAttack);
 				}			
 			}
+			else if (UDDPlayEffectAnimNotify* PlayEffectNotify = Cast<UDDPlayEffectAnimNotify>(eventNotify.Notify))
+			{
+				PlayEffectNotify->OnNotified.AddUObject(this, &ADDEnemyBase::PlayAttackEffect);
+			}
 		}
 	}
 }
@@ -516,7 +554,7 @@ void ADDEnemyBase::MeleeAttack()
 {
 	TArray<AActor*> IgnoreActors;
 	FHitResult OutHit;
-	bool bHit = UKismetSystemLibrary::SphereTraceSingle(GetWorld(), GetActorLocation(), GetActorLocation(), AttackRange, ETraceTypeQuery::TraceTypeQuery7, false, IgnoreActors, EDrawDebugTrace::ForDuration, OutHit, true);
+	bool bHit = UKismetSystemLibrary::SphereTraceSingle(GetWorld(), GetActorLocation(), GetActorLocation(), AttackRange, ETraceTypeQuery::TraceTypeQuery7, false, IgnoreActors, EDrawDebugTrace::None, OutHit, true);
 	// TODO : YSY Change TraceTypeQuery to name
 
 	if (bHit)
@@ -535,7 +573,7 @@ void ADDEnemyBase::RangeAttack()
 
 	FVector Start = GetActorLocation();
 	FVector End = GetActorForwardVector() * 10000.0 + GetActorLocation(); // TODO : YSY MagicNumber, DataTable
-	bool bHit = UKismetSystemLibrary::LineTraceSingle(GetWorld(), Start, End, ETraceTypeQuery::TraceTypeQuery7, false, IgnoreActors, EDrawDebugTrace::ForDuration, OutHit, true);
+	bool bHit = UKismetSystemLibrary::LineTraceSingle(GetWorld(), Start, End, ETraceTypeQuery::TraceTypeQuery7, false, IgnoreActors, EDrawDebugTrace::None, OutHit, true);
 	// TODO : YSY Change TraceTypeQuery to name
 
 	if (bHit)
@@ -545,4 +583,65 @@ void ADDEnemyBase::RangeAttack()
 			
 		}
 	}
+}
+
+void ADDEnemyBase::ShowHpBarbyAttack()
+{
+	SetVisibleHpBar(true);
+
+	GetWorld()->GetTimerManager().SetTimer(HpBarTH, [this]()
+		{
+			SetVisibleHpBar(false);
+		}, 0.1f, false, 4.0f);
+}
+
+void ADDEnemyBase::PlayAttackEffect()
+{
+	for (const auto& AttackEffectInfo : AttackEffects)
+	{
+		for (const auto& LocationName : AttackEffectInfo.LocationNames)
+		{
+			auto Location = GetMesh()->GetSocketLocation(LocationName);
+
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), AttackEffectInfo.SoundEffect, Location, 1.0f, 1.0f, AttackEffectInfo.SoundStartTime);
+
+			if (AttackEffectInfo.CascadeEffect)
+			{
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), AttackEffectInfo.CascadeEffect, Location);
+			}
+
+			if (AttackEffectInfo.NiagaraEffect)
+			{
+				UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), AttackEffectInfo.NiagaraEffect, Location);
+			}
+		}
+	}
+}
+
+void ADDEnemyBase::PlayDeathEffect()
+{
+	for (const auto& DeathEffectInfo : DeathEffects)
+	{
+		for (const auto& LocationName : DeathEffectInfo.LocationNames)
+		{
+			auto Location = GetMesh()->GetSocketLocation(LocationName);
+
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), DeathEffectInfo.SoundEffect, Location, 1.0f, 1.0f, DeathEffectInfo.SoundStartTime);
+
+			if (DeathEffectInfo.CascadeEffect)
+			{
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DeathEffectInfo.CascadeEffect, Location);
+			}
+
+			if (DeathEffectInfo.NiagaraEffect)
+			{
+				UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), DeathEffectInfo.NiagaraEffect, Location);
+			}
+		}
+	}
+}
+
+void ADDEnemyBase::SetVisibleHpBar(bool bIsVisible)
+{
+	OnSetVisibleHpBarDelegate.ExecuteIfBound(bIsVisible);
 }
