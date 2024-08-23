@@ -20,7 +20,7 @@ void UDDAssetManager::LoadAssetsAsync(const TArray<TSoftObjectPtr<UObject>>& Ass
 {
 	if (AssetsToLoad.Num() == 0)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("No assets to load."));
+		//UE_LOG(LogTemp, Warning, TEXT("No assets to load."));
 		return;
 	}
 
@@ -34,7 +34,7 @@ void UDDAssetManager::LoadAssetsAsync(const TArray<TSoftObjectPtr<UObject>>& Ass
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("%s is already loaded."), *Asset.ToString());
+			//UE_LOG(LogTemp, Warning, TEXT("%s is already loaded."), *Asset.ToString());
 		}
 	}
 
@@ -45,19 +45,23 @@ void UDDAssetManager::LoadAssetsAsync(const TArray<TSoftObjectPtr<UObject>>& Ass
 			{
 				if (Asset.IsValid())
 				{
-					UE_LOG(LogTemp, Warning, TEXT("Asset %s loaded successfully."), *Asset.ToString());
+					//UE_LOG(LogTemp, Warning, TEXT("Asset %s loaded successfully."), *Asset.ToString());
 				}
 			}
-			//this->UnloadAsset(const_cast<TArray<TSoftObjectPtr<UObject>>&>(AssetsToLoad));
+			UE_LOG(LogTemp, Warning, TEXT("Start Unload."));
+			this->UnloadAsset(const_cast<TArray<TSoftObjectPtr<UObject>>&>(AssetsToLoad));
 		};
-
-	// 비동기 로드 시작
-	FStreamableManager& StreamableManager = UAssetManager::GetStreamableManager();
-	StreamableManager.RequestAsyncLoad(SoftObjectPaths, FStreamableDelegate::CreateLambda(OnAssetsLoadedCallback));
+	if (SoftObjectPaths.Num() > 0)
+	{
+		// 비동기 로드 시작
+		FStreamableManager& StreamableManager = UAssetManager::GetStreamableManager();
+		StreamableManager.RequestAsyncLoad(SoftObjectPaths, FStreamableDelegate::CreateLambda(OnAssetsLoadedCallback));
+	}
 }
 
 void UDDAssetManager::UnloadAsset(TArray<TSoftObjectPtr<UObject>>& AssetsToUnload)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Unload Test"));
 	if (AssetsToUnload.Num() == 0)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("No assets to unload."));

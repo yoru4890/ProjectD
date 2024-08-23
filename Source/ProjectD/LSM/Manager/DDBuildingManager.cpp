@@ -76,7 +76,7 @@ void UDDBuildingManager::InitializeBuildings()
 {
 	for (auto& Elem : BuildingDataTable)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("%s is Unlock? : %s"), *Elem.Key.ToString(), Elem.Value->bIsUnlocked ? TEXT("true") : TEXT("false"));
+		//UE_LOG(LogTemp, Warning, TEXT("%s is Unlock? : %s"), *Elem.Key.ToString(), Elem.Value->bIsUnlocked ? TEXT("true") : TEXT("false"));
 
 		if (Elem.Value->bIsUnlocked)
 		{
@@ -88,7 +88,7 @@ void UDDBuildingManager::InitializeBuildings()
 				AssetManager->LoadAssetsAsync(AssetsToLoad); // 에셋 리스트 전달
 			}
 
-			UE_LOG(LogTemp, Warning, TEXT("%s : Init"), *Elem.Key.ToString());
+			//UE_LOG(LogTemp, Warning, TEXT("%s : Init"), *Elem.Key.ToString());
 		}
 	}
 }
