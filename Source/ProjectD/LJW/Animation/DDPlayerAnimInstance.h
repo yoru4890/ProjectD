@@ -6,9 +6,6 @@
 #include "Animation/AnimInstance.h"
 #include "DDPlayerAnimInstance.generated.h"
 
-/**
- * 
- */
 
 UCLASS()
 class PROJECTD_API UDDPlayerAnimInstance : public UAnimInstance

@@ -6,6 +6,7 @@
 #include "LJW/Character/DDCharacterBase.h"
 #include "InputActionValue.h"
 #include "LJW/Interface/CameraFOVInterface.h"
+#include "LJW/Interface/DDPlayerComponentsAnimInterface.h"
 #include "DDCharacterPlayer.generated.h"
 
 
@@ -20,7 +21,7 @@ enum class EPlayerMode : uint8
 };
 
 UCLASS()
-class PROJECTD_API ADDCharacterPlayer : public ADDCharacterBase, public ICameraFOVInterface
+class PROJECTD_API ADDCharacterPlayer : public ADDCharacterBase, public ICameraFOVInterface, public IDDPlayerComponentsAnimInterface
 {
 	GENERATED_BODY()
 	
@@ -45,6 +46,9 @@ protected:
 
 	virtual void SetCharacterControlData(const class UDDCharacterControlData* CharacterControlData) override;
 
+	UPROPERTY(VisibleAnywhere, Category = Control)
+	TObjectPtr<APlayerController> PlayerController;
+
 //Camera Section
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, Meta = (AllowPrivateAccess = "true"))
@@ -57,9 +61,12 @@ protected:
 //Input Section
 protected:
 	void Move(const FInputActionValue& Value);
+	void BackMoveTrue();
+	void BackMoveFalse();
 	void Look(const FInputActionValue& Value);
 	void Sprint(const FInputActionValue& Value);
 	void Walk(const FInputActionValue& Value);
+
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> JumpAction;
@@ -69,6 +76,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> MoveAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> BackMoveAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> SprintAction;
@@ -82,9 +92,20 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> SubSkillAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> AttackAction;
+
 	UPROPERTY(EditAnywhere, Category = Character)
 	float MouseSpeed;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
+	float WalkSpeed;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
+	float SprintSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
+	uint8 bIsBackMove;
 
 //Mesh Section
 protected:
@@ -92,13 +113,19 @@ protected:
 	void CreateLeaderPoseSkeletalMesh(USkeletalMeshComponent* USkeletalMesh, const FString& Name, const FString& Path );
 
 
+	UPROPERTY(VisibleAnywhere, Category = Anim)
+	TObjectPtr<class UDDPlayerAnimInstance> PlayerAnimInstance;
+
 //Weapon System
 
 public:
 	UFUNCTION()
 	void OnUnequipMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
+	// ICameraFOVInterface
+	virtual void SetCameraFOV(const float& Amount) override;
 
+	virtual class UDDWeaponSystemComponent* GetWeaponComp() override;
 
 protected:
 	void EquipMelee();
@@ -106,10 +133,11 @@ protected:
 	void WeaponSubSkill();
 	void WeaponStartAiming();
 	void WeaponEndAiming();
-
+	void WeaponAttack();
 
 protected:
 
 	UPROPERTY(VisibleAnywhere, Category = Weapon)
 	TObjectPtr<class UDDWeaponSystemComponent> WeaponSystem;
+
 };
