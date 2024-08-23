@@ -3,7 +3,7 @@
 
 #include "YSY/Manager/DDEnemySpawnManager.h"
 #include "YSY/Enemy/DDEnemyBase.h"
-#include "YSY/Game/DDGameSingleton.h"
+#include "YSY/Game/DDDataManager.h"
 #include "YSY/Game/DDGameInstance.h"
 #include "YSY/Manager/DDWaveManager.h"
 #include "Kismet/GameplayStatics.h"
@@ -19,7 +19,8 @@ void UDDEnemySpawnManager::SetupEnemyPools(int32 StageNum)
 {
 	FString StringNum = FString::Printf(TEXT("%d"), StageNum);
 	FName StageName(*StringNum);
-	const TMap<FName, int32>& EnemyPoolSizes = UDDGameSingleton::Get().GetWaveDataTable().Find(StageName)->EnemyPoolSizes;
+	UDDGameInstance* MyGameInstance = Cast<UDDGameInstance>(GetWorld()->GetGameInstance());
+	const TMap<FName, int32>& EnemyPoolSizes = MyGameInstance->GetDataManager()->GetWaveDataTable().Find(StageName)->EnemyPoolSizes;
 
 	for (auto& [EnemyName, PoolSize] : EnemyPoolSizes)
 	{
@@ -75,9 +76,9 @@ void UDDEnemySpawnManager::SpawnEnemy(const FName& EnemyName)
 
 	if (Enemy)
 	{
-
+		UDDGameInstance* MyGameInstance = Cast<UDDGameInstance>(GetWorld()->GetGameInstance());
 		Enemy->OnDie.AddUObject(this, &UDDEnemySpawnManager::Deactivate);
-		Enemy->InitializeEnemy(*UDDGameSingleton::Get().GetEnemyDataTable().Find(EnemyName));
+		Enemy->InitializeEnemy(*MyGameInstance->GetDataManager()->GetEnemyDataTable().Find(EnemyName));
 		Enemy->FinishSpawning({});
 		Enemy->Deactivate();
 		InactiveObjects[EnemyName].Add(Enemy);
@@ -86,7 +87,8 @@ void UDDEnemySpawnManager::SpawnEnemy(const FName& EnemyName)
 
 void UDDEnemySpawnManager::ClearEnemyPool()
 {
-	auto& EnemyDataTable = UDDGameSingleton::Get().GetEnemyDataTable();
+	UDDGameInstance* MyGameInstance = Cast<UDDGameInstance>(GetWorld()->GetGameInstance());
+	auto& EnemyDataTable = MyGameInstance->GetDataManager()->GetEnemyDataTable();
 
 	FStreamableManager& AssetLoader = UAssetManager::GetStreamableManager();
 

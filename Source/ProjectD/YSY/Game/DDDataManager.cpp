@@ -1,11 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "YSY/Game/DDGameSingleton.h"
+#include "YSY/Game/DDDataManager.h"
 
-DEFINE_LOG_CATEGORY(LogDDGameSingleton);
-
-UDDGameSingleton::UDDGameSingleton()
+UDDDataManager::UDDDataManager()
 {
 	LoadDataTable<FDDEnemyData>(EnemyDataTable, TEXT("/Script/Engine.DataTable'/Game/0000/YSY/Data/DT_EnemyData.DT_EnemyData'"));
 	LoadDataTable<FDDTrapData>(TrapDataTable, TEXT("/Script/Engine.DataTable'/Game/0000/LSM/Data/LSM_DT_Trap.LSM_DT_Trap'"));
@@ -13,16 +11,4 @@ UDDGameSingleton::UDDGameSingleton()
 	LoadDataTable<FDDWeaponData>(WeaponDataTable, TEXT("/Script/Engine.DataTable'/Game/0000/LJW/Blueprints/Data/LJW_DT_WeaponData.LJW_DT_WeaponData'"));
 	LoadDataTable<FDDWaveData>(WaveDataTable, TEXT("/Script/Engine.DataTable'/Game/0000/YSY/Data/YSY_DT_WaveData.YSY_DT_WaveData'"));
 	LoadDataTable<FDDProjectileData>(ProjectileDataTable, TEXT("/Script/Engine.DataTable'/Game/0000/LSM/Data/LSM_DT_Projectile.LSM_DT_Projectile'"));
-}
-
-UDDGameSingleton& UDDGameSingleton::Get()
-{
-	UDDGameSingleton* Singleton = CastChecked<UDDGameSingleton>(GEngine->GameSingleton);
-	if (Singleton)
-	{
-		return *Singleton;
-	}
-
-	UE_LOG(LogDDGameSingleton, Error, TEXT("Invalid Game Singleton"));
-	return *NewObject<UDDGameSingleton>();
 }

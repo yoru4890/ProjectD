@@ -32,7 +32,15 @@ public:
 	void SetAssets(const FDDProjectileData& LoadedAsset);
 	void InitializeProjectile(float InDamageAmount, TSubclassOf<UDamageType> InDamageType, float InProjectileSpeed, float InMaxLifeTime, bool InbIsExplosive, float InExplosionRadius, int32 InMaxPenetrationCount);
 
+	void SetProjectileActive(bool bIsActive);
+
+protected:
+	virtual void OnCollisionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	virtual void OnCollisionEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
 private:
+	void SetupCollisionResponses();
 	void SetParticeEffects(const FDDProjectileData& LoadedAsset);
 	void SetSound(const FDDProjectileData& LoadedAsset);
 	void SetMeshs(const FDDProjectileData& LoadedAsset);
@@ -60,6 +68,9 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Penetration", meta = (AllowPrivateAccess = "true"))
 	int32 MaxPenetrationCount;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Penetration", meta = (AllowPrivateAccess = "true"))
+	int32 CurrentPenetrationCount;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UStaticMeshComponent> StaticMeshComponent;

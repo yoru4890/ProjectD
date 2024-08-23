@@ -4,7 +4,7 @@
 #include "LSM/Manager/DDAssetManager.h"
 #include "LSM/Building/DDBuildingBaseData.h"
 #include "YSY/Game/DDGameInstance.h"
-#include "YSY/Game/DDGameSingleton.h"
+#include "YSY/Game/DDDataManager.h"
 #include "Engine/StreamableManager.h"
 #include "Engine/AssetManager.h"
 #include "Kismet/GameplayStatics.h"
@@ -39,7 +39,7 @@ void UDDAssetManager::LoadAssetsAsync(const TArray<TSoftObjectPtr<UObject>>& Ass
 	}
 
 	// 비동기 로드 완료 콜백
-	TFunction<void()> OnAssetsLoadedCallback = [AssetsToLoad]()
+	TFunction<void()> OnAssetsLoadedCallback = [this,AssetsToLoad]()
 		{
 			for (const TSoftObjectPtr<UObject>& Asset : AssetsToLoad)
 			{
@@ -48,6 +48,7 @@ void UDDAssetManager::LoadAssetsAsync(const TArray<TSoftObjectPtr<UObject>>& Ass
 					UE_LOG(LogTemp, Warning, TEXT("Asset %s loaded successfully."), *Asset.ToString());
 				}
 			}
+			//this->UnloadAsset(const_cast<TArray<TSoftObjectPtr<UObject>>&>(AssetsToLoad));
 		};
 
 	// 비동기 로드 시작
