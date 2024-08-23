@@ -35,6 +35,8 @@ public:
 
 	FORCEINLINE class UDDProjectileManager* GetProjectileManager() const { return ProjectileManager; }
 
+	FORCEINLINE class UDDDataManager* GetDataManager() const { return DataManager; }
+
 	void InitializeManagerDelegates();
 
 private:
@@ -57,4 +59,7 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UDDProjectileManager> ProjectileManager;
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<class UDDDataManager> DataManager;
 };

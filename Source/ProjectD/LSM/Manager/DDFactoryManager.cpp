@@ -4,13 +4,16 @@
 #include "LSM/Manager/DDFactoryManager.h"
 #include "LSM/Factory/DDFactoryInterface.h"
 #include "LSM/Building/DDBuildingBaseData.h"
-#include "YSY/Game/DDGameSingleton.h"
+#include "YSY/Game/DDDataManager.h"
+#include "YSY/Game/DDGameInstance.h"
 
 void UDDFactoryManager::Initialize()
 {
-	TMap<FName,FDDTrapData>& TrapDataTable = UDDGameSingleton::Get().GetTrapDataTable();
-	TMap<FName,FDDTowerData>& TowerDataTable = UDDGameSingleton::Get().GetTowerDataTable();
-	TMap<FName,FDDProjectileData>& ProjectileDataTable = UDDGameSingleton::Get().GetProjectileDataTable();
+	UDDGameInstance* MyGameInstance = Cast<UDDGameInstance>(GetWorld()->GetGameInstance());
+
+	TMap<FName,FDDTrapData>& TrapDataTable = MyGameInstance->GetDataManager()->GetTrapDataTable();
+	TMap<FName,FDDTowerData>& TowerDataTable = MyGameInstance->GetDataManager()->GetTowerDataTable();
+	TMap<FName,FDDProjectileData>& ProjectileDataTable = MyGameInstance->GetDataManager()->GetProjectileDataTable();
 	for (auto& Elem : TrapDataTable) {
 		if (Elem.Value.FactoryClass) {
 			NamesToFactories.Add(Elem.Key, Elem.Value.FactoryClass);

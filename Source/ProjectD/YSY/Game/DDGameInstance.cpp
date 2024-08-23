@@ -8,10 +8,12 @@
 #include "YSY/Manager/DDEnemySpawnManager.h"
 #include "YSY/Manager/DDWaveManager.h"
 #include "LSM/Manager/DDProjectileManager.h"
+#include "YSY/Game/DDDataManager.h"
 
 void UDDGameInstance::Init()
 {
 	Super::Init();
+	DataManager = NewObject<UDDDataManager>(this);
 	BuildingManager = NewObject<UDDBuildingManager>(this);
 	FactoryManager = NewObject<UDDFactoryManager>(this);
 	AssetManager = NewObject<UDDAssetManager>(this);
