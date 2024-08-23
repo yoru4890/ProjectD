@@ -68,7 +68,7 @@ private:
 protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FString DisplayName; // 빌딩의 위젯 표시 이름
+	FText DisplayName; // 빌딩의 위젯 표시 이름
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName RowName; // 빌딩의 데이터테이블 이름

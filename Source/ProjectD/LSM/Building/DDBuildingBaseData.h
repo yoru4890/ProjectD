@@ -26,7 +26,7 @@ struct FDDBuildingBaseData : public FTableRowBase
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FString DisplayName; // 오브젝트의 이름
+	FText DisplayName; // 오브젝트의 이름
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FText ObjectInfo; // 오브젝트의 정보
