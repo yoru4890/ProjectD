@@ -4,6 +4,7 @@
 #include "LSM/Projectile/DDProjectileBase.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "NiagaraComponent.h"
+#include "YSY/Collision/CollisionChannel.h"
 // Sets default values
 ADDProjectileBase::ADDProjectileBase()
 {
@@ -21,8 +22,7 @@ ADDProjectileBase::ADDProjectileBase()
 	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("UProjectileMovementComponent"));
 	ProjectileMovementComponent->SetUpdatedComponent(RootComponent);
 
-	StaticMeshComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
-
+	SetupCollisionResponses();
 
 
 }
@@ -38,8 +38,17 @@ void ADDProjectileBase::BeginPlay()
 	
 }
 
+#pragma region SetupAndInitialization
+
 void ADDProjectileBase::InitializeProjectile(float InDamageAmount, TSubclassOf<UDamageType> InDamageType, float InProjectileSpeed, float InMaxLifeTime, bool InbIsExplosive, float InExplosionRadius, int32 InMaxPenetrationCount)
 {
+	DamageAmount = InDamageAmount;
+	DamageType = InDamageType;
+	ProjectileSpeed = InProjectileSpeed;
+	MaxLifeTime = InMaxLifeTime;
+	bIsExplosive = InbIsExplosive;
+	ExplosionRadius = InExplosionRadius;
+	MaxPenetrationCount = InMaxPenetrationCount;
 
 }
 
@@ -50,11 +59,11 @@ void ADDProjectileBase::SetAssets(const FDDProjectileData& LoadedAsset)
 	SetParticeEffects(LoadedAsset);
 }
 
-// Called every frame
-void ADDProjectileBase::Tick(float DeltaTime)
+void ADDProjectileBase::SetupCollisionResponses()
 {
-	Super::Tick(DeltaTime);
-
+	StaticMeshComponent->SetCollisionObjectType(GTCHANNEL_PROJECTILE);
+	StaticMeshComponent->OnComponentBeginOverlap.AddDynamic(this, &ADDProjectileBase::OnCollisionBeginOverlap);
+	StaticMeshComponent->OnComponentEndOverlap.AddDynamic(this, &ADDProjectileBase::OnCollisionEndOverlap);
 }
 
 void ADDProjectileBase::SetParticeEffects(const FDDProjectileData& LoadedAsset)
@@ -112,3 +121,53 @@ void ADDProjectileBase::SetMeshs(const FDDProjectileData& LoadedAsset)
 	}
 }
 
+#pragma endregion SetupAndInitialization
+
+#pragma region CollisionCallbacks
+
+void ADDProjectileBase::OnCollisionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	CurrentPenetrationCount++;
+
+	if (CurrentPenetrationCount >= MaxPenetrationCount)
+	{
+		if (bIsExplosive)
+		{
+
+		}
+		else
+		{
+
+		}
+	}
+}
+
+void ADDProjectileBase::OnCollisionEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+}
+
+void ADDProjectileBase::SetProjectileActive(bool bIsActive)
+{
+	if (!bIsActive)
+	{
+		StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+	else
+	{
+		StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	}
+	CurrentPenetrationCount = 0;
+}
+
+#pragma endregion CollisionAndCallbacks
+
+#pragma region TickAndUpdate
+
+// Called every frame
+void ADDProjectileBase::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+}
+
+#pragma endregion TickAndUpdate

@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "LSM/Manager/DDBuildingManager.h"
-#include "YSY/Game/DDGameSingleton.h"
+#include "YSY/Game/DDDataManager.h"
 #include "YSY/Game/DDGameInstance.h"
 #include "DDFactoryManager.h"
 #include "DDAssetManager.h"
@@ -19,6 +19,8 @@ UDDBuildingManager::UDDBuildingManager()
 
 void UDDBuildingManager::Initialize()
 {
+	SetupCommonReferences(GetWorld());
+
 	TMap<FName, FDDTrapData>& TrapDataTable = GetTrapDataTable();
 	TMap<FName, FDDTowerData>& TowerDataTable = GetTowerDataTable();
 
@@ -33,7 +35,6 @@ void UDDBuildingManager::Initialize()
 	}
 
 	SetBuildingSellCost();
-	SetupCommonReferences(GetWorld());
 	InitializeBuildings();
 }
 
@@ -358,7 +359,8 @@ FDDBuildingBaseData* UDDBuildingManager::GetBuildingData(const FName& RowName)
 
 const FDDTrapData* UDDBuildingManager::GetTrapData(const FName& RowName) const
 {
-	const FDDTrapData* FoundData = UDDGameSingleton::Get().GetTrapDataTable().Find(RowName);
+
+	const FDDTrapData* FoundData = MyGameInstance->GetDataManager()->GetTrapDataTable().Find(RowName);
 	if (!FoundData)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Trap data for RowName %s not found!"), *RowName.ToString());
@@ -368,7 +370,7 @@ const FDDTrapData* UDDBuildingManager::GetTrapData(const FName& RowName) const
 
 const FDDTowerData* UDDBuildingManager::GetTowerData(const FName& RowName) const
 {
-	const FDDTowerData* FoundData = UDDGameSingleton::Get().GetTowerDataTable().Find(RowName);
+	const FDDTowerData* FoundData = MyGameInstance->GetDataManager()->GetTowerDataTable().Find(RowName);
 	if (!FoundData)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Tower data for RowName %s not found!"), *RowName.ToString());
@@ -378,22 +380,22 @@ const FDDTowerData* UDDBuildingManager::GetTowerData(const FName& RowName) const
 
 const TMap<FName, FDDTrapData>& UDDBuildingManager::GetTrapDataTable() const
 {
-	return UDDGameSingleton::Get().GetTrapDataTable();
+	return MyGameInstance->GetDataManager()->GetTrapDataTable();
 }
 
 TMap<FName, FDDTrapData>& UDDBuildingManager::GetTrapDataTable()
 {
-	return UDDGameSingleton::Get().GetTrapDataTable();
+	return MyGameInstance->GetDataManager()->GetTrapDataTable();
 }
 
 const TMap<FName, FDDTowerData>& UDDBuildingManager::GetTowerDataTable() const
 {
-	return UDDGameSingleton::Get().GetTowerDataTable();
+	return MyGameInstance->GetDataManager()->GetTowerDataTable();
 }
 
 TMap<FName, FDDTowerData>& UDDBuildingManager::GetTowerDataTable()
 {
-	return UDDGameSingleton::Get().GetTowerDataTable();
+	return MyGameInstance->GetDataManager()->GetTowerDataTable();
 }
 
 const TMap<FName, FDDBuildingBaseData*>& UDDBuildingManager::GetBuildingDataTable() const

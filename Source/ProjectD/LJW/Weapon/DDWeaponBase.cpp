@@ -2,7 +2,7 @@
 
 
 #include "LJW/Weapon/DDWeaponBase.h"
-#include "YSY/Game/DDGameSingleton.h"
+#include "YSY/Game/DDDataManager.h"
 #include "LJW/Animation/DDVisibleWeaponAnimNotify.h"
 #include "LJW/Animation/DDHiddenWeaponAnimNotify.h"
 

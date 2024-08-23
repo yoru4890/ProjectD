@@ -2,7 +2,7 @@
 
 
 #include "LSM/Manager/DDProjectileManager.h"
-#include "YSY/Game/DDGameSingleton.h"
+#include "YSY/Game/DDDataManager.h"
 #include "YSY/Game/DDGameInstance.h"
 #include "LSM/Manager/DDAssetManager.h"
 #include "DDFactoryManager.h"
@@ -81,17 +81,17 @@ void UDDProjectileManager::GetSoftObjectPtrsInProjectile(const FName& RowName, T
 
 const TMap<FName, FDDProjectileData>& UDDProjectileManager::GetProjectileDataTable() const
 {
-	return UDDGameSingleton::Get().GetProjectileDataTable();
+	return MyGameInstance->GetDataManager()->GetProjectileDataTable();
 }
 
 TMap<FName, FDDProjectileData>& UDDProjectileManager::GetProjectileDataTable()
 {
-	return UDDGameSingleton::Get().GetProjectileDataTable();
+	return MyGameInstance->GetDataManager()->GetProjectileDataTable();
 }
 
 const FDDProjectileData* UDDProjectileManager::GetProjectileData(const FName& RowName) const
 {
-	const FDDProjectileData* ProjectileData = UDDGameSingleton::Get().GetProjectileDataTable().Find(RowName);
+	const FDDProjectileData* ProjectileData = MyGameInstance->GetDataManager()->GetProjectileDataTable().Find(RowName);
 
 	if (ProjectileData)
 	{
@@ -103,7 +103,7 @@ const FDDProjectileData* UDDProjectileManager::GetProjectileData(const FName& Ro
 
 FDDProjectileData* UDDProjectileManager::GetProjectileData(const FName& RowName)
 {
-	FDDProjectileData* ProjectileData = UDDGameSingleton::Get().GetProjectileDataTable().Find(RowName);
+	FDDProjectileData* ProjectileData = MyGameInstance->GetDataManager()->GetProjectileDataTable().Find(RowName);
 
 	if (ProjectileData)
 	{

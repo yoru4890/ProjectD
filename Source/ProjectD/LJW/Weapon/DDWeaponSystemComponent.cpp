@@ -2,13 +2,14 @@
 
 
 #include "LJW/Weapon/DDWeaponSystemComponent.h"
-#include "YSY/Game/DDGameSingleton.h"
+#include "YSY/Game/DDDataManager.h"
 #include "LJW/Weapon/DDWeaponBase.h"
 #include "LJW/Weapon/DDWeaponCudgel.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include <Kismet/KismetSystemLibrary.h>
 #include "LJW/Interface/CameraFOVInterface.h"
+#include "YSY/Game/DDGameInstance.h"
 
 
 
@@ -45,7 +46,8 @@ void UDDWeaponSystemComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 void UDDWeaponSystemComponent::InitializeWeapon()
 {
 	// 싱글톤에서 data들을 얻음, 데이터 순서 중요
-	auto WeaponDatas = UDDGameSingleton::Get().GetWeaponDataTable();
+	UDDGameInstance* MyGameInstance = Cast<UDDGameInstance>(GetWorld()->GetGameInstance());
+	auto WeaponDatas = MyGameInstance->GetDataManager()->GetWeaponDataTable();
 	
 	//Player에 무기 장착
 	if (GetOwner())

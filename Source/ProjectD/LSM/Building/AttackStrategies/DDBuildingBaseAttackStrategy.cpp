@@ -6,6 +6,7 @@
 #include "LSM/Building/DDBuildingBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "NiagaraFunctionLibrary.h"
+#include "YSY/Interface/DamageInterface.h"
 
 
 void UDDBuildingBaseAttackStrategy::Initialize(ADDBuildingBase* InOwningTower)
@@ -35,9 +36,15 @@ void UDDBuildingBaseAttackStrategy::ApplyDotDamge(AActor* TargetEnemy)
 void UDDBuildingBaseAttackStrategy::ApplyDirectDamage(AActor* TargetEnemy)
 {
 	//UE_LOG(LogTemp, Warning, TEXT("Apply Direct Damage"));
-	FDamageEvent DamageEvent{};
-	DamageEvent.DamageTypeClass = DamageType;
-	TargetEnemy->TakeDamage(Damage, DamageEvent, nullptr, OwningTower);
+    IDamageInterface* DamageInterface = Cast<IDamageInterface>(TargetEnemy);
+    if (DamageInterface)
+    {
+        FDamageEvent DamageEvent{};
+        DamageEvent.DamageTypeClass = DamageType;
+        DamageInterface->ApplyDamage(Damage, DamageEvent, nullptr, OwningTower);
+
+        UE_LOG(LogTemp, Warning, TEXT("Apply Direct Damage"));
+    }
 }
 
 void UDDBuildingBaseAttackStrategy::ApplySlowEffect(AActor* TargetEnemy)
