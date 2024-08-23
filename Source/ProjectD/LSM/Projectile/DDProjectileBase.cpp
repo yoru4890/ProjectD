@@ -4,6 +4,7 @@
 #include "LSM/Projectile/DDProjectileBase.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "NiagaraComponent.h"
+#include "YSY/Collision/CollisionChannel.h"
 // Sets default values
 ADDProjectileBase::ADDProjectileBase()
 {
@@ -21,7 +22,9 @@ ADDProjectileBase::ADDProjectileBase()
 	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("UProjectileMovementComponent"));
 	ProjectileMovementComponent->SetUpdatedComponent(RootComponent);
 
-	StaticMeshComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
+	StaticMeshComponent->SetCollisionObjectType(GTCHANNEL_PROJECTILE);
+	StaticMeshComponent->OnComponentBeginOverlap.AddDynamic(this, &ADDProjectileBase::OnCollisionBeginOverlap);
+	StaticMeshComponent->OnComponentEndOverlap.AddDynamic(this, &ADDProjectileBase::OnCollisionEndOverlap);
 
 
 
@@ -40,6 +43,13 @@ void ADDProjectileBase::BeginPlay()
 
 void ADDProjectileBase::InitializeProjectile(float InDamageAmount, TSubclassOf<UDamageType> InDamageType, float InProjectileSpeed, float InMaxLifeTime, bool InbIsExplosive, float InExplosionRadius, int32 InMaxPenetrationCount)
 {
+	DamageAmount = InDamageAmount;
+	DamageType = InDamageType;
+	ProjectileSpeed = InProjectileSpeed;
+	MaxLifeTime = InMaxLifeTime;
+	bIsExplosive = InbIsExplosive;
+	ExplosionRadius = InExplosionRadius;
+	MaxPenetrationCount = InMaxPenetrationCount;
 
 }
 

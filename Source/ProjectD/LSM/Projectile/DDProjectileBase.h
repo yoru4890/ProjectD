@@ -32,6 +32,9 @@ public:
 	void SetAssets(const FDDProjectileData& LoadedAsset);
 	void InitializeProjectile(float InDamageAmount, TSubclassOf<UDamageType> InDamageType, float InProjectileSpeed, float InMaxLifeTime, bool InbIsExplosive, float InExplosionRadius, int32 InMaxPenetrationCount);
 
+protected:
+	virtual void OnCollisionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
 private:
 	void SetParticeEffects(const FDDProjectileData& LoadedAsset);
 	void SetSound(const FDDProjectileData& LoadedAsset);
