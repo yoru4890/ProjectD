@@ -19,3 +19,4 @@
 #define GTCHANNEL_ENEMYDAMAGE ECC_GameTraceChannel9
 #define GTCHANNEL_MANAGETRACE ECC_GameTraceChannel10
 #define GTCHANNEL_BUILDZONE ECC_GameTraceChannel12
+#define GTCHANNEL_PROJECTILE ECC_GameTraceChannel13

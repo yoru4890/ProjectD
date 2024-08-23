@@ -7,7 +7,7 @@
 #include "YSY/AI/AISplineRoute.h"
 #include "YSY/Manager/DDEnemySpawnManager.h"
 #include "YSY/Game/DDGameInstance.h"
-#include "YSY/Game/DDGameSingleton.h"
+#include "YSY/Game/DDDataManager.h"
 
 UDDWaveManager::UDDWaveManager()
 {
@@ -15,7 +15,8 @@ UDDWaveManager::UDDWaveManager()
 
 void UDDWaveManager::Initialize()
 {
-	auto& TempData = UDDGameSingleton::Get().GetWaveDataTable();
+	UDDGameInstance* MyGameInstance = Cast<UDDGameInstance>(GetWorld()->GetGameInstance());
+	auto& TempData = MyGameInstance->GetDataManager()->GetWaveDataTable();
 
 	StageWaveInfo.SetNum(TempData.Num() + 1);
 
