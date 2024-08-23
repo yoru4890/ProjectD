@@ -33,6 +33,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	FORCEINLINE class UDDWaveManager* GetWaveManager() const { return WaveManager; }
 
+	FORCEINLINE class UDDProjectileManager* GetProjectileManager() const { return ProjectileManager; }
+
 	void InitializeManagerDelegates();
 
 private:
@@ -52,4 +54,7 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UDDWaveManager> WaveManager;
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<class UDDProjectileManager> ProjectileManager;
 };

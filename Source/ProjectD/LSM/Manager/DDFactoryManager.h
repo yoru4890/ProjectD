@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
-#include "LSM/Building/DDBuildingBaseData.h"
 #include "DDFactoryManager.generated.h"
 
 /**
@@ -15,7 +14,7 @@ class PROJECTD_API UDDFactoryManager : public UObject
 {
 	GENERATED_BODY()
 public:
-	void Initialize(const TMap<FName, FDDBuildingBaseData*>& BuildingDataTable /* other DataTable can Add*/);
+	void Initialize();
 
 	class IDDFactoryInterface* GetFactory(const FName& RowName);
 

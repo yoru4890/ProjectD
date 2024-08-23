@@ -5,7 +5,6 @@
 #include "LSM/Building/Tower/DDTowerData.h"
 #include "LSM/Building/Tower/DDTowerBase.h"
 #include "YSY/Game/DDGameInstance.h"
-#include "LSM/Manager/DDAssetManager.h"
 #include "LSM/Manager/DDBuildingManager.h"
 
 UObject* UDDTowerFactory::CreateObject(UWorld* World, const FName& RowName, const FVector& Location, const FRotator& Rotation, AActor* Owner, APawn* Instigator)
@@ -26,12 +25,6 @@ UObject* UDDTowerFactory::CreateObject(UWorld* World, const FName& RowName, cons
 	// TrapClass를 사용하여 NewTrap 생성
 	ADDTowerBase* NewTower = World->SpawnActor<ADDTowerBase>(TowerClass);
 	check(NewTower);
-
-
-
-
-	UDDAssetManager* AssetManager = MyGameInstance->GetAssetManager();
-	check(AssetManager);
 
 	NewTower->InitFromDataTable(RowName, *TowerData);
 	NewTower->SetAssets(BuildingData);

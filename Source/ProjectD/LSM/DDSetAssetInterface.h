@@ -22,5 +22,5 @@ class PROJECTD_API IDDSetAssetInterface
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual void SetAssets(FDDBuildingBaseData& LoadedAsset) = 0;
+	//virtual void SetAssets(FDDBuildingBaseData& LoadedAsset) = 0;
 };
