@@ -11,21 +11,18 @@
 #include "LJW/Weapon/DDWeaponData.h"
 #include "YSY/GameData/DDWaveData.h"
 #include "LSM/Projectile/DDProjectileData.h"
-#include "DDGameSingleton.generated.h"
-
-DECLARE_LOG_CATEGORY_EXTERN(LogDDGameSingleton, Error, All);
+#include "DDDataManager.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class PROJECTD_API UDDGameSingleton : public UObject
+class PROJECTD_API UDDDataManager : public UObject
 {
 	GENERATED_BODY()
 	
 public:
-	UDDGameSingleton();
-	static UDDGameSingleton& Get();
+	UDDDataManager();
 
 	FORCEINLINE TMap<FName, FDDEnemyData>& GetEnemyDataTable() { return EnemyDataTable; }
 	FORCEINLINE TMap<FName, FDDTrapData>& GetTrapDataTable() { return TrapDataTable; }
@@ -62,13 +59,13 @@ private:
 				}
 				else
 				{
-					UE_LOG(LogDDGameSingleton, Warning, TEXT("Failed to find row: %s"), *RowName.ToString());
+					//UE_LOG(LogDDGameSingleton, Warning, TEXT("Failed to find row: %s"), *RowName.ToString());
 				}
 			}
 		}
 		else
 		{
-			UE_LOG(LogDDGameSingleton, Error, TEXT("Failed to load DataTable at path: %s"), *Path);
+			//UE_LOG(LogDDGameSingleton, Error, TEXT("Failed to load DataTable at path: %s"), *Path);
 		}
 	}
 };

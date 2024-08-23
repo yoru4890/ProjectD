@@ -337,12 +337,10 @@ void ADDBuildingBase::PlayAttackAnimation()
 			UAnimInstance* AnimInstance = SkeletalMeshComponents[index]->GetAnimInstance();
 			if (AnimInstance)
 			{
-				UE_LOG(LogTemp, Warning, TEXT("AnimInstance Exist"));
 				// UDDTrapAnimInstance로 캐스팅합니다.
 				UDDBuildingAnimInstance* BuildingAnimInstance = Cast<UDDBuildingAnimInstance>(AnimInstance);
 				if (BuildingAnimInstance && AttackMontages.IsValidIndex(index))
 				{
-					UE_LOG(LogTemp, Warning, TEXT("Trap AnimInstance Exist"));
 					// PlayAnimationMontage를 호출합니다.
 					BuildingAnimInstance->PlayAnimationMontage(AttackMontages[index]);
 				}

@@ -18,10 +18,8 @@ void UDDBuildingAnimInstance::PlayAnimationMontage(UAnimMontage* InMontage)
 {
     if (InMontage)
     {
-        UE_LOG(LogTemp, Warning, TEXT("Trap Attack Montage Exist"));
         if (Montage_Play(InMontage) > 0)
         {
-            UE_LOG(LogTemp, Warning, TEXT("Montage is playing successfully"));
             CurrentMontage = InMontage;
 
             // 공격 몽타주가 끝나면 bIsAttacking을 false로 설정
@@ -31,12 +29,12 @@ void UDDBuildingAnimInstance::PlayAnimationMontage(UAnimMontage* InMontage)
         }
         else
         {
-            UE_LOG(LogTemp, Error, TEXT("Failed to play montage"));
+            //UE_LOG(LogTemp, Error, TEXT("Failed to play montage"));
         }
     }
     else
     {
-        UE_LOG(LogTemp, Error, TEXT("InMontage is null"));
+        //UE_LOG(LogTemp, Error, TEXT("InMontage is null"));
     }
 }
 
