@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "LJW/Weapon/DDWeaponData.h"
+#include "Components/CapsuleComponent.h"
 #include "DDWeaponBase.generated.h"
 
 
@@ -39,8 +40,11 @@ public:
 	FORCEINLINE UAnimMontage* GetAttackMontage() const noexcept { return AttackAnim; }
 	void SetAttackMontage(UAnimMontage* InMontage) { AttackAnim = InMontage; }
 
-	virtual void SubSkill() {};
+	FORCEINLINE FName GetSocketName() const noexcept { return WeaponSocketName; }
 
+	
+	virtual void SubSkill() {};
+	virtual void Attack() {};
 	
 protected:
 	// Called when the game starts or when spawned
@@ -55,6 +59,9 @@ public:
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
 	FName WeaponRowName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon)
+	FName WeaponSocketName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
 	FString WeaponDisplayName;

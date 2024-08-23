@@ -8,7 +8,7 @@
 
 /**
  * 
- */
+ */  
 UCLASS()
 class PROJECTD_API UDDCharacterControlData : public UPrimaryDataAsset
 {
@@ -32,6 +32,24 @@ public:
 	UPROPERTY(EditAnywhere, Category = CharacterMovement)
 	float MouseSpeed;
 
+	UPROPERTY(EditAnywhere, Category = CharacterMovement)
+	float JumpZVelocity;
+
+	UPROPERTY(EditAnywhere, Category = CharacterMovement)
+	float AirControl;
+
+	UPROPERTY(EditAnywhere, Category = CharacterMovement)
+	float MaxWalkSpeed;
+
+	UPROPERTY(EditAnywhere, Category = CharacterMovement)
+	float MaxSprintSpeed;
+
+	UPROPERTY(EditAnywhere, Category = CharacterMovement)
+	float MinAnalogWalkSpeed;
+
+	UPROPERTY(EditAnywhere, Category = CharacterMovement)
+	float BrakingDecelerationWalking;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	TObjectPtr<class UInputMappingContext> InputMappingContext;
 
@@ -39,7 +57,7 @@ public:
 	float TargetArmLength;
 
 	UPROPERTY(EditAnywhere, Category = SpringArm)
-	FVector TargetOffset;
+	FVector SocketOffset;
 
 	UPROPERTY(EditAnywhere, Category = SpringArm)
 	FRotator RelativeRotation;
@@ -56,6 +74,5 @@ public:
 	UPROPERTY(EditAnywhere, Category = SpringArm)
 	uint32 bInheritRoll : 1;
 
-	
 
 };

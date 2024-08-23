@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "LJW/Weapon/DDWeaponBase.h"
+#include "Components/TimeLineComponent.h"
 #include "DDWeaponSystemComponent.generated.h"
 
 DECLARE_DELEGATE_RetVal(bool, FOnGetIsAimingSignature);
@@ -25,7 +26,7 @@ enum class EWeaponType : uint8
 	Bazooka UMETA(DisplayName = "Bazooka"),
 	Machinegun UMETA(DisplayName = "Machinegun"),
 	
-	Unknown UMETA(DisplayName = "Unknown")
+ 	Unknown UMETA(DisplayName = "Unknown")
 };
 
 
@@ -53,11 +54,21 @@ public:
 	void WeaponSubSkill();
 	void WeaponStartAiming();
 	void WeaponEndAiming();
+	
+	void WeaponAttack();
 
 	//조건 모음
 	bool IsUnequipMontage(const UAnimMontage* Montage) const;
 	bool CanMeleeSubSkill();
 	bool CanRangeAiming();
+	bool CanAttacking();
+
+	UFUNCTION()
+	void UpdateRifleZoom(); //Timeline Update(Tick)
+	UFUNCTION()
+	void FinishRifleZoom(); //Timeline Finish(End)
+	UFUNCTION()
+	void InitTimeline();
 
 public:
 	FOnGetIsAimingSignature OnGetAimingDelegate;
@@ -65,6 +76,11 @@ public:
 	FOnGetIsDeadSignature OnGetDeadDelegate;
 	FOnSetIsDeadSignature OnSetDeadDelegate;
 	FOnSetWeaponIndexSignature OnSetWeaponIndexDelegate;
+
+	FName ComboSectionIndex;
+
+	UPROPERTY()
+	TObjectPtr<UCapsuleComponent> CudgelCollision;
 
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon, meta = (AllowPrivateAccess = "true"))
@@ -88,4 +104,17 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Animation, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class ACharacter> PlayerCharacter;
+
+
+	UPROPERTY()
+	TObjectPtr<UAnimInstance> PlayerAnimInstance;
+
+	FTimeline RifleZoomTL;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon, meta = (AllowPrivateAccess = "true"))
+	UCurveFloat* ZoomCurve;
+
+	uint32 bIsOnTimeline : 1;
+
+	
 }; 
