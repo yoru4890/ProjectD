@@ -85,7 +85,7 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 		EquipMeleeAction = MeleeRef.Object;
 	}
 
-	static ConstructorHelpers::FObjectFinder<UInputAction>RangeRef(TEXT("/Script/EnhancedInput.InputAction'/Game/0000/LJW/In put/IA_Player_EquipRange.IA_Player_EquipRange'"));
+	static ConstructorHelpers::FObjectFinder<UInputAction>RangeRef(TEXT("/Script/EnhancedInput.InputAction'/Game/0000/LJW/Input/IA_Player_EquipRange.IA_Player_EquipRange'"));
 	if (nullptr != RangeRef.Object)
 	{
 		EquipRangeAction = RangeRef.Object;
@@ -229,7 +229,6 @@ void ADDCharacterPlayer::Move(const FInputActionValue& Value)
 	AddMovementInput(ForwardDirection, MovementVector.X);
 	AddMovementInput(RightDirection, MovementVector.Y);
 
-	UE_LOG(LogTemp, Warning, TEXT("%d"), bIsBackMove);
 
 }
 
@@ -316,8 +315,10 @@ void ADDCharacterPlayer::EquipMelee()
 	}
 }
 
+
 void ADDCharacterPlayer::EquipRange()
 {
+
 	if (!(PlayerAnimInstance->IsAnyMontagePlaying()))
 	{
 		WeaponSystem->EquipRangeWeapon();
