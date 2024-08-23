@@ -108,6 +108,8 @@ bool UDDBuildingManager::UnlockBuilding(const FName& RowName)
 
 	FName ParentName = BuildingStruct->ParentRowName;
 
+	UE_LOG(LogTemp, Warning, TEXT("Here1"));
+
 	while (ParentName != FName("None")) {
 		if (!GetBuildingData(ParentName)->bIsUnlocked) 
 		{
@@ -117,11 +119,13 @@ bool UDDBuildingManager::UnlockBuilding(const FName& RowName)
 		ParentName = GetBuildingData(ParentName)->ParentRowName;
 		
 	}
+	UE_LOG(LogTemp, Warning, TEXT("Here2"));
 	ADDPlayerState* PlayerState = CastChecked<ADDPlayerState>(UGameplayStatics::GetPlayerState(GetWorld(), 0));
 	check(PlayerState);
 
 	if (PlayerState->CheckLikePoint(BuildingStruct->UnlockCost)) {
 		PlayerState->SubtractLikePoint(BuildingStruct->UnlockCost);
+		UE_LOG(LogTemp, Warning, TEXT("Here3"));
 		BuildingStruct->bIsUnlocked = true;
 		TArray<TSoftObjectPtr<UObject>> AssetsToload;
 		GetSoftObjectPtrsInBuilding(RowName, AssetsToload);
@@ -129,6 +133,7 @@ bool UDDBuildingManager::UnlockBuilding(const FName& RowName)
 
 		return true;
 	}
+	UE_LOG(LogTemp, Warning, TEXT("Here4"));
 	return false;
 }
 
