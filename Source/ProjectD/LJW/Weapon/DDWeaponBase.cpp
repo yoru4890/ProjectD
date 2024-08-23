@@ -14,6 +14,7 @@ ADDWeaponBase::ADDWeaponBase()
 	WeaponSkeletal->SetupAttachment(RootComponent);
 }
 
+
 // Called when the game starts or when spawned
 void ADDWeaponBase::BeginPlay()
 {
@@ -44,6 +45,7 @@ void ADDWeaponBase::InitData(const FName& RowName, const FDDWeaponData& WeaponDa
 	AttackCooltime = WeaponData.AttackCooltime;
 	AttackDamage = WeaponData.AttackDamage;
 	AttackRange = WeaponData.AttackRange;
+	WeaponSocketName = WeaponData.WeaponSocketName;
 
 	//Equip Montage
 	if (WeaponData.EquipMontage)
@@ -95,6 +97,8 @@ void ADDWeaponBase::InitData(const FName& RowName, const FDDWeaponData& WeaponDa
 	{
 		SkillWeaponAnim = WeaponData.SkillMontage;
 	}
+
+	//Attack Montage
 	if (WeaponData.AttackMontage)
 	{
 		AttackAnim = WeaponData.AttackMontage;

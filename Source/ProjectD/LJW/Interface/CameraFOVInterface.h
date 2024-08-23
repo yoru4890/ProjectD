@@ -20,6 +20,8 @@ class PROJECTD_API ICameraFOVInterface
 {
 	GENERATED_BODY()
 
+public:
+	virtual void SetCameraFOV(const float& Amount) = 0;
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 
 };

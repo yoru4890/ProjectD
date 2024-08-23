@@ -22,20 +22,21 @@ struct FDDWeaponData : public FTableRowBase
 public:
 	FDDWeaponData() {}
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
-	FString WeaponName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
 	EAttackType AttackType;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
-	TObjectPtr<USkeletalMesh> WeaponMesh;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
 	TSubclassOf<class ADDWeaponBase> WeaponClass; 
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
+	FString WeaponName;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
 	FString WeaponInformation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
+	FName WeaponSocketName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
 	int32 Price;
@@ -56,6 +57,9 @@ public:
 	float AttackRange;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
+	TObjectPtr<USkeletalMesh> WeaponMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
 	TObjectPtr<UAnimMontage> EquipMontage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
@@ -66,4 +70,5 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
 	TObjectPtr<UAnimMontage> AttackMontage;
+
 };
