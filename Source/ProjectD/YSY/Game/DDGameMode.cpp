@@ -5,6 +5,7 @@
 #include "GameFramework/HUD.h"
 #include "GameFramework/GameStateBase.h"
 #include "GameFramework/PlayerState.h"
+#include "YSY/Game/DDGameSingleton.h"
 
 ADDGameMode::ADDGameMode()
 {
@@ -35,4 +36,5 @@ ADDGameMode::ADDGameMode()
 	{
 		PlayerStateClass = PlayerStateClassRef.Class;
 	}
+
 }
