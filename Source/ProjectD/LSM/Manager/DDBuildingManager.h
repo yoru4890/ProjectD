@@ -70,6 +70,8 @@ public:
 
 	void DestroyBuilding(class ADDBuildingBase& Building);
 
+	void GetSoftObjectPtrsInBuilding(const FName& RowName, TArray<TSoftObjectPtr<UObject>>& AssetsToLoad);
+
 private:
 	void SetupCommonReferences(UWorld* World);
 
@@ -79,7 +81,6 @@ private:
 
 	ADDBuildingBase* CreateBuildingInstance(UWorld* World, const FName& RowName);
 
-	void GetSoftObjectPtrsInBuilding(const FName& RowName, TArray<TSoftObjectPtr<UObject>>& AssetsToLoad);
 
 
 	TMap<FName, FBuildingList> BuildingPool;
