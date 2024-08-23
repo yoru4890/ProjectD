@@ -22,14 +22,15 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+
+public:
 	FORCEINLINE const FName& GetRowName() const { return RowName; }
 
 public:
 	void SetAssets(const FDDProjectileData& LoadedAsset);
-
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	void InitializeProjectile(float InDamageAmount, TSubclassOf<UDamageType> InDamageType, float InProjectileSpeed, float InMaxLifeTime, bool InbIsExplosive, float InExplosionRadius, int32 InMaxPenetrationCount);
 
 private:
 	void SetParticeEffects(const FDDProjectileData& LoadedAsset);
@@ -38,6 +39,27 @@ private:
 
 private:
 	FName RowName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Damage", meta = (AllowPrivateAccess = "true"))
+	float DamageAmount;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Damage", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UDamageType> DamageType;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
+	float ProjectileSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Lifetime", meta = (AllowPrivateAccess = "true"))
+	float MaxLifeTime;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Explosive", meta = (AllowPrivateAccess = "true"))
+	bool bIsExplosive;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Explosive", meta = (AllowPrivateAccess = "true"))
+	float ExplosionRadius;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Penetration", meta = (AllowPrivateAccess = "true"))
+	int32 MaxPenetrationCount;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UStaticMeshComponent> StaticMeshComponent;

@@ -21,6 +21,8 @@ ADDProjectileBase::ADDProjectileBase()
 	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("UProjectileMovementComponent"));
 	ProjectileMovementComponent->SetUpdatedComponent(RootComponent);
 
+	StaticMeshComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
+
 
 
 }
@@ -34,6 +36,11 @@ void ADDProjectileBase::BeginPlay()
 {
 	Super::BeginPlay();
 	
+}
+
+void ADDProjectileBase::InitializeProjectile(float InDamageAmount, TSubclassOf<UDamageType> InDamageType, float InProjectileSpeed, float InMaxLifeTime, bool InbIsExplosive, float InExplosionRadius, int32 InMaxPenetrationCount)
+{
+
 }
 
 void ADDProjectileBase::SetAssets(const FDDProjectileData& LoadedAsset)
