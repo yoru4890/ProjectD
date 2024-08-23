@@ -6,9 +6,15 @@
 #include "GameFramework/PlayerState.h"
 #include "DDPlayerState.generated.h"
 
+
+// 델리게이트 선언
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGoldChanged);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLikePointChanged);
+
 /**
  * 
  */
+
 UCLASS()
 class PROJECTD_API ADDPlayerState : public APlayerState
 {
@@ -17,41 +23,31 @@ class PROJECTD_API ADDPlayerState : public APlayerState
 public:
 	ADDPlayerState();
 
+	// 델리게이트 선언
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnGoldChanged OnGoldChanged;
+
+	UPROPERTY(BlueprintAssignable, Category = "Events")
+	FOnLikePointChanged OnLikePointChanged;
+
+	UFUNCTION(BlueprintCallable, Category = "Gold")
 	FORCEINLINE int32 GetGold() const { return Gold; }
+
+	UFUNCTION(BlueprintCallable, Category = "Gold")
 	FORCEINLINE bool CheckGold(const int32 InGold) const { return Gold>=InGold; }
-	FORCEINLINE void AddGold(const int32 InGold)
-	{ 
-		Gold += InGold;
-		
-	}
-	FORCEINLINE bool SubtractGold(const int32 InGold)
-	{
-		if (CheckGold(InGold)) {
-			Gold -= InGold;
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
 
+	void AddGold(const int32 InGold);
+
+	bool SubtractGold(const int32 InGold);
+
+	UFUNCTION(BlueprintCallable, Category = "LikePoint")
 	FORCEINLINE int32 GetLikePoint() const { return LikePoint; }
-	FORCEINLINE bool CheckLikePoint(const int32 InLikePoint) const { return LikePoint >= InLikePoint; }
-	FORCEINLINE void AddLikePoint(const int32 InLikePoint)
-	{
-		LikePoint += InLikePoint;
 
-	}
-	FORCEINLINE bool SubtractLikePoint(const int32 InLikePoint)
-	{
-		if (CheckLikePoint(InLikePoint)) {
-			LikePoint -= InLikePoint;
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
+	UFUNCTION(BlueprintCallable, Category = "LikePoint")
+	FORCEINLINE bool CheckLikePoint(const int32 InLikePoint) const { return LikePoint >= InLikePoint; }
+
+	void AddLikePoint(const int32 InLikePoint);
+	bool SubtractLikePoint(const int32 InLikePoint);
 
 	
 

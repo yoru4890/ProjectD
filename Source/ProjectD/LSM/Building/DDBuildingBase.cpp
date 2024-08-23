@@ -7,7 +7,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "YSY/Collision/CollisionChannel.h"
 #include "DDBuildingAnimInstance.h"
-#include "NiagaraSystem.h"
 #include "NiagaraComponent.h"
 #include "LSM/Building/AttackStrategies/DDBuildingBaseAttackStrategy.h"
 
@@ -119,21 +118,21 @@ void ADDBuildingBase::SetAttackStrategy(TSubclassOf<class UDDBuildingBaseAttackS
 }
 
 
-void ADDBuildingBase::SetAssets(FDDBuildingBaseData& LoadedAsset)
+void ADDBuildingBase::SetAssets(const FDDBuildingBaseData& LoadedAsset)
 {
 	SetMeshs(LoadedAsset);
 	SetParticeEffects(LoadedAsset);
 	ModifyMeshAndAttackCollision();
+	SetSound(LoadedAsset);
 	SetAttackStrategy(LoadedAsset.AttackStrategy);
 
 }
-
 
 #pragma endregion SetupAndInitialization
 
 #pragma region EffectsAndMeshes
 
-void ADDBuildingBase::SetParticeEffects(FDDBuildingBaseData& LoadedAsset)
+void ADDBuildingBase::SetParticeEffects(const FDDBuildingBaseData& LoadedAsset)
 {
 	if (LoadedAsset.AttackEffect.IsValid())
 	{
@@ -189,7 +188,19 @@ void ADDBuildingBase::SetParticeEffects(FDDBuildingBaseData& LoadedAsset)
 	}
 }
 
-void ADDBuildingBase::SetMeshs(FDDBuildingBaseData& LoadedAsset)
+void ADDBuildingBase::SetSound(const FDDBuildingBaseData& LoadedAsset)
+{
+	if (LoadedAsset.AttackSound.IsValid())
+	{
+		AttackSound = LoadedAsset.AttackSound.Get();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s : AttackSound not loaded"), RowName);
+	}
+}
+
+void ADDBuildingBase::SetMeshs(const FDDBuildingBaseData& LoadedAsset)
 {
 	for (UMeshComponent* MeshComponent : MeshComponents)
 	{
@@ -200,7 +211,7 @@ void ADDBuildingBase::SetMeshs(FDDBuildingBaseData& LoadedAsset)
 	}
 	MeshComponents.Empty();
 
-	for (TSoftObjectPtr<UAnimMontage>& AnimMontageSoftPtr : LoadedAsset.AttackMontages)
+	for (TSoftObjectPtr<UAnimMontage> AnimMontageSoftPtr : LoadedAsset.AttackMontages)
 	{
 		if (AnimMontageSoftPtr.IsValid())
 		{
@@ -212,7 +223,7 @@ void ADDBuildingBase::SetMeshs(FDDBuildingBaseData& LoadedAsset)
 		}
 	}
 
-	for (TSoftObjectPtr<USkeletalMesh>& SkeletalMeshSoftPtr : LoadedAsset.SkeletalMeshs)
+	for (TSoftObjectPtr<USkeletalMesh> SkeletalMeshSoftPtr : LoadedAsset.SkeletalMeshs)
 	{
 		USkeletalMeshComponent* SkeletalMeshComponent = NewObject<USkeletalMeshComponent>(this);
 		check(SkeletalMeshComponent);
@@ -242,11 +253,18 @@ void ADDBuildingBase::SetMeshs(FDDBuildingBaseData& LoadedAsset)
 	{
 		if (SkeletalMeshComponents.IsValidIndex(index))
 		{
-			SkeletalMeshComponents[index]->SetAnimInstanceClass(LoadedAsset.AnimBlueprints[index]->GeneratedClass);
+			if (LoadedAsset.AnimBlueprints.IsValidIndex(index) && LoadedAsset.AnimBlueprints[index].IsValid())
+			{
+				SkeletalMeshComponents[index]->SetAnimInstanceClass(LoadedAsset.AnimBlueprints[index]->GeneratedClass);
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("%s : AnimBlueprints not loaded"), RowName);
+			}
 		}
 	}
 
-	for (TSoftObjectPtr<UStaticMesh>& StaticMeshSoftPtr : LoadedAsset.StaticMeshs)
+	for (TSoftObjectPtr<UStaticMesh> StaticMeshSoftPtr : LoadedAsset.StaticMeshs)
 	{
 		UStaticMeshComponent* StaticMeshComponent = NewObject<UStaticMeshComponent>(this);
 		check(StaticMeshComponent);
@@ -284,6 +302,7 @@ void ADDBuildingBase::SetCanAttack(const bool bInCanAttack)
 	if (!bInCanAttack)
 	{
 		AttackCollisionComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		StopAttackEffect();
 	}
 	else
 	{
@@ -334,6 +353,10 @@ void ADDBuildingBase::PlayAttackAnimation()
 
 void ADDBuildingBase::PlayAttackSound()
 {
+	if (AttackSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, AttackSound, GetActorLocation());
+	}
 }
 
 #pragma endregion AttackAndCollision

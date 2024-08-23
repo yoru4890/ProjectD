@@ -7,6 +7,7 @@
 #include "LSM/Manager/DDFactoryManager.h"
 #include "YSY/Manager/DDEnemySpawnManager.h"
 #include "YSY/Manager/DDWaveManager.h"
+#include "LSM/Manager/DDProjectileManager.h"
 
 void UDDGameInstance::Init()
 {
@@ -15,15 +16,17 @@ void UDDGameInstance::Init()
 	FactoryManager = NewObject<UDDFactoryManager>(this);
 	AssetManager = NewObject<UDDAssetManager>(this);
 
-	BuildingManager->Initialize();
-	FactoryManager->Initialize(BuildingManager->GetBuildingDataTable());
 	AssetManager->Initialize();
+	BuildingManager->Initialize();
+	FactoryManager->Initialize();
 	
 	EnemySpawnManager = NewObject<UDDEnemySpawnManager>(this);
 	WaveManager = NewObject<UDDWaveManager>(this);
 
 	WaveManager->Initialize();
 	InitializeManagerDelegates();
+
+	ProjectileManager = NewObject<UDDProjectileManager>(this);
 }
 
 void UDDGameInstance::InitializeManagerDelegates()

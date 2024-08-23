@@ -28,8 +28,6 @@ public:
 
 	void Initialize();
 
-	void SetBuildingSellCost(float Ratio = 0.8f);
-
 	// 함정이 해금이 되었는지 체크하는 메서드
 	UFUNCTION(BlueprintCallable)
 	bool IsBuildingUnlocked(const FName& RowName) const;
@@ -67,11 +65,29 @@ public:
 	UFUNCTION(BlueprintCallable)
 	class ADDBuildingBase* SpawnBuilding(UWorld* World, const FName& RowName, const FVector& Location, const FRotator& Rotation, AActor* Owner, APawn* Instigator);
 
+	UFUNCTION(BlueprintCallable)
+	void HandleBuildingPoolsOnLevelChange();
+
 	void DestroyBuilding(class ADDBuildingBase& Building);
 
+	void GetSoftObjectPtrsInBuilding(const FName& RowName, TArray<TSoftObjectPtr<UObject>>& AssetsToLoad);
+
 private:
+	void SetupCommonReferences(UWorld* World);
+
+	void SetBuildingSellCost(float Ratio = 0.8f);
+
+	void InitializeBuildings();
+
+	ADDBuildingBase* CreateBuildingInstance(UWorld* World, const FName& RowName);
+
+
+
 	TMap<FName, FBuildingList> BuildingPool;
 
 	TMap<FName, FDDBuildingBaseData*> BuildingDataTable;
+	TObjectPtr<class UDDGameInstance> MyGameInstance;
+	TObjectPtr<class UDDFactoryManager> FactoryManager;
+	TObjectPtr<class UDDAssetManager> AssetManager;
 
 };

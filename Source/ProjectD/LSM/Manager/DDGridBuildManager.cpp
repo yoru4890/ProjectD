@@ -60,14 +60,14 @@ void ADDGridBuildManager::InitializeGridCells()
 
 			FCollisionQueryParams CollisionParams;
 			FGridCell GridCell;
-			if (GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, ECC_Visibility, CollisionParams))
+			if (GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, GTCHANNEL_BUILDZONE, CollisionParams))
 			{
 				CellLocation.Z = HitResult.ImpactPoint.Z;
-				GridCell = FGridCell(CellLocation, HitResult.ImpactNormal, true);
+				GridCell = FGridCell(CellLocation, HitResult.ImpactNormal.GetSafeNormal(), true);
 			}
 			else {
 				CellLocation.Z = -10000.f;
-				GridCell = FGridCell(CellLocation, HitResult.ImpactNormal, false);
+				GridCell = FGridCell(CellLocation, HitResult.ImpactNormal.GetSafeNormal(), false);
 			}
 			GridCellMap.Add(FIntPoint(Row, Column), GridCell);
 		}
@@ -210,9 +210,11 @@ bool ADDGridBuildManager::SetGridCellAsBlank(const FVector& HitLocation, const i
 
 const bool ADDGridBuildManager::IsPointOnSamePlane(const FVector& InPointWorldLocation, const FVector& StandardPointWorldLocation, const FVector& PlaneNormalVector) const
 {
+	FVector NormalizedPlaneNormal = PlaneNormalVector.GetSafeNormal();
 	// 평면 위에 있는 점이라면 내적했을 때, 값이 0
 	float DistanceToPlane = FVector::DotProduct(PlaneNormalVector, InPointWorldLocation - StandardPointWorldLocation);
-	return FMath::Abs(DistanceToPlane) <= KINDA_SMALL_NUMBER;
+	// 어느정도 단차는 무시
+	return FMath::Abs(DistanceToPlane) <= PlaneTolerance;
 }
 
 void ADDGridBuildManager::AddTowerZone()
