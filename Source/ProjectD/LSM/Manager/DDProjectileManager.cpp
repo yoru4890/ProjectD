@@ -11,6 +11,7 @@
 
 void UDDProjectileManager::Initialize()
 {
+	SetupCommonReferences(GetWorld());
 }
 
 ADDProjectileBase* UDDProjectileManager::SpawnProjectile(UWorld* World, const FName& RowName, const FVector& Location, const FRotator& Rotation, AActor* Owner, APawn* Instigator)
@@ -36,9 +37,7 @@ ADDProjectileBase* UDDProjectileManager::SpawnProjectile(UWorld* World, const FN
 		NewProjectile = CreateProjectileInstance(World, RowName);
 	}
 
-	NewProjectile->SetActorHiddenInGame(false);
-	NewProjectile->SetActorEnableCollision(true);
-	NewProjectile->SetActorTickEnabled(true);
+	NewProjectile->SetProjectileActive(true);
 
 	return NewProjectile;
 }
@@ -112,10 +111,8 @@ FDDProjectileData* UDDProjectileManager::GetProjectileData(const FName& RowName)
 	return ProjectileData;
 }
 
-void UDDProjectileManager::DestroyProjectile(ADDProjectileBase& Projectile)
+void UDDProjectileManager::DestroyProjectile(ADDProjectileBase* Projectile)
 {
-	ProjectilePool[Projectile.GetRowName()].Projectiles.Add(Projectile);
-	Projectile.SetActorHiddenInGame(true);
-	Projectile.SetActorEnableCollision(false);
-	Projectile.SetActorTickEnabled(false);
+	ProjectilePool[Projectile->GetRowName()].Projectiles.Add(Projectile);
+	Projectile->SetProjectileActive(false);
 }

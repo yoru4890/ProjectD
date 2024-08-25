@@ -48,8 +48,8 @@ void UDDAssetManager::LoadAssetsAsync(const TArray<TSoftObjectPtr<UObject>>& Ass
 					//UE_LOG(LogTemp, Warning, TEXT("Asset %s loaded successfully."), *Asset.ToString());
 				}
 			}
-			UE_LOG(LogTemp, Warning, TEXT("Start Unload."));
-			this->UnloadAsset(const_cast<TArray<TSoftObjectPtr<UObject>>&>(AssetsToLoad));
+			//UE_LOG(LogTemp, Warning, TEXT("Start Unload."));
+			//this->UnloadAsset(const_cast<TArray<TSoftObjectPtr<UObject>>&>(AssetsToLoad));
 		};
 	if (SoftObjectPaths.Num() > 0)
 	{
@@ -77,15 +77,15 @@ void UDDAssetManager::UnloadAsset(TArray<TSoftObjectPtr<UObject>>& AssetsToUnloa
 		{
 			// 에셋 경로를 통해 언로드 진행
 			StreamableManager.Unload(Asset.ToSoftObjectPath());
-			UE_LOG(LogTemp, Warning, TEXT("Unloading asset: %s"), *Asset.ToString());
+			//UE_LOG(LogTemp, Warning, TEXT("Unloading asset: %s"), *Asset.ToString());
 
 			// WeakPtr를 리셋하여 언로드 후 참조 제거
 			Asset.ResetWeakPtr();
-			UE_LOG(LogTemp, Warning, TEXT("Asset IsValid after Reset: %s"), Asset.IsValid() ? TEXT("true") : TEXT("false"));
+			//UE_LOG(LogTemp, Warning, TEXT("Asset IsValid after Reset: %s"), Asset.IsValid() ? TEXT("true") : TEXT("false"));
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Asset %s was already unloaded or invalid."), *Asset.ToString());
+			//UE_LOG(LogTemp, Warning, TEXT("Asset %s was already unloaded or invalid."), *Asset.ToString());
 		}
 	}
 
