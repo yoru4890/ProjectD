@@ -16,12 +16,27 @@ class PROJECTD_API UDDProjectileAttackStrategy : public UDDBaseAttackStrategy
 
 protected:
 	void InitializeProjectile(FName& ProjectileName);
+	void ConfigureProjectile();
 
 protected:
 	virtual void Attack(AActor* TargetEnemy) override;
 
 protected:
+	UPROPERTY()
+	TObjectPtr<class ADDProjectileBase> Projectile;
 	FName ProjectileRowName;
+
+	float ProjectileSpeed;
+
+	float ProjectileMaxSpeed;
+
+	float ProjectileLifeTime;
+
+	bool bIsExplosive;
+
+	float ExplosionRadius;
+
+	int32 MaxPenetrationCount;
 
 private:
 	UPROPERTY()

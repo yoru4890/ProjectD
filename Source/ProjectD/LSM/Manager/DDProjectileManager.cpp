@@ -55,6 +55,8 @@ ADDProjectileBase* UDDProjectileManager::SpawnProjectile(UWorld* World, const FN
 	}
 
 	NewProjectile->SetProjectileState(true);
+	NewProjectile->SetActorLocation(Location);
+	NewProjectile->SetActorRotation(Rotation);
 
 	return NewProjectile;
 }
@@ -62,7 +64,7 @@ ADDProjectileBase* UDDProjectileManager::SpawnProjectile(UWorld* World, const FN
 ADDProjectileBase* UDDProjectileManager::CreateProjectileInstance(UWorld* World, const FName& RowName)
 {
 	IDDFactoryInterface* ProjectileFactory = FactoryManager->GetFactory(RowName);
-	UObject* CreatedObject = ProjectileFactory->CreateObject(World, RowName, FVector::ZeroVector, FRotator::ZeroRotator, nullptr, nullptr);
+	UObject* CreatedObject = ProjectileFactory->CreateObject(World, RowName,  nullptr, nullptr);
 	return Cast<ADDProjectileBase>(CreatedObject);
 }
 
