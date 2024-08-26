@@ -29,14 +29,16 @@ public:
 	FORCEINLINE const FName& GetRowName() const { return RowName; }
 
 public:
-	void SetAssets(const FDDProjectileData& LoadedAsset);
-	void InitializeProjectile(float InDamageAmount, TSubclassOf<UDamageType> InDamageType, float InProjectileSpeed, float InMaxLifeTime, bool InbIsExplosive, float InExplosionRadius, int32 InMaxPenetrationCount);
+	void SetAssetAndManager(const FDDProjectileData& LoadedAsset, class  UDDProjectileManager* InProjectileManager);
+	void InitializeProjectile(float InDamageAmount, TSubclassOf<UDamageType> InDamageType, float InProjectileSpeed, float InMaxSpeed, float InMaxLifeTime, bool InbIsExplosive, float InExplosionRadius, int32 InMaxPenetrationCount);
 
 	void SetProjectileActive(bool bIsActive);
 
 protected:
+	UFUNCTION()
 	virtual void OnCollisionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-
+	
+	UFUNCTION()
 	virtual void OnCollisionEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 private:
@@ -44,6 +46,17 @@ private:
 	void SetParticeEffects(const FDDProjectileData& LoadedAsset);
 	void SetSound(const FDDProjectileData& LoadedAsset);
 	void SetMeshs(const FDDProjectileData& LoadedAsset);
+
+	void OnLifeTimeExpired();
+	void StopLifeTimeTimer();
+
+	void LaunchProjectile();
+	void SetProjectileState(bool bIsActive);
+
+	void Explode();
+	void ApplyDamageToActor(AActor* OtherActor);
+
+
 
 private:
 	FName RowName;
@@ -56,6 +69,9 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	float ProjectileSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
+	float MaxSpeed;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Lifetime", meta = (AllowPrivateAccess = "true"))
 	float MaxLifeTime;
@@ -92,6 +108,11 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "VFX", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<USoundBase> FlyingSound;
+
+	UPROPERTY()
+	TObjectPtr<class UDDProjectileManager> ProjectileManager;
+
+	FTimerHandle LifeSpanTimerHandle;
 
 
 };

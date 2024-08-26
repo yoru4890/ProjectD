@@ -29,6 +29,7 @@ void UDDGameInstance::Init()
 	InitializeManagerDelegates();
 
 	ProjectileManager = NewObject<UDDProjectileManager>(this);
+	ProjectileManager->Initialize();
 }
 
 void UDDGameInstance::InitializeManagerDelegates()

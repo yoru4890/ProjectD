@@ -247,7 +247,7 @@ void UDDBuildingManager::GetSoftObjectPtrsInBuilding(const FName& RowName, TArra
 		AssetsToLoad.Add(Montage);
 	}
 
-	AssetsToLoad.Add(TSoftObjectPtr<UObject>(BuildingData->AttackEffect));
+	AssetsToLoad.Add(BuildingData->AttackEffect);
 
 	AssetsToLoad.Add(BuildingData->AttackSound);
 
