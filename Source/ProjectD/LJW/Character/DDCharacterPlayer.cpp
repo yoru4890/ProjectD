@@ -133,6 +133,12 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 		WaveStartAction = WaveStartRef.Object;
 	}
 
+	static ConstructorHelpers::FObjectFinder<UInputAction>PlaceBuildingRef(TEXT("/Script/EnhancedInput.InputAction'/Game/0000/LJW/Input/IA_Player_PlaceBuilding.IA_Player_PlaceBuilding'"));
+	if (nullptr != PlaceBuildingRef.Object)
+	{
+		PlaceBuildingAction = PlaceBuildingRef.Object;
+	}
+
 #pragma endregion
 
 }
@@ -207,9 +213,11 @@ void ADDCharacterPlayer::SetupPlayerInputComponent(class UInputComponent* Player
 
 	EnhancedInputComponent->BindAction(EnterManagementModeAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::EnterManagementMode);
 	
-	EnhancedInputComponent->BindAction(EnterBuildModeAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::EnterBuildMode);
+	EnhancedInputComponent->BindAction(EnterBuildModeAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::OpenBuildWidget);
 
 	EnhancedInputComponent->BindAction(WaveStartAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::WaveStart);
+
+	EnhancedInputComponent->BindAction(PlaceBuildingAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::PlaceBuilding);
 }
 
 void ADDCharacterPlayer::SetCharacterControl()
@@ -344,6 +352,7 @@ void ADDCharacterPlayer::EquipMelee()
 	{
 		WeaponSystem->EquipMeleeWeapon();
 		CurrentPlayerMode = EPlayerMode::CombatMode;
+		BuildSystem->AllStopTrace();
 	}
 }
 
@@ -353,6 +362,7 @@ void ADDCharacterPlayer::EquipRange()
 	{
 		WeaponSystem->EquipRangeWeapon();
 		CurrentPlayerMode = EPlayerMode::CombatMode;
+		BuildSystem->AllStopTrace();
 	}
 }
 
@@ -417,7 +427,7 @@ void ADDCharacterPlayer::EnterManagementMode()
 	CurrentPlayerMode = EPlayerMode::ManagementMode;
 }
 
-void ADDCharacterPlayer::EnterBuildMode()
+void ADDCharacterPlayer::OpenBuildWidget()
 {
 	if (CurrentPlayerMode == EPlayerMode::ManagementMode)
 	{
@@ -427,6 +437,37 @@ void ADDCharacterPlayer::EnterBuildMode()
 		PlayerController->StopMovement();
 		PlayerController->SetInputMode(InputModeUIOnlyData);
 		PlayerController->SetShowMouseCursor(true);
+	}
+}
+
+void ADDCharacterPlayer::BuildTrapOrTower(const FName& BuildingName)
+{
+	FInputModeGameOnly InputModeGameOnlyData;
+
+	CurrentPlayerMode = EPlayerMode::BuildMode;
+	BuildSystem->AllStopTrace();
+	BuildSystem->StartBuildTrace();
+	BuildSystem->ReadyBuilding(BuildingName);
+	PlayerController->SetShowMouseCursor(false);
+	PlayerController->SetInputMode(InputModeGameOnlyData);
+	PlayerController->SetIgnoreMoveInput(false);
+	BuildWidget->RemoveFromParent();
+}
+
+void ADDCharacterPlayer::PlaceBuilding()
+{
+	if (CurrentPlayerMode == EPlayerMode::BuildMode)
+	{
+		if (BuildSystem->PlaceBuilding())
+		{
+			CurrentPlayerMode = EPlayerMode::ManagementMode;
+			BuildSystem->AllStopTrace();
+			BuildSystem->StartManageTrace();
+		}
+	}
+	else if (CurrentPlayerMode == EPlayerMode::ManagementMode)
+	{
+		//TODO : YSY or LJW Upgrade Widget
 	}
 }
 

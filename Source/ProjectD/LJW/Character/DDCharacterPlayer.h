@@ -104,6 +104,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> WaveStartAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> PlaceBuildingAction;
+
 	UPROPERTY(EditAnywhere, Category = Character)
 	float MouseSpeed;
 	
@@ -165,7 +168,13 @@ public:
 	void EnterManagementMode();
 
 	UFUNCTION(BlueprintCallable)
-	void EnterBuildMode();
+	void OpenBuildWidget();
+
+	UFUNCTION(BlueprintCallable)
+	void BuildTrapOrTower(const FName& BuildingName);
+
+	UFUNCTION(BlueprintCallable)
+	void PlaceBuilding();
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Build, Meta = (AllowPrivateAccess = "true"))
