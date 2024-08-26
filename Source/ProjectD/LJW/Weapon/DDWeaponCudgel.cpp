@@ -11,7 +11,7 @@ ADDWeaponCudgel::ADDWeaponCudgel()
 	CollisionCapsule = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Collision"));
 	CollisionCapsule->InitCapsuleSize(10.0f, 50.0f);
 	CollisionCapsule->SetCollisionResponseToAllChannels(ECR_Ignore);
-	CollisionCapsule->SetCollisionResponseToChannel(GTCHANNEL_ENEMY, ECollisionResponse::ECR_Overlap);
+	CollisionCapsule->SetCollisionResponseToChannel(GTCHANNEL_ENEMYDETECT, ECollisionResponse::ECR_Overlap);
 	CollisionCapsule->SetRelativeLocation(FVector(0.0f, 0.0f, 50.0f));
 	CollisionCapsule->SetupAttachment(RootComponent);
 	//Begin Overlap

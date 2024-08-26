@@ -7,8 +7,8 @@
 #include "InputActionValue.h"
 #include "LJW/Interface/CameraFOVInterface.h"
 #include "LJW/Interface/DDPlayerComponentsAnimInterface.h"
+#include "YSY/Interface/AggroTargetInterface.h"
 #include "DDCharacterPlayer.generated.h"
-
 
 
 UENUM(BlueprintType)
@@ -21,7 +21,7 @@ enum class EPlayerMode : uint8
 };
 
 UCLASS()
-class PROJECTD_API ADDCharacterPlayer : public ADDCharacterBase, public ICameraFOVInterface, public IDDPlayerComponentsAnimInterface
+class PROJECTD_API ADDCharacterPlayer : public ADDCharacterBase, public ICameraFOVInterface, public IDDPlayerComponentsAnimInterface, public IAggroTargetInterface
 {
 	GENERATED_BODY()
 	
@@ -37,7 +37,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon, Meta = (AllowPrivateAccess = "true"))
 	EPlayerMode CurrentPlayerMode;
 
 //Character Control Section
@@ -95,6 +95,12 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> AttackAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> EnterManagementModeAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> EnterBuildModeAction;
+
 	UPROPERTY(EditAnywhere, Category = Character)
 	float MouseSpeed;
 	
@@ -140,4 +146,24 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = Weapon)
 	TObjectPtr<class UDDWeaponSystemComponent> WeaponSystem;
 
+//AggroTarget System
+public:
+	virtual void AddAggro();
+	virtual void SubtractAggro();
+	virtual bool IsMaxAggro();
+
+protected:
+	int32 CurrentAggroNum{};
+	int32 MaxAggroNum{ 3 };
+
+//BuildComponent
+public:
+	void EnterManagementMode();
+
+	UFUNCTION(BlueprintCallable)
+	void EnterBuildMode();
+
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Build, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UDDBuildComponent> BuildSystem;
 };

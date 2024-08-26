@@ -36,7 +36,7 @@ void ADDWeaponRifle::Attack()
 	const FVector StartTrace = CameraManager->GetCameraLocation();
 	const FVector EndTrace = StartTrace + CameraManager->GetActorForwardVector() * AttackRange;
 	
-	bool IsDetect = GetWorld()->LineTraceSingleByChannel(HitResult, StartTrace, EndTrace, GTCHANNEL_PlAYERDAMAGE);
+	bool IsDetect = GetWorld()->LineTraceSingleByChannel(HitResult, StartTrace, EndTrace, GTCHANNEL_ENEMYDETECT);
 	
 	FColor DrawColor = IsDetect ? FColor::Green : FColor::Red;
 

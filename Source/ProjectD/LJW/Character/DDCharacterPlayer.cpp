@@ -12,7 +12,7 @@
 #include "LJW/Weapon/DDWeaponSystemComponent.h"
 #include "LJW/Animation/DDPlayerAnimInstance.h"
 #include "Components/CapsuleComponent.h"
-
+#include "LSM/BuildComponent/DDBuildComponent.h"
 
 
 ADDCharacterPlayer::ADDCharacterPlayer()
@@ -46,6 +46,8 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 	//Collision
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("Player"));
 
+	//BuildComponent
+	BuildSystem = CreateDefaultSubobject<UDDBuildComponent>(TEXT("BuildSystem"));
 #pragma region Init Input
 
 	//Input
@@ -101,6 +103,18 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 	if (nullptr != AttackRef.Object)
 	{
 		AttackAction = AttackRef.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction>EnterManagementModeRef(TEXT("/Script/EnhancedInput.InputAction'/Game/0000/LJW/Input/IA_Player_EnterManagementMode.IA_Player_EnterManagementMode'"));
+	if (nullptr != EnterManagementModeRef.Object)
+	{
+		EnterManagementModeAction = EnterManagementModeRef.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction>EnterBuildModeRef(TEXT("/Script/EnhancedInput.InputAction'/Game/0000/LJW/Input/IA_Player_EnterBuildMode.IA_Player_EnterBuildMode'"));
+	if (nullptr != EnterBuildModeRef.Object)
+	{
+		EnterBuildModeAction = EnterBuildModeRef.Object;
 	}
 
 #pragma endregion
@@ -175,7 +189,7 @@ void ADDCharacterPlayer::SetupPlayerInputComponent(class UInputComponent* Player
 
 	EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Completed, this, &ADDCharacterPlayer::WeaponAttack);
 
-
+	EnhancedInputComponent->BindAction(EnterManagementModeAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::EnterManagementMode);
 	
 }
 
@@ -228,8 +242,6 @@ void ADDCharacterPlayer::Move(const FInputActionValue& Value)
 
 	AddMovementInput(ForwardDirection, MovementVector.X);
 	AddMovementInput(RightDirection, MovementVector.Y);
-
-	UE_LOG(LogTemp, Warning, TEXT("%d"), bIsBackMove);
 
 }
 
@@ -312,7 +324,7 @@ void ADDCharacterPlayer::EquipMelee()
 	if (!(PlayerAnimInstance->IsAnyMontagePlaying()))
 	{
 		WeaponSystem->EquipMeleeWeapon();
-
+		CurrentPlayerMode = EPlayerMode::CombatMode;
 	}
 }
 
@@ -321,6 +333,7 @@ void ADDCharacterPlayer::EquipRange()
 	if (!(PlayerAnimInstance->IsAnyMontagePlaying()))
 	{
 		WeaponSystem->EquipRangeWeapon();
+		CurrentPlayerMode = EPlayerMode::CombatMode;
 	}
 }
 
@@ -360,6 +373,34 @@ void ADDCharacterPlayer::WeaponAttack()
 	if (CurrentPlayerMode == EPlayerMode::CombatMode)
 	{
 		WeaponSystem->WeaponAttack();
+	}
+}
+
+void ADDCharacterPlayer::AddAggro()
+{
+	CurrentAggroNum++;
+}
+
+void ADDCharacterPlayer::SubtractAggro()
+{
+	CurrentAggroNum--;
+}
+
+bool ADDCharacterPlayer::IsMaxAggro()
+{
+	return CurrentAggroNum >= MaxAggroNum;
+}
+
+void ADDCharacterPlayer::EnterManagementMode()
+{
+	CurrentPlayerMode = EPlayerMode::ManagementMode;
+}
+
+void ADDCharacterPlayer::EnterBuildMode()
+{
+	if (CurrentPlayerMode == EPlayerMode::ManagementMode)
+	{
+		// TODO : Build UI Open
 	}
 }
 

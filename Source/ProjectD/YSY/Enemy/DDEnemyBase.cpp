@@ -445,6 +445,7 @@ void ADDEnemyBase::Activate()
 	}
 	EnemyAIController->StopMovement();
 	Stat->SetCurrentHp(MaxHP);
+	SetActorTickEnabled(true);
 	SetActorHiddenInGame(false);
 	GetMesh()->SetVisibility(true);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
@@ -470,6 +471,7 @@ void ADDEnemyBase::Deactivate()
 	bIsDead = true;
 	GetCharacterMovement()->MaxWalkSpeed = 0.0f;
 	//EnemyAIController->StopAI();
+	SetActorTickEnabled(false);
 	SetActorHiddenInGame(true);
 	SetActorEnableCollision(false);
 	RouteIndex = 0;
