@@ -13,7 +13,9 @@
 #include "LJW/Animation/DDPlayerAnimInstance.h"
 #include "Components/CapsuleComponent.h"
 #include "LSM/BuildComponent/DDBuildComponent.h"
-
+#include "YSY/Game/DDGameInstance.h"
+#include "YSY/Manager/DDWaveManager.h"
+#include "Blueprint/UserWidget.h"
 
 ADDCharacterPlayer::ADDCharacterPlayer()
 {
@@ -48,6 +50,14 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 
 	//BuildComponent
 	BuildSystem = CreateDefaultSubobject<UDDBuildComponent>(TEXT("BuildSystem"));
+
+	//BuildWidget
+	static ConstructorHelpers::FClassFinder<UUserWidget> BuildWidgetFinder(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/0000/YSY/Widget/YSY_WBP_TestRadialMenu.YSY_WBP_TestRadialMenu_C'"));
+
+	if (BuildWidgetFinder.Succeeded())
+	{
+		BuildWidgetClass = BuildWidgetFinder.Class;
+	}
 #pragma region Init Input
 
 	//Input
@@ -117,6 +127,12 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 		EnterBuildModeAction = EnterBuildModeRef.Object;
 	}
 
+	static ConstructorHelpers::FObjectFinder<UInputAction>WaveStartRef(TEXT("/Script/EnhancedInput.InputAction'/Game/0000/LJW/Input/IA_Player_WaveStart.IA_Player_WaveStart'"));
+	if (nullptr != WaveStartRef.Object)
+	{
+		WaveStartAction = WaveStartRef.Object;
+	}
+
 #pragma endregion
 
 }
@@ -133,7 +149,7 @@ void ADDCharacterPlayer::BeginPlay()
 	}
 	
 	SetCharacterControl();
-		
+	InitWidget();
 	
 }
 
@@ -191,6 +207,9 @@ void ADDCharacterPlayer::SetupPlayerInputComponent(class UInputComponent* Player
 
 	EnhancedInputComponent->BindAction(EnterManagementModeAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::EnterManagementMode);
 	
+	EnhancedInputComponent->BindAction(EnterBuildModeAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::EnterBuildMode);
+
+	EnhancedInputComponent->BindAction(WaveStartAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::WaveStart);
 }
 
 void ADDCharacterPlayer::SetCharacterControl()
@@ -379,11 +398,13 @@ void ADDCharacterPlayer::WeaponAttack()
 void ADDCharacterPlayer::AddAggro()
 {
 	CurrentAggroNum++;
+	CurrentAggroNum = std::min(CurrentAggroNum, MaxAggroNum);
 }
 
 void ADDCharacterPlayer::SubtractAggro()
 {
 	CurrentAggroNum--;
+	CurrentAggroNum = std::max(CurrentAggroNum, 0);
 }
 
 bool ADDCharacterPlayer::IsMaxAggro()
@@ -400,8 +421,24 @@ void ADDCharacterPlayer::EnterBuildMode()
 {
 	if (CurrentPlayerMode == EPlayerMode::ManagementMode)
 	{
-		// TODO : Build UI Open
+		BuildWidget->AddToViewport();
+		FInputModeUIOnly InputModeUIOnlyData;
+		PlayerController->SetIgnoreMoveInput(true);
+		PlayerController->StopMovement();
+		PlayerController->SetInputMode(InputModeUIOnlyData);
+		PlayerController->SetShowMouseCursor(true);
 	}
+}
+
+void ADDCharacterPlayer::WaveStart()
+{
+	auto GameInstance = Cast<UDDGameInstance>(GetGameInstance());
+	GameInstance->GetWaveManager()->WaveStart();
+}
+
+void ADDCharacterPlayer::InitWidget()
+{
+	BuildWidget = CreateWidget(GetWorld(), BuildWidgetClass);
 }
 
 

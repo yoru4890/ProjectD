@@ -17,6 +17,7 @@
 #include "YSY/Animation/AttackFinishedAnimNotify.h"
 #include "YSY/Animation/AttackTraceAnimNotify.h"
 #include "YSY/Animation/DDPlayEffectAnimNotify.h"
+#include "YSY/Interface/AggroTargetInterface.h"
 
 // Sets default values
 ADDEnemyBase::ADDEnemyBase()
@@ -43,14 +44,14 @@ ADDEnemyBase::ADDEnemyBase()
 	}
 
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
-	//GetCharacterMovement()->bUseRVOAvoidance = true;
-	//GetCharacterMovement()->AvoidanceConsiderationRadius = 300.0f;
-	//GetCharacterMovement()->bConstrainToPlane = true;
+	GetCharacterMovement()->bUseRVOAvoidance = true;
+	GetCharacterMovement()->AvoidanceConsiderationRadius = 300.0f;
+	GetCharacterMovement()->bConstrainToPlane = true;
 
-	//GetCharacterMovement()->bEnablePhysicsInteraction = false;
-	//GetCharacterMovement()->bPushForceUsingZOffset = true;
-	//GetCharacterMovement()->bPushForceScaledToMass = true;
-	//GetCharacterMovement()->PushForceFactor = 0.0f;
+	GetCharacterMovement()->bEnablePhysicsInteraction = false;
+	GetCharacterMovement()->bPushForceUsingZOffset = true;
+	GetCharacterMovement()->bPushForceScaledToMass = true;
+	GetCharacterMovement()->PushForceFactor = 0.0f;
 }
 
 void ADDEnemyBase::PostInitializeComponents()
@@ -467,6 +468,11 @@ void ADDEnemyBase::Deactivate()
 	}
 	GetMesh()->GetAnimInstance()->Montage_Stop(0.01f);
 	AttackFinished();
+	if (bIsAggroState)
+	{
+		IAggroTargetInterface* AggroTargetInterface = Cast<IAggroTargetInterface>(Player);
+		AggroTargetInterface->SubtractAggro();
+	}
 	bIsAggroState = false;
 	bIsDead = true;
 	GetCharacterMovement()->MaxWalkSpeed = 0.0f;

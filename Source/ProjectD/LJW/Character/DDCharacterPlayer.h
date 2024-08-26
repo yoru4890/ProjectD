@@ -101,6 +101,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> EnterBuildModeAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> WaveStartAction;
+
 	UPROPERTY(EditAnywhere, Category = Character)
 	float MouseSpeed;
 	
@@ -158,6 +161,7 @@ protected:
 
 //BuildComponent
 public:
+	UFUNCTION(BlueprintCallable)
 	void EnterManagementMode();
 
 	UFUNCTION(BlueprintCallable)
@@ -166,4 +170,19 @@ public:
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Build, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UDDBuildComponent> BuildSystem;
+
+// Wave System
+public:
+	void WaveStart();
+
+//BuildWidget
+public:
+	void InitWidget();
+
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, Meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class UUserWidget> BuildWidgetClass;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, Meta = (AllowPrivateAccess = "true"))
+	UUserWidget* BuildWidget;
 };
