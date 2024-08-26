@@ -15,21 +15,20 @@ void UDDGameInstance::Init()
 	Super::Init();
 	DataManager = NewObject<UDDDataManager>(this);
 	BuildingManager = NewObject<UDDBuildingManager>(this);
+	ProjectileManager = NewObject<UDDProjectileManager>(this);
 	FactoryManager = NewObject<UDDFactoryManager>(this);
 	AssetManager = NewObject<UDDAssetManager>(this);
 
 	AssetManager->Initialize();
-	BuildingManager->Initialize();
 	FactoryManager->Initialize();
+	ProjectileManager->Initialize();
+	BuildingManager->Initialize();
 	
 	EnemySpawnManager = NewObject<UDDEnemySpawnManager>(this);
 	WaveManager = NewObject<UDDWaveManager>(this);
 
 	WaveManager->Initialize();
 	InitializeManagerDelegates();
-
-	ProjectileManager = NewObject<UDDProjectileManager>(this);
-	ProjectileManager->Initialize();
 }
 
 void UDDGameInstance::InitializeManagerDelegates()

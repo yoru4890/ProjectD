@@ -18,10 +18,16 @@ void UDDTankTowerAttackStrategy::Initialize(ADDBuildingBase* InOwningTower)
     // 투사체 데이터를 가져옴
     FDDProjectileData* ProjectileData = ProjectileManager->GetProjectileData(ProjectileRowName);
 
+    if (!ProjectileData)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Strategy error"));
+        return;
+    }
+
     if (ProjectileData && !ProjectileData->bIsLoaded)
     {
         // 비동기 로딩 함수 호출
-        AsyncLoadProjectileAssets(AssetManager,ProjectileRowName);
+        ProjectileManager->LoadProjectileAssets(ProjectileRowName);
     }
 
 
@@ -29,11 +35,4 @@ void UDDTankTowerAttackStrategy::Initialize(ADDBuildingBase* InOwningTower)
 
 void UDDTankTowerAttackStrategy::Attack(AActor* TargetEnemy)
 {
-}
-
-void UDDTankTowerAttackStrategy::AsyncLoadProjectileAssets(UDDAssetManager* AssetManager, const FName& RowName)
-{
-    TArray<TSoftObjectPtr<UObject>> AssetsToLoad;
-    ProjectileManager->GetSoftObjectPtrsInProjectile(RowName, AssetsToLoad);
-    AssetManager->LoadAssetsAsync(AssetsToLoad);
 }

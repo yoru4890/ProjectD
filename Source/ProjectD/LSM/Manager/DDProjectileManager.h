@@ -30,6 +30,9 @@ public:
 
 	void DestroyProjectile(class ADDProjectileBase* Projectile);
 
+	void GetSoftObjectPtrsInProjectile(const FName& RowName, TArray<TSoftObjectPtr<UObject>>& AssetsToLoad);
+
+
 	const TMap<FName, FDDProjectileData>& GetProjectileDataTable() const;
 
 	TMap<FName, FDDProjectileData>& GetProjectileDataTable();
@@ -38,10 +41,14 @@ public:
 
 	FDDProjectileData* GetProjectileData(const FName& RowName);
 
-	void GetSoftObjectPtrsInProjectile(const FName& RowName, TArray<TSoftObjectPtr<UObject>>& AssetsToLoad);
+	void LoadProjectileAssets(const FName& RowName);
+
+
 
 private:
 	void SetupCommonReferences(UWorld* World);
+
+	void OnProjectileAssetsLoaded(const FName& RowName);
 
 	ADDProjectileBase* CreateProjectileInstance(UWorld* World, const FName& RowName);
 	TMap<FName, FProjectileList> ProjectilePool;

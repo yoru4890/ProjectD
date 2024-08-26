@@ -32,6 +32,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool IsBuildingUnlocked(const FName& RowName) const;
 
+	UFUNCTION(BlueprintCallable)
+	bool IsParentUnlocked(const FName& RowName);
+
 	// 함정을 해금하는 메서드
 	UFUNCTION(BlueprintCallable)
 	bool UnlockBuilding(const FName& RowName);
@@ -72,14 +75,18 @@ public:
 
 	void GetSoftObjectPtrsInBuilding(const FName& RowName, TArray<TSoftObjectPtr<UObject>>& AssetsToLoad);
 
+	void LoadBuildingAssets(const FName& RowName);
+
+	void UnloadBuildingAssets(const FName& RowName);
+
 private:
 	void SetupCommonReferences(UWorld* World);
 
 	void SetBuildingSellCost(float Ratio = 0.8f);
 
-	void InitializeBuildings();
-
 	ADDBuildingBase* CreateBuildingInstance(UWorld* World, const FName& RowName);
+
+	void OnBuildingAssetsLoaded(const FName& RowName);
 
 
 

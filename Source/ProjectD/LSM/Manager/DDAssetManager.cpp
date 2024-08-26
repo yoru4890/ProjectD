@@ -16,11 +16,12 @@ void UDDAssetManager::Initialize()
 
 }
 
-void UDDAssetManager::LoadAssetsAsync(const TArray<TSoftObjectPtr<UObject>>& AssetsToLoad)
+void UDDAssetManager::LoadAssetsAsync(const TArray<TSoftObjectPtr<UObject>>& AssetsToLoad, FStreamableDelegate OnAssetsLoadedCallback)
 {
 	if (AssetsToLoad.Num() == 0)
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("No assets to load."));
+		OnAssetsLoadedCallback.ExecuteIfBound();
 		return;
 	}
 
@@ -28,7 +29,13 @@ void UDDAssetManager::LoadAssetsAsync(const TArray<TSoftObjectPtr<UObject>>& Ass
 	TArray<FSoftObjectPath> SoftObjectPaths;
 	for (const TSoftObjectPtr<UObject>& Asset : AssetsToLoad)
 	{
-		if (!Asset.IsValid())
+		// TODO : 이거 나중에 확인해야함!!!! 
+		// 에디터 상에서는 IsValid로 체크했을 떄, 로딩이 되었다고 뜨지만 막상 써보면 로딩이 안되어있어서 아무것도 안뜸.
+		// 그래서 첫번째거를 해줘야 게임을 2번쨰 실행할 때 잘뜬다
+		// 2번째거는 에디터상에서 2번쨰 게임실행해도 오류가 뜬다.
+		//if (!Asset.IsNull())
+		//if (!Asset.IsNull() && !Asset.IsValid())
+		if (!Asset.IsNull())
 		{
 			SoftObjectPaths.Add(Asset.ToSoftObjectPath());
 		}
@@ -37,25 +44,15 @@ void UDDAssetManager::LoadAssetsAsync(const TArray<TSoftObjectPtr<UObject>>& Ass
 			//UE_LOG(LogTemp, Warning, TEXT("%s is already loaded."), *Asset.ToString());
 		}
 	}
-
-	// 비동기 로드 완료 콜백
-	TFunction<void()> OnAssetsLoadedCallback = [this,AssetsToLoad]()
-		{
-			for (const TSoftObjectPtr<UObject>& Asset : AssetsToLoad)
-			{
-				if (Asset.IsValid())
-				{
-					UE_LOG(LogTemp, Warning, TEXT("Asset %s loaded successfully."), *Asset.ToString());
-				}
-			}
-			//UE_LOG(LogTemp, Warning, TEXT("Start Unload."));
-			//this->UnloadAsset(const_cast<TArray<TSoftObjectPtr<UObject>>&>(AssetsToLoad));
-		};
 	if (SoftObjectPaths.Num() > 0)
 	{
 		// 비동기 로드 시작
 		FStreamableManager& StreamableManager = UAssetManager::GetStreamableManager();
-		StreamableManager.RequestAsyncLoad(SoftObjectPaths, FStreamableDelegate::CreateLambda(OnAssetsLoadedCallback));
+		StreamableManager.RequestAsyncLoad(SoftObjectPaths, OnAssetsLoadedCallback);
+	}
+	else
+	{
+		OnAssetsLoadedCallback.ExecuteIfBound();
 	}
 }
 
@@ -93,54 +90,16 @@ void UDDAssetManager::UnloadAsset(TArray<TSoftObjectPtr<UObject>>& AssetsToUnloa
 	GEngine->ForceGarbageCollection(true);
 }
 
-//void UDDAssetManager::RemoveLoadedAssetAll()
-//{
-//	check(GetWorld());
-//	UDDGameInstance* GameInstance = CastChecked<UDDGameInstance>(GetWorld()->GetGameInstance());
-//	check(GameInstance);
-//
-//	UDDBuildingManager* BuildingManager = GameInstance->GetBuildingManager();
-//	check(BuildingManager);
-//
-//	const TMap<FName, FDDBuildingBaseData*>& BuildingDataTable = BuildingManager->GetBuildingDataTable();
-//
-//	FStreamableManager& StreamableManager = UAssetManager::GetStreamableManager();
-//	TArray<FName> KeyArray;
-//	BuildingDataTable.GenerateKeyArray(KeyArray);
-//	for (FName& RowName : KeyArray)
-//	{
-//		FDDBuildingBaseData* ObjectStruct = GetObjectBaseData(RowName);
-//
-//		// 각 타입별로 로드된 에셋을 언로드
-//		for (TSoftObjectPtr<UStaticMesh>& StaticMesh : ObjectStruct->StaticMeshs)
-//		{
-//			StreamableManager.Unload(StaticMesh.ToSoftObjectPath());
-//			StaticMesh.ResetWeakPtr();
-//		}
-//		for (TSoftObjectPtr<USkeletalMesh>& SkeletalMesh : ObjectStruct->SkeletalMeshs)
-//		{
-//			StreamableManager.Unload(SkeletalMesh.ToSoftObjectPath());
-//			SkeletalMesh.ResetWeakPtr();
-//		}
-//
-//		for (TSoftObjectPtr<UAnimBlueprint>& AnimBlueprint : ObjectStruct->AnimBlueprints)
-//		{
-//			StreamableManager.Unload(AnimBlueprint.ToSoftObjectPath());
-//			AnimBlueprint.ResetWeakPtr();
-//		}
-//		for (TSoftObjectPtr<UAnimMontage>& Montage : ObjectStruct->AttackMontages)
-//		{
-//			StreamableManager.Unload(Montage.ToSoftObjectPath());
-//			Montage.ResetWeakPtr();
-//		}
-//
-//		StreamableManager.Unload(ObjectStruct->AttackEffect.ToSoftObjectPath());
-//		ObjectStruct->AttackEffect.ResetWeakPtr();
-//
-//		StreamableManager.Unload(ObjectStruct->HitEffect.ToSoftObjectPath());
-//		ObjectStruct->HitEffect.ResetWeakPtr();
-//
-//		StreamableManager.Unload(ObjectStruct->AttackSound.ToSoftObjectPath());
-//		ObjectStruct->AttackSound.ResetWeakPtr();
-//	}
-//}
+bool UDDAssetManager::ShouldForceGarbageCollection() const
+{
+	UE_LOG(LogTemp, Warning, TEXT("Garbage Collection Start"));
+	const int32 MemoryThresholdMB = 500; // 500MB 기준
+	int32 CurrentMemoryUsageMB = GetCurrentMemoryUsageInMB();
+
+	return CurrentMemoryUsageMB > MemoryThresholdMB;
+}
+
+int32 UDDAssetManager::GetCurrentMemoryUsageInMB() const
+{
+	return FPlatformMemory::GetStats().UsedPhysical / (1024 * 1024);
+}

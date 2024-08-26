@@ -12,6 +12,8 @@
 #include "LSM/Manager/DDAssetManager.h"
 #include "LSM/Building/DDBuildingBase.h"
 
+#pragma region Initalize
+
 UDDBuildingManager::UDDBuildingManager()
 {
 
@@ -35,7 +37,7 @@ void UDDBuildingManager::Initialize()
 	}
 
 	SetBuildingSellCost();
-	InitializeBuildings();
+	HandleBuildingPoolsOnLevelChange();
 }
 
 void UDDBuildingManager::SetupCommonReferences(UWorld* World)
@@ -72,35 +74,102 @@ void UDDBuildingManager::SetBuildingSellCost(float Ratio)
 	}
 }
 
-void UDDBuildingManager::InitializeBuildings()
+#pragma region SpawnAndDestroy
+
+ADDBuildingBase* UDDBuildingManager::SpawnBuilding(UWorld* World, const FName& RowName, const FVector& Location, const FRotator& Rotation, AActor* Owner, APawn* Instigator)
 {
-	for (auto& Elem : BuildingDataTable)
+	if (!BuildingPool.Contains(RowName))
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("%s is Unlock? : %s"), *Elem.Key.ToString(), Elem.Value->bIsUnlocked ? TEXT("true") : TEXT("false"));
+		BuildingPool.Add(RowName, FBuildingList());
+		UE_LOG(LogTemp, Warning, TEXT("check1"));
+	}
 
-		if (Elem.Value->bIsUnlocked)
+	ADDBuildingBase* NewBuilding = nullptr;
+
+	// 풀에서 트랩을 꺼냅니다.
+	if (BuildingPool[RowName].Buildings.Num() > 0)
+	{
+		NewBuilding = BuildingPool[RowName].Buildings.Pop();
+		if (NewBuilding)
 		{
-			TArray<TSoftObjectPtr<UObject>> AssetsToLoad;
-			// 에셋 매니저에게 로딩 요청
-			GetSoftObjectPtrsInBuilding(Elem.Key, AssetsToLoad);
-			if (AssetManager)
-			{
-				AssetManager->LoadAssetsAsync(AssetsToLoad); // 에셋 리스트 전달
-			}
-
-			//UE_LOG(LogTemp, Warning, TEXT("%s : Init"), *Elem.Key.ToString());
+			// 트랩 위치와 회전을 설정합니다.
+			NewBuilding->SetActorLocationAndRotation(Location, Rotation);
+			UE_LOG(LogTemp, Warning, TEXT("check2"));
 		}
 	}
+	else
+	{
+		// World가 null이면 실행 중지
+		check(World);
+		NewBuilding = CreateBuildingInstance(World, RowName);
+		UE_LOG(LogTemp, Warning, TEXT("check3"));
+	}
+	if (NewBuilding)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("check4"));
+		NewBuilding->SetActorHiddenInGame(false);
+		NewBuilding->SetActorEnableCollision(true);
+		NewBuilding->SetActorTickEnabled(true);
+		NewBuilding->SetCanAttack(false);
+	}
+
+	return NewBuilding;
 }
+
+void UDDBuildingManager::DestroyBuilding(ADDBuildingBase& Building)
+{
+	BuildingPool[Building.GetRowName()].Buildings.Add(Building);
+	Building.SetActorHiddenInGame(true);
+	Building.SetActorEnableCollision(false);
+	Building.SetActorTickEnabled(false);
+	Building.SetCanAttack(false);
+}
+
+ADDBuildingBase* UDDBuildingManager::CreateBuildingInstance(UWorld* World, const FName& RowName)
+{
+	IDDFactoryInterface* BuildingFactory = FactoryManager->GetFactory(RowName);
+	if (!BuildingFactory)
+	{
+		return nullptr;
+	}
+	check(BuildingFactory);
+	UObject* CreatedObject = BuildingFactory->CreateObject(World, RowName, FVector::ZeroVector, FRotator::ZeroRotator, nullptr, nullptr);
+	return Cast<ADDBuildingBase>(CreatedObject);
+}
+
+#pragma endregion SpawnAndDestroy
+
+#pragma endregion Initalize
+
+#pragma region Utility
 
 bool UDDBuildingManager::IsBuildingUnlocked(const FName& RowName) const
 {
 	const FDDBuildingBaseData* BuildingStruct = GetBuildingData(RowName);
-	
+
 	bool bIsUnlocked = BuildingStruct->bIsUnlocked;
 
 	return bIsUnlocked;
 
+}
+
+bool UDDBuildingManager::IsParentUnlocked(const FName& RowName)
+{
+	FDDBuildingBaseData* BuildingStruct = GetBuildingData(RowName);
+
+	FName ParentName = BuildingStruct->ParentRowName;
+
+	while (ParentName != FName("None"))
+	{
+		if (!GetBuildingData(ParentName)->bIsUnlocked)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Parent Trap is Not Unlocked"));
+			return false;
+		}
+		ParentName = GetBuildingData(ParentName)->ParentRowName;
+	}
+
+	return true;
 }
 
 bool UDDBuildingManager::UnlockBuilding(const FName& RowName)
@@ -109,24 +178,23 @@ bool UDDBuildingManager::UnlockBuilding(const FName& RowName)
 
 	FName ParentName = BuildingStruct->ParentRowName;
 
-	while (ParentName != FName("None")) {
-		if (!GetBuildingData(ParentName)->bIsUnlocked) 
+	while (ParentName != FName("None"))
+	{
+		if (!GetBuildingData(ParentName)->bIsUnlocked)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Parent Trap is Not Unlocked"));
 			return false;
 		}
 		ParentName = GetBuildingData(ParentName)->ParentRowName;
-		
+
 	}
 	ADDPlayerState* PlayerState = CastChecked<ADDPlayerState>(UGameplayStatics::GetPlayerState(GetWorld(), 0));
 	check(PlayerState);
 
-	if (PlayerState->CheckLikePoint(BuildingStruct->UnlockCost)) {
+	if (PlayerState->CheckLikePoint(BuildingStruct->UnlockCost))
+	{
 		PlayerState->SubtractLikePoint(BuildingStruct->UnlockCost);
 		BuildingStruct->bIsUnlocked = true;
-		TArray<TSoftObjectPtr<UObject>> AssetsToload;
-		GetSoftObjectPtrsInBuilding(RowName, AssetsToload);
-		AssetManager->LoadAssetsAsync(AssetsToload);
 
 		return true;
 	}
@@ -138,7 +206,8 @@ bool UDDBuildingManager::LockBuilding(const FName& RowName)
 	TArray<FName> Stack;
 	Stack.Push(RowName);
 
-	while (Stack.Num()>0) {
+	while (Stack.Num() > 0)
+	{
 		FName CurrentName = Stack.Pop();
 		FDDBuildingBaseData* CurrentBuildingStruct = GetBuildingData(CurrentName);
 
@@ -160,59 +229,12 @@ bool UDDBuildingManager::LockBuilding(const FName& RowName)
 
 	PlayerState->AddLikePoint(LockBuildingData->UnlockCost);
 	LockBuildingData->bIsUnlocked = false;
-
-	TArray<TSoftObjectPtr<UObject>> AssetsToUnload;
-	GetSoftObjectPtrsInBuilding(RowName, AssetsToUnload);
-	AssetManager->UnloadAsset(AssetsToUnload);
 	return true;
 }
 
-ADDBuildingBase* UDDBuildingManager::SpawnBuilding(UWorld* World, const FName& RowName, const FVector& Location, const FRotator& Rotation, AActor* Owner, APawn* Instigator)
-{
-	if (!BuildingPool.Contains(RowName)) {
-		BuildingPool.Add(RowName, FBuildingList());
-	}
+#pragma endregion Utility
 
-	ADDBuildingBase* NewBuilding = nullptr;
-
-	// 풀에서 트랩을 꺼냅니다.
-	if (BuildingPool[RowName].Buildings.Num() > 0) {
-		NewBuilding = BuildingPool[RowName].Buildings.Pop();
-		if (NewBuilding) {
-			// 트랩 위치와 회전을 설정합니다.
-			NewBuilding->SetActorLocationAndRotation(Location, Rotation);
-		}
-	}
-	else {
-		// World가 null이면 실행 중지
-		check(World);
-
-		NewBuilding = CreateBuildingInstance(World, RowName);
-	}
-
-	NewBuilding->SetActorHiddenInGame(false);
-	NewBuilding->SetActorEnableCollision(true);
-	NewBuilding->SetActorTickEnabled(true);
-	NewBuilding->SetCanAttack(false);
-
-	return NewBuilding;
-}
-
-void UDDBuildingManager::DestroyBuilding(ADDBuildingBase& Building)
-{
-	BuildingPool[Building.GetRowName()].Buildings.Add(Building);
-	Building.SetActorHiddenInGame(true);
-	Building.SetActorEnableCollision(false);
-	Building.SetActorTickEnabled(false);
-	Building.SetCanAttack(false);
-}
-
-ADDBuildingBase* UDDBuildingManager::CreateBuildingInstance(UWorld* World, const FName& RowName)
-{
-	IDDFactoryInterface* BuildingFactory = FactoryManager->GetFactory(RowName);
-	UObject* CreatedObject = BuildingFactory->CreateObject(World, RowName, FVector::ZeroVector, FRotator::ZeroRotator, nullptr, nullptr);
-	return Cast<ADDBuildingBase>(CreatedObject);
-}
+#pragma region Asset
 
 void UDDBuildingManager::GetSoftObjectPtrsInBuilding(const FName& RowName, TArray<TSoftObjectPtr<UObject>>& AssetsToLoad)
 {
@@ -257,6 +279,8 @@ void UDDBuildingManager::GetSoftObjectPtrsInBuilding(const FName& RowName, TArra
 
 }
 
+#pragma endregion Asset
+
 void UDDBuildingManager::HandleBuildingPoolsOnLevelChange()
 {
 	UWorld* World = GetWorld();
@@ -270,26 +294,7 @@ void UDDBuildingManager::HandleBuildingPoolsOnLevelChange()
 		// 빌딩이 잠금 해제되었는지 확인
 		if (BuildingData->bIsUnlocked)
 		{
-
-			// 풀에 해당 빌딩이 없으면 추가
-			if (!BuildingPool.Contains(RowName))
-			{
-				BuildingPool.Add(RowName, FBuildingList());
-			}
-
-			int32 NumInstances = (BuildingData->BuildingType == EBuildingType::Trap) ? 10 : 3;
-			for (int32 i = 0; i < NumInstances; ++i)
-			{
-				ADDBuildingBase* NewBuilding = CreateBuildingInstance(World, RowName);
-				if (NewBuilding)
-				{
-					BuildingPool[RowName].Buildings.Add(NewBuilding);
-					NewBuilding->SetActorHiddenInGame(true);  // 일단 숨기기
-					NewBuilding->SetActorEnableCollision(false);  // 충돌 비활성화
-					NewBuilding->SetActorTickEnabled(false);  // 틱 비활성화
-					NewBuilding->SetCanAttack(false);
-				}
-			}
+			LoadBuildingAssets(RowName);
 		}
 		else
 		{
@@ -312,10 +317,72 @@ void UDDBuildingManager::HandleBuildingPoolsOnLevelChange()
 				// BuildingPool에서 해당 RowName 제거
 				BuildingPool.Remove(RowName);
 			}
+			UnloadBuildingAssets(RowName);
 		}
 	}
 }
 
+void UDDBuildingManager::LoadBuildingAssets(const FName& RowName)
+{
+	TArray<TSoftObjectPtr<UObject>> AssetsToLoad;
+
+	GetSoftObjectPtrsInBuilding(RowName, AssetsToLoad);
+
+	AssetManager->LoadAssetsAsync(AssetsToLoad, FStreamableDelegate::CreateLambda([this, RowName]()
+		{
+			OnBuildingAssetsLoaded(RowName);
+		}));
+
+}
+
+void UDDBuildingManager::UnloadBuildingAssets(const FName& RowName)
+{
+	TArray<TSoftObjectPtr<UObject>> AssetsToUnLoad;
+
+	GetSoftObjectPtrsInBuilding(RowName, AssetsToUnLoad);
+
+	AssetManager->UnloadAsset(AssetsToUnLoad);
+}
+
+void UDDBuildingManager::OnBuildingAssetsLoaded(const FName& RowName)
+{
+	// 로딩된 RowName에 해당하는 액터를 풀에 추가
+	UE_LOG(LogTemp, Warning, TEXT("Assets for RowName %s loaded."), *RowName.ToString());
+
+	// 풀에 해당 RowName에 대한 액터 추가
+	if (!BuildingPool.Contains(RowName))
+	{
+		BuildingPool.Add(RowName, FBuildingList());
+	}
+	FDDBuildingBaseData* BuildingData = GetBuildingData(RowName);
+
+	// 빌딩이 잠금 해제되었는지 확인
+	if (BuildingData->bIsUnlocked)
+	{
+
+		// 풀에 해당 빌딩이 없으면 추가
+		if (!BuildingPool.Contains(RowName))
+		{
+			BuildingPool.Add(RowName, FBuildingList());
+		}
+
+		int32 NumInstances = (BuildingData->BuildingType == EBuildingType::Trap) ? 10 : 3;
+		for (int32 i = 0; i < NumInstances; ++i)
+		{
+			ADDBuildingBase* NewBuilding = CreateBuildingInstance(GetWorld(), RowName);
+			if (NewBuilding)
+			{
+				BuildingPool[RowName].Buildings.Add(NewBuilding);
+				NewBuilding->SetActorHiddenInGame(true);  // 일단 숨기기
+				NewBuilding->SetActorEnableCollision(false);  // 충돌 비활성화
+				NewBuilding->SetActorTickEnabled(false);  // 틱 비활성화
+				NewBuilding->SetCanAttack(false);
+			}
+		}
+	}
+}
+
+#pragma region Data
 
 const FDDBuildingBaseData* UDDBuildingManager::GetBuildingData(const FName& RowName) const
 {
@@ -330,7 +397,7 @@ const FDDBuildingBaseData* UDDBuildingManager::GetBuildingData(const FName& RowN
 	}
 	// Log an error if the data is not found
 	UE_LOG(LogTemp, Warning, TEXT("Building data for RowName %s not found!"), *RowName.ToString());
-	
+
 	return nullptr;
 }
 
@@ -402,3 +469,6 @@ TMap<FName, FDDBuildingBaseData*>& UDDBuildingManager::GetBuildingDataTable()
 {
 	return BuildingDataTable;
 }
+
+
+#pragma endregion Data

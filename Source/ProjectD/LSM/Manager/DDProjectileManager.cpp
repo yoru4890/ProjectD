@@ -9,10 +9,27 @@
 #include "LSM/Factory/DDFactoryInterface.h"
 #include "LSM/Projectile/DDProjectileBase.h"
 
+#pragma region Initalize
 void UDDProjectileManager::Initialize()
 {
 	SetupCommonReferences(GetWorld());
 }
+
+void UDDProjectileManager::SetupCommonReferences(UWorld* World)
+{
+	MyGameInstance = Cast<UDDGameInstance>(World->GetGameInstance());
+	check(MyGameInstance);
+
+	AssetManager = MyGameInstance->GetAssetManager();
+	check(AssetManager);
+
+	FactoryManager = MyGameInstance->GetFactoryManager();
+	check(FactoryManager);
+}
+
+#pragma endregion Initalize
+
+#pragma region SpawnAndDestroy
 
 ADDProjectileBase* UDDProjectileManager::SpawnProjectile(UWorld* World, const FName& RowName, const FVector& Location, const FRotator& Rotation, AActor* Owner, APawn* Instigator)
 {
@@ -42,24 +59,22 @@ ADDProjectileBase* UDDProjectileManager::SpawnProjectile(UWorld* World, const FN
 	return NewProjectile;
 }
 
-void UDDProjectileManager::SetupCommonReferences(UWorld* World)
-{
-	MyGameInstance = Cast<UDDGameInstance>(World->GetGameInstance());
-	check(MyGameInstance);
-
-	AssetManager = MyGameInstance->GetAssetManager();
-	check(AssetManager);
-
-	FactoryManager = MyGameInstance->GetFactoryManager();
-	check(FactoryManager);
-}
-
 ADDProjectileBase* UDDProjectileManager::CreateProjectileInstance(UWorld* World, const FName& RowName)
 {
 	IDDFactoryInterface* ProjectileFactory = FactoryManager->GetFactory(RowName);
 	UObject* CreatedObject = ProjectileFactory->CreateObject(World, RowName, FVector::ZeroVector, FRotator::ZeroRotator, nullptr, nullptr);
 	return Cast<ADDProjectileBase>(CreatedObject);
 }
+
+void UDDProjectileManager::DestroyProjectile(ADDProjectileBase* Projectile)
+{
+	ProjectilePool[Projectile->GetRowName()].Projectiles.Add(Projectile);
+	Projectile->SetProjectileActive(false);
+}
+
+#pragma endregion SpawnAndDestroy
+
+#pragma region Asset
 
 void UDDProjectileManager::GetSoftObjectPtrsInProjectile(const FName& RowName, TArray<TSoftObjectPtr<UObject>>& AssetsToLoad)
 {
@@ -77,6 +92,58 @@ void UDDProjectileManager::GetSoftObjectPtrsInProjectile(const FName& RowName, T
 	AssetsToLoad.Add(ProjectileData->FlyingSound);
 }
 
+void UDDProjectileManager::LoadProjectileAssets(const FName& RowName)
+{
+	bool bIsAlreadyLoaded = GetProjectileData(RowName)->bIsLoaded;
+	if (bIsAlreadyLoaded)
+	{
+		return;
+	}
+	TArray<TSoftObjectPtr<UObject>> AssetsToLoad;
+
+	GetSoftObjectPtrsInProjectile(RowName, AssetsToLoad);
+
+	GetProjectileData(RowName)->bIsLoaded = true;
+
+	AssetManager->LoadAssetsAsync(AssetsToLoad, FStreamableDelegate::CreateLambda([this, RowName]()
+		{
+			OnProjectileAssetsLoaded(RowName);
+		}));
+
+}
+
+void UDDProjectileManager::OnProjectileAssetsLoaded(const FName& RowName)
+{
+	// 로딩된 RowName에 해당하는 액터를 풀에 추가
+	UE_LOG(LogTemp, Warning, TEXT("Assets for RowName %s loaded."), *RowName.ToString());
+
+	// 풀에 해당 RowName에 대한 액터 추가
+	if (!ProjectilePool.Contains(RowName))
+	{
+		ProjectilePool.Add(RowName, FProjectileList());
+	}
+
+	int PoolSize = GetProjectileData(RowName)->PoolSize;
+
+	// 5개의 투사체를 생성하여 풀에 추가
+	for (int32 i = 0; i < PoolSize; ++i)
+	{
+		ADDProjectileBase* NewProjectile = CreateProjectileInstance(GetWorld(), RowName);
+		if (NewProjectile)
+		{
+			ProjectilePool[RowName].Projectiles.Add(NewProjectile);
+			UE_LOG(LogTemp, Warning, TEXT("Projectile %d for RowName %s added to pool."), i + 1, *RowName.ToString());
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Failed to create projectile %d for RowName %s."), i + 1, *RowName.ToString());
+		}
+	}
+}
+
+#pragma endregion Asset
+
+#pragma region Data
 
 const TMap<FName, FDDProjectileData>& UDDProjectileManager::GetProjectileDataTable() const
 {
@@ -92,9 +159,10 @@ const FDDProjectileData* UDDProjectileManager::GetProjectileData(const FName& Ro
 {
 	const FDDProjectileData* ProjectileData = MyGameInstance->GetDataManager()->GetProjectileDataTable().Find(RowName);
 
-	if (ProjectileData)
+	if (!ProjectileData)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("ProjectileData for RowName %s not found!"), *RowName.ToString());
+		return nullptr;
 	}
 
 	return ProjectileData;
@@ -102,17 +170,17 @@ const FDDProjectileData* UDDProjectileManager::GetProjectileData(const FName& Ro
 
 FDDProjectileData* UDDProjectileManager::GetProjectileData(const FName& RowName)
 {
+	check(MyGameInstance);
+	check(MyGameInstance->GetDataManager());
 	FDDProjectileData* ProjectileData = MyGameInstance->GetDataManager()->GetProjectileDataTable().Find(RowName);
+	check(ProjectileData);
 
-	if (ProjectileData)
+	if (!ProjectileData)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("ProjectileData for RowName %s not found!"), *RowName.ToString());
+		return nullptr;
 	}
 	return ProjectileData;
 }
 
-void UDDProjectileManager::DestroyProjectile(ADDProjectileBase* Projectile)
-{
-	ProjectilePool[Projectile->GetRowName()].Projectiles.Add(Projectile);
-	Projectile->SetProjectileActive(false);
-}
+#pragma endregion Data

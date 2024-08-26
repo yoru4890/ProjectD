@@ -36,5 +36,7 @@ struct FDDProjectileData : public FTableRowBase
 	TSubclassOf<UObject> FactoryClass; // 팩토리 클래스
 
 	bool bIsLoaded = false;
+
+	int32 PoolSize;
 	
 };
