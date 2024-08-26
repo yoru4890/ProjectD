@@ -30,11 +30,6 @@ ADDBuildingBase::ADDBuildingBase()
 	MeshContainerComponent = CreateDefaultSubobject<USceneComponent>(TEXT("MashContainerComponent"));
 	MeshContainerComponent->SetupAttachment(RootComponent);
 
-	// 나이아가라 시스템 컴포넌트 생성
-	AttackNiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("NiagaraComponent"));
-	AttackNiagaraComponent->SetupAttachment(RootComponent);
-	AttackNiagaraComponent->SetAutoActivate(false);  // 기본적으로 비활성화
-
 
 }
 
@@ -103,7 +98,7 @@ void ADDBuildingBase::InitFromDataTable(const FName& InRowName, const FDDBuildin
 	bCanAttack = false;
 	DamageType = BuildingData.DamageType;
 	MeshZAxisModify = BuildingData.MeshZAxisModify;
-	UE_LOG(LogTemp, Warning, TEXT("MeshZAxisModify is : %f"), BuildingData.MeshZAxisModify);
+	//UE_LOG(LogTemp, Warning, TEXT("MeshZAxisModify is : %f"), BuildingData.MeshZAxisModify);
 }
 
 void ADDBuildingBase::SetAttackStrategy(TSubclassOf<class UDDBuildingBaseAttackStrategy> AttackStrategyClass)
@@ -140,7 +135,7 @@ void ADDBuildingBase::SetParticeEffects(const FDDBuildingBaseData& LoadedAsset)
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("%s : AttackEffect not loaded"), RowName);
+		//UE_LOG(LogTemp, Warning, TEXT("%s : AttackEffect not loaded"), RowName);
 	}
 
 	if (LoadedAsset.HitEffect.IsValid())
@@ -149,43 +144,97 @@ void ADDBuildingBase::SetParticeEffects(const FDDBuildingBaseData& LoadedAsset)
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("%s : HitEffect not loaded"), RowName);
+		//UE_LOG(LogTemp, Warning, TEXT("%s : HitEffect not loaded"), RowName);
 	}
 
-	FName SocketName = TEXT("FirePoint");
-	USceneComponent* TargetComponent = nullptr;
+	//FName SocketName = TEXT("FirePoint");
+	//USceneComponent* TargetComponent = nullptr;
 
-	if (SkeletalMeshComponents.Num() > 0 && SkeletalMeshComponents[0]->DoesSocketExist(SocketName))
-	{
-		TargetComponent = SkeletalMeshComponents[0];
-	}
-	else if (StaticMeshComponents.Num() > 0 && StaticMeshComponents[0]->DoesSocketExist(SocketName))
-	{
-		TargetComponent = StaticMeshComponents[0];
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Socket %s not found on any mesh components."), *SocketName.ToString());
-		return;
-	}
+	//if (SkeletalMeshComponents.Num() > 0 && SkeletalMeshComponents[0]->DoesSocketExist(SocketName))
+	//{
+	//	TargetComponent = SkeletalMeshComponents[0];
+	//}
+	//else if (StaticMeshComponents.Num() > 0 && StaticMeshComponents[0]->DoesSocketExist(SocketName))
+	//{
+	//	TargetComponent = StaticMeshComponents[0];
+	//}
+	//else
+	//{
+	//	UE_LOG(LogTemp, Warning, TEXT("Socket %s not found on any mesh components."), *SocketName.ToString());
+	//	return;
+	//}
 
-	if (AttackNiagaraComponent)
+	TArray<FName> FirePointSockets;
+
+	// SkeletalMesh에서 "FirePoint"로 시작하는 소켓 이름들을 찾아서 배열에 추가
+	if (SkeletalMeshComponents.Num() > 0)
 	{
-		AttackNiagaraComponent->AttachToComponent(TargetComponent, FAttachmentTransformRules::SnapToTargetIncludingScale, SocketName);
-		AttackNiagaraComponent->RegisterComponent();
-	}
-	if (UNiagaraSystem* NiagaraSystem = Cast<UNiagaraSystem>(AttackEffect))
-	{
-		// NiagaraSystem 설정 및 활성화
-		if (AttackNiagaraComponent)
+		const TArray<FName>& SocketNames = SkeletalMeshComponents[0]->GetAllSocketNames();
+		for (const FName& SocketName : SocketNames)
 		{
-			AttackNiagaraComponent->SetAsset(NiagaraSystem);
+			if (SocketName.ToString().StartsWith(TEXT("FirePoint")))
+			{
+				FirePointSockets.Add(SocketName);
+			}
 		}
 	}
-	else
+	// StaticMesh에서도 동일하게 처리
+	else if (StaticMeshComponents.Num() > 0)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("AttackEffect is of unknown type."));
+		const TArray<FName>& SocketNames = StaticMeshComponents[0]->GetAllSocketNames();
+		for (const FName& SocketName : SocketNames)
+		{
+			if (SocketName.ToString().StartsWith(TEXT("FirePoint")))
+			{
+				FirePointSockets.Add(SocketName);
+			}
+		}
 	}
+
+	// 찾아낸 FirePoint 소켓들에 대해 나이아가라 컴포넌트 생성 및 설정
+	for (const FName& SocketName : FirePointSockets)
+	{
+		USceneComponent* TargetComponent = nullptr;
+
+		if (SkeletalMeshComponents.Num() > 0 && SkeletalMeshComponents[0]->DoesSocketExist(SocketName))
+		{
+			TargetComponent = SkeletalMeshComponents[0];
+		}
+		else if (StaticMeshComponents.Num() > 0 && StaticMeshComponents[0]->DoesSocketExist(SocketName))
+		{
+			TargetComponent = StaticMeshComponents[0];
+		}
+
+		if (TargetComponent)
+		{
+			// 나이아가라 컴포넌트를 생성하고 설정
+			UNiagaraComponent* NewNiagaraComponent = NewObject<UNiagaraComponent>(this);
+			NewNiagaraComponent->SetAsset(AttackEffect);
+			NewNiagaraComponent->SetupAttachment(TargetComponent, SocketName);
+			NewNiagaraComponent->SetAutoActivate(false);  // 기본적으로 비활성화
+			NewNiagaraComponent->RegisterComponent();
+			AttackNiagaraComponents.Add(NewNiagaraComponent);  // 필요시 나이아가라 컴포넌트를 배열에 저장
+		}
+	}
+
+
+	//if (AttackNiagaraComponent)
+	//{
+	//	AttackNiagaraComponent->AttachToComponent(TargetComponent, FAttachmentTransformRules::SnapToTargetIncludingScale, SocketName);
+	//	AttackNiagaraComponent->RegisterComponent();
+	//}
+	//if (UNiagaraSystem* NiagaraSystem = Cast<UNiagaraSystem>(AttackEffect))
+	//{
+	//	// NiagaraSystem 설정 및 활성화
+	//	if (AttackNiagaraComponent)
+	//	{
+	//		AttackNiagaraComponent->SetAsset(NiagaraSystem);
+	//	}
+	//}
+	//else
+	//{
+	//	UE_LOG(LogTemp, Warning, TEXT("AttackEffect is of unknown type."));
+	//}
 }
 
 void ADDBuildingBase::SetSound(const FDDBuildingBaseData& LoadedAsset)
@@ -196,7 +245,7 @@ void ADDBuildingBase::SetSound(const FDDBuildingBaseData& LoadedAsset)
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("%s : AttackSound not loaded"), RowName);
+		//UE_LOG(LogTemp, Warning, TEXT("%s : AttackSound not loaded"), RowName);
 	}
 }
 
@@ -219,7 +268,7 @@ void ADDBuildingBase::SetMeshs(const FDDBuildingBaseData& LoadedAsset)
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("%s : Montages not loaded"), RowName);
+			//UE_LOG(LogTemp, Warning, TEXT("%s : Montages not loaded"), RowName);
 		}
 	}
 
@@ -235,7 +284,7 @@ void ADDBuildingBase::SetMeshs(const FDDBuildingBaseData& LoadedAsset)
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("%s : SkeletalMesh not loaded"), RowName);
+			//UE_LOG(LogTemp, Warning, TEXT("%s : SkeletalMesh not loaded"), RowName);
 		}
 		SkeletalMeshComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
 		SkeletalMeshComponent->SetCollisionResponseToChannel(GTCHANNEL_MANAGETRACE, ECR_Block);
@@ -259,7 +308,7 @@ void ADDBuildingBase::SetMeshs(const FDDBuildingBaseData& LoadedAsset)
 			}
 			else
 			{
-				UE_LOG(LogTemp, Warning, TEXT("%s : AnimBlueprints not loaded"), RowName);
+				//UE_LOG(LogTemp, Warning, TEXT("%s : AnimBlueprints not loaded"), RowName);
 			}
 		}
 	}
@@ -319,13 +368,19 @@ void ADDBuildingBase::ExecuteAttackEffects()
 
 void ADDBuildingBase::PlayAttackEffectAtSocket()
 {
-	AttackNiagaraComponent->SetActive(true);
+	for (auto& AttackNiagaraComponent : AttackNiagaraComponents)
+	{
+		AttackNiagaraComponent->SetActive(true);
+	}
 
 }
 
 void ADDBuildingBase::StopAttackEffect()
 {
-	AttackNiagaraComponent->SetActive(false);
+	for (auto& AttackNiagaraComponent : AttackNiagaraComponents)
+	{
+		AttackNiagaraComponent->SetActive(false);
+	}
 }
 
 void ADDBuildingBase::PlayAttackAnimation()
@@ -379,13 +434,13 @@ void ADDBuildingBase::ModifyMeshAndAttackCollision() const
 {
 	if (!MeshContainerComponent)
 	{
-		UE_LOG(LogTemp, Error, TEXT("MeshContainerComponent is not valid."));
+		//UE_LOG(LogTemp, Error, TEXT("MeshContainerComponent is not valid."));
 		return;
 	}
 
 	if (MeshComponents.Num() == 0)
 	{
-		UE_LOG(LogTemp, Error, TEXT("MeshComponents array is empty."));
+		//UE_LOG(LogTemp, Error, TEXT("MeshComponents array is empty."));
 		return;
 	}
 
@@ -398,7 +453,7 @@ void ADDBuildingBase::ModifyMeshAndAttackCollision() const
 	{
 		if (!MeshComponent)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("MeshComponent is not valid."));
+			//UE_LOG(LogTemp, Warning, TEXT("MeshComponent is not valid."));
 			continue;
 		}
 
@@ -423,7 +478,7 @@ void ADDBuildingBase::ModifyMeshAndAttackCollision() const
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("ComponentBox is not valid for %s."), *MeshComponent->GetName());
+			//UE_LOG(LogTemp, Warning, TEXT("ComponentBox is not valid for %s."), *MeshComponent->GetName());
 		}
 	}
 
@@ -431,9 +486,9 @@ void ADDBuildingBase::ModifyMeshAndAttackCollision() const
 	FVector TargetSize(CellWidth * GridCellSize, CellWidth * GridCellSize, CellWidth * GridCellSize);
 	FVector ScaleFactor = TargetSize / CurrentSize;
 
-	UE_LOG(LogTemp, Warning, TEXT("CurrentSize X:%f Y:%f Z:%f"), CurrentSize.X, CurrentSize.Y, CurrentSize.Z);
-	UE_LOG(LogTemp, Warning, TEXT("TargetSize X:%f Y:%f Z:%f"), TargetSize.X, TargetSize.Y, TargetSize.Z);
-	UE_LOG(LogTemp, Warning, TEXT("ScaleFactor X:%f Y:%f Z:%f"), ScaleFactor.X, ScaleFactor.Y, ScaleFactor.Z);
+	//UE_LOG(LogTemp, Warning, TEXT("CurrentSize X:%f Y:%f Z:%f"), CurrentSize.X, CurrentSize.Y, CurrentSize.Z);
+	//UE_LOG(LogTemp, Warning, TEXT("TargetSize X:%f Y:%f Z:%f"), TargetSize.X, TargetSize.Y, TargetSize.Z);
+	//UE_LOG(LogTemp, Warning, TEXT("ScaleFactor X:%f Y:%f Z:%f"), ScaleFactor.X, ScaleFactor.Y, ScaleFactor.Z);
 
 	// 스케일 팩터 중 가장 작은 값을 사용하여 균등하게 스케일 조정
 	float UniformScaleFactor = FMath::Min(ScaleFactor.X, ScaleFactor.Y);
@@ -444,7 +499,7 @@ void ADDBuildingBase::ModifyMeshAndAttackCollision() const
 	// MeshContainerComponent의 위치 설정
 	MeshContainerComponent->SetRelativeLocation(FVector(0, 0, MeshZAxisModify));
 
-	UE_LOG(LogTemp, Warning, TEXT("UniformScaleFactor: %f"), UniformScaleFactor);
+	//UE_LOG(LogTemp, Warning, TEXT("UniformScaleFactor: %f"), UniformScaleFactor);
 
 }
 

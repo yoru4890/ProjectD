@@ -22,10 +22,17 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 private:
-	// 타이머로 호출될 함수
 	void RotateTowardsEnemy();
+
+	const bool IsEnemyInSight(float CosTheta = 0.97f) const;
+
+	void SetIsNowAttack(bool InIsNowAttack);
 
 private:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UDDRotationComponent> DDRotationComponent;
+
+	float RotationSpeed;
+
+	bool IsNowAttack = false;
 };
