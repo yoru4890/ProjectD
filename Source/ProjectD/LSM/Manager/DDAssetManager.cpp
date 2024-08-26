@@ -45,11 +45,11 @@ void UDDAssetManager::LoadAssetsAsync(const TArray<TSoftObjectPtr<UObject>>& Ass
 			{
 				if (Asset.IsValid())
 				{
-					//UE_LOG(LogTemp, Warning, TEXT("Asset %s loaded successfully."), *Asset.ToString());
+					UE_LOG(LogTemp, Warning, TEXT("Asset %s loaded successfully."), *Asset.ToString());
 				}
 			}
-			UE_LOG(LogTemp, Warning, TEXT("Start Unload."));
-			this->UnloadAsset(const_cast<TArray<TSoftObjectPtr<UObject>>&>(AssetsToLoad));
+			//UE_LOG(LogTemp, Warning, TEXT("Start Unload."));
+			//this->UnloadAsset(const_cast<TArray<TSoftObjectPtr<UObject>>&>(AssetsToLoad));
 		};
 	if (SoftObjectPaths.Num() > 0)
 	{
