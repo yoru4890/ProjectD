@@ -4,7 +4,11 @@
 #include "LSM/Projectile/DDProjectileBase.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "NiagaraComponent.h"
+#include "NiagaraSystem.h"
 #include "YSY/Collision/CollisionChannel.h"
+#include "LSM/Manager/DDProjectileManager.h"
+#include "YSY/Interface/DamageInterface.h"
+#include "Engine/DamageEvents.h"
 // Sets default values
 ADDProjectileBase::ADDProjectileBase()
 {
@@ -40,23 +44,28 @@ void ADDProjectileBase::BeginPlay()
 
 #pragma region SetupAndInitialization
 
-void ADDProjectileBase::InitializeProjectile(float InDamageAmount, TSubclassOf<UDamageType> InDamageType, float InProjectileSpeed, float InMaxLifeTime, bool InbIsExplosive, float InExplosionRadius, int32 InMaxPenetrationCount)
+void ADDProjectileBase::InitializeProjectile(float InDamageAmount, TSubclassOf<UDamageType> InDamageType, float InProjectileSpeed, float InMaxSpeed, float InMaxLifeTime, bool InbIsExplosive, float InExplosionRadius, int32 InMaxPenetrationCount)
 {
 	DamageAmount = InDamageAmount;
 	DamageType = InDamageType;
 	ProjectileSpeed = InProjectileSpeed;
+	MaxSpeed = InMaxSpeed;
 	MaxLifeTime = InMaxLifeTime;
 	bIsExplosive = InbIsExplosive;
 	ExplosionRadius = InExplosionRadius;
 	MaxPenetrationCount = InMaxPenetrationCount;
 
+	GetWorld()->GetTimerManager().SetTimer(LifeSpanTimerHandle, this, &ADDProjectileBase::OnLifeTimeExpired, MaxLifeTime, false);
+
+	LaunchProjectile();
 }
 
-void ADDProjectileBase::SetAssets(const FDDProjectileData& LoadedAsset)
+void ADDProjectileBase::SetAssetAndManager(const FDDProjectileData& LoadedAsset, UDDProjectileManager* InProjectileManager)
 {
 	SetMeshs(LoadedAsset);
 	SetSound(LoadedAsset);
 	SetParticeEffects(LoadedAsset);
+	ProjectileManager = InProjectileManager;
 }
 
 void ADDProjectileBase::SetupCollisionResponses()
@@ -129,16 +138,21 @@ void ADDProjectileBase::OnCollisionBeginOverlap(UPrimitiveComponent* OverlappedC
 {
 	CurrentPenetrationCount++;
 
+	ApplyDamageToActor(OtherActor);
+
+
 	if (CurrentPenetrationCount >= MaxPenetrationCount)
 	{
 		if (bIsExplosive)
 		{
 
 		}
-		else
+		else 
 		{
 
 		}
+		ProjectileManager->DestroyProjectile(this);
+		StopLifeTimeTimer();
 	}
 }
 
@@ -161,6 +175,29 @@ void ADDProjectileBase::SetProjectileActive(bool bIsActive)
 
 #pragma endregion CollisionAndCallbacks
 
+#pragma region AttackAndExplode
+
+void ADDProjectileBase::Explode()
+{
+
+}
+
+void ADDProjectileBase::ApplyDamageToActor(AActor* OtherActor)
+{
+	IDamageInterface* DamagedActor = Cast<IDamageInterface>(OtherActor);
+
+	if (DamagedActor)
+	{
+		FDamageEvent DamageEvent{};
+		DamageEvent.DamageTypeClass = DamageType;
+		DamagedActor->ApplyDamage(DamageAmount, DamageEvent, nullptr, this);
+
+		UE_LOG(LogTemp, Warning, TEXT("Apply Direct Damage"));
+	}
+}
+
+#pragma endregion AttackAndExplode
+
 #pragma region TickAndUpdate
 
 // Called every frame
@@ -171,3 +208,84 @@ void ADDProjectileBase::Tick(float DeltaTime)
 }
 
 #pragma endregion TickAndUpdate
+
+#pragma region Utility
+
+void ADDProjectileBase::LaunchProjectile()
+{
+	if (ProjectileMovementComponent)
+	{
+		ProjectileMovementComponent->SetActive(true);
+		ProjectileMovementComponent->InitialSpeed = ProjectileSpeed;
+		ProjectileMovementComponent->MaxSpeed = MaxSpeed;
+		ProjectileMovementComponent->bShouldBounce = false;
+		ProjectileMovementComponent->ProjectileGravityScale = 0.0f;
+
+		ProjectileMovementComponent->Velocity = GetActorForwardVector() * ProjectileSpeed;
+	}
+}
+
+void ADDProjectileBase::SetProjectileState(bool bIsActive)
+{
+	if (bIsActive)
+	{
+		// 활성화: 충돌 활성화, 액터 표시, 틱 활성화
+		StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		SetActorHiddenInGame(false);
+		SetActorEnableCollision(true);
+		SetActorTickEnabled(true);
+
+		// 나이아가라 이펙트 및 사운드 활성화 (선택 사항)
+		if (TrailNiagaraComponent && !TrailNiagaraComponent->IsActive())
+		{
+			TrailNiagaraComponent->Activate();
+		}
+
+		// 필요한 경우 추가 초기화 로직
+		CurrentPenetrationCount = 0;  // 관통 횟수 초기화
+	}
+	else
+	{
+		// 비활성화: 이동 중지, 충돌 비활성화, 액터 숨김, 틱 비활성화
+		if (ProjectileMovementComponent)
+		{
+			ProjectileMovementComponent->StopMovementImmediately();
+			ProjectileMovementComponent->SetActive(false);
+		}
+
+		StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		SetActorHiddenInGame(true);
+		SetActorEnableCollision(false);
+		SetActorTickEnabled(false);
+
+		// 나이아가라 이펙트 및 사운드 비활성화 (선택 사항)
+		if (TrailNiagaraComponent && TrailNiagaraComponent->IsActive())
+		{
+			TrailNiagaraComponent->Deactivate();
+		}
+	}
+}
+
+void ADDProjectileBase::OnLifeTimeExpired()
+{
+	// 폭파이펙트 추가 가능
+	if (bIsExplosive)
+	{
+
+	}
+	// 프로젝타일 제거
+	ProjectileManager->DestroyProjectile(this);
+	StopLifeTimeTimer();
+
+}
+
+void ADDProjectileBase::StopLifeTimeTimer()
+{
+	// 타이머가 설정된 경우 타이머 종료
+	if (GetWorld()->GetTimerManager().IsTimerActive(LifeSpanTimerHandle))
+	{
+		GetWorld()->GetTimerManager().ClearTimer(LifeSpanTimerHandle);
+	}
+}
+
+#pragma endregion Utility

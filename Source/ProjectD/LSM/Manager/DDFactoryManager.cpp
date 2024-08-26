@@ -17,6 +17,7 @@ void UDDFactoryManager::Initialize()
 	for (auto& Elem : TrapDataTable) {
 		if (Elem.Value.FactoryClass) {
 			NamesToFactories.Add(Elem.Key, Elem.Value.FactoryClass);
+			UE_LOG(LogTemp, Warning, TEXT("Factory is %s"), *Elem.Value.FactoryClass->GetDisplayNameText().ToString());
 		}
 	}
 
@@ -25,6 +26,7 @@ void UDDFactoryManager::Initialize()
 		if (Elem.Value.FactoryClass)
 		{
 			NamesToFactories.Add(Elem.Key, Elem.Value.FactoryClass);
+			UE_LOG(LogTemp, Warning, TEXT("Factory is %s"), *Elem.Value.FactoryClass->GetDisplayNameText().ToString());
 		}
 	}
 
@@ -33,6 +35,7 @@ void UDDFactoryManager::Initialize()
 		if (Elem.Value.FactoryClass)
 		{
 			NamesToFactories.Add(Elem.Key, Elem.Value.FactoryClass);
+			UE_LOG(LogTemp, Warning, TEXT("Factory is %s"), *Elem.Value.FactoryClass->GetDisplayNameText().ToString());
 		}
 	}
 
@@ -56,6 +59,10 @@ IDDFactoryInterface* UDDFactoryManager::GetFactory(const FName& RowName)
 			FactoryInstances.Add(*FactoryClass, NewFactoryInstance);
 			return Cast<IDDFactoryInterface>(NewFactoryInstance);
 		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s : Factory Class is null"), *RowName.ToString());
 	}
 
 	return nullptr; // 팩토리를 찾을 수 없음

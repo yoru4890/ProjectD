@@ -35,7 +35,7 @@ void ADDTrap::ModifyMeshAndAttackCollision() const
 {
 	Super::ModifyMeshAndAttackCollision();
 	FVector AttackRange = FVector(GridCellSize * CellWidth/2, GridCellSize * CellWidth/2, 50);
-	UE_LOG(LogTemp, Warning, TEXT("GridCellSize: %d"), GridCellSize);
-	UE_LOG(LogTemp, Warning, TEXT("CellWidth: %d"), CellWidth);
+	//UE_LOG(LogTemp, Warning, TEXT("GridCellSize: %d"), GridCellSize);
+	//UE_LOG(LogTemp, Warning, TEXT("CellWidth: %d"), CellWidth);
 	Cast<UBoxComponent>(AttackCollisionComponent)->SetBoxExtent(AttackRange);
 }
