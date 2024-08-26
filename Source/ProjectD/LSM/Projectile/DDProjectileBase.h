@@ -31,8 +31,7 @@ public:
 public:
 	void SetAssetAndManager(const FDDProjectileData& LoadedAsset, class  UDDProjectileManager* InProjectileManager);
 	void InitializeProjectile(float InDamageAmount, TSubclassOf<UDamageType> InDamageType, float InProjectileSpeed, float InMaxSpeed, float InMaxLifeTime, bool InbIsExplosive, float InExplosionRadius, int32 InMaxPenetrationCount);
-
-	void SetProjectileActive(bool bIsActive);
+	void SetProjectileState(bool bIsActive);
 
 protected:
 	UFUNCTION()
@@ -51,7 +50,6 @@ private:
 	void StopLifeTimeTimer();
 
 	void LaunchProjectile();
-	void SetProjectileState(bool bIsActive);
 
 	void Explode();
 	void ApplyDamageToActor(AActor* OtherActor);

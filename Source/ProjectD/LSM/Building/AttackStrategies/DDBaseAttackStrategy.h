@@ -5,13 +5,13 @@
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "DDBuildingAttackStrategyInterface.h"
-#include "DDBuildingBaseAttackStrategy.generated.h"
+#include "DDBaseAttackStrategy.generated.h"
 
 /**
  * 
  */
 UCLASS(Blueprintable)
-class PROJECTD_API UDDBuildingBaseAttackStrategy : public UObject, public IDDBuildingAttackStrategyInterface
+class PROJECTD_API UDDBaseAttackStrategy : public UObject, public IDDBuildingAttackStrategyInterface
 {
 	GENERATED_BODY()
 	

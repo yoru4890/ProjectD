@@ -54,7 +54,7 @@ ADDProjectileBase* UDDProjectileManager::SpawnProjectile(UWorld* World, const FN
 		NewProjectile = CreateProjectileInstance(World, RowName);
 	}
 
-	NewProjectile->SetProjectileActive(true);
+	NewProjectile->SetProjectileState(true);
 
 	return NewProjectile;
 }
@@ -69,7 +69,7 @@ ADDProjectileBase* UDDProjectileManager::CreateProjectileInstance(UWorld* World,
 void UDDProjectileManager::DestroyProjectile(ADDProjectileBase* Projectile)
 {
 	ProjectilePool[Projectile->GetRowName()].Projectiles.Add(Projectile);
-	Projectile->SetProjectileActive(false);
+	Projectile->SetProjectileState(false);
 }
 
 #pragma endregion SpawnAndDestroy
@@ -132,6 +132,7 @@ void UDDProjectileManager::OnProjectileAssetsLoaded(const FName& RowName)
 		if (NewProjectile)
 		{
 			ProjectilePool[RowName].Projectiles.Add(NewProjectile);
+			NewProjectile->SetProjectileState(false);
 			UE_LOG(LogTemp, Warning, TEXT("Projectile %d for RowName %s added to pool."), i + 1, *RowName.ToString());
 		}
 		else

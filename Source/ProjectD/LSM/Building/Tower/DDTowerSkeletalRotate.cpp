@@ -4,7 +4,7 @@
 #include "LSM/Building/Tower/DDTowerSkeletalRotate.h"
 #include "LSM/DDRotationComponent.h"
 #include "NiagaraComponent.h"
-#include "LSM/Building/AttackStrategies/DDBuildingBaseAttackStrategy.h"
+#include "LSM/Building/AttackStrategies/DDBaseAttackStrategy.h"
 
 ADDTowerSkeletalRotate::ADDTowerSkeletalRotate()
 {

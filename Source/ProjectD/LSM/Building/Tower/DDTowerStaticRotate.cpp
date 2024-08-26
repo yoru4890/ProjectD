@@ -3,7 +3,7 @@
 
 #include "LSM/Building/Tower/DDTowerStaticRotate.h"
 #include "LSM/DDRotationComponent.h"
-#include "LSM/Building/AttackStrategies/DDBuildingBaseAttackStrategy.h"
+#include "LSM/Building/AttackStrategies/DDBaseAttackStrategy.h"
 
 ADDTowerStaticRotate::ADDTowerStaticRotate()
 {
@@ -27,11 +27,9 @@ void ADDTowerStaticRotate::Tick(float DeltaTime)
 	{
 		if (TimeSinceLastAttack >= AttackCoolTime)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Check"));
 			bool bIsEnemyInSight = IsEnemyInSight();
 			if (bIsEnemyInSight)
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Check1"));
 				ExecuteAttackEffects();
 				if (AttackStrategy)
 				{
@@ -42,7 +40,6 @@ void ADDTowerStaticRotate::Tick(float DeltaTime)
 			}
 			else
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Check2"));
 				SetIsNowAttack(false);
 			}
 		}

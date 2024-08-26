@@ -59,7 +59,7 @@ private:
 	void SetParticeEffects(const FDDBuildingBaseData& LoadedAsset);
 	void SetSound(const FDDBuildingBaseData& LoadedAsset);
 	void SetMeshs(const FDDBuildingBaseData& LoadedAsset);
-	void SetAttackStrategy(TSubclassOf<class UDDBuildingBaseAttackStrategy> AttackStrategyClass);
+	void SetAttackStrategy(TSubclassOf<class UDDBaseAttackStrategy> AttackStrategyClass);
 	void PlayAttackEffectAtSocket();
 	void PlayAttackAnimation();
 	void PlayAttackSound();
@@ -167,5 +167,5 @@ protected:
 	TObjectPtr<UMaterialInstanceDynamic> DynamicMaterialInstance;
 
 	UPROPERTY()
-	TObjectPtr<class UDDBuildingBaseAttackStrategy> AttackStrategy;
+	TObjectPtr<class UDDBaseAttackStrategy> AttackStrategy;
 };

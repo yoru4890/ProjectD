@@ -123,7 +123,7 @@ public:
 	TSubclassOf<UDamageType> DamageType; // 데미지 타입
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<class UDDBuildingBaseAttackStrategy> AttackStrategy; // 공격 전략
+	TSubclassOf<class UDDBaseAttackStrategy> AttackStrategy; // 공격 전략
 
 	bool bIsLoading = false;
 	bool bIsLoaded = false;

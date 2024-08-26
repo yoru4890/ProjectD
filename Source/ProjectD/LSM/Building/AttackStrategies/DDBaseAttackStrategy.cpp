@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "LSM/Building/AttackStrategies/DDBuildingBaseAttackStrategy.h"
+#include "LSM/Building/AttackStrategies/DDBaseAttackStrategy.h"
 #include "Engine/DamageEvents.h"
 #include "LSM/Building/DDBuildingBase.h"
 #include "Kismet/GameplayStatics.h"
@@ -9,7 +9,7 @@
 #include "YSY/Interface/DamageInterface.h"
 
 
-void UDDBuildingBaseAttackStrategy::Initialize(ADDBuildingBase* InOwningTower)
+void UDDBaseAttackStrategy::Initialize(ADDBuildingBase* InOwningTower)
 {
 	OwningTower = InOwningTower;
 	DamageType = InOwningTower->GetDamageType();
@@ -22,18 +22,18 @@ void UDDBuildingBaseAttackStrategy::Initialize(ADDBuildingBase* InOwningTower)
 }
 
 
-void UDDBuildingBaseAttackStrategy::Attack(AActor* TargetEnemy)
+void UDDBaseAttackStrategy::Attack(AActor* TargetEnemy)
 {
 	
 
 }
 
-void UDDBuildingBaseAttackStrategy::ApplyDotDamge(AActor* TargetEnemy)
+void UDDBaseAttackStrategy::ApplyDotDamge(AActor* TargetEnemy)
 {
 	//UE_LOG(LogTemp, Warning, TEXT("Apply Dot Damage"));
 }
 
-void UDDBuildingBaseAttackStrategy::ApplyDirectDamage(AActor* TargetEnemy)
+void UDDBaseAttackStrategy::ApplyDirectDamage(AActor* TargetEnemy)
 {
 	//UE_LOG(LogTemp, Warning, TEXT("Apply Direct Damage"));
     IDamageInterface* DamageInterface = Cast<IDamageInterface>(TargetEnemy);
@@ -47,12 +47,12 @@ void UDDBuildingBaseAttackStrategy::ApplyDirectDamage(AActor* TargetEnemy)
     }
 }
 
-void UDDBuildingBaseAttackStrategy::ApplySlowEffect(AActor* TargetEnemy)
+void UDDBaseAttackStrategy::ApplySlowEffect(AActor* TargetEnemy)
 {
 	//UE_LOG(LogTemp, Warning, TEXT("Apply Slow Effect"));
 }
 
-void UDDBuildingBaseAttackStrategy::PlayHitEffect(AActor* TargetEnemy, FVector Location, FRotator Rotation, FName SocketName, bool bAttachToTarget)
+void UDDBaseAttackStrategy::PlayHitEffect(AActor* TargetEnemy, FVector Location, FRotator Rotation, FName SocketName, bool bAttachToTarget)
 {
     UNiagaraSystem* NiagaraEffect = OwningTower->GetHitEffect();
 

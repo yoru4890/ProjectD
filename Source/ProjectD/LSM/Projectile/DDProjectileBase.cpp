@@ -160,18 +160,18 @@ void ADDProjectileBase::OnCollisionEndOverlap(UPrimitiveComponent* OverlappedCom
 {
 }
 
-void ADDProjectileBase::SetProjectileActive(bool bIsActive)
-{
-	if (!bIsActive)
-	{
-		StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	}
-	else
-	{
-		StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	}
-	CurrentPenetrationCount = 0;
-}
+//void ADDProjectileBase::SetProjectileActive(bool bIsActive)
+//{
+//	if (!bIsActive)
+//	{
+//		StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+//	}
+//	else
+//	{
+//		StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+//	}
+//	CurrentPenetrationCount = 0;
+//}
 
 #pragma endregion CollisionAndCallbacks
 
@@ -253,7 +253,6 @@ void ADDProjectileBase::SetProjectileState(bool bIsActive)
 			ProjectileMovementComponent->SetActive(false);
 		}
 
-		StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		SetActorHiddenInGame(true);
 		SetActorEnableCollision(false);
 		SetActorTickEnabled(false);

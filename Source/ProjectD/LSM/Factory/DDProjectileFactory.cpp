@@ -28,6 +28,7 @@ UObject* UDDProjectileFactory::CreateObject(UWorld* World, const FName& RowName,
 
 	//NewProjectile->InitFromDataTable(RowName, *TowerData);
 	NewProjectile->SetAssetAndManager(ProjectileData,ProjectileManager);
+	NewProjectile->SetProjectileState(false);
 	NewProjectile->SetActorLocation(Location);
 	NewProjectile->SetActorRotation(Rotation);
 	NewProjectile->SetOwner(Owner);

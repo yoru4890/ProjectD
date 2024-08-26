@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "LSM/Building/AttackStrategies/DDBuildingBaseAttackStrategy.h"
+#include "LSM/Building/AttackStrategies/DDProjectileAttackStrategy.h"
 #include "DDTankTowerAttackStrategy.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class PROJECTD_API UDDTankTowerAttackStrategy : public UDDBuildingBaseAttackStrategy
+class PROJECTD_API UDDTankTowerAttackStrategy : public UDDProjectileAttackStrategy
 {
 	GENERATED_BODY()
 
@@ -20,13 +20,4 @@ public:
 	virtual void Attack(AActor* TargetEnemy) override;
 
 private:
-
-	void AsyncLoadProjectileAssets(class UDDAssetManager* AssetManager, const FName& RowName);
-
-
-	UPROPERTY()
-	TObjectPtr<class UDDProjectileManager> ProjectileManager;
-
-	FName ProjectileRowName;
-	
 };

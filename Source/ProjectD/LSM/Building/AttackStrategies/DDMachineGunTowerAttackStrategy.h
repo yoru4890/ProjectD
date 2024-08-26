@@ -4,14 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
-#include "DDBuildingBaseAttackStrategy.h"
+#include "DDBaseAttackStrategy.h"
 #include "DDMachineGunTowerAttackStrategy.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class PROJECTD_API UDDMachineGunTowerAttackStrategy : public UDDBuildingBaseAttackStrategy
+class PROJECTD_API UDDMachineGunTowerAttackStrategy : public UDDBaseAttackStrategy
 {
 	GENERATED_BODY()
 

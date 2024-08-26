@@ -8,7 +8,7 @@
 #include "YSY/Collision/CollisionChannel.h"
 #include "DDBuildingAnimInstance.h"
 #include "NiagaraComponent.h"
-#include "LSM/Building/AttackStrategies/DDBuildingBaseAttackStrategy.h"
+#include "LSM/Building/AttackStrategies/DDBaseAttackStrategy.h"
 
 #pragma region ConstructorAndInitialization
 // Sets default values
@@ -101,11 +101,11 @@ void ADDBuildingBase::InitFromDataTable(const FName& InRowName, const FDDBuildin
 	//UE_LOG(LogTemp, Warning, TEXT("MeshZAxisModify is : %f"), BuildingData.MeshZAxisModify);
 }
 
-void ADDBuildingBase::SetAttackStrategy(TSubclassOf<class UDDBuildingBaseAttackStrategy> AttackStrategyClass)
+void ADDBuildingBase::SetAttackStrategy(TSubclassOf<class UDDBaseAttackStrategy> AttackStrategyClass)
 {
 	if (AttackStrategyClass)
 	{
-		UDDBuildingBaseAttackStrategy* StrategyInstance = NewObject<UDDBuildingBaseAttackStrategy>(this, AttackStrategyClass);
+		UDDBaseAttackStrategy* StrategyInstance = NewObject<UDDBaseAttackStrategy>(this, AttackStrategyClass);
 
 		AttackStrategy = StrategyInstance;
 		AttackStrategy->Initialize(this);
