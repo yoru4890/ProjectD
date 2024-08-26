@@ -128,10 +128,7 @@ protected:
 	TSubclassOf<UDamageType> DamageType; // 빌딩의 데미지 타입
 
 	UPROPERTY(EditAnywhere)
-	TObjectPtr<UParticleSystemComponent> AttackParticleSystemComponent;
-
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<class UNiagaraComponent> AttackNiagaraComponent;
+	TArray<TObjectPtr<class UNiagaraComponent>> AttackNiagaraComponents;
 
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<class UNiagaraSystem> AttackEffect;

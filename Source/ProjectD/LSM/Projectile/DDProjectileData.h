@@ -34,5 +34,9 @@ struct FDDProjectileData : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<UObject> FactoryClass; // 팩토리 클래스
+
+	bool bIsLoaded = false;
+
+	int32 PoolSize;
 	
 };

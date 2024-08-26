@@ -28,7 +28,10 @@ public:
 
 	class ADDProjectileBase* SpawnProjectile(UWorld* World, const FName& RowName, const FVector& Location, const FRotator& Rotation, AActor* Owner, APawn* Instigator);
 
-	void DestroyProjectile(class ADDProjectileBase& Projectile);
+	void DestroyProjectile(class ADDProjectileBase* Projectile);
+
+	void GetSoftObjectPtrsInProjectile(const FName& RowName, TArray<TSoftObjectPtr<UObject>>& AssetsToLoad);
+
 
 	const TMap<FName, FDDProjectileData>& GetProjectileDataTable() const;
 
@@ -38,12 +41,16 @@ public:
 
 	FDDProjectileData* GetProjectileData(const FName& RowName);
 
+	void LoadProjectileAssets(const FName& RowName);
+
+
+
 private:
 	void SetupCommonReferences(UWorld* World);
 
-	ADDProjectileBase* CreateProjectileInstance(UWorld* World, const FName& RowName);
+	void OnProjectileAssetsLoaded(const FName& RowName);
 
-	void GetSoftObjectPtrsInProjectile(const FName& RowName, TArray<TSoftObjectPtr<UObject>>& AssetsToLoad);
+	ADDProjectileBase* CreateProjectileInstance(UWorld* World, const FName& RowName);
 	TMap<FName, FProjectileList> ProjectilePool;
 	TObjectPtr<class UDDGameInstance> MyGameInstance;
 	TObjectPtr<class UDDFactoryManager> FactoryManager;
