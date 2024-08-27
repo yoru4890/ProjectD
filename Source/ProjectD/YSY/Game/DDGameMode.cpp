@@ -35,4 +35,5 @@ ADDGameMode::ADDGameMode()
 	{
 		PlayerStateClass = PlayerStateClassRef.Class;
 	}
+
 }

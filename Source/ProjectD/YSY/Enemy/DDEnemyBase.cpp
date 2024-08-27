@@ -17,6 +17,8 @@
 #include "YSY/Animation/AttackFinishedAnimNotify.h"
 #include "YSY/Animation/AttackTraceAnimNotify.h"
 #include "YSY/Animation/DDPlayEffectAnimNotify.h"
+#include "YSY/Interface/AggroTargetInterface.h"
+#include "YSY/Collision/CollisionChannel.h"
 
 // Sets default values
 ADDEnemyBase::ADDEnemyBase()
@@ -42,15 +44,18 @@ ADDEnemyBase::ADDEnemyBase()
 		HpBar->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 
+	GetCapsuleComponent()->SetCollisionProfileName(FName("Enemy"));
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
-	//GetCharacterMovement()->bUseRVOAvoidance = true;
-	//GetCharacterMovement()->AvoidanceConsiderationRadius = 300.0f;
-	//GetCharacterMovement()->bConstrainToPlane = true;
+	GetCapsuleComponent()->SetCollisionResponseToChannel(GTCHANNEL_PLAYER, ECollisionResponse::ECR_Block);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(GTCHANNEL_ENEMY, ECollisionResponse::ECR_Block);
+	GetCharacterMovement()->bUseRVOAvoidance = true;
+	GetCharacterMovement()->AvoidanceConsiderationRadius = 300.0f;
+	GetCharacterMovement()->bConstrainToPlane = true;
 
-	//GetCharacterMovement()->bEnablePhysicsInteraction = false;
-	//GetCharacterMovement()->bPushForceUsingZOffset = true;
-	//GetCharacterMovement()->bPushForceScaledToMass = true;
-	//GetCharacterMovement()->PushForceFactor = 0.0f;
+	GetCharacterMovement()->bEnablePhysicsInteraction = false;
+	GetCharacterMovement()->bPushForceUsingZOffset = true;
+	GetCharacterMovement()->bPushForceScaledToMass = true;
+	GetCharacterMovement()->PushForceFactor = 0.0f;
 }
 
 void ADDEnemyBase::PostInitializeComponents()
@@ -81,19 +86,23 @@ float ADDEnemyBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 	const UDamageType* DamageType = DamageEvent.DamageTypeClass.GetDefaultObject();
 
 	float ActualDamage = DamageAmount;
+	
+	if (DamageType)
+	{
+		if (DamageType->IsA<UHackingDamageType>())
+		{
+			CaculateHackingDamage(ActualDamage);
+		}
+		else if (DamageType->IsA<UPiercingDamageType>())
+		{
+			CaculatePiercingDamage(ActualDamage);
+		}
+		else if (DamageType->IsA<UCorrosionDamageType>())
+		{
+			CaculateCorrosionDamage(ActualDamage);
+		}
+	}
 
-	if (DamageType->IsA<UHackingDamageType>())
-	{
-		CaculateHackingDamage(ActualDamage);
-	}
-	else if (DamageType->IsA<UPiercingDamageType>())
-	{
-		CaculatePiercingDamage(ActualDamage);
-	}
-	else if (DamageType->IsA<UCorrosionDamageType>())
-	{
-		CaculateCorrosionDamage(ActualDamage);
-	}
 
 	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
 	{
@@ -179,6 +188,7 @@ void ADDEnemyBase::InitializeEnemy(const FDDEnemyData& EnemyData)
 	GetMesh()->SetSkeletalMesh(EnemySkeletalMesh);
 	GetMesh()->SetRelativeLocationAndRotation({ 0,0,-90 }, { 0,-90,0 });
 	GetMesh()->SetCollisionProfileName(FName("Enemy"));
+	GetMesh()->SetGenerateOverlapEvents(true);
 
 	if (!EnemyData.AnimationBlueprint.IsValid())
 	{
@@ -445,6 +455,7 @@ void ADDEnemyBase::Activate()
 	}
 	EnemyAIController->StopMovement();
 	Stat->SetCurrentHp(MaxHP);
+	SetActorTickEnabled(true);
 	SetActorHiddenInGame(false);
 	GetMesh()->SetVisibility(true);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
@@ -466,10 +477,16 @@ void ADDEnemyBase::Deactivate()
 	}
 	GetMesh()->GetAnimInstance()->Montage_Stop(0.01f);
 	AttackFinished();
+	if (bIsAggroState)
+	{
+		IAggroTargetInterface* AggroTargetInterface = Cast<IAggroTargetInterface>(Player);
+		AggroTargetInterface->SubtractAggro();
+	}
 	bIsAggroState = false;
 	bIsDead = true;
 	GetCharacterMovement()->MaxWalkSpeed = 0.0f;
 	//EnemyAIController->StopAI();
+	SetActorTickEnabled(false);
 	SetActorHiddenInGame(true);
 	SetActorEnableCollision(false);
 	RouteIndex = 0;

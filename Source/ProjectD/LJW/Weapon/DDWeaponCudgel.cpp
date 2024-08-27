@@ -4,6 +4,9 @@
 #include "LJW/Weapon/DDWeaponCudgel.h"
 #include "GameFramework/Character.h"
 #include "YSY/Collision/CollisionChannel.h"
+#include "YSY/Interface/DamageInterface.h"
+#include "Engine/DamageEvents.h"
+#include "Kismet/GameplayStatics.h"
 
 ADDWeaponCudgel::ADDWeaponCudgel()
 {
@@ -35,6 +38,13 @@ void ADDWeaponCudgel::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, A
 
 	UE_LOG(LogTemp, Warning, TEXT("Overlap : %s"), *(OtherActor->GetFName().ToString()));
 
+	IDamageInterface* HitActor = Cast<IDamageInterface>(OtherActor);
+
+	FDamageEvent DamageEvent;
+	float DamageAmount{ 20.0f };
+	AController* EventInstigator{};
+
+	HitActor->ApplyDamage(DamageAmount, DamageEvent, EventInstigator, this);
 }
 
 

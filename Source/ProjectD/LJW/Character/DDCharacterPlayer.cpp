@@ -12,8 +12,10 @@
 #include "LJW/Weapon/DDWeaponSystemComponent.h"
 #include "LJW/Animation/DDPlayerAnimInstance.h"
 #include "Components/CapsuleComponent.h"
-
-
+#include "LSM/BuildComponent/DDBuildComponent.h"
+#include "YSY/Game/DDGameInstance.h"
+#include "YSY/Manager/DDWaveManager.h"
+#include "Blueprint/UserWidget.h"
 
 ADDCharacterPlayer::ADDCharacterPlayer()
 {
@@ -46,6 +48,16 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 	//Collision
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("Player"));
 
+	//BuildComponent
+	BuildSystem = CreateDefaultSubobject<UDDBuildComponent>(TEXT("BuildSystem"));
+
+	//BuildWidget
+	static ConstructorHelpers::FClassFinder<UUserWidget> BuildWidgetFinder(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/0000/YSY/Widget/YSY_WBP_TestRadialMenu.YSY_WBP_TestRadialMenu_C'"));
+
+	if (BuildWidgetFinder.Succeeded())
+	{
+		BuildWidgetClass = BuildWidgetFinder.Class;
+	}
 #pragma region Init Input
 
 	//Input
@@ -85,7 +97,7 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 		EquipMeleeAction = MeleeRef.Object;
 	}
 
-	static ConstructorHelpers::FObjectFinder<UInputAction>RangeRef(TEXT("/Script/EnhancedInput.InputAction'/Game/0000/LJW/In put/IA_Player_EquipRange.IA_Player_EquipRange'"));
+	static ConstructorHelpers::FObjectFinder<UInputAction>RangeRef(TEXT("/Script/EnhancedInput.InputAction'/Game/0000/LJW/Input/IA_Player_EquipRange.IA_Player_EquipRange'"));
 	if (nullptr != RangeRef.Object)
 	{
 		EquipRangeAction = RangeRef.Object;
@@ -101,6 +113,30 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 	if (nullptr != AttackRef.Object)
 	{
 		AttackAction = AttackRef.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction>EnterManagementModeRef(TEXT("/Script/EnhancedInput.InputAction'/Game/0000/LJW/Input/IA_Player_EnterManagementMode.IA_Player_EnterManagementMode'"));
+	if (nullptr != EnterManagementModeRef.Object)
+	{
+		EnterManagementModeAction = EnterManagementModeRef.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction>EnterBuildModeRef(TEXT("/Script/EnhancedInput.InputAction'/Game/0000/LJW/Input/IA_Player_EnterBuildMode.IA_Player_EnterBuildMode'"));
+	if (nullptr != EnterBuildModeRef.Object)
+	{
+		EnterBuildModeAction = EnterBuildModeRef.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction>WaveStartRef(TEXT("/Script/EnhancedInput.InputAction'/Game/0000/LJW/Input/IA_Player_WaveStart.IA_Player_WaveStart'"));
+	if (nullptr != WaveStartRef.Object)
+	{
+		WaveStartAction = WaveStartRef.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction>PlaceBuildingRef(TEXT("/Script/EnhancedInput.InputAction'/Game/0000/LJW/Input/IA_Player_PlaceBuilding.IA_Player_PlaceBuilding'"));
+	if (nullptr != PlaceBuildingRef.Object)
+	{
+		PlaceBuildingAction = PlaceBuildingRef.Object;
 	}
 
 #pragma endregion
@@ -119,7 +155,7 @@ void ADDCharacterPlayer::BeginPlay()
 	}
 	
 	SetCharacterControl();
-		
+	InitWidget();
 	
 }
 
@@ -175,8 +211,13 @@ void ADDCharacterPlayer::SetupPlayerInputComponent(class UInputComponent* Player
 
 	EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Completed, this, &ADDCharacterPlayer::WeaponAttack);
 
-
+	EnhancedInputComponent->BindAction(EnterManagementModeAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::EnterManagementMode);
 	
+	EnhancedInputComponent->BindAction(EnterBuildModeAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::OpenBuildWidget);
+
+	EnhancedInputComponent->BindAction(WaveStartAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::WaveStart);
+
+	EnhancedInputComponent->BindAction(PlaceBuildingAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::PlaceBuilding);
 }
 
 void ADDCharacterPlayer::SetCharacterControl()
@@ -228,8 +269,6 @@ void ADDCharacterPlayer::Move(const FInputActionValue& Value)
 
 	AddMovementInput(ForwardDirection, MovementVector.X);
 	AddMovementInput(RightDirection, MovementVector.Y);
-
-	UE_LOG(LogTemp, Warning, TEXT("%d"), bIsBackMove);
 
 }
 
@@ -312,7 +351,8 @@ void ADDCharacterPlayer::EquipMelee()
 	if (!(PlayerAnimInstance->IsAnyMontagePlaying()))
 	{
 		WeaponSystem->EquipMeleeWeapon();
-
+		CurrentPlayerMode = EPlayerMode::CombatMode;
+		BuildSystem->AllStopTrace();
 	}
 }
 
@@ -321,6 +361,8 @@ void ADDCharacterPlayer::EquipRange()
 	if (!(PlayerAnimInstance->IsAnyMontagePlaying()))
 	{
 		WeaponSystem->EquipRangeWeapon();
+		CurrentPlayerMode = EPlayerMode::CombatMode;
+		BuildSystem->AllStopTrace();
 	}
 }
 
@@ -361,6 +403,83 @@ void ADDCharacterPlayer::WeaponAttack()
 	{
 		WeaponSystem->WeaponAttack();
 	}
+}
+
+void ADDCharacterPlayer::AddAggro()
+{
+	CurrentAggroNum++;
+	CurrentAggroNum = std::min(CurrentAggroNum, MaxAggroNum);
+}
+
+void ADDCharacterPlayer::SubtractAggro()
+{
+	CurrentAggroNum--;
+	CurrentAggroNum = std::max(CurrentAggroNum, 0);
+}
+
+bool ADDCharacterPlayer::IsMaxAggro()
+{
+	return CurrentAggroNum >= MaxAggroNum;
+}
+
+void ADDCharacterPlayer::EnterManagementMode()
+{
+	CurrentPlayerMode = EPlayerMode::ManagementMode;
+}
+
+void ADDCharacterPlayer::OpenBuildWidget()
+{
+	if (CurrentPlayerMode == EPlayerMode::ManagementMode)
+	{
+		BuildWidget->AddToViewport();
+		FInputModeUIOnly InputModeUIOnlyData;
+		PlayerController->SetIgnoreMoveInput(true);
+		PlayerController->StopMovement();
+		PlayerController->SetInputMode(InputModeUIOnlyData);
+		PlayerController->SetShowMouseCursor(true);
+	}
+}
+
+void ADDCharacterPlayer::BuildTrapOrTower(const FName& BuildingName)
+{
+	FInputModeGameOnly InputModeGameOnlyData;
+
+	CurrentPlayerMode = EPlayerMode::BuildMode;
+	BuildSystem->AllStopTrace();
+	BuildSystem->StartBuildTrace();
+	BuildSystem->ReadyBuilding(BuildingName);
+	PlayerController->SetShowMouseCursor(false);
+	PlayerController->SetInputMode(InputModeGameOnlyData);
+	PlayerController->SetIgnoreMoveInput(false);
+	BuildWidget->RemoveFromParent();
+}
+
+void ADDCharacterPlayer::PlaceBuilding()
+{
+	if (CurrentPlayerMode == EPlayerMode::BuildMode)
+	{
+		if (BuildSystem->PlaceBuilding())
+		{
+			CurrentPlayerMode = EPlayerMode::ManagementMode;
+			BuildSystem->AllStopTrace();
+			BuildSystem->StartManageTrace();
+		}
+	}
+	else if (CurrentPlayerMode == EPlayerMode::ManagementMode)
+	{
+		//TODO : YSY or LJW Upgrade Widget
+	}
+}
+
+void ADDCharacterPlayer::WaveStart()
+{
+	auto GameInstance = Cast<UDDGameInstance>(GetGameInstance());
+	GameInstance->GetWaveManager()->WaveStart();
+}
+
+void ADDCharacterPlayer::InitWidget()
+{
+	BuildWidget = CreateWidget(GetWorld(), BuildWidgetClass);
 }
 
 

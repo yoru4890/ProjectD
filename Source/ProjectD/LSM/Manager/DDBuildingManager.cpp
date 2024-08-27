@@ -86,20 +86,20 @@ ADDBuildingBase* UDDBuildingManager::SpawnBuilding(UWorld* World, const FName& R
 
 	ADDBuildingBase* NewBuilding = nullptr;
 
-	// Ç®¿¡¼­ Æ®·¦À» ²¨³À´Ï´Ù.
+	// Ç®ï¿½ï¿½ï¿½ï¿½ Æ®ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ï´ï¿½.
 	if (BuildingPool[RowName].Buildings.Num() > 0)
 	{
 		NewBuilding = BuildingPool[RowName].Buildings.Pop();
 		if (NewBuilding)
 		{
-			// Æ®·¦ À§Ä¡¿Í È¸ÀüÀ» ¼³Á¤ÇÕ´Ï´Ù.
+			// Æ®ï¿½ï¿½ ï¿½ï¿½Ä¡ï¿½ï¿½ È¸ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Õ´Ï´ï¿½.
 			NewBuilding->SetActorLocationAndRotation(Location, Rotation);
 			UE_LOG(LogTemp, Warning, TEXT("check2"));
 		}
 	}
 	else
 	{
-		// World°¡ nullÀÌ¸é ½ÇÇà ÁßÁö
+		// Worldï¿½ï¿½ nullï¿½Ì¸ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 		check(World);
 		NewBuilding = CreateBuildingInstance(World, RowName);
 		UE_LOG(LogTemp, Warning, TEXT("check3"));
@@ -188,16 +188,19 @@ bool UDDBuildingManager::UnlockBuilding(const FName& RowName)
 		ParentName = GetBuildingData(ParentName)->ParentRowName;
 
 	}
+	UE_LOG(LogTemp, Warning, TEXT("Here2"));
 	ADDPlayerState* PlayerState = CastChecked<ADDPlayerState>(UGameplayStatics::GetPlayerState(GetWorld(), 0));
 	check(PlayerState);
 
 	if (PlayerState->CheckLikePoint(BuildingStruct->UnlockCost))
 	{
 		PlayerState->SubtractLikePoint(BuildingStruct->UnlockCost);
+		UE_LOG(LogTemp, Warning, TEXT("Here3"));
 		BuildingStruct->bIsUnlocked = true;
 
 		return true;
 	}
+	UE_LOG(LogTemp, Warning, TEXT("Here4"));
 	return false;
 }
 
@@ -238,7 +241,7 @@ bool UDDBuildingManager::LockBuilding(const FName& RowName)
 
 void UDDBuildingManager::GetSoftObjectPtrsInBuilding(const FName& RowName, TArray<TSoftObjectPtr<UObject>>& AssetsToLoad)
 {
-	// TODO: ¿©±â¿¡ return ¹®À» »ðÀÔÇÕ´Ï´Ù.
+	// TODO: ï¿½ï¿½ï¿½â¿¡ return ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Õ´Ï´ï¿½.
 	const FDDBuildingBaseData* BuildingData = GetBuildingData(RowName);
 	if (!BuildingData)
 	{
@@ -291,30 +294,30 @@ void UDDBuildingManager::HandleBuildingPoolsOnLevelChange()
 		FDDBuildingBaseData* BuildingData = BuildingDataEntry.Value;
 		FName RowName = BuildingDataEntry.Key;
 
-		// ºôµùÀÌ Àá±Ý ÇØÁ¦µÇ¾ú´ÂÁö È®ÀÎ
+		// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ç¾ï¿½ï¿½ï¿½ï¿½ï¿½ È®ï¿½ï¿½
 		if (BuildingData->bIsUnlocked)
 		{
 			LoadBuildingAssets(RowName);
 		}
 		else
 		{
-			// BuildingPool¿¡¼­ ÇØ´ç RowName¿¡ ÇØ´çÇÏ´Â Ç×¸ñÀ» Ã£À½
+			// BuildingPoolï¿½ï¿½ï¿½ï¿½ ï¿½Ø´ï¿½ RowNameï¿½ï¿½ ï¿½Ø´ï¿½ï¿½Ï´ï¿½ ï¿½×¸ï¿½ï¿½ï¿½ Ã£ï¿½ï¿½
 			if (FBuildingList* BuildingList = BuildingPool.Find(RowName))
 			{
-				// BuildingList ³»ÀÇ ¸ðµç °Ç¹° ÀÎ½ºÅÏ½º¸¦ Á¦°Å
+				// BuildingList ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½Ç¹ï¿½ ï¿½Î½ï¿½ï¿½Ï½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
 				for (ADDBuildingBase* Building : BuildingList->Buildings)
 				{
 					if (Building)
 					{
-						// °Ç¹° ÀÎ½ºÅÏ½º Á¦°Å (ÇÊ¿ä¿¡ µû¶ó Destroy ¶Ç´Â ´Ù¸¥ ¹æ½Ä »ç¿ë °¡´É)
-						Building->Destroy(); // ¶Ç´Â ÀûÀýÇÑ Á¤¸® ¸Þ¼­µå »ç¿ë
+						// ï¿½Ç¹ï¿½ ï¿½Î½ï¿½ï¿½Ï½ï¿½ ï¿½ï¿½ï¿½ï¿½ (ï¿½Ê¿ä¿¡ ï¿½ï¿½ï¿½ï¿½ Destroy ï¿½Ç´ï¿½ ï¿½Ù¸ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½)
+						Building->Destroy(); // ï¿½Ç´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Þ¼ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½
 					}
 				}
 
-				// BuildingList ³»ÀÇ ¸ðµç °Ç¹° ÀÎ½ºÅÏ½º¸¦ Á¦°ÅÇÑ ÈÄ, ¹è¿­µµ ºñ¿ò
+				// BuildingList ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½Ç¹ï¿½ ï¿½Î½ï¿½ï¿½Ï½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½, ï¿½è¿­ï¿½ï¿½ ï¿½ï¿½ï¿½
 				BuildingList->Buildings.Empty();
 
-				// BuildingPool¿¡¼­ ÇØ´ç RowName Á¦°Å
+				// BuildingPoolï¿½ï¿½ï¿½ï¿½ ï¿½Ø´ï¿½ RowName ï¿½ï¿½ï¿½ï¿½
 				BuildingPool.Remove(RowName);
 			}
 			UnloadBuildingAssets(RowName);
@@ -346,21 +349,21 @@ void UDDBuildingManager::UnloadBuildingAssets(const FName& RowName)
 
 void UDDBuildingManager::OnBuildingAssetsLoaded(const FName& RowName)
 {
-	// ·ÎµùµÈ RowName¿¡ ÇØ´çÇÏ´Â ¾×ÅÍ¸¦ Ç®¿¡ Ãß°¡
+	// ï¿½Îµï¿½ï¿½ï¿½ RowNameï¿½ï¿½ ï¿½Ø´ï¿½ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½Í¸ï¿½ Ç®ï¿½ï¿½ ï¿½ß°ï¿½
 	UE_LOG(LogTemp, Warning, TEXT("Assets for RowName %s loaded."), *RowName.ToString());
 
-	// Ç®¿¡ ÇØ´ç RowName¿¡ ´ëÇÑ ¾×ÅÍ Ãß°¡
+	// Ç®ï¿½ï¿½ ï¿½Ø´ï¿½ RowNameï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ß°ï¿½
 	if (!BuildingPool.Contains(RowName))
 	{
 		BuildingPool.Add(RowName, FBuildingList());
 	}
 	FDDBuildingBaseData* BuildingData = GetBuildingData(RowName);
 
-	// ºôµùÀÌ Àá±Ý ÇØÁ¦µÇ¾ú´ÂÁö È®ÀÎ
+	// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ç¾ï¿½ï¿½ï¿½ï¿½ï¿½ È®ï¿½ï¿½
 	if (BuildingData->bIsUnlocked)
 	{
 
-		// Ç®¿¡ ÇØ´ç ºôµùÀÌ ¾øÀ¸¸é Ãß°¡
+		// Ç®ï¿½ï¿½ ï¿½Ø´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ß°ï¿½
 		if (!BuildingPool.Contains(RowName))
 		{
 			BuildingPool.Add(RowName, FBuildingList());
@@ -373,9 +376,9 @@ void UDDBuildingManager::OnBuildingAssetsLoaded(const FName& RowName)
 			if (NewBuilding)
 			{
 				BuildingPool[RowName].Buildings.Add(NewBuilding);
-				NewBuilding->SetActorHiddenInGame(true);  // ÀÏ´Ü ¼û±â±â
-				NewBuilding->SetActorEnableCollision(false);  // Ãæµ¹ ºñÈ°¼ºÈ­
-				NewBuilding->SetActorTickEnabled(false);  // Æ½ ºñÈ°¼ºÈ­
+				NewBuilding->SetActorHiddenInGame(true);  // ï¿½Ï´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½
+				NewBuilding->SetActorEnableCollision(false);  // ï¿½æµ¹ ï¿½ï¿½È°ï¿½ï¿½È­
+				NewBuilding->SetActorTickEnabled(false);  // Æ½ ï¿½ï¿½È°ï¿½ï¿½È­
 				NewBuilding->SetCanAttack(false);
 			}
 		}
