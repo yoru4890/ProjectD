@@ -18,7 +18,7 @@ class PROJECTD_API UDDBaseAttackStrategy : public UObject, public IDDBuildingAtt
 public:
 	virtual void Initialize(class ADDBuildingBase* InOwningTower);
 
-	virtual void Attack(AActor* TargetEnemy) override;
+	virtual void Attack(AActor* TargetEnemy, const FVector& FireLocation = FVector(0, 0, 0), const FRotator& FireRotation = FRotator(0, 0, 0)) override;
 
 protected:
 	void ApplyDotDamge(AActor* TargetEnemy);

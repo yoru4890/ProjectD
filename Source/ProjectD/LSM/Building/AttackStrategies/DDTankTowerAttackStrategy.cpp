@@ -21,8 +21,8 @@ void UDDTankTowerAttackStrategy::Initialize(ADDBuildingBase* InOwningTower)
 	MaxPenetrationCount = 3;
 }
 
-void UDDTankTowerAttackStrategy::Attack(AActor* TargetEnemy)
+void UDDTankTowerAttackStrategy::Attack(AActor* TargetEnemy, const FVector& FireLocation, const FRotator& FireRotation)
 {
-	Super::Attack(TargetEnemy);
+	Super::Attack(TargetEnemy, FireLocation, FireRotation);
 	Projectile->SetActorScale3D(FVector(0.3f,0.3f,0.3f));
 }

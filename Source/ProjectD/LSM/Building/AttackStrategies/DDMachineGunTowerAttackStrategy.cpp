@@ -5,9 +5,9 @@
 #include "LSM/Building/DDBuildingBase.h"
 #include "Engine/DamageEvents.h"
 
-void UDDMachineGunTowerAttackStrategy::Attack(AActor* TargetEnemy)
+void UDDMachineGunTowerAttackStrategy::Attack(AActor* TargetEnemy, const FVector& FireLocation, const FRotator& FireRotation)
 {
-	Super::Attack(TargetEnemy);
+	Super::Attack(TargetEnemy, FireLocation, FireRotation);
 
 	ApplyDirectDamage(TargetEnemy);
 	PlayHitEffect(TargetEnemy);

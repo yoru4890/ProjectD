@@ -95,5 +95,8 @@ void ADDTowerBase::InitFromDataTable(const FName& InRowName, const FDDBuildingBa
 	}
 
 	this->TowerAttackRange = TowerData->TowerAttackRange;
+	this->bCanRecoli = TowerData->bCanRecoil;
+	this->MaxRecoilTime = TowerData->MaxRecoilTime;
+	this->RecoilDistance = TowerData->RecoilDistance;
 }
 

@@ -49,6 +49,8 @@ public:
 protected:
 	virtual void ExecuteAttackEffects();
 
+	virtual void SetMeshs(const FDDBuildingBaseData& LoadedAsset);
+
 	void SetupAttackCollisionResponses();
 
 	UFUNCTION()
@@ -64,7 +66,6 @@ protected:
 private:
 	void SetParticeEffects(const FDDBuildingBaseData& LoadedAsset);
 	void SetSound(const FDDBuildingBaseData& LoadedAsset);
-	void SetMeshs(const FDDBuildingBaseData& LoadedAsset);
 	void SetAttackStrategy(TSubclassOf<class UDDBaseAttackStrategy> AttackStrategyClass);
 	void PlayAttackEffectAtSocket();
 	void PlayAttackAnimation();

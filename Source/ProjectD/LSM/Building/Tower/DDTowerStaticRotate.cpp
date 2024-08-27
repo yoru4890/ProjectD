@@ -17,6 +17,23 @@ void ADDTowerStaticRotate::Tick(float DeltaTime)
 	RotateTowardsEnemy();
 
 	TimeSinceLastAttack += DeltaTime;
+	if (bIsRecoiling)
+	{
+		// 반동 시간 경과에 따라 배럴 위치를 계산
+		RecoilTimeElapsed += DeltaTime;
+		float Alpha = FMath::Clamp(RecoilTimeElapsed / MaxRecoilTime, 0.0f, 1.0f);
+
+		// 배럴 위치를 초기 위치에서 반동 오프셋 위치로 보간
+		FVector NewLocation = FMath::Lerp(InitialBarrelLocation, InitialBarrelLocation + RecoilOffset, Alpha);
+		BarrelStaticMeshComponent->SetRelativeLocation(NewLocation);
+
+		// 반동이 끝나면 초기화
+		if (Alpha >= 1.0f)
+		{
+			bIsRecoiling = false;
+			BarrelStaticMeshComponent->SetRelativeLocation(InitialBarrelLocation);
+		}
+	}
 
 	if (!bCanAttack || !TargetEnemy)
 	{
@@ -31,10 +48,17 @@ void ADDTowerStaticRotate::Tick(float DeltaTime)
 			if (bIsEnemyInSight)
 			{
 				ExecuteAttackEffects();
+				if (bCanRecoli)
+				{
+					StartRecoil();
+				}
 				if (AttackStrategy)
 				{
 					IDDBuildingAttackStrategyInterface* AttackStrategyInterface = Cast<IDDBuildingAttackStrategyInterface>(AttackStrategy);
-					AttackStrategyInterface->Attack(TargetEnemy);
+					FVector FirePointLocation = BarrelStaticMeshComponent->GetSocketLocation(TEXT("FirePoint"));
+					FRotator FirePointDirection = BarrelStaticMeshComponent->GetSocketRotation(TEXT("FirePoint"));
+
+					AttackStrategyInterface->Attack(TargetEnemy, FirePointLocation, FirePointDirection);
 				}
 				SetIsNowAttack(true);
 				TimeSinceLastAttack = 0.f;
@@ -52,7 +76,8 @@ void ADDTowerStaticRotate::RotateTowardsEnemy()
 	if (TargetEnemy)
 	{
 		// 타겟 적을 향해 회전
-		DDRotationComponent->RotateStaticMeshTowardsTarget(StaticMeshComponents[0], TargetEnemy, RotationSpeed);
+		DDRotationComponent->RotatePitchAndYawStaticMeshTowardsTarget(BarrelStaticMeshComponent, TargetEnemy, RotationSpeed);
+		DDRotationComponent->RotateYawStaticMeshTowardsTarget(WaistMeshComponent, TargetEnemy, RotationSpeed);
 	}
 }
 
@@ -62,7 +87,7 @@ const bool ADDTowerStaticRotate::IsEnemyInSight(float CosTheta) const
 	{
 		return false;
 	}
-	if (StaticMeshComponents.Num() == 0 || !StaticMeshComponents[0])
+	if (!BarrelStaticMeshComponent)
 	{
 		return false;
 	}
@@ -72,7 +97,7 @@ const bool ADDTowerStaticRotate::IsEnemyInSight(float CosTheta) const
 	FVector EnemyLocation = TargetEnemy->GetActorLocation();
 	EnemyLocation.Z = 0;
 
-	FVector FirePointDirection = StaticMeshComponents[0]->GetSocketRotation(TEXT("FirePoint1")).Vector().GetSafeNormal();
+	FVector FirePointDirection = BarrelStaticMeshComponent->GetSocketRotation(TEXT("FireDirection")).Vector().GetSafeNormal();
 	FVector DirectionToEnemy = (EnemyLocation - TowerLocation).GetSafeNormal();
 
 	float DotProduct = FVector::DotProduct(DirectionToEnemy, FirePointDirection);
@@ -90,4 +115,37 @@ void ADDTowerStaticRotate::SetIsNowAttack(bool InIsNowAttack)
 		}
 	}
 	IsNowAttack = InIsNowAttack;
+}
+
+void ADDTowerStaticRotate::SetMeshs(const FDDBuildingBaseData& LoadedAsset)
+{
+	Super::SetMeshs(LoadedAsset);
+
+	if (StaticMeshComponents.IsValidIndex(0))
+	{
+		BarrelStaticMeshComponent = StaticMeshComponents[0];
+	}
+	if (StaticMeshComponents.IsValidIndex(1))
+	{
+		WaistMeshComponent = StaticMeshComponents[1];
+	}
+	if (StaticMeshComponents.IsValidIndex(2))
+	{
+		PlatformMeshComponent = StaticMeshComponents[2];
+	}
+}
+
+void ADDTowerStaticRotate::StartRecoil()
+{
+	if (!bIsRecoiling && BarrelStaticMeshComponent)
+	{
+		// 배럴의 초기 위치를 저장
+		InitialBarrelLocation = BarrelStaticMeshComponent->GetRelativeLocation();
+		// 반동 상태 시작
+		bIsRecoiling = true;
+		RecoilTimeElapsed = 0.0f;
+		// 반동 방향 (예: 뒤로 밀리기)
+		FVector ForwardVector = BarrelStaticMeshComponent->GetForwardVector();
+		RecoilOffset = -ForwardVector * RecoilDistance; // 배럴이 바라보는 방향의 반대쪽으로 설정
+	}
 }

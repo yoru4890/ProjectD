@@ -16,7 +16,7 @@ class PROJECTD_API UDDMachineGunTowerAttackStrategy : public UDDBaseAttackStrate
 	GENERATED_BODY()
 
 public:
-	virtual void Attack(AActor* TargetEnemy) override;
+	virtual void Attack(AActor* TargetEnemy, const FVector& FireLocation = FVector(0, 0, 0), const FRotator& FireRotation = FRotator(0, 0, 0)) override;
 	
 private:
 

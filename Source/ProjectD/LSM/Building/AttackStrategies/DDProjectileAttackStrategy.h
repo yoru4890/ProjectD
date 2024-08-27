@@ -19,7 +19,7 @@ protected:
 	void ConfigureProjectile();
 
 protected:
-	virtual void Attack(AActor* TargetEnemy) override;
+	virtual void Attack(AActor* TargetEnemy, const FVector& FireLocation, const FRotator& FireRotation) override;
 
 protected:
 	UPROPERTY()

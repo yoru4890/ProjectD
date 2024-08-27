@@ -37,12 +37,12 @@ void UDDProjectileAttackStrategy::ConfigureProjectile()
     Projectile->ConfigureProjectile(Damage,DamageType, ProjectileSpeed, ProjectileMaxSpeed, ProjectileLifeTime, bIsExplosive, ExplosionRadius, MaxPenetrationCount);
 }
 
-void UDDProjectileAttackStrategy::Attack(AActor* TargetEnemy)
+void UDDProjectileAttackStrategy::Attack(AActor* TargetEnemy, const FVector& FireLocation, const FRotator& FireRotation)
 {
-    Super::Attack(TargetEnemy);
+    Super::Attack(TargetEnemy, FireLocation, FireRotation);
     UE_LOG(LogTemp, Warning, TEXT("Projectile Attack"));
     FRotator Rotator = OwningTower->GetFireStaticMeshComponent()->GetRelativeRotation();
-    Projectile = ProjectileManager->SpawnProjectile(GetWorld(), ProjectileRowName,OwningTower->GetActorLocation(), Rotator,nullptr,nullptr);
+    Projectile = ProjectileManager->SpawnProjectile(GetWorld(), ProjectileRowName, FireLocation, FireRotation,nullptr,nullptr);
     ConfigureProjectile();
 
 }
