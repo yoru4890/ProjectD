@@ -18,6 +18,7 @@
 #include "YSY/Animation/AttackTraceAnimNotify.h"
 #include "YSY/Animation/DDPlayEffectAnimNotify.h"
 #include "YSY/Interface/AggroTargetInterface.h"
+#include "YSY/Collision/CollisionChannel.h"
 
 // Sets default values
 ADDEnemyBase::ADDEnemyBase()
@@ -43,7 +44,10 @@ ADDEnemyBase::ADDEnemyBase()
 		HpBar->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 
+	GetCapsuleComponent()->SetCollisionProfileName(FName("Enemy"));
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(GTCHANNEL_PLAYER, ECollisionResponse::ECR_Block);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(GTCHANNEL_ENEMY, ECollisionResponse::ECR_Block);
 	GetCharacterMovement()->bUseRVOAvoidance = true;
 	GetCharacterMovement()->AvoidanceConsiderationRadius = 300.0f;
 	GetCharacterMovement()->bConstrainToPlane = true;
@@ -82,19 +86,23 @@ float ADDEnemyBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 	const UDamageType* DamageType = DamageEvent.DamageTypeClass.GetDefaultObject();
 
 	float ActualDamage = DamageAmount;
+	
+	if (DamageType)
+	{
+		if (DamageType->IsA<UHackingDamageType>())
+		{
+			CaculateHackingDamage(ActualDamage);
+		}
+		else if (DamageType->IsA<UPiercingDamageType>())
+		{
+			CaculatePiercingDamage(ActualDamage);
+		}
+		else if (DamageType->IsA<UCorrosionDamageType>())
+		{
+			CaculateCorrosionDamage(ActualDamage);
+		}
+	}
 
-	if (DamageType->IsA<UHackingDamageType>())
-	{
-		CaculateHackingDamage(ActualDamage);
-	}
-	else if (DamageType->IsA<UPiercingDamageType>())
-	{
-		CaculatePiercingDamage(ActualDamage);
-	}
-	else if (DamageType->IsA<UCorrosionDamageType>())
-	{
-		CaculateCorrosionDamage(ActualDamage);
-	}
 
 	if (DamageEvent.IsOfType(FPointDamageEvent::ClassID))
 	{
@@ -180,6 +188,7 @@ void ADDEnemyBase::InitializeEnemy(const FDDEnemyData& EnemyData)
 	GetMesh()->SetSkeletalMesh(EnemySkeletalMesh);
 	GetMesh()->SetRelativeLocationAndRotation({ 0,0,-90 }, { 0,-90,0 });
 	GetMesh()->SetCollisionProfileName(FName("Enemy"));
+	GetMesh()->SetGenerateOverlapEvents(true);
 
 	if (!EnemyData.AnimationBlueprint.IsValid())
 	{
