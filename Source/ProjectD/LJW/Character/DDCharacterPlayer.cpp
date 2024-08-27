@@ -52,7 +52,7 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 	BuildSystem = CreateDefaultSubobject<UDDBuildComponent>(TEXT("BuildSystem"));
 
 	//BuildWidget
-	static ConstructorHelpers::FClassFinder<UUserWidget> BuildWidgetFinder(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/0000/YSY/Widget/YSY_WBP_TestRadialMenu.YSY_WBP_TestRadialMenu_C'"));
+	static ConstructorHelpers::FClassFinder<UUserWidget> BuildWidgetFinder(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/0000/YSY/Widget/YSY_WBP_RM_Select.YSY_WBP_RM_Select_C'"));
 
 	if (BuildWidgetFinder.Succeeded())
 	{
@@ -427,6 +427,7 @@ bool ADDCharacterPlayer::IsMaxAggro()
 void ADDCharacterPlayer::EnterManagementMode()
 {
 	CurrentPlayerMode = EPlayerMode::ManagementMode;
+	BuildSystem->StartManageTrace();
 }
 
 void ADDCharacterPlayer::OpenBuildWidget()
@@ -453,6 +454,7 @@ void ADDCharacterPlayer::BuildTrapOrTower(const FName& BuildingName)
 	PlayerController->SetShowMouseCursor(false);
 	PlayerController->SetInputMode(InputModeGameOnlyData);
 	PlayerController->SetIgnoreMoveInput(false);
+	BuildWidget->SetVisibility(ESlateVisibility::Visible);
 	BuildWidget->RemoveFromParent();
 }
 

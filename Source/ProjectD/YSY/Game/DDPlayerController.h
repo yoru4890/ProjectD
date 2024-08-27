@@ -14,6 +14,16 @@ class PROJECTD_API ADDPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 	
+public:
+	ADDPlayerController();
+
 protected:
 	virtual void BeginPlay() override;
+
+private:
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, Meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class UUserWidget> MainWidgetClass;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, Meta = (AllowPrivateAccess = "true"))
+	UUserWidget* MainWidget;
 };
