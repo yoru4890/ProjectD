@@ -4,8 +4,8 @@
 #include "LJW/Weapon/DDWeaponRifle.h"
 #include "Kismet/GameplayStatics.h"
 #include "YSY/Collision/CollisionChannel.h"
-
-
+#include "YSY/Interface/DamageInterface.h"
+#include "Engine/DamageEvents.h"
 
 
 ADDWeaponRifle::ADDWeaponRifle()
@@ -43,7 +43,16 @@ void ADDWeaponRifle::Attack()
 	DrawDebugLine(GetWorld(), StartTrace, EndTrace, DrawColor, false, 5.0f);
 	if (IsDetect)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Trace : %s"), *(HitResult.GetActor()->GetFName().ToString()))
+		UE_LOG(LogTemp, Warning, TEXT("Trace : %s"), *(HitResult.GetActor()->GetFName().ToString()));
+
+		IDamageInterface* HitActor = Cast<IDamageInterface>(HitResult.GetActor());
+		FDamageEvent DamageEvent;
+		float DamageAmount{ 20.0f };
+		AController* EventInstigator{};
+
+		HitActor->ApplyDamage(DamageAmount, DamageEvent, EventInstigator, this);
 	}
+
 	
 }
+
