@@ -29,7 +29,13 @@ public:
 	FORCEINLINE const EBuildingType GetBuildingType() const { return BuildingType; }
 	FORCEINLINE const float GetDamage() const { return Damage; }
 	FORCEINLINE const TSubclassOf<UDamageType> GetDamageType() const { return DamageType; }
+	FORCEINLINE const float GetDotDamage() const { return DotDamage; }
+	FORCEINLINE const float GetDotDuration() const { return DotDuration; }
+	FORCEINLINE const float GetDotInterval() const { return DotInterval; }
+	FORCEINLINE const float GetSlowAmount() const { return SlowAmount; }
+	FORCEINLINE const float GeSlowDuration() const { return SlowDuration; }
 	FORCEINLINE class UNiagaraSystem* GetHitEffect() const { return HitEffect; }
+	FORCEINLINE const UStaticMeshComponent* GetFireStaticMeshComponent() const { return StaticMeshComponents[0]; }
 
 public:
 	// Called every frame

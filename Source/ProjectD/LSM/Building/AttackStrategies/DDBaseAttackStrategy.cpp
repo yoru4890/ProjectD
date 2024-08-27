@@ -14,11 +14,11 @@ void UDDBaseAttackStrategy::Initialize(ADDBuildingBase* InOwningTower)
 	OwningTower = InOwningTower;
 	DamageType = InOwningTower->GetDamageType();
 	Damage = InOwningTower->GetDamage();
-	DotDamage = InOwningTower->GetDamage();
-	DotDuration = InOwningTower->GetDamage();
-	DotInterval = InOwningTower->GetDamage();
-	SlowAmount = InOwningTower->GetDamage();
-	SlowDuration = InOwningTower->GetDamage();
+	DotDamage = InOwningTower->GetDotDamage();
+	DotDuration = InOwningTower->GetDotDuration();
+	DotInterval = InOwningTower->GetDotInterval();
+	SlowAmount = InOwningTower->GetSlowAmount();
+	SlowDuration = InOwningTower->GeSlowDuration();
 }
 
 

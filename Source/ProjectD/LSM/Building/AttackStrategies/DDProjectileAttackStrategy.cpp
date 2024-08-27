@@ -5,6 +5,8 @@
 #include "LSM/Manager/DDProjectileManager.h"
 #include "YSY/Game/DDGameInstance.h"
 #include "LSM/Manager/DDAssetManager.h"
+#include "LSM/Projectile/DDProjectileBase.h"
+#include "LSM/Building/DDBuildingBase.h"
 
 void UDDProjectileAttackStrategy::InitializeProjectile(FName& ProjectileName)
 {
@@ -30,7 +32,17 @@ void UDDProjectileAttackStrategy::InitializeProjectile(FName& ProjectileName)
     }
 }
 
+void UDDProjectileAttackStrategy::ConfigureProjectile()
+{
+    Projectile->ConfigureProjectile(Damage,DamageType, ProjectileSpeed, ProjectileMaxSpeed, ProjectileLifeTime, bIsExplosive, ExplosionRadius, MaxPenetrationCount);
+}
+
 void UDDProjectileAttackStrategy::Attack(AActor* TargetEnemy)
 {
+    Super::Attack(TargetEnemy);
+    UE_LOG(LogTemp, Warning, TEXT("Projectile Attack"));
+    FRotator Rotator = OwningTower->GetFireStaticMeshComponent()->GetRelativeRotation();
+    Projectile = ProjectileManager->SpawnProjectile(GetWorld(), ProjectileRowName,OwningTower->GetActorLocation(), Rotator,nullptr,nullptr);
+    ConfigureProjectile();
 
 }

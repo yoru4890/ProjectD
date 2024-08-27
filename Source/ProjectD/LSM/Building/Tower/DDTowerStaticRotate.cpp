@@ -33,7 +33,8 @@ void ADDTowerStaticRotate::Tick(float DeltaTime)
 				ExecuteAttackEffects();
 				if (AttackStrategy)
 				{
-					AttackStrategy->Attack(TargetEnemy);
+					IDDBuildingAttackStrategyInterface* AttackStrategyInterface = Cast<IDDBuildingAttackStrategyInterface>(AttackStrategy);
+					AttackStrategyInterface->Attack(TargetEnemy);
 				}
 				SetIsNowAttack(true);
 				TimeSinceLastAttack = 0.f;
