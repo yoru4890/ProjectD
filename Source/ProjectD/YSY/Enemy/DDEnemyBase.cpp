@@ -617,7 +617,7 @@ void ADDEnemyBase::PlayAttackEffect()
 {
 	for (const auto& AttackEffectInfo : AttackEffects)
 	{
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), AttackEffectInfo.SoundEffect, GetActorLocation(), 1.0f, 1.0f, AttackEffectInfo.SoundStartTime);
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), AttackEffectInfo.SoundEffect, GetActorLocation(), AttackEffectInfo.VolumeMultiplier, AttackEffectInfo.PitchMultiplier, AttackEffectInfo.SoundStartTime);
 		
 		for (const auto& LocationName : AttackEffectInfo.LocationNames)
 		{
@@ -625,12 +625,12 @@ void ADDEnemyBase::PlayAttackEffect()
 
 			if (AttackEffectInfo.CascadeEffect)
 			{
-				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), AttackEffectInfo.CascadeEffect, Location);
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), AttackEffectInfo.CascadeEffect, Location, FRotator::ZeroRotator, FVector(AttackEffectInfo.EffectScale));
 			}
 
 			if (AttackEffectInfo.NiagaraEffect)
 			{
-				UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), AttackEffectInfo.NiagaraEffect, Location);
+				UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), AttackEffectInfo.NiagaraEffect, Location, FRotator::ZeroRotator, FVector(AttackEffectInfo.EffectScale));
 			}
 		}
 	}
@@ -640,7 +640,7 @@ void ADDEnemyBase::PlayDeathEffect()
 {
 	for (const auto& DeathEffectInfo : DeathEffects)
 	{
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), DeathEffectInfo.SoundEffect, GetActorLocation(), 1.0f, 1.0f, DeathEffectInfo.SoundStartTime);
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), DeathEffectInfo.SoundEffect, GetActorLocation(), DeathEffectInfo.VolumeMultiplier, DeathEffectInfo.PitchMultiplier, DeathEffectInfo.SoundStartTime);
 
 		for (const auto& LocationName : DeathEffectInfo.LocationNames)
 		{
@@ -648,12 +648,12 @@ void ADDEnemyBase::PlayDeathEffect()
 
 			if (DeathEffectInfo.CascadeEffect)
 			{
-				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DeathEffectInfo.CascadeEffect, Location);
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DeathEffectInfo.CascadeEffect, Location, FRotator::ZeroRotator, FVector(DeathEffectInfo.EffectScale));
 			}
 
 			if (DeathEffectInfo.NiagaraEffect)
 			{
-				UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), DeathEffectInfo.NiagaraEffect, Location);
+				UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), DeathEffectInfo.NiagaraEffect, Location, FRotator::ZeroRotator, FVector(DeathEffectInfo.EffectScale));
 			}
 		}
 	}
