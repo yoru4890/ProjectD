@@ -44,7 +44,6 @@ ADDEnemyBase::ADDEnemyBase()
 		HpBar->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 
-	GetCapsuleComponent()->SetCollisionProfileName(FName("Enemy"));
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 	GetCapsuleComponent()->SetCollisionResponseToChannel(GTCHANNEL_PLAYER, ECollisionResponse::ECR_Block);
 	GetCapsuleComponent()->SetCollisionResponseToChannel(GTCHANNEL_ENEMY, ECollisionResponse::ECR_Block);
@@ -175,6 +174,8 @@ void ADDEnemyBase::InitializeEnemy(const FDDEnemyData& EnemyData)
 	bIsElite = EnemyData.bIsElite;
 	AttackEffects = EnemyData.AttackEffects;
 	DeathEffects = EnemyData.DeathEffects;
+	GetCapsuleComponent()->SetCapsuleRadius(EnemyData.CapsuleRadiusSize);
+	GetCapsuleComponent()->SetCapsuleHalfHeight(EnemyData.CapsuleHalfHeightSize);
 
 	float EnemyScale = EnemyData.ScaleSize;
 	SetActorScale3D({ EnemyScale, EnemyScale, EnemyScale });
@@ -186,7 +187,7 @@ void ADDEnemyBase::InitializeEnemy(const FDDEnemyData& EnemyData)
 
 	USkeletalMesh* EnemySkeletalMesh = EnemyData.SkeletalMesh.Get();
 	GetMesh()->SetSkeletalMesh(EnemySkeletalMesh);
-	GetMesh()->SetRelativeLocationAndRotation({ 0,0,-90 }, { 0,-90,0 });
+	GetMesh()->SetRelativeLocationAndRotation({ 0,0,EnemyData.MeshLocationZ }, { 0,-90,0 });
 	GetMesh()->SetCollisionProfileName(FName("Enemy"));
 	GetMesh()->SetGenerateOverlapEvents(true);
 
@@ -616,11 +617,11 @@ void ADDEnemyBase::PlayAttackEffect()
 {
 	for (const auto& AttackEffectInfo : AttackEffects)
 	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), AttackEffectInfo.SoundEffect, GetActorLocation(), 1.0f, 1.0f, AttackEffectInfo.SoundStartTime);
+		
 		for (const auto& LocationName : AttackEffectInfo.LocationNames)
 		{
 			auto Location = GetMesh()->GetSocketLocation(LocationName);
-
-			UGameplayStatics::PlaySoundAtLocation(GetWorld(), AttackEffectInfo.SoundEffect, Location, 1.0f, 1.0f, AttackEffectInfo.SoundStartTime);
 
 			if (AttackEffectInfo.CascadeEffect)
 			{
@@ -639,11 +640,11 @@ void ADDEnemyBase::PlayDeathEffect()
 {
 	for (const auto& DeathEffectInfo : DeathEffects)
 	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), DeathEffectInfo.SoundEffect, GetActorLocation(), 1.0f, 1.0f, DeathEffectInfo.SoundStartTime);
+
 		for (const auto& LocationName : DeathEffectInfo.LocationNames)
 		{
 			auto Location = GetMesh()->GetSocketLocation(LocationName);
-
-			UGameplayStatics::PlaySoundAtLocation(GetWorld(), DeathEffectInfo.SoundEffect, Location, 1.0f, 1.0f, DeathEffectInfo.SoundStartTime);
 
 			if (DeathEffectInfo.CascadeEffect)
 			{
