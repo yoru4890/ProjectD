@@ -194,4 +194,6 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, Meta = (AllowPrivateAccess = "true"))
 	UUserWidget* BuildWidget;
+
+
 };
