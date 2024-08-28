@@ -7,6 +7,7 @@
 #include "YSY/Interface/DamageInterface.h"
 #include "Engine/DamageEvents.h"
 #include "Kismet/GameplayStatics.h"
+#include "GameFramework/Character.h"
 
 ADDWeaponCudgel::ADDWeaponCudgel()
 {
@@ -47,8 +48,9 @@ void ADDWeaponCudgel::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, A
 		FDamageEvent DamageEvent;
 		float DamageAmount{ 20.0f };
 		AController* EventInstigator{};
+		auto DDPlayerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 
-		HitActor->ApplyDamage(DamageAmount, DamageEvent, EventInstigator, this);
+		HitActor->ApplyDamage(DamageAmount, DamageEvent, EventInstigator, DDPlayerCharacter);
 		// 여기서 타격음
 	}
 }

@@ -6,7 +6,7 @@
 #include "YSY/Collision/CollisionChannel.h"
 #include "YSY/Interface/DamageInterface.h"
 #include "Engine/DamageEvents.h"
-
+#include "GameFramework/Character.h"
 
 
 ADDWeaponRifle::ADDWeaponRifle()
@@ -53,8 +53,9 @@ void ADDWeaponRifle::Attack()
 			FDamageEvent DamageEvent;
 			float DamageAmount{ 20.0f };
 			AController* EventInstigator{};
+			auto DDPlayerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 
-			HitActor->ApplyDamage(DamageAmount, DamageEvent, EventInstigator, this);
+			HitActor->ApplyDamage(DamageAmount, DamageEvent, EventInstigator, DDPlayerCharacter);
 
 		}
 	}

@@ -8,6 +8,8 @@
 #include "LJW/Interface/CameraFOVInterface.h"
 #include "LJW/Interface/DDPlayerComponentsAnimInterface.h"
 #include "YSY/Interface/AggroTargetInterface.h"
+#include "YSY/Interface/DDCharacterWidgetInterface.h"
+#include "YSY/Interface/DamageInterface.h"
 #include "DDCharacterPlayer.generated.h"
 
 
@@ -21,7 +23,7 @@ enum class EPlayerMode : uint8
 };
 
 UCLASS()
-class PROJECTD_API ADDCharacterPlayer : public ADDCharacterBase, public ICameraFOVInterface, public IDDPlayerComponentsAnimInterface, public IAggroTargetInterface
+class PROJECTD_API ADDCharacterPlayer : public ADDCharacterBase, public ICameraFOVInterface, public IDDPlayerComponentsAnimInterface, public IAggroTargetInterface, public IDDCharacterWidgetInterface, public IDamageInterface
 {
 	GENERATED_BODY()
 	
@@ -187,6 +189,7 @@ public:
 //BuildWidget
 public:
 	void InitWidget();
+	void SetPlayerUIMode();
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, Meta = (AllowPrivateAccess = "true"))
@@ -195,5 +198,34 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, Meta = (AllowPrivateAccess = "true"))
 	UUserWidget* BuildWidget;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, Meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class UUserWidget> RMMachineGunWidgetClass;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, Meta = (AllowPrivateAccess = "true"))
+	UUserWidget* RMMachineGunWidget;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, Meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class UUserWidget> UpMachineGunWidgetClass;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, Meta = (AllowPrivateAccess = "true"))
+	UUserWidget* UpMachineGunWidget;
+
+// Stat
+public:
+	void Die();
+
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Build, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UDDCharacterStatComponent> Stat;
+
+// CharacterWidgetInterface
+public:
+	virtual void SetupCharacterWidget(class UDDUserWidget* InUserWidget);
+
+// DamageInterface
+public:
+	virtual float ApplyDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser);
+	virtual void ApplyDamageOverTime(EDotDamageType DamageType, float Time, float TimeInterval, float DamageAmount);
+	virtual void ApplyChainDamage(int DamageAmount, int NumberOfChain);
+	virtual void ApplyDebuff(EDebuffType DebuffType, float Time, float DebuffRate);
 };

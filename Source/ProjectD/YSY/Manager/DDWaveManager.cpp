@@ -36,6 +36,8 @@ void UDDWaveManager::InitStage(int32 StageNum)
 
 	CurrentStage = StageNum;
 	CurrentWave = 1;
+	MaxWave = StageWaveInfo[CurrentStage].EnemyCountsPerWave.Num() - 1;
+	RemainingLives = 20;
 	EnemyIndex = 0;
 	TotalSpawnEnemyCount = 0;
 	SetSplines();
@@ -146,6 +148,8 @@ void UDDWaveManager::WaveEnd()
 		StageEnd();
 	}
 
+	OnWaveChangedSignature.Broadcast(CurrentWave, MaxWave);
+
 }
 
 void UDDWaveManager::StageEnd()
@@ -177,4 +181,16 @@ void UDDWaveManager::InitEnemyNames()
 	EnemyNames.Add(FName("Legio"));
 	EnemyNames.Add(FName("ShockBomber"));
 	EnemyNames.Add(FName("Obliterator"));
+}
+
+void UDDWaveManager::SubtractRemainingLives(int32 Amount)
+{
+	RemainingLives -= Amount;
+
+	RemainingLives = std::max(0, RemainingLives);
+	if (RemainingLives <= 0)
+	{
+		//TODO : YSY Stage Fail Widget
+	}
+	OnRemainingLivesChanged.Broadcast(RemainingLives);
 }

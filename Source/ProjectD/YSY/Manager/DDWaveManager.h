@@ -9,6 +9,8 @@
 
 DECLARE_DELEGATE_RetVal_TwoParams(AActor*, FOnActivateEnemySignature, const FName&, int32);
 DECLARE_DELEGATE_OneParam(FOnSetupEnemyPoolSignature, int32);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRemainingLivesChangedSignature, int32, CurrentRemainingLives);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnWaveChangedSignature, int32, CurrentWave, int32, MaxWave);
 
 UCLASS()
 class PROJECTD_API UDDWaveManager : public UObject
@@ -32,6 +34,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	TArray<FDDWaveData>& GetStageWaveInfos() { return StageWaveInfo; }
 
+	const int32& GetRemainingLives() const noexcept { return RemainingLives; }
+	const int32& GetCurrentWave() const noexcept { return CurrentWave; }
+	const int32& GetMaxWave() const noexcept { return MaxWave; }
 	UFUNCTION(BlueprintCallable)
 	void WaveStart();
 	void SpawnEnd();
@@ -44,9 +49,14 @@ public:
 
 	void InitEnemyNames();
 
+	UFUNCTION(BlueprintCallable)
+	void SubtractRemainingLives(int32 Amount);
+
 public:
 	FOnActivateEnemySignature OnActivateEnemySignature;
 	FOnSetupEnemyPoolSignature OnSetupEnemyPoolSignature;
+	FOnRemainingLivesChangedSignature OnRemainingLivesChanged;
+	FOnWaveChangedSignature OnWaveChangedSignature;
 
 private:
 	TArray<FDDWaveData> StageWaveInfo;
@@ -55,9 +65,11 @@ private:
 
 	int32 CurrentStage{};
 	int32 CurrentWave{};
+	int32 MaxWave{};
 	int32 EnemyIndex{};
 	int32 TotalSpawnEnemyCount{};
 	int32 TotalEnemyCount{};
+	int32 RemainingLives{};
 	FTimerHandle WaveTimerHandle;
 
 	bool bIsWaveInProgress{};
