@@ -48,8 +48,6 @@ ADDCharacterPlayerEngineer::ADDCharacterPlayerEngineer()
 void ADDCharacterPlayerEngineer::BeginPlay()
 {
 	Super::BeginPlay();
-
-	
 }
 
 

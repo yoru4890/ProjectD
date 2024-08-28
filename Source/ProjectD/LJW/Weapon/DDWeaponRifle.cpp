@@ -8,6 +8,7 @@
 #include "Engine/DamageEvents.h"
 
 
+
 ADDWeaponRifle::ADDWeaponRifle()
 {
 	
@@ -46,13 +47,22 @@ void ADDWeaponRifle::Attack()
 		UE_LOG(LogTemp, Warning, TEXT("Trace : %s"), *(HitResult.GetActor()->GetFName().ToString()));
 
 		IDamageInterface* HitActor = Cast<IDamageInterface>(HitResult.GetActor());
-		FDamageEvent DamageEvent;
-		float DamageAmount{ 20.0f };
-		AController* EventInstigator{};
 
-		HitActor->ApplyDamage(DamageAmount, DamageEvent, EventInstigator, this);
+		if (HitActor)
+		{
+			FDamageEvent DamageEvent;
+			float DamageAmount{ 20.0f };
+			AController* EventInstigator{};
+
+			HitActor->ApplyDamage(DamageAmount, DamageEvent, EventInstigator, this);
+
+		}
 	}
 
+}
+
+void ADDWeaponRifle::EffectAttack()
+{
 	
 }
 

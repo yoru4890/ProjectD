@@ -356,8 +356,10 @@ void ADDCharacterPlayer::EquipMelee()
 	}
 }
 
+
 void ADDCharacterPlayer::EquipRange()
 {
+
 	if (!(PlayerAnimInstance->IsAnyMontagePlaying()))
 	{
 		WeaponSystem->EquipRangeWeapon();
