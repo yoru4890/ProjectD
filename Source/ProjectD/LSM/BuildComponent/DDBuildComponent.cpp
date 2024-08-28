@@ -211,6 +211,15 @@ bool UDDBuildComponent::UpgradeBuilding(const FName& RowName)
 	return true;
 }
 
+FName UDDBuildComponent::GetManagedBuildingRowName()
+{
+	if (!ManagedBuilding)
+	{
+		return NAME_None;
+	}
+	return ManagedBuilding->GetRowName();
+}
+
 void UDDBuildComponent::AllStopTrace()
 {
 	StopBuildTrace();

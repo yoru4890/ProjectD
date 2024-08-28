@@ -22,6 +22,9 @@ public:
 	virtual void Attack() override;
 
 private:
+
+	void EffectAttack();
+
 	UPROPERTY()
 	TObjectPtr<class APlayerCameraManager> CameraManager;
 	

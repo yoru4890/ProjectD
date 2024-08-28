@@ -37,6 +37,7 @@ struct FDDProjectileData : public FTableRowBase
 
 	bool bIsLoaded = false;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 PoolSize;
 	
 };

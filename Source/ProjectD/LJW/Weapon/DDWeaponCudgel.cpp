@@ -19,6 +19,9 @@ ADDWeaponCudgel::ADDWeaponCudgel()
 	CollisionCapsule->SetupAttachment(RootComponent);
 	//Begin Overlap
 	CollisionCapsule->OnComponentBeginOverlap.AddDynamic(this, &ADDWeaponCudgel::OnOverlapBegin);
+
+	//Collision Disabled
+	CollisionCapsule->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void ADDWeaponCudgel::SubSkill()
@@ -39,12 +42,15 @@ void ADDWeaponCudgel::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, A
 	UE_LOG(LogTemp, Warning, TEXT("Overlap : %s"), *(OtherActor->GetFName().ToString()));
 
 	IDamageInterface* HitActor = Cast<IDamageInterface>(OtherActor);
+	if (HitActor)
+	{
+		FDamageEvent DamageEvent;
+		float DamageAmount{ 20.0f };
+		AController* EventInstigator{};
 
-	FDamageEvent DamageEvent;
-	float DamageAmount{ 20.0f };
-	AController* EventInstigator{};
-
-	HitActor->ApplyDamage(DamageAmount, DamageEvent, EventInstigator, this);
+		HitActor->ApplyDamage(DamageAmount, DamageEvent, EventInstigator, this);
+		// 여기서 타격음
+	}
 }
 
 
