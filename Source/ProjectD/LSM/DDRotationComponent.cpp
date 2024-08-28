@@ -25,15 +25,6 @@ void UDDRotationComponent::BeginPlay()
 	
 }
 
-
-// Called every frame
-void UDDRotationComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// ...
-}
-
 void UDDRotationComponent::RotateYawStaticMeshTowardsTarget(UStaticMeshComponent* MeshComponent, const AActor* Target, const float RotationSpeed) const
 {
 	if (!MeshComponent || !Target)

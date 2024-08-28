@@ -21,7 +21,8 @@ public:
 	virtual void Attack(AActor* TargetEnemy, const FVector& FireLocation = FVector(0, 0, 0), const FRotator& FireRotation = FRotator(0, 0, 0)) override;
 
 protected:
-	void ApplyDotDamge(AActor* TargetEnemy);
+	void ApplyFireDotDamge(AActor* TargetEnemy);
+	void ApplyAcidDotDamge(AActor* TargetEnemy);
 	void ApplyDirectDamage(AActor* TargetEnemy);
 	void ApplySlowEffect(AActor* TargetEnemy);
 

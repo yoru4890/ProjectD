@@ -4,13 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "LSM/Building/DDBuildingBase.h"
+#include "LSM/Building/DDBuildingAttackInterface.h"
 #include "DDTrap.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class PROJECTD_API ADDTrap : public ADDBuildingBase
+class PROJECTD_API ADDTrap : public ADDBuildingBase , public IDDBuildingAttackInterface
 {
 	GENERATED_BODY()
 public:
@@ -20,9 +21,10 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	virtual void Attack() override;
 
 protected:
 	virtual void ModifyMeshAndAttackCollision() const override;
+
+	virtual void ResetCanAttack() override;
 };

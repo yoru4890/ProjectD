@@ -23,6 +23,12 @@ public:
 	TSubclassOf<class ADDTowerBase> TowerClass; // 타워 클래스
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector BarrelMeshOffset; // 배럴매쉬 조정값
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector WaistMeshOffset; // 배럴매쉬 조정값
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float TowerAttackRange; // 타워 공격범위
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

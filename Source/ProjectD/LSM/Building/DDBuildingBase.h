@@ -38,8 +38,6 @@ public:
 	FORCEINLINE const UStaticMeshComponent* GetFireStaticMeshComponent() const { return StaticMeshComponents[0]; }
 
 public:
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
 	virtual void InitFromDataTable(const FName& InRowName, const FDDBuildingBaseData& BuildingData);
 	virtual void  SetCanAttack(const bool bInCanAttack);
 	void SetAssets(const FDDBuildingBaseData& LoadedAsset);
@@ -63,6 +61,8 @@ protected:
 
 	void StopAttackEffect();
 
+	virtual void ResetCanAttack();
+
 private:
 	void SetParticeEffects(const FDDBuildingBaseData& LoadedAsset);
 	void SetSound(const FDDBuildingBaseData& LoadedAsset);
@@ -70,6 +70,8 @@ private:
 	void PlayAttackEffectAtSocket();
 	void PlayAttackAnimation();
 	void PlayAttackSound();
+
+	FTimerHandle AttackCooldownTimerHandle;
 
 
 protected:

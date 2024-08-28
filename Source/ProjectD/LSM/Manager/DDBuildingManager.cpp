@@ -64,7 +64,8 @@ void UDDBuildingManager::SetBuildingSellCost(float Ratio)
 
 		while (ParentName != FName("None"))
 		{
-			TotalCost += BuildingData->BuildCost;
+			FDDBuildingBaseData* ParentBuildingData = (*BuildingDataTable.Find(ParentName));
+			TotalCost += ParentBuildingData->BuildCost;
 			ParentName = (*BuildingDataTable.Find(ParentName))->ParentRowName;
 		}
 
@@ -92,8 +93,6 @@ ADDBuildingBase* UDDBuildingManager::SpawnBuilding(UWorld* World, const FName& R
 		NewBuilding = BuildingPool[RowName].Buildings.Pop();
 		if (NewBuilding)
 		{
-			// Ʈ�� ��ġ�� ȸ���� �����մϴ�.
-			NewBuilding->SetActorLocationAndRotation(Location, Rotation);
 			UE_LOG(LogTemp, Warning, TEXT("check2"));
 		}
 	}
@@ -107,6 +106,7 @@ ADDBuildingBase* UDDBuildingManager::SpawnBuilding(UWorld* World, const FName& R
 	if (NewBuilding)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("check4"));
+		NewBuilding->SetActorLocationAndRotation(Location, Rotation);
 		NewBuilding->SetActorHiddenInGame(false);
 		NewBuilding->SetActorEnableCollision(true);
 		NewBuilding->SetActorTickEnabled(true);

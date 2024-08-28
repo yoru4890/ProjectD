@@ -43,6 +43,5 @@ void UDDBuildingAnimInstance::OnMontageEnded(UAnimMontage* Montage, bool bInterr
     if (Montage == CurrentMontage)
     {
         CurrentMontage = nullptr;
-        UE_LOG(LogTemp, Warning, TEXT("Montage ended: %s"), bInterrupted ? TEXT("Interrupted") : TEXT("Completed"));
     }
 }

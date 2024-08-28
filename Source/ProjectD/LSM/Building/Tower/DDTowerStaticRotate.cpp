@@ -16,7 +16,6 @@ void ADDTowerStaticRotate::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	RotateTowardsEnemy();
 
-	TimeSinceLastAttack += DeltaTime;
 	if (bIsRecoiling)
 	{
 		// 반동 시간 경과에 따라 배럴 위치를 계산
@@ -40,34 +39,12 @@ void ADDTowerStaticRotate::Tick(float DeltaTime)
 		SetIsNowAttack(false);
 		return;
 	}
-	else
-	{
-		if (TimeSinceLastAttack >= AttackCoolTime)
-		{
-			bool bIsEnemyInSight = IsEnemyInSight();
-			if (bIsEnemyInSight)
-			{
-				ExecuteAttackEffects();
-				if (bCanRecoli)
-				{
-					StartRecoil();
-				}
-				if (AttackStrategy)
-				{
-					IDDBuildingAttackStrategyInterface* AttackStrategyInterface = Cast<IDDBuildingAttackStrategyInterface>(AttackStrategy);
-					FVector FirePointLocation = BarrelStaticMeshComponent->GetSocketLocation(TEXT("FirePoint"));
-					FRotator FirePointDirection = BarrelStaticMeshComponent->GetSocketRotation(TEXT("FirePoint"));
 
-					AttackStrategyInterface->Attack(TargetEnemy, FirePointLocation, FirePointDirection);
-				}
-				SetIsNowAttack(true);
-				TimeSinceLastAttack = 0.f;
-			}
-			else
-			{
-				SetIsNowAttack(false);
-			}
-		}
+	UE_LOG(LogTemp, Warning, TEXT("Tower Tick Test"));
+
+	if (IsEnemyInSight() && bCanAttack)
+	{
+		StartAttackProcedure();
 	}
 }
 
@@ -124,10 +101,12 @@ void ADDTowerStaticRotate::SetMeshs(const FDDBuildingBaseData& LoadedAsset)
 	if (StaticMeshComponents.IsValidIndex(0))
 	{
 		BarrelStaticMeshComponent = StaticMeshComponents[0];
+		BarrelStaticMeshComponent->SetRelativeLocation(BarrelMeshOffset);
 	}
 	if (StaticMeshComponents.IsValidIndex(1))
 	{
 		WaistMeshComponent = StaticMeshComponents[1];
+		WaistMeshComponent->SetRelativeLocation(WaistMeshOffset);
 	}
 	if (StaticMeshComponents.IsValidIndex(2))
 	{
@@ -148,4 +127,28 @@ void ADDTowerStaticRotate::StartRecoil()
 		FVector ForwardVector = BarrelStaticMeshComponent->GetForwardVector();
 		RecoilOffset = -ForwardVector * RecoilDistance; // 배럴이 바라보는 방향의 반대쪽으로 설정
 	}
+}
+
+void ADDTowerStaticRotate::Attack()
+{
+	if (AttackStrategy)
+	{
+		IDDBuildingAttackStrategyInterface* AttackStrategyInterface = Cast<IDDBuildingAttackStrategyInterface>(AttackStrategy);
+		FVector FirePointLocation = BarrelStaticMeshComponent->GetSocketLocation(TEXT("FirePoint"));
+		FRotator FirePointDirection = BarrelStaticMeshComponent->GetSocketRotation(TEXT("FirePoint"));
+
+		AttackStrategyInterface->Attack(TargetEnemy, FirePointLocation, FirePointDirection);
+	}
+	SetIsNowAttack(true);
+}
+
+void ADDTowerStaticRotate::StartAttackProcedure()
+{
+	UE_LOG(LogTemp, Warning, TEXT("StartAttackProcedure"));
+	ExecuteAttackEffects();
+	if (bCanRecoli)
+	{
+		StartRecoil();
+	}
+	Attack();
 }

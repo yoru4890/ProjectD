@@ -46,7 +46,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "LikePoint")
 	FORCEINLINE bool CheckLikePoint(const int32 InLikePoint) const { return LikePoint >= InLikePoint; }
 
+	UFUNCTION(BlueprintCallable, Category = "LikePoint")
 	void AddLikePoint(const int32 InLikePoint);
+
 	bool SubtractLikePoint(const int32 InLikePoint);
 
 	
