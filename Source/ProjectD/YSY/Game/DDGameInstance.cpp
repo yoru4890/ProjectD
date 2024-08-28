@@ -14,9 +14,9 @@ void UDDGameInstance::Init()
 {
 	Super::Init();
 	DataManager = NewObject<UDDDataManager>(this);
+	FactoryManager = NewObject<UDDFactoryManager>(this);
 	BuildingManager = NewObject<UDDBuildingManager>(this);
 	ProjectileManager = NewObject<UDDProjectileManager>(this);
-	FactoryManager = NewObject<UDDFactoryManager>(this);
 	AssetManager = NewObject<UDDAssetManager>(this);
 
 	AssetManager->Initialize();

@@ -7,7 +7,7 @@
 #include "YSY/Game/DDGameInstance.h"
 #include "LSM/Manager/DDBuildingManager.h"
 
-UObject* UDDTowerFactory::CreateObject(UWorld* World, const FName& RowName, const FVector& Location, const FRotator& Rotation, AActor* Owner, APawn* Instigator)
+UObject* UDDTowerFactory::CreateObject(UWorld* World, const FName& RowName, AActor* Owner, APawn* Instigator)
 {
 	UDDGameInstance* MyGameInstance = Cast<UDDGameInstance>(GetWorld()->GetGameInstance());
 	check(MyGameInstance);
@@ -28,8 +28,7 @@ UObject* UDDTowerFactory::CreateObject(UWorld* World, const FName& RowName, cons
 
 	NewTower->InitFromDataTable(RowName, *TowerData);
 	NewTower->SetAssets(BuildingData);
-	NewTower->SetActorLocation(Location);
-	NewTower->SetActorRotation(Rotation);
+	NewTower->SetActorLocation(FVector(0, 0, -5000));
 	NewTower->SetOwner(Owner);
 	NewTower->SetInstigator(Instigator);
 

@@ -8,7 +8,7 @@
 #include "LSM/Projectile/DDProjectileData.h"
 #include "LSM/Projectile/DDProjectileBase.h"
 
-UObject* UDDProjectileFactory::CreateObject(UWorld* World, const FName& RowName, const FVector& Location, const FRotator& Rotation, AActor* Owner, APawn* Instigator)
+UObject* UDDProjectileFactory::CreateObject(UWorld* World, const FName& RowName, AActor* Owner, APawn* Instigator)
 {
 	UDDGameInstance* MyGameInstance = Cast<UDDGameInstance>(GetWorld()->GetGameInstance());
 	check(MyGameInstance);
@@ -27,9 +27,10 @@ UObject* UDDProjectileFactory::CreateObject(UWorld* World, const FName& RowName,
 	check(NewProjectile);
 
 	//NewProjectile->InitFromDataTable(RowName, *TowerData);
+	NewProjectile->SetRowName(RowName);
 	NewProjectile->SetAssetAndManager(ProjectileData,ProjectileManager);
-	NewProjectile->SetActorLocation(Location);
-	NewProjectile->SetActorRotation(Rotation);
+	NewProjectile->SetProjectileState(false);
+	NewProjectile->SetActorLocation(FVector(-1000, 0, 0));
 	NewProjectile->SetOwner(Owner);
 	NewProjectile->SetInstigator(Instigator);
 

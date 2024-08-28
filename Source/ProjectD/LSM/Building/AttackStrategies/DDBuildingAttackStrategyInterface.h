@@ -22,5 +22,6 @@ class PROJECTD_API IDDBuildingAttackStrategyInterface
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual void Attack(AActor* TargetEnemy) = 0;
+	virtual void Initialize(class ADDBuildingBase* InOwningTower) = 0;
+	virtual void Attack(AActor* TargetEnemy, const FVector& FireLocation = FVector(0,0,0), const FRotator& FireRotation = FRotator(0, 0, 0)) = 0;
 };

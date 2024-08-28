@@ -8,7 +8,7 @@
 #include "YSY/Collision/CollisionChannel.h"
 #include "DDBuildingAnimInstance.h"
 #include "NiagaraComponent.h"
-#include "LSM/Building/AttackStrategies/DDBuildingBaseAttackStrategy.h"
+#include "LSM/Building/AttackStrategies/DDBaseAttackStrategy.h"
 
 #pragma region ConstructorAndInitialization
 // Sets default values
@@ -101,14 +101,18 @@ void ADDBuildingBase::InitFromDataTable(const FName& InRowName, const FDDBuildin
 	//UE_LOG(LogTemp, Warning, TEXT("MeshZAxisModify is : %f"), BuildingData.MeshZAxisModify);
 }
 
-void ADDBuildingBase::SetAttackStrategy(TSubclassOf<class UDDBuildingBaseAttackStrategy> AttackStrategyClass)
+void ADDBuildingBase::SetAttackStrategy(TSubclassOf<class UDDBaseAttackStrategy> AttackStrategyClass)
 {
 	if (AttackStrategyClass)
 	{
-		UDDBuildingBaseAttackStrategy* StrategyInstance = NewObject<UDDBuildingBaseAttackStrategy>(this, AttackStrategyClass);
+		UDDBaseAttackStrategy* StrategyInstance = NewObject<UDDBaseAttackStrategy>(this, AttackStrategyClass);
 
 		AttackStrategy = StrategyInstance;
-		AttackStrategy->Initialize(this);
+		// 인터페이스로 캐스팅하여 초기화
+		if (IDDBuildingAttackStrategyInterface* Interface = Cast<IDDBuildingAttackStrategyInterface>(AttackStrategy))
+		{
+			Interface->Initialize(this);
+		}
 	}
 }
 
@@ -146,23 +150,6 @@ void ADDBuildingBase::SetParticeEffects(const FDDBuildingBaseData& LoadedAsset)
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("%s : HitEffect not loaded"), RowName);
 	}
-
-	//FName SocketName = TEXT("FirePoint");
-	//USceneComponent* TargetComponent = nullptr;
-
-	//if (SkeletalMeshComponents.Num() > 0 && SkeletalMeshComponents[0]->DoesSocketExist(SocketName))
-	//{
-	//	TargetComponent = SkeletalMeshComponents[0];
-	//}
-	//else if (StaticMeshComponents.Num() > 0 && StaticMeshComponents[0]->DoesSocketExist(SocketName))
-	//{
-	//	TargetComponent = StaticMeshComponents[0];
-	//}
-	//else
-	//{
-	//	UE_LOG(LogTemp, Warning, TEXT("Socket %s not found on any mesh components."), *SocketName.ToString());
-	//	return;
-	//}
 
 	TArray<FName> FirePointSockets;
 
@@ -216,25 +203,6 @@ void ADDBuildingBase::SetParticeEffects(const FDDBuildingBaseData& LoadedAsset)
 			AttackNiagaraComponents.Add(NewNiagaraComponent);  // 필요시 나이아가라 컴포넌트를 배열에 저장
 		}
 	}
-
-
-	//if (AttackNiagaraComponent)
-	//{
-	//	AttackNiagaraComponent->AttachToComponent(TargetComponent, FAttachmentTransformRules::SnapToTargetIncludingScale, SocketName);
-	//	AttackNiagaraComponent->RegisterComponent();
-	//}
-	//if (UNiagaraSystem* NiagaraSystem = Cast<UNiagaraSystem>(AttackEffect))
-	//{
-	//	// NiagaraSystem 설정 및 활성화
-	//	if (AttackNiagaraComponent)
-	//	{
-	//		AttackNiagaraComponent->SetAsset(NiagaraSystem);
-	//	}
-	//}
-	//else
-	//{
-	//	UE_LOG(LogTemp, Warning, TEXT("AttackEffect is of unknown type."));
-	//}
 }
 
 void ADDBuildingBase::SetSound(const FDDBuildingBaseData& LoadedAsset)
