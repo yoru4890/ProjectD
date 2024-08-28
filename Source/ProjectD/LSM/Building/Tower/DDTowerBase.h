@@ -40,6 +40,14 @@ public:
 protected:
 	float TowerAttackRange;
 
+	FVector InitialBarrelLocation; // 배럴의 초기 위치
+	FVector RecoilOffset; // 반동으로 인해 이동할 위치
+	bool bCanRecoli = false;
+	bool bIsRecoiling = false; // 반동 중인지 여부
+	float RecoilTimeElapsed = 0.0f; // 반동 시간 경과
+	float MaxRecoilTime = 0.2f; // 반동이 지속되는 시간 (초)
+	float RecoilDistance = 10.0f; // 반동 거리
+
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<AActor> TargetEnemy;
 

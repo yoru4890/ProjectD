@@ -40,6 +40,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool UpgradeBuilding(const FName& RowName);
 
+	// 새로운 함수: 트랩 업그레이드
+	UFUNCTION(BlueprintCallable)
+	FName GetManagedBuildingRowName();
+
 	UFUNCTION(BlueprintCallable)
 	void AllStopTrace();
 

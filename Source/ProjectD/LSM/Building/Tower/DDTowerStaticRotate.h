@@ -28,9 +28,22 @@ private:
 
 	void SetIsNowAttack(bool InIsNowAttack);
 
+	virtual void SetMeshs(const FDDBuildingBaseData& LoadedAsset) override;
+
+	void StartRecoil();
+
 private:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UDDRotationComponent> DDRotationComponent;
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<class UStaticMeshComponent> BarrelStaticMeshComponent;
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<class UStaticMeshComponent> WaistMeshComponent;
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<class UStaticMeshComponent> PlatformMeshComponent;
 
 	float RotationSpeed;
 

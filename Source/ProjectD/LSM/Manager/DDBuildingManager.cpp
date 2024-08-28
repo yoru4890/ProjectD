@@ -133,7 +133,7 @@ ADDBuildingBase* UDDBuildingManager::CreateBuildingInstance(UWorld* World, const
 		return nullptr;
 	}
 	check(BuildingFactory);
-	UObject* CreatedObject = BuildingFactory->CreateObject(World, RowName, FVector::ZeroVector, FRotator::ZeroRotator, nullptr, nullptr);
+	UObject* CreatedObject = BuildingFactory->CreateObject(World, RowName, nullptr, nullptr);
 	return Cast<ADDBuildingBase>(CreatedObject);
 }
 

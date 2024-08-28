@@ -44,7 +44,7 @@ void ADDProjectileBase::BeginPlay()
 
 #pragma region SetupAndInitialization
 
-void ADDProjectileBase::InitializeProjectile(float InDamageAmount, TSubclassOf<UDamageType> InDamageType, float InProjectileSpeed, float InMaxSpeed, float InMaxLifeTime, bool InbIsExplosive, float InExplosionRadius, int32 InMaxPenetrationCount)
+void ADDProjectileBase::ConfigureProjectile(float InDamageAmount, TSubclassOf<UDamageType> InDamageType, float InProjectileSpeed, float InMaxSpeed, float InMaxLifeTime, bool InbIsExplosive, float InExplosionRadius, int32 InMaxPenetrationCount)
 {
 	DamageAmount = InDamageAmount;
 	DamageType = InDamageType;
@@ -70,8 +70,10 @@ void ADDProjectileBase::SetAssetAndManager(const FDDProjectileData& LoadedAsset,
 
 void ADDProjectileBase::SetupCollisionResponses()
 {
-	StaticMeshComponent->SetCollisionObjectType(GTCHANNEL_PROJECTILE);
+	StaticMeshComponent->SetCollisionProfileName("Projectile");
+	//StaticMeshComponent->SetCollisionObjectType(GTCHANNEL_PROJECTILE);
 	StaticMeshComponent->OnComponentBeginOverlap.AddDynamic(this, &ADDProjectileBase::OnCollisionBeginOverlap);
+	StaticMeshComponent->OnComponentHit.AddDynamic(this, &ADDProjectileBase::OnCollisionHit);
 	StaticMeshComponent->OnComponentEndOverlap.AddDynamic(this, &ADDProjectileBase::OnCollisionEndOverlap);
 }
 
@@ -151,26 +153,20 @@ void ADDProjectileBase::OnCollisionBeginOverlap(UPrimitiveComponent* OverlappedC
 		{
 
 		}
-		ProjectileManager->DestroyProjectile(this);
-		StopLifeTimeTimer();
+		//ProjectileManager->DestroyProjectile(this);
+		//StopLifeTimeTimer();
 	}
+}
+
+void ADDProjectileBase::OnCollisionHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{
+	ProjectileMovementComponent->StopMovementImmediately();
+	ProjectileMovementComponent->SetActive(false);
+	this->SetActorLocation(GetActorLocation() + GetActorForwardVector() * 50.f);
 }
 
 void ADDProjectileBase::OnCollisionEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-}
-
-void ADDProjectileBase::SetProjectileActive(bool bIsActive)
-{
-	if (!bIsActive)
-	{
-		StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	}
-	else
-	{
-		StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	}
-	CurrentPenetrationCount = 0;
 }
 
 #pragma endregion CollisionAndCallbacks
@@ -230,7 +226,7 @@ void ADDProjectileBase::SetProjectileState(bool bIsActive)
 	if (bIsActive)
 	{
 		// 활성화: 충돌 활성화, 액터 표시, 틱 활성화
-		StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		ProjectileMovementComponent->SetUpdatedComponent(RootComponent);
 		SetActorHiddenInGame(false);
 		SetActorEnableCollision(true);
 		SetActorTickEnabled(true);
@@ -253,7 +249,6 @@ void ADDProjectileBase::SetProjectileState(bool bIsActive)
 			ProjectileMovementComponent->SetActive(false);
 		}
 
-		StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		SetActorHiddenInGame(true);
 		SetActorEnableCollision(false);
 		SetActorTickEnabled(false);
@@ -266,13 +261,25 @@ void ADDProjectileBase::SetProjectileState(bool bIsActive)
 	}
 }
 
+void ADDProjectileBase::SetStaticMeshRotator(FRotator Rotator)
+{
+	StaticMeshComponent->SetRelativeRotation(Rotator);
+}
+
 void ADDProjectileBase::OnLifeTimeExpired()
 {
+	if (!ProjectileManager)
+	{
+		UE_LOG(LogTemp, Error, TEXT("ProjectileManager is nullptr in OnLifeTimeExpired!"));
+		return;
+	}
+
 	// 폭파이펙트 추가 가능
 	if (bIsExplosive)
 	{
-
+		// 폭발 처리 로직
 	}
+
 	// 프로젝타일 제거
 	ProjectileManager->DestroyProjectile(this);
 	StopLifeTimeTimer();

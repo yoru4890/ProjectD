@@ -16,6 +16,6 @@ class PROJECTD_API UDDTowerFactory : public UObject, public IDDFactoryInterface
 	GENERATED_BODY()
 
 public:
-	virtual UObject* CreateObject(UWorld* World, const FName& RowName, const FVector& Location, const FRotator& Rotation, AActor* Owner, APawn* Instigator) override;
+	virtual UObject* CreateObject(UWorld* World, const FName& RowName, AActor* Owner, APawn* Instigator) override;
 
 };
