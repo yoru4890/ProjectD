@@ -16,6 +16,8 @@ class PROJECTD_API ADDPlayerController : public APlayerController
 	
 public:
 	ADDPlayerController();
+	UFUNCTION(BlueprintCallable)
+	void ShowMainWidget();
 
 protected:
 	virtual void BeginPlay() override;

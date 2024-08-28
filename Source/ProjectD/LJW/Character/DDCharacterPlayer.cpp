@@ -16,6 +16,8 @@
 #include "YSY/Game/DDGameInstance.h"
 #include "YSY/Manager/DDWaveManager.h"
 #include "Blueprint/UserWidget.h"
+#include "YSY/UI/DDPlayerHPBarWidget.h"
+#include "LJW/CharacterStat/DDCharacterStatComponent.h"
 
 ADDCharacterPlayer::ADDCharacterPlayer()
 {
@@ -58,6 +60,23 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 	{
 		BuildWidgetClass = BuildWidgetFinder.Class;
 	}
+
+	static ConstructorHelpers::FClassFinder<UUserWidget> RMMachineGunWidgetFinder(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/0000/YSY/Widget/YSY_WBP_RM_MachineGun.YSY_WBP_RM_MachineGun_C'"));
+
+	if (RMMachineGunWidgetFinder.Succeeded())
+	{
+		RMMachineGunWidgetClass = RMMachineGunWidgetFinder.Class;
+	}
+
+	static ConstructorHelpers::FClassFinder<UUserWidget> UpMachineGunWidgetFinder(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/0000/YSY/Widget/YSY_WBP_RM_UpMachineGun.YSY_WBP_RM_UpMachineGun_C'"));
+
+	if (UpMachineGunWidgetFinder.Succeeded())
+	{
+		UpMachineGunWidgetClass = UpMachineGunWidgetFinder.Class;
+	}
+
+	//StatComponent
+	Stat = CreateDefaultSubobject<UDDCharacterStatComponent>(TEXT("Stat"));
 #pragma region Init Input
 
 	//Input
@@ -172,7 +191,7 @@ void ADDCharacterPlayer::PostInitializeComponents()
 	WeaponSystem->OnGetAimingDelegate.BindUObject(PlayerAnimInstance, &UDDPlayerAnimInstance::GetIsAiming);
 	WeaponSystem->OnSetWeaponIndexDelegate.BindUObject(PlayerAnimInstance, &UDDPlayerAnimInstance::SetWeaponIndex);
 
-
+	Stat->OnHpZero.AddUObject(this, &ADDCharacterPlayer::Die);
 }
 
 void ADDCharacterPlayer::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
@@ -435,11 +454,7 @@ void ADDCharacterPlayer::OpenBuildWidget()
 	if (CurrentPlayerMode == EPlayerMode::ManagementMode)
 	{
 		BuildWidget->AddToViewport();
-		FInputModeUIOnly InputModeUIOnlyData;
-		PlayerController->SetIgnoreMoveInput(true);
-		PlayerController->StopMovement();
-		PlayerController->SetInputMode(InputModeUIOnlyData);
-		PlayerController->SetShowMouseCursor(true);
+		SetPlayerUIMode();
 	}
 }
 
@@ -472,6 +487,25 @@ void ADDCharacterPlayer::PlaceBuilding()
 	else if (CurrentPlayerMode == EPlayerMode::ManagementMode)
 	{
 		//TODO : YSY or LJW Upgrade Widget
+
+		FName BuildingName = BuildSystem->GetManagedBuildingRowName();
+		
+		if (BuildingName == NAME_None)
+		{
+			return;
+		}
+		else if (BuildingName == FName("MachineGunTower"))
+		{
+			RMMachineGunWidget->AddToViewport();
+			SetPlayerUIMode();
+		}
+		else if (BuildingName == FName("UpgradeMachineGunTower"))
+		{
+			UpMachineGunWidget->AddToViewport();
+			SetPlayerUIMode();
+		}
+
+		
 	}
 }
 
@@ -484,6 +518,54 @@ void ADDCharacterPlayer::WaveStart()
 void ADDCharacterPlayer::InitWidget()
 {
 	BuildWidget = CreateWidget(GetWorld(), BuildWidgetClass);
+	RMMachineGunWidget = CreateWidget(GetWorld(), RMMachineGunWidgetClass);
+	UpMachineGunWidget = CreateWidget(GetWorld(), UpMachineGunWidgetClass);
+}
+
+void ADDCharacterPlayer::SetPlayerUIMode()
+{
+	FInputModeUIOnly InputModeUIOnlyData;
+	PlayerController->SetIgnoreMoveInput(true);
+	PlayerController->StopMovement();
+	PlayerController->SetInputMode(InputModeUIOnlyData);
+	PlayerController->SetShowMouseCursor(true);
+}
+
+void ADDCharacterPlayer::Die()
+{
+
+}
+
+void ADDCharacterPlayer::SetupCharacterWidget(UDDUserWidget* InUserWidget)
+{
+	UDDPlayerHPBarWidget* HpBarWidget = Cast<UDDPlayerHPBarWidget>(InUserWidget);
+	ensure(HpBarWidget);
+	if (HpBarWidget)
+	{
+		// TODO : YSY or LJW Remove MagicNumber. Need to StatComponent
+		Stat->SetHp(500.0f);
+		HpBarWidget->UpdateStat(500.0f);
+		HpBarWidget->UpdateHpBar(500.0f);
+		Stat->OnHpChanged.AddUObject(HpBarWidget, &UDDPlayerHPBarWidget::UpdateHpBar);
+	}
+}
+
+float ADDCharacterPlayer::ApplyDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	Stat->ApplyDamage(DamageAmount);
+	return DamageAmount;
+}
+
+void ADDCharacterPlayer::ApplyDamageOverTime(EDotDamageType DamageType, float Time, float TimeInterval, float DamageAmount)
+{
+}
+
+void ADDCharacterPlayer::ApplyChainDamage(int DamageAmount, int NumberOfChain)
+{
+}
+
+void ADDCharacterPlayer::ApplyDebuff(EDebuffType DebuffType, float Time, float DebuffRate)
+{
 }
 
 

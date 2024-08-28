@@ -19,6 +19,7 @@
 #include "YSY/Animation/DDPlayEffectAnimNotify.h"
 #include "YSY/Interface/AggroTargetInterface.h"
 #include "YSY/Collision/CollisionChannel.h"
+#include "YSY/Game/DDPlayerState.h"
 
 // Sets default values
 ADDEnemyBase::ADDEnemyBase()
@@ -80,7 +81,10 @@ void ADDEnemyBase::PostInitializeComponents()
 
 float ADDEnemyBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	ShowHpBarbyAttack();
+	if (DamageCauser && DamageCauser->IsA(ACharacter::StaticClass()))
+	{
+		ShowHpBarbyAttack();
+	}
 
 	const UDamageType* DamageType = DamageEvent.DamageTypeClass.GetDefaultObject();
 
@@ -349,7 +353,9 @@ void ADDEnemyBase::ArrivalAtGoal()
 	EnemyAIController->StopAI();
 	OnDie.Broadcast(EnemyName, this);
 
-	// TODO : YSY Caculate Potal Count
+	// TODO : YSY Caculate Potal Count, Remove MagicNum
+
+	OnSubRemainingLivesSignature.Execute(1);
 }
 
 void ADDEnemyBase::Die()
@@ -358,6 +364,10 @@ void ADDEnemyBase::Die()
 	PlayDeathEffect();
 	OnSetVisibleHpBarDelegate.ExecuteIfBound(false);
 	OnDie.Broadcast(EnemyName, this);
+	ADDPlayerState* DDPlayerState = Cast<ADDPlayerState>(UGameplayStatics::GetPlayerState(GetWorld(), 0));
+
+	DDPlayerState->AddGold(GoldDropAmount);
+	UE_LOG(LogTemp, Warning, TEXT("%d"), DDPlayerState->GetGold());
 }
 
 void ADDEnemyBase::UpdateWidgetScale()
@@ -577,9 +587,10 @@ void ADDEnemyBase::MeleeAttack()
 
 	if (bHit)
 	{
-		if (OutHit.GetActor()->GetClass()->ImplementsInterface(UDamageInterface::StaticClass()))
+		if (auto HitActor = Cast<IDamageInterface>(OutHit.GetActor()))
 		{
-			
+			FDamageEvent DamageEvent;
+			HitActor->ApplyDamage(Damage, DamageEvent, EnemyAIController, this);
 		}
 	}
 }
@@ -596,9 +607,10 @@ void ADDEnemyBase::RangeAttack()
 
 	if (bHit)
 	{
-		if (OutHit.GetActor()->GetClass()->ImplementsInterface(UDamageInterface::StaticClass()))
+		if (auto HitActor = Cast<IDamageInterface>(OutHit.GetActor()))
 		{
-			
+			FDamageEvent DamageEvent;
+			HitActor->ApplyDamage(Damage, DamageEvent, EnemyAIController, this);
 		}
 	}
 }
