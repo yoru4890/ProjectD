@@ -23,4 +23,13 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
 	float SoundStartTime;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	float VolumeMultiplier{ 1.0f };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	float PitchMultiplier{ 1.0f };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	float EffectScale{ 1.0f };
 };

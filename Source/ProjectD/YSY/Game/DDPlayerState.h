@@ -8,9 +8,8 @@
 
 
 // 델리게이트 선언
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnGoldChanged);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnLikePointChanged);
-
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnGoldChanged, int32, CurrentGold);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLikePointChanged, int32, CurrentLikePoint);
 /**
  * 
  */

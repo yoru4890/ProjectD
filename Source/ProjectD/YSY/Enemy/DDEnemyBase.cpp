@@ -19,6 +19,7 @@
 #include "YSY/Animation/DDPlayEffectAnimNotify.h"
 #include "YSY/Interface/AggroTargetInterface.h"
 #include "YSY/Collision/CollisionChannel.h"
+#include "YSY/Game/DDPlayerState.h"
 
 // Sets default values
 ADDEnemyBase::ADDEnemyBase()
@@ -44,7 +45,6 @@ ADDEnemyBase::ADDEnemyBase()
 		HpBar->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 
-	GetCapsuleComponent()->SetCollisionProfileName(FName("Enemy"));
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 	GetCapsuleComponent()->SetCollisionResponseToChannel(GTCHANNEL_PLAYER, ECollisionResponse::ECR_Block);
 	GetCapsuleComponent()->SetCollisionResponseToChannel(GTCHANNEL_ENEMY, ECollisionResponse::ECR_Block);
@@ -81,7 +81,10 @@ void ADDEnemyBase::PostInitializeComponents()
 
 float ADDEnemyBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	ShowHpBarbyAttack();
+	if (DamageCauser && DamageCauser->IsA(ACharacter::StaticClass()))
+	{
+		ShowHpBarbyAttack();
+	}
 
 	const UDamageType* DamageType = DamageEvent.DamageTypeClass.GetDefaultObject();
 
@@ -175,6 +178,8 @@ void ADDEnemyBase::InitializeEnemy(const FDDEnemyData& EnemyData)
 	bIsElite = EnemyData.bIsElite;
 	AttackEffects = EnemyData.AttackEffects;
 	DeathEffects = EnemyData.DeathEffects;
+	GetCapsuleComponent()->SetCapsuleRadius(EnemyData.CapsuleRadiusSize);
+	GetCapsuleComponent()->SetCapsuleHalfHeight(EnemyData.CapsuleHalfHeightSize);
 
 	float EnemyScale = EnemyData.ScaleSize;
 	SetActorScale3D({ EnemyScale, EnemyScale, EnemyScale });
@@ -186,7 +191,7 @@ void ADDEnemyBase::InitializeEnemy(const FDDEnemyData& EnemyData)
 
 	USkeletalMesh* EnemySkeletalMesh = EnemyData.SkeletalMesh.Get();
 	GetMesh()->SetSkeletalMesh(EnemySkeletalMesh);
-	GetMesh()->SetRelativeLocationAndRotation({ 0,0,-90 }, { 0,-90,0 });
+	GetMesh()->SetRelativeLocationAndRotation({ 0,0,EnemyData.MeshLocationZ }, { 0,-90,0 });
 	GetMesh()->SetCollisionProfileName(FName("Enemy"));
 	GetMesh()->SetGenerateOverlapEvents(true);
 
@@ -348,15 +353,26 @@ void ADDEnemyBase::ArrivalAtGoal()
 	EnemyAIController->StopAI();
 	OnDie.Broadcast(EnemyName, this);
 
-	// TODO : YSY Caculate Potal Count
+	// TODO : YSY Caculate Potal Count, Remove MagicNum
+
+	OnSubRemainingLivesSignature.Execute(1);
 }
 
 void ADDEnemyBase::Die()
 {
 	// TODO : YSY Player get gold, Drop Item
+	if (bIsDead)
+	{
+		return;
+	}
+	bIsDead = true;
 	PlayDeathEffect();
 	OnSetVisibleHpBarDelegate.ExecuteIfBound(false);
 	OnDie.Broadcast(EnemyName, this);
+	ADDPlayerState* DDPlayerState = Cast<ADDPlayerState>(UGameplayStatics::GetPlayerState(GetWorld(), 0));
+
+	DDPlayerState->AddGold(GoldDropAmount);
+	UE_LOG(LogTemp, Warning, TEXT("%d"), DDPlayerState->GetGold());
 }
 
 void ADDEnemyBase::UpdateWidgetScale()
@@ -483,7 +499,6 @@ void ADDEnemyBase::Deactivate()
 		AggroTargetInterface->SubtractAggro();
 	}
 	bIsAggroState = false;
-	bIsDead = true;
 	GetCharacterMovement()->MaxWalkSpeed = 0.0f;
 	//EnemyAIController->StopAI();
 	SetActorTickEnabled(false);
@@ -576,9 +591,10 @@ void ADDEnemyBase::MeleeAttack()
 
 	if (bHit)
 	{
-		if (OutHit.GetActor()->GetClass()->ImplementsInterface(UDamageInterface::StaticClass()))
+		if (auto HitActor = Cast<IDamageInterface>(OutHit.GetActor()))
 		{
-			
+			FDamageEvent DamageEvent;
+			HitActor->ApplyDamage(Damage, DamageEvent, EnemyAIController, this);
 		}
 	}
 }
@@ -595,9 +611,10 @@ void ADDEnemyBase::RangeAttack()
 
 	if (bHit)
 	{
-		if (OutHit.GetActor()->GetClass()->ImplementsInterface(UDamageInterface::StaticClass()))
+		if (auto HitActor = Cast<IDamageInterface>(OutHit.GetActor()))
 		{
-			
+			FDamageEvent DamageEvent;
+			HitActor->ApplyDamage(Damage, DamageEvent, EnemyAIController, this);
 		}
 	}
 }
@@ -616,20 +633,20 @@ void ADDEnemyBase::PlayAttackEffect()
 {
 	for (const auto& AttackEffectInfo : AttackEffects)
 	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), AttackEffectInfo.SoundEffect, GetActorLocation(), AttackEffectInfo.VolumeMultiplier, AttackEffectInfo.PitchMultiplier, AttackEffectInfo.SoundStartTime);
+		
 		for (const auto& LocationName : AttackEffectInfo.LocationNames)
 		{
 			auto Location = GetMesh()->GetSocketLocation(LocationName);
 
-			UGameplayStatics::PlaySoundAtLocation(GetWorld(), AttackEffectInfo.SoundEffect, Location, 1.0f, 1.0f, AttackEffectInfo.SoundStartTime);
-
 			if (AttackEffectInfo.CascadeEffect)
 			{
-				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), AttackEffectInfo.CascadeEffect, Location);
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), AttackEffectInfo.CascadeEffect, Location, FRotator::ZeroRotator, FVector(AttackEffectInfo.EffectScale));
 			}
 
 			if (AttackEffectInfo.NiagaraEffect)
 			{
-				UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), AttackEffectInfo.NiagaraEffect, Location);
+				UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), AttackEffectInfo.NiagaraEffect, Location, FRotator::ZeroRotator, FVector(AttackEffectInfo.EffectScale));
 			}
 		}
 	}
@@ -639,20 +656,20 @@ void ADDEnemyBase::PlayDeathEffect()
 {
 	for (const auto& DeathEffectInfo : DeathEffects)
 	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), DeathEffectInfo.SoundEffect, GetActorLocation(), DeathEffectInfo.VolumeMultiplier, DeathEffectInfo.PitchMultiplier, DeathEffectInfo.SoundStartTime);
+
 		for (const auto& LocationName : DeathEffectInfo.LocationNames)
 		{
 			auto Location = GetMesh()->GetSocketLocation(LocationName);
 
-			UGameplayStatics::PlaySoundAtLocation(GetWorld(), DeathEffectInfo.SoundEffect, Location, 1.0f, 1.0f, DeathEffectInfo.SoundStartTime);
-
 			if (DeathEffectInfo.CascadeEffect)
 			{
-				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DeathEffectInfo.CascadeEffect, Location);
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DeathEffectInfo.CascadeEffect, Location, FRotator::ZeroRotator, FVector(DeathEffectInfo.EffectScale));
 			}
 
 			if (DeathEffectInfo.NiagaraEffect)
 			{
-				UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), DeathEffectInfo.NiagaraEffect, Location);
+				UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), DeathEffectInfo.NiagaraEffect, Location, FRotator::ZeroRotator, FVector(DeathEffectInfo.EffectScale));
 			}
 		}
 	}
