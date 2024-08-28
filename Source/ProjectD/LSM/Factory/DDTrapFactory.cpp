@@ -8,7 +8,7 @@
 #include "YSY/Game/DDGameInstance.h"
 #include "LSM/Manager/DDBuildingManager.h"
 
-UObject* UDDTrapFactory::CreateObject(UWorld* World, const FName& RowName, const FVector& Location, const FRotator& Rotation, AActor* Owner, APawn* Instigator)
+UObject* UDDTrapFactory::CreateObject(UWorld* World, const FName& RowName, AActor* Owner, APawn* Instigator)
 {
 
 	UDDGameInstance* MyGameInstance = Cast<UDDGameInstance>(GetWorld()->GetGameInstance());
@@ -31,8 +31,7 @@ UObject* UDDTrapFactory::CreateObject(UWorld* World, const FName& RowName, const
 
 	NewTrap->InitFromDataTable(RowName, *TrapData);
 	NewTrap->SetAssets(BuildingData);
-	NewTrap->SetActorLocation(Location);
-	NewTrap->SetActorRotation(Rotation);
+	NewTrap->SetActorLocation(FVector(0,0, -5000));
 	NewTrap->SetOwner(Owner);
 	NewTrap->SetInstigator(Instigator);
 	

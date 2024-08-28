@@ -5,34 +5,24 @@
 #include "LSM/Manager/DDProjectileManager.h"
 #include "YSY/Game/DDGameInstance.h"
 #include "LSM/Manager/DDAssetManager.h"
+#include "LSM/Projectile/DDProjectileBase.h"
 
 void UDDTankTowerAttackStrategy::Initialize(ADDBuildingBase* InOwningTower)
 {
-    ProjectileRowName = FName("Shell");
-    UDDGameInstance* MyGameInstance = Cast<UDDGameInstance>(GetWorld()->GetGameInstance());
-    ProjectileManager = MyGameInstance->GetProjectileManager();
-    check(ProjectileManager);
+	Super::Initialize(InOwningTower);
+	ProjectileRowName = FName("Shell");
+	InitializeProjectile(ProjectileRowName);
 
-    UDDAssetManager* AssetManager = MyGameInstance->GetAssetManager();
-
-    // 투사체 데이터를 가져옴
-    FDDProjectileData* ProjectileData = ProjectileManager->GetProjectileData(ProjectileRowName);
-
-    if (!ProjectileData)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("Strategy error"));
-        return;
-    }
-
-    if (ProjectileData && !ProjectileData->bIsLoaded)
-    {
-        // 비동기 로딩 함수 호출
-        ProjectileManager->LoadProjectileAssets(ProjectileRowName);
-    }
-
-
+	ProjectileSpeed = 5000;
+	ProjectileMaxSpeed = 5000;
+	ProjectileLifeTime = 1;
+	bIsExplosive = false;
+	ExplosionRadius = 0;
+	MaxPenetrationCount = 3;
 }
 
-void UDDTankTowerAttackStrategy::Attack(AActor* TargetEnemy)
+void UDDTankTowerAttackStrategy::Attack(AActor* TargetEnemy, const FVector& FireLocation, const FRotator& FireRotation)
 {
+	Super::Attack(TargetEnemy, FireLocation, FireRotation);
+	Projectile->SetActorScale3D(FVector(0.3f,0.3f,0.3f));
 }

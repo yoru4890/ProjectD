@@ -25,4 +25,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float TowerAttackRange; // 타워 공격범위
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bCanRecoil; // 반동여부
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bCanRecoil"))
+	float MaxRecoilTime; // 반동 시간
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bCanRecoil"))
+	float RecoilDistance; // 반동 거리
+
 };
