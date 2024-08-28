@@ -4,13 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "LSM/Building/Tower/DDTowerBase.h"
+#include "LSM/Building/DDBuildingAttackInterface.h"
 #include "DDTowerStaticRotate.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class PROJECTD_API ADDTowerStaticRotate : public ADDTowerBase
+class PROJECTD_API ADDTowerStaticRotate : public ADDTowerBase, public IDDBuildingAttackInterface
 {
 	GENERATED_BODY()
 
@@ -31,6 +32,11 @@ private:
 	virtual void SetMeshs(const FDDBuildingBaseData& LoadedAsset) override;
 
 	void StartRecoil();
+
+	virtual void Attack() override;
+
+	void StartAttackProcedure();
+
 
 private:
 	UPROPERTY(VisibleAnywhere)

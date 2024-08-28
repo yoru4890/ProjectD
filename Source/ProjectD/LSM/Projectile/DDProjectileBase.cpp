@@ -194,17 +194,6 @@ void ADDProjectileBase::ApplyDamageToActor(AActor* OtherActor)
 
 #pragma endregion AttackAndExplode
 
-#pragma region TickAndUpdate
-
-// Called every frame
-void ADDProjectileBase::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
-
-#pragma endregion TickAndUpdate
-
 #pragma region Utility
 
 void ADDProjectileBase::LaunchProjectile()
@@ -279,7 +268,7 @@ void ADDProjectileBase::OnLifeTimeExpired()
 	{
 		// 폭발 처리 로직
 	}
-
+	UE_LOG(LogTemp, Error, TEXT("Projectile is Destroyed because of LifeTime"));
 	// 프로젝타일 제거
 	ProjectileManager->DestroyProjectile(this);
 	StopLifeTimeTimer();

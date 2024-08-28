@@ -28,9 +28,28 @@ void UDDBaseAttackStrategy::Attack(AActor* TargetEnemy, const FVector& FireLocat
 
 }
 
-void UDDBaseAttackStrategy::ApplyDotDamge(AActor* TargetEnemy)
+void UDDBaseAttackStrategy::ApplyFireDotDamge(AActor* TargetEnemy)
 {
-	//UE_LOG(LogTemp, Warning, TEXT("Apply Dot Damage"));
+    EDotDamageType DotDamageType = EDotDamageType::Fire;
+    IDamageInterface* DamageInterface = Cast<IDamageInterface>(TargetEnemy);
+    if (DamageInterface)
+    {
+        DamageInterface->ApplyDamageOverTime(DotDamageType, DotDuration, DotInterval, DotDamage);
+
+        UE_LOG(LogTemp, Warning, TEXT("Apply Direct Damage"));
+    }
+}
+
+void UDDBaseAttackStrategy::ApplyAcidDotDamge(AActor* TargetEnemy)
+{
+    EDotDamageType DotDamageType = EDotDamageType::Acid;
+    IDamageInterface* DamageInterface = Cast<IDamageInterface>(TargetEnemy);
+    if (DamageInterface)
+    {
+        DamageInterface->ApplyDamageOverTime(DotDamageType, DotDuration, DotInterval, DotDamage);
+
+        UE_LOG(LogTemp, Warning, TEXT("Apply Direct Damage"));
+    }
 }
 
 void UDDBaseAttackStrategy::ApplyDirectDamage(AActor* TargetEnemy)

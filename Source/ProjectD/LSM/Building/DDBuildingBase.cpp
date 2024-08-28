@@ -58,12 +58,6 @@ void ADDBuildingBase::BeginPlay()
 
 #pragma region TickAndUpdate
 
-// Called every frame
-void ADDBuildingBase::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-}
-
 #pragma endregion TickAndUpdate
 
 #pragma region SetupAndInitialization
@@ -97,7 +91,6 @@ void ADDBuildingBase::InitFromDataTable(const FName& InRowName, const FDDBuildin
 	SlowDuration = BuildingData.SlowDuration;
 	bCanAttack = false;
 	DamageType = BuildingData.DamageType;
-	MeshZAxisModify = BuildingData.MeshZAxisModify;
 	//UE_LOG(LogTemp, Warning, TEXT("MeshZAxisModify is : %f"), BuildingData.MeshZAxisModify);
 }
 
@@ -314,12 +307,17 @@ void ADDBuildingBase::SetMeshs(const FDDBuildingBaseData& LoadedAsset)
 void ADDBuildingBase::SetCanAttack(const bool bInCanAttack)
 {
 	bCanAttack = bInCanAttack;
-	TimeSinceLastAttack = 0;
 
 	if (!bInCanAttack)
 	{
 		AttackCollisionComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		StopAttackEffect();
+		// 타이머가 설정된 경우 타이머 종료
+		if (GetWorld()->GetTimerManager().IsTimerActive(AttackCooldownTimerHandle))
+		{
+			GetWorld()->GetTimerManager().ClearTimer(AttackCooldownTimerHandle);
+			UE_LOG(LogTemp, Warning, TEXT("Attack Timer Test"));
+		}
 	}
 	else
 	{
@@ -329,9 +327,14 @@ void ADDBuildingBase::SetCanAttack(const bool bInCanAttack)
 
 void ADDBuildingBase::ExecuteAttackEffects()
 {
+	bCanAttack = false;
 	PlayAttackEffectAtSocket();
 	PlayAttackAnimation();
 	PlayAttackSound();
+
+	UE_LOG(LogTemp, Warning, TEXT("testest"));
+	// 타이머를 설정하여 쿨타임 후 bCanAttack을 true로 변경
+	GetWorld()->GetTimerManager().SetTimer(AttackCooldownTimerHandle, this, &ADDBuildingBase::ResetCanAttack, AttackCoolTime, false);
 }
 
 void ADDBuildingBase::PlayAttackEffectAtSocket()
@@ -349,6 +352,12 @@ void ADDBuildingBase::StopAttackEffect()
 	{
 		AttackNiagaraComponent->SetActive(false);
 	}
+}
+
+void ADDBuildingBase::ResetCanAttack()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Building attack cooltime reset"));
+	bCanAttack = true;
 }
 
 void ADDBuildingBase::PlayAttackAnimation()
@@ -386,6 +395,10 @@ void ADDBuildingBase::PlayAttackSound()
 
 void ADDBuildingBase::OnBoxCollisionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	if (bCanAttack)
+	{
+		ExecuteAttackEffects();
+	}
 	EnemiesInRanged.Add(OtherActor);
 }
 

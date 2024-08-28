@@ -41,9 +41,6 @@ public:
 	int32 OccupiedCellWidth; // 그리드를 차지하는 크기
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float MeshZAxisModify; // z축 조정 값
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsAnimated; // 메쉬 타입
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
