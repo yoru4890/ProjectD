@@ -361,6 +361,11 @@ void ADDEnemyBase::ArrivalAtGoal()
 void ADDEnemyBase::Die()
 {
 	// TODO : YSY Player get gold, Drop Item
+	if (bIsDead)
+	{
+		return;
+	}
+	bIsDead = true;
 	PlayDeathEffect();
 	OnSetVisibleHpBarDelegate.ExecuteIfBound(false);
 	OnDie.Broadcast(EnemyName, this);
@@ -494,7 +499,6 @@ void ADDEnemyBase::Deactivate()
 		AggroTargetInterface->SubtractAggro();
 	}
 	bIsAggroState = false;
-	bIsDead = true;
 	GetCharacterMovement()->MaxWalkSpeed = 0.0f;
 	//EnemyAIController->StopAI();
 	SetActorTickEnabled(false);
