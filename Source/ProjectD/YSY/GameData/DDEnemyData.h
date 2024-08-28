@@ -49,6 +49,15 @@ public:
 	float ScaleSize;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	float CapsuleRadiusSize;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	float CapsuleHalfHeightSize;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	float MeshLocationZ;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
 	float MaxHP;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)

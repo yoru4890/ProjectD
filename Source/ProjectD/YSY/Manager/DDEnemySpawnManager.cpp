@@ -74,10 +74,15 @@ void UDDEnemySpawnManager::SpawnEnemy(const FName& EnemyName)
 
 	ADDEnemyBase* Enemy = GetWorld()->SpawnActorDeferred<ADDEnemyBase>(ADDEnemyBase::StaticClass(), {});
 
+	// TODO : YSY Casting X
+	UDDGameInstance* DDGameInstance = Cast<UDDGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+	auto TempWaveManager = DDGameInstance->GetWaveManager();
+
 	if (Enemy)
 	{
 		UDDGameInstance* MyGameInstance = Cast<UDDGameInstance>(GetWorld()->GetGameInstance());
 		Enemy->OnDie.AddUObject(this, &UDDEnemySpawnManager::Deactivate);
+		Enemy->OnSubRemainingLivesSignature.BindUObject(TempWaveManager, &UDDWaveManager::SubtractRemainingLives);
 		Enemy->InitializeEnemy(*MyGameInstance->GetDataManager()->GetEnemyDataTable().Find(EnemyName));
 		Enemy->FinishSpawning({});
 		Enemy->Deactivate();

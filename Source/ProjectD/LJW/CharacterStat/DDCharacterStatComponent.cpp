@@ -14,7 +14,7 @@ void UDDCharacterStatComponent::InitializeComponent()
 {
 	Super::InitializeComponent();
 	
-	SetHp(BaseStat.MaxHp);
+	//SetHp(BaseStat.MaxHp);
 }
 
 float UDDCharacterStatComponent::ApplyDamage(float InDamage)
@@ -32,8 +32,11 @@ float UDDCharacterStatComponent::ApplyDamage(float InDamage)
 
 void UDDCharacterStatComponent::SetHp(float NewHp)
 {
-	CurrentHp = FMath::Clamp<float>(NewHp, 0.0f, BaseStat.MaxHp);
+	CurrentHp = NewHp;
+	//CurrentHp = FMath::Clamp<float>(NewHp, 0.0f, BaseStat.MaxHp);
 	OnHpChanged.Broadcast(CurrentHp);
+
+	UE_LOG(LogTemp, Warning, TEXT("%f"), CurrentHp);
 }
 
 

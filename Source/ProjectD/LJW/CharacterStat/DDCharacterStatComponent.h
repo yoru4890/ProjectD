@@ -30,10 +30,9 @@ public:
 
 	FORCEINLINE float GetCurrentHp() const { return CurrentHp; }
 	float ApplyDamage(float InDamage);
+	void SetHp(float NewHp);
 
 protected:
-
-	void SetHp(float NewHp);
 
 	UPROPERTY(Transient, VisibleInstanceOnly, Category = Stat)
 	float CurrentHp;

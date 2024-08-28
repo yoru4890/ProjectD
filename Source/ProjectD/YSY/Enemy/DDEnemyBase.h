@@ -16,6 +16,8 @@ DECLARE_MULTICAST_DELEGATE_ThreeParams(FOnDebuffSignature, FTimerHandle&, float,
 
 DECLARE_DELEGATE_OneParam(FOnSetVisibleHpBarSignature, bool);
 
+DECLARE_DELEGATE_OneParam(FOnSubRemainingLivesSignature, int32);
+
 struct FDotEffectState
 {
 	float DamageAmount = 0.0f;
@@ -138,6 +140,7 @@ public:
 
 public:
 	FOnDieSignature OnDie{};
+	FOnSubRemainingLivesSignature OnSubRemainingLivesSignature{};
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "DD", Meta = (AllowPrivateAccess = "true"))
