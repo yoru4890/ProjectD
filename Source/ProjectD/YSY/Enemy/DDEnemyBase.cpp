@@ -339,9 +339,10 @@ void ADDEnemyBase::SplineMoveFinish()
 {
 	OnSplineMoveFinished.ExecuteIfBound();
 
-	if (AIMoveRoute->IsSplineEnd(RouteIndex))
+	if (AIMoveRoute && AIMoveRoute->IsSplineEnd(RouteIndex))
 	{
 		ArrivalAtGoal();
+		UE_LOG(LogTemp, Warning, TEXT("%d"), RouteIndex);
 	}
 }
 
@@ -355,7 +356,11 @@ void ADDEnemyBase::ArrivalAtGoal()
 
 	// TODO : YSY Caculate Potal Count, Remove MagicNum
 
-	OnSubRemainingLivesSignature.Execute(1);
+	if (OnSubRemainingLivesSignature.IsBound())
+	{
+		OnSubRemainingLivesSignature.Execute(1);
+	}
+
 }
 
 void ADDEnemyBase::Die()
@@ -372,7 +377,6 @@ void ADDEnemyBase::Die()
 	ADDPlayerState* DDPlayerState = Cast<ADDPlayerState>(UGameplayStatics::GetPlayerState(GetWorld(), 0));
 
 	DDPlayerState->AddGold(GoldDropAmount);
-	UE_LOG(LogTemp, Warning, TEXT("%d"), DDPlayerState->GetGold());
 }
 
 void ADDEnemyBase::UpdateWidgetScale()
