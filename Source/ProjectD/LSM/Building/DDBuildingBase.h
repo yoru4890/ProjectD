@@ -89,7 +89,7 @@ protected:
 	int32 CellWidth; // 빌딩이 차지하는 셀의 크기
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 GridCellSize; // 셀 한칸이 차지하는 길이
+	int32 GridCellSize = 3; // 셀 한칸이 차지하는 길이
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bCanAttack; // 빌딩이 공격할 수 있는지

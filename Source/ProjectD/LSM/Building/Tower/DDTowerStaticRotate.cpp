@@ -34,7 +34,7 @@ void ADDTowerStaticRotate::Tick(float DeltaTime)
 		}
 	}
 
-	if (!bCanAttack || !TargetEnemy)
+	if (!TargetEnemy)
 	{
 		SetIsNowAttack(false);
 		return;
