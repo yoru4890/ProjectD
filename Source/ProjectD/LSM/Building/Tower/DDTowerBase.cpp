@@ -19,11 +19,6 @@ void ADDTowerBase::BeginPlay()
 	Super::BeginPlay();
 }
 
-void ADDTowerBase::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-}
-
 void ADDTowerBase::SetTargetEnemy(AActor* NewTargetEnemy)
 {
 	TargetEnemy = NewTargetEnemy;
@@ -98,5 +93,7 @@ void ADDTowerBase::InitFromDataTable(const FName& InRowName, const FDDBuildingBa
 	this->bCanRecoli = TowerData->bCanRecoil;
 	this->MaxRecoilTime = TowerData->MaxRecoilTime;
 	this->RecoilDistance = TowerData->RecoilDistance;
+	this->BarrelMeshOffset = TowerData->BarrelMeshOffset;
+	this->WaistMeshOffset = TowerData->WaistMeshOffset;
 }
 

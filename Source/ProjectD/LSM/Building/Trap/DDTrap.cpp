@@ -4,6 +4,7 @@
 #include "LSM/Building/Trap/DDTrap.h"
 #include "Components/BoxComponent.h"
 #include "Engine/DamageEvents.h"
+#include "LSM/Building/AttackStrategies/DDBuildingAttackStrategyInterface.h"
 
 ADDTrap::ADDTrap()
 {
@@ -17,17 +18,17 @@ void ADDTrap::BeginPlay()
 	Super::BeginPlay();
 }
 
-void ADDTrap::Tick(float DeltaTime)
+void ADDTrap::Attack()
 {
-	Super::Tick(DeltaTime);
-
-	TimeSinceLastAttack += DeltaTime;
-
-	if (bCanAttack && !EnemiesInRanged.IsEmpty() && TimeSinceLastAttack >= AttackCoolTime)
+	if (!EnemiesInRanged.IsEmpty())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Attack"));
-		ExecuteAttackEffects();
-		TimeSinceLastAttack = 0.f;
+		IDDBuildingAttackStrategyInterface* AttackStrategyInterface = Cast<IDDBuildingAttackStrategyInterface>(AttackStrategy);
+		TSet<TObjectPtr<AActor>> Targets = EnemiesInRanged;
+		for (auto& Target : Targets)
+		{
+			AttackStrategyInterface->Attack(Target);
+		}
 	}
 }
 
@@ -38,4 +39,14 @@ void ADDTrap::ModifyMeshAndAttackCollision() const
 	//UE_LOG(LogTemp, Warning, TEXT("GridCellSize: %d"), GridCellSize);
 	//UE_LOG(LogTemp, Warning, TEXT("CellWidth: %d"), CellWidth);
 	Cast<UBoxComponent>(AttackCollisionComponent)->SetBoxExtent(AttackRange);
+}
+
+void ADDTrap::ResetCanAttack()
+{
+	Super::ResetCanAttack();
+
+	if (EnemiesInRanged.Num() > 0)
+	{
+		ExecuteAttackEffects();
+	}
 }

@@ -16,6 +16,12 @@ ADDGridBuildManager::ADDGridBuildManager()
 
 	GridCellSize = 100.f;
 
+	// 기본 메시 설정 (예시로 Cube 메시 사용)
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> CubeMesh(TEXT("/Game/0000/LSM/Mesh/Shape_Cube.Shape_Cube"));
+	if (CubeMesh.Succeeded())
+	{
+		TowerZoneMeshAsset=CubeMesh.Object;
+	}
 }
 
 // Called when the game starts or when spawned
@@ -25,6 +31,7 @@ void ADDGridBuildManager::BeginPlay()
 	InitializeGridCells();
 	UpdateTowerZone();
 	DrawDebugBox(GetWorld(), GetActorLocation(), BoxComponent->GetScaledBoxExtent(), FColor::Green, true, -1, 0, 5);
+	SetTowerBuildingZoneMaterial(true);
 
 }
 
@@ -208,6 +215,14 @@ bool ADDGridBuildManager::SetGridCellAsBlank(const FVector& HitLocation, const i
 	return false;
 }
 
+void ADDGridBuildManager::SetTowerBuildingZoneMaterial(bool bIsHiddenInGame)
+{
+	for (auto& TowerZone : TowerZones)
+	{
+		TowerZone->SetHiddenInGame(bIsHiddenInGame);;
+	}
+}
+
 const bool ADDGridBuildManager::IsPointOnSamePlane(const FVector& InPointWorldLocation, const FVector& StandardPointWorldLocation, const FVector& PlaneNormalVector) const
 {
 	FVector NormalizedPlaneNormal = PlaneNormalVector.GetSafeNormal();
@@ -219,16 +234,13 @@ const bool ADDGridBuildManager::IsPointOnSamePlane(const FVector& InPointWorldLo
 
 void ADDGridBuildManager::AddTowerZone()
 {
-	UBoxComponent* NewTowerZone = NewObject<UBoxComponent>(this);
+	UStaticMeshComponent* NewTowerZone = NewObject<UStaticMeshComponent>(this);
 	// 이름 설정
 	FName TowerZoneName = FName(*FString::Printf(TEXT("%s:TowerZone"), *NewTowerZone->GetFName().ToString()));
 	NewTowerZone->Rename(*TowerZoneName.ToString());
-
-	NewTowerZone->SetBoxExtent(FVector(100.0f, 100.0f, 50.0f));
-	NewTowerZone->SetupAttachment(RootComponent);
 	NewTowerZone->SetCollisionResponseToAllChannels(ECR_Ignore);
 	NewTowerZone->SetCollisionResponseToChannel(GTCHANNEL_BUILDINGTRACE, ECR_Block);
-
+	NewTowerZone->SetStaticMesh(TowerZoneMeshAsset);
 
 	NewTowerZone->RegisterComponent();
 	TowerZones.Add(NewTowerZone);
@@ -259,9 +271,13 @@ void ADDGridBuildManager::ShowDeugGrid()
 
 void ADDGridBuildManager::UpdateTowerZone()
 {
-	for (UBoxComponent* TowerZone : TowerZones)
+	for (UStaticMeshComponent* TowerZone : TowerZones)
 	{
-		FVector ZoneExtent = TowerZone->GetScaledBoxExtent();
+		// 메시의 바운딩 박스를 가져옵니다.
+		FBoxSphereBounds MeshBounds = TowerZone->GetStaticMesh()->GetBounds();
+		// 메시의 바운딩 박스에 TowerZone의 스케일을 적용합니다.
+		FVector ZoneExtent = MeshBounds.BoxExtent * TowerZone->GetComponentScale();
+
 		FVector ZoneOrigin = TowerZone->GetComponentLocation() - FVector(ZoneExtent.X, ZoneExtent.Y, 0);
 
 		int32 NumCellsX = FMath::CeilToInt((ZoneExtent.X * 2) / GridCellSize);

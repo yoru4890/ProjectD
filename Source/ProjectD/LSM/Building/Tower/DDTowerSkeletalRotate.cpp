@@ -18,7 +18,7 @@ void ADDTowerSkeletalRotate::Tick(float DeltaTime)
 
 	if (!bCanAttack || !TargetEnemy)
 	{
-		SetIsNowAttack(false);
+		//SetIsNowAttack(false);
 		return;
 	}
 	else
@@ -33,12 +33,12 @@ void ADDTowerSkeletalRotate::Tick(float DeltaTime)
 				{
 					AttackStrategy->Attack(TargetEnemy);
 				}
-				SetIsNowAttack(true);
+				//SetIsNowAttack(true);
 				TimeSinceLastAttack = 0.f;
 			}
 			else
 			{
-				SetIsNowAttack(false);
+				//SetIsNowAttack(false);
 			}
 		}
 	}
@@ -92,7 +92,7 @@ void ADDTowerSkeletalRotate::SetIsNowAttack(bool InIsNowAttack)
 	{
 		if (InIsNowAttack == false)
 		{
-			StopAttackEffect();
+			//StopAttackEffect();
 		}
 	}
 	IsNowAttack = InIsNowAttack;
