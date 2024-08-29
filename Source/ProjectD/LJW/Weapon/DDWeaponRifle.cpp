@@ -41,7 +41,7 @@ void ADDWeaponRifle::Attack()
 	
 	FColor DrawColor = IsDetect ? FColor::Green : FColor::Red;
 
-	DrawDebugLine(GetWorld(), StartTrace, EndTrace, DrawColor, false, 5.0f);
+	//DrawDebugLine(GetWorld(), StartTrace, EndTrace, DrawColor, false, 5.0f);
 	if (IsDetect)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Trace : %s"), *(HitResult.GetActor()->GetFName().ToString()));
