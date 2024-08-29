@@ -30,7 +30,7 @@ void ADDGridBuildManager::BeginPlay()
 	Super::BeginPlay();
 	InitializeGridCells();
 	UpdateTowerZone();
-	DrawDebugBox(GetWorld(), GetActorLocation(), BoxComponent->GetScaledBoxExtent(), FColor::Green, true, -1, 0, 5);
+	//DrawDebugBox(GetWorld(), GetActorLocation(), BoxComponent->GetScaledBoxExtent(), FColor::Green, true, -1, 0, 5);
 	SetTowerBuildingZoneMaterial(true);
 
 }
