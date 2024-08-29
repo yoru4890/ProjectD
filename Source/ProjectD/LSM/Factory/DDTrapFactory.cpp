@@ -8,32 +8,31 @@
 #include "YSY/Game/DDGameInstance.h"
 #include "LSM/Manager/DDBuildingManager.h"
 
-UObject* UDDTrapFactory::CreateObject(UWorld* World, const FName& RowName, AActor* Owner, APawn* Instigator)
+UObject* UDDTrapFactory::CreateObject(const FDDFactoryParams& Params)
 {
-
-	UDDGameInstance* MyGameInstance = Cast<UDDGameInstance>(GetWorld()->GetGameInstance());
+	check(Params.World);
+	UDDGameInstance* MyGameInstance = Cast<UDDGameInstance>(Params.World->GetGameInstance());
 	check(MyGameInstance);
 
 	UDDBuildingManager* BuildingManager = MyGameInstance->GetBuildingManager();
 	check(BuildingManager);
 
-	const FDDTrapData* TrapData = BuildingManager->GetTrapData(RowName);
-	const FDDBuildingBaseData& BuildingData = *BuildingManager->GetBuildingData(RowName);
+	const FDDTrapData* TrapData = BuildingManager->GetTrapData(Params.RowName);
+	const FDDBuildingBaseData& BuildingData = *BuildingManager->GetBuildingData(Params.RowName);
 	check(TrapData);
 
 	UClass* TrapClass = TrapData->TrapClass;
 
-	check(World);
 	check(TrapClass);
 	// TrapClass를 사용하여 NewTrap 생성
-	ADDTrap* NewTrap = World->SpawnActor<ADDTrap>(TrapClass);
+	ADDTrap* NewTrap = Params.World->SpawnActor<ADDTrap>(TrapClass);
 	check(NewTrap);
 
-	NewTrap->InitFromDataTable(RowName, *TrapData);
+	NewTrap->InitFromDataTable(Params.RowName, *TrapData);
 	NewTrap->SetAssets(BuildingData);
 	NewTrap->SetActorLocation(FVector(0,0, -5000));
-	NewTrap->SetOwner(Owner);
-	NewTrap->SetInstigator(Instigator);
+	NewTrap->SetOwner(Params.Owner);
+	NewTrap->SetInstigator(Params.Instigator);
 	
 
 

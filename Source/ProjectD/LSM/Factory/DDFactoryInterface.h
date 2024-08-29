@@ -4,8 +4,26 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
-#include "LSM/DDAssetBaseData.h"
 #include "DDFactoryInterface.generated.h"
+
+USTRUCT(BlueprintType)
+struct FDDFactoryParams
+{
+    GENERATED_BODY()
+
+    UPROPERTY(BlueprintReadWrite)
+    UWorld* World;
+
+    UPROPERTY(BlueprintReadWrite)
+    FName RowName;
+
+    UPROPERTY(BlueprintReadWrite)
+    AActor* Owner;
+
+    UPROPERTY(BlueprintReadWrite)
+    APawn* Instigator;
+};
+
 
 // This class does not need to be modified.
 UINTERFACE(MinimalAPI)
@@ -23,5 +41,5 @@ class PROJECTD_API IDDFactoryInterface
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual UObject* CreateObject(UWorld* World, const FName& RowName, AActor* Owner, APawn* Instigator) = 0;
+	virtual UObject* CreateObject(const FDDFactoryParams& Params) = 0;
 };

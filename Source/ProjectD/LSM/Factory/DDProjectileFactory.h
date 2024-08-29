@@ -16,6 +16,6 @@ class PROJECTD_API UDDProjectileFactory : public UObject, public IDDFactoryInter
 	GENERATED_BODY()
 
 public:
-	virtual UObject* CreateObject(UWorld* World, const FName& RowName, AActor* Owner, APawn* Instigator) override;
+	virtual UObject* CreateObject(const FDDFactoryParams& Params) override;
 	
 };

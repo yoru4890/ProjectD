@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
+#include "LSM/Factory/DDFactoryInterface.h"
 #include "LSM/Projectile/DDProjectileData.h"
 #include "DDProjectileManager.generated.h"
 
@@ -50,7 +51,7 @@ private:
 
 	void OnProjectileAssetsLoaded(const FName& RowName);
 
-	ADDProjectileBase* CreateProjectileInstance(UWorld* World, const FName& RowName);
+	class ADDProjectileBase* CreateProjectileInstance(const FDDFactoryParams& Params);
 	TMap<FName, FProjectileList> ProjectilePool;
 	TObjectPtr<class UDDGameInstance> MyGameInstance;
 	TObjectPtr<class UDDFactoryManager> FactoryManager;
