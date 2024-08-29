@@ -40,11 +40,10 @@ void ADDTowerStaticRotate::Tick(float DeltaTime)
 		return;
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("Tower Tick Test"));
-
 	if (IsEnemyInSight() && bCanAttack)
 	{
 		StartAttackProcedure();
+		UE_LOG(LogTemp, Warning, TEXT("Tower Tick Test"));
 	}
 }
 
