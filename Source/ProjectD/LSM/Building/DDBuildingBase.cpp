@@ -311,7 +311,6 @@ void ADDBuildingBase::SetCanAttack(const bool bInCanAttack)
 	if (!bInCanAttack)
 	{
 		AttackCollisionComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		StopAttackEffect();
 		// 타이머가 설정된 경우 타이머 종료
 		if (GetWorld()->GetTimerManager().IsTimerActive(AttackCooldownTimerHandle))
 		{
@@ -323,6 +322,7 @@ void ADDBuildingBase::SetCanAttack(const bool bInCanAttack)
 	{
 		AttackCollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	}
+	StopAttackEffect();
 }
 
 void ADDBuildingBase::ExecuteAttackEffects()
