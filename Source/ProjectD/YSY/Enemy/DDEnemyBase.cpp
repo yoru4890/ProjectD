@@ -358,7 +358,7 @@ void ADDEnemyBase::ArrivalAtGoal()
 
 	if (OnSubRemainingLivesSignature.IsBound())
 	{
-		OnSubRemainingLivesSignature.Execute(1);
+		//OnSubRemainingLivesSignature.Execute(1);
 	}
 
 }
