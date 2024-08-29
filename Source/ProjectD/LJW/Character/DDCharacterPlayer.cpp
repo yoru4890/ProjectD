@@ -75,6 +75,20 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 		UpMachineGunWidgetClass = UpMachineGunWidgetFinder.Class;
 	}
 
+	static ConstructorHelpers::FClassFinder<UUserWidget> RMThornTrapWidgetFinder(TEXT(""));
+
+	if (RMThornTrapWidgetFinder.Succeeded())
+	{
+		RMThornTrapWidgetClass = RMThornTrapWidgetFinder.Class;
+	}
+
+	static ConstructorHelpers::FClassFinder<UUserWidget> UpThornTrapWidgetFinder(TEXT(""));
+
+	if (UpThornTrapWidgetFinder.Succeeded())
+	{
+		UpThornTrapWidgetClass = UpThornTrapWidgetFinder.Class;
+	}
+
 	//StatComponent
 	Stat = CreateDefaultSubobject<UDDCharacterStatComponent>(TEXT("Stat"));
 #pragma region Init Input
@@ -504,6 +518,16 @@ void ADDCharacterPlayer::PlaceBuilding()
 			UpMachineGunWidget->AddToViewport();
 			SetPlayerUIMode();
 		}
+		else if (BuildingName == FName("ThornTrap"))
+		{
+			RMThornTrapWidget->AddToViewport();
+			SetPlayerUIMode();
+		}
+		else if (BuildingName == FName("UpgradeThornTrap"))
+		{
+			UpThornTrapWidget->AddToViewport();
+			SetPlayerUIMode();
+		}
 
 		
 	}
@@ -520,6 +544,8 @@ void ADDCharacterPlayer::InitWidget()
 	BuildWidget = CreateWidget(GetWorld(), BuildWidgetClass);
 	RMMachineGunWidget = CreateWidget(GetWorld(), RMMachineGunWidgetClass);
 	UpMachineGunWidget = CreateWidget(GetWorld(), UpMachineGunWidgetClass);
+	RMThornTrapWidget = CreateWidget(GetWorld(), RMThornTrapWidgetClass);
+	UpThornTrapWidget = CreateWidget(GetWorld(), UpThornTrapWidgetClass);
 }
 
 void ADDCharacterPlayer::SetPlayerUIMode()
