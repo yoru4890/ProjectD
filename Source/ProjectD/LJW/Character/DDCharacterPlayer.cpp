@@ -75,14 +75,14 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 		UpMachineGunWidgetClass = UpMachineGunWidgetFinder.Class;
 	}
 
-	static ConstructorHelpers::FClassFinder<UUserWidget> RMThornTrapWidgetFinder(TEXT(""));
+	static ConstructorHelpers::FClassFinder<UUserWidget> RMThornTrapWidgetFinder(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/0000/YSY/Widget/YSY_WBP_RM_ThornTrap.YSY_WBP_RM_ThornTrap_C'"));
 
 	if (RMThornTrapWidgetFinder.Succeeded())
 	{
 		RMThornTrapWidgetClass = RMThornTrapWidgetFinder.Class;
 	}
 
-	static ConstructorHelpers::FClassFinder<UUserWidget> UpThornTrapWidgetFinder(TEXT(""));
+	static ConstructorHelpers::FClassFinder<UUserWidget> UpThornTrapWidgetFinder(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/0000/YSY/Widget/YSY_WBP_RM_UpThornTrap.YSY_WBP_RM_UpThornTrap_C'"));
 
 	if (UpThornTrapWidgetFinder.Succeeded())
 	{
