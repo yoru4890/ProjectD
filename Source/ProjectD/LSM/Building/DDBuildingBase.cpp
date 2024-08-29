@@ -48,9 +48,11 @@ void ADDBuildingBase::BeginPlay()
 
 	// 빌드매니저에서 Grid 크기를 가져온다.
 	ADDGridBuildManager* GridBuildManager = Cast<ADDGridBuildManager>(UGameplayStatics::GetActorOfClass(GetWorld(), ADDGridBuildManager::StaticClass()));
-	check(GridBuildManager);
-
-	GridCellSize = GridBuildManager->GetGridCellSize();
+	
+	if (GridBuildManager)
+	{
+		GridCellSize = GridBuildManager->GetGridCellSize();
+	}
 
 }
 
@@ -395,10 +397,6 @@ void ADDBuildingBase::PlayAttackSound()
 
 void ADDBuildingBase::OnBoxCollisionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (bCanAttack)
-	{
-		ExecuteAttackEffects();
-	}
 	EnemiesInRanged.Add(OtherActor);
 }
 

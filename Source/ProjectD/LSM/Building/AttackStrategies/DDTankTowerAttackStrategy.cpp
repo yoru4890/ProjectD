@@ -15,7 +15,7 @@ void UDDTankTowerAttackStrategy::Initialize(ADDBuildingBase* InOwningTower)
 
 	ProjectileSpeed = 5000;
 	ProjectileMaxSpeed = 5000;
-	ProjectileLifeTime = 3;
+	ProjectileLifeTime = 2;
 	bIsExplosive = false;
 	ExplosionRadius = 0;
 	MaxPenetrationCount = 3;

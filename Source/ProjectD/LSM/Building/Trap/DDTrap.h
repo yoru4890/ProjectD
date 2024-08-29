@@ -27,4 +27,6 @@ protected:
 	virtual void ModifyMeshAndAttackCollision() const override;
 
 	virtual void ResetCanAttack() override;
+
+	virtual void OnBoxCollisionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) override;
 };
