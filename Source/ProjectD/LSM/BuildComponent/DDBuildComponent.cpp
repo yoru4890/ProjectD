@@ -95,6 +95,10 @@ AActor* UDDBuildComponent::ReadyBuilding(const FName& RowName)
 
 	PreviewBuilding->SetMaterialToPreview(bCanPay);
 
+	if (PreviewBuilding->GetBuildingType() == EBuildingType::Tower)
+	{
+		SetTowerZoneIsHiddenInGame(false);
+	}
 	return PreviewBuilding;
 
 }
@@ -134,6 +138,11 @@ bool UDDBuildComponent::PlaceBuilding()
 
 	PreviewBuilding->SetCanAttack(true);
 	PayBuildCost(BuildingRowName);
+
+	if (PreviewBuilding->GetBuildingType() == EBuildingType::Tower)
+	{
+		SetTowerZoneIsHiddenInGame(true);
+	}
 
 	PreviewBuilding = nullptr;
 
@@ -423,6 +432,11 @@ bool UDDBuildComponent::PayBuildCost(const FName& RowName) const
 	const FDDBuildingBaseData& BuildingData = *BuildingManager->GetBuildingData(RowName);
 	bool bIsPay = PlayerState->SubtractGold(BuildingData.BuildCost);
 	return bIsPay;
+}
+
+void UDDBuildComponent::SetTowerZoneIsHiddenInGame(bool bIsHiddenInGame) const
+{
+	GridBuildManager->SetTowerBuildingZoneMaterial(bIsHiddenInGame);
 }
 
 //bool UDDBuildComponent::CanPayUpgradeCost(const FName& RowName) const
