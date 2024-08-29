@@ -7,30 +7,29 @@
 #include "YSY/Game/DDGameInstance.h"
 #include "LSM/Manager/DDBuildingManager.h"
 
-UObject* UDDTowerFactory::CreateObject(UWorld* World, const FName& RowName, AActor* Owner, APawn* Instigator)
+UObject* UDDTowerFactory::CreateObject(const FDDFactoryParams& Params)
 {
-	UDDGameInstance* MyGameInstance = Cast<UDDGameInstance>(GetWorld()->GetGameInstance());
+	UDDGameInstance* MyGameInstance = Cast<UDDGameInstance>(Params.World->GetGameInstance());
 	check(MyGameInstance);
 
 	UDDBuildingManager* BuildingManager = MyGameInstance->GetBuildingManager();
 	check(BuildingManager);
 
-	const FDDTowerData* TowerData = BuildingManager->GetTowerData(RowName);
-	const FDDBuildingBaseData& BuildingData = *BuildingManager->GetBuildingData(RowName);
+	const FDDTowerData* TowerData = BuildingManager->GetTowerData(Params.RowName);
+	const FDDBuildingBaseData& BuildingData = *BuildingManager->GetBuildingData(Params.RowName);
 
 	UClass* TowerClass = TowerData->TowerClass;
 	check(TowerClass);
 
-	check(World);
 	// TrapClass를 사용하여 NewTrap 생성
-	ADDTowerBase* NewTower = World->SpawnActor<ADDTowerBase>(TowerClass);
+	ADDTowerBase* NewTower = Params.World->SpawnActor<ADDTowerBase>(TowerClass);
 	check(NewTower);
 
-	NewTower->InitFromDataTable(RowName, *TowerData);
+	NewTower->InitFromDataTable(Params.RowName, *TowerData);
 	NewTower->SetAssets(BuildingData);
 	NewTower->SetActorLocation(FVector(0, 0, -5000));
-	NewTower->SetOwner(Owner);
-	NewTower->SetInstigator(Instigator);
+	NewTower->SetOwner(Params.Owner);
+	NewTower->SetInstigator(Params.Instigator);
 
 	return NewTower;
 }

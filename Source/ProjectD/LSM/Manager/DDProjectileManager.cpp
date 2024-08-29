@@ -51,7 +51,12 @@ ADDProjectileBase* UDDProjectileManager::SpawnProjectile(UWorld* World, const FN
 	else
 	{
 		check(World);
-		NewProjectile = CreateProjectileInstance(World, RowName);
+		FDDFactoryParams Params;
+		Params.World = World;
+		Params.RowName = RowName;
+		Params.Owner = Owner;
+		Params.Instigator = Instigator;
+		NewProjectile = CreateProjectileInstance(Params);
 	}
 
 	NewProjectile->SetProjectileState(true);
@@ -61,10 +66,17 @@ ADDProjectileBase* UDDProjectileManager::SpawnProjectile(UWorld* World, const FN
 	return NewProjectile;
 }
 
-ADDProjectileBase* UDDProjectileManager::CreateProjectileInstance(UWorld* World, const FName& RowName)
+ADDProjectileBase* UDDProjectileManager::CreateProjectileInstance(const FDDFactoryParams& Params)
 {
-	IDDFactoryInterface* ProjectileFactory = FactoryManager->GetFactory(RowName);
-	UObject* CreatedObject = ProjectileFactory->CreateObject(World, RowName,  nullptr, nullptr);
+	IDDFactoryInterface* ProjectileFactory = FactoryManager->GetFactory(Params.RowName);
+
+	if (!ProjectileFactory)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Can't Find Factory"))
+			return nullptr;
+	}
+
+	UObject* CreatedObject = ProjectileFactory->CreateObject(Params);
 	return Cast<ADDProjectileBase>(CreatedObject);
 }
 
@@ -130,7 +142,13 @@ void UDDProjectileManager::OnProjectileAssetsLoaded(const FName& RowName)
 	// 5개의 투사체를 생성하여 풀에 추가
 	for (int32 i = 0; i < PoolSize; ++i)
 	{
-		ADDProjectileBase* NewProjectile = CreateProjectileInstance(GetWorld(), RowName);
+		FDDFactoryParams Params;
+		Params.World = GetWorld();
+		Params.RowName = RowName;
+		Params.Owner = nullptr;
+		Params.Instigator = nullptr;
+
+		ADDProjectileBase* NewProjectile = CreateProjectileInstance(Params);
 		if (NewProjectile)
 		{
 			ProjectilePool[RowName].Projectiles.Add(NewProjectile);
