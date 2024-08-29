@@ -50,3 +50,13 @@ void ADDTrap::ResetCanAttack()
 		ExecuteAttackEffects();
 	}
 }
+
+void ADDTrap::OnBoxCollisionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	Super::OnBoxCollisionBeginOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
+
+	if (bCanAttack)
+	{
+		ExecuteAttackEffects();
+	}
+}
