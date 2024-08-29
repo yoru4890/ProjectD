@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
+#include "LSM/Factory/DDFactoryInterface.h"
 #include "LSM/Building/Tower/DDTowerData.h"
 #include "LSM/Building/Trap/DDTrapData.h"
 #include "DDBuildingManager.generated.h"
@@ -84,7 +85,7 @@ private:
 
 	void SetBuildingSellCost(float Ratio = 0.8f);
 
-	ADDBuildingBase* CreateBuildingInstance(UWorld* World, const FName& RowName);
+	class ADDBuildingBase* CreateBuildingInstance(const FDDFactoryParams& Params);
 
 	void OnBuildingAssetsLoaded(const FName& RowName);
 

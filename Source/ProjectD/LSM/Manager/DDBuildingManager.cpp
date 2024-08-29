@@ -82,30 +82,30 @@ ADDBuildingBase* UDDBuildingManager::SpawnBuilding(UWorld* World, const FName& R
 	if (!BuildingPool.Contains(RowName))
 	{
 		BuildingPool.Add(RowName, FBuildingList());
-		UE_LOG(LogTemp, Warning, TEXT("check1"));
 	}
 
 	ADDBuildingBase* NewBuilding = nullptr;
 
-	// Ǯ���� Ʈ���� �����ϴ�.
 	if (BuildingPool[RowName].Buildings.Num() > 0)
 	{
 		NewBuilding = BuildingPool[RowName].Buildings.Pop();
 		if (NewBuilding)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("check2"));
+
 		}
 	}
 	else
 	{
-		// World�� null�̸� ���� ����
 		check(World);
-		NewBuilding = CreateBuildingInstance(World, RowName);
-		UE_LOG(LogTemp, Warning, TEXT("check3"));
+		FDDFactoryParams Params;
+		Params.World = World;
+		Params.RowName = RowName;
+		Params.Owner = Owner;
+		Params.Instigator = Instigator;
+		NewBuilding = CreateBuildingInstance(Params);
 	}
 	if (NewBuilding)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("check4"));
 		NewBuilding->SetActorLocationAndRotation(Location, Rotation);
 		NewBuilding->SetActorHiddenInGame(false);
 		NewBuilding->SetActorEnableCollision(true);
@@ -125,15 +125,15 @@ void UDDBuildingManager::DestroyBuilding(ADDBuildingBase& Building)
 	Building.SetCanAttack(false);
 }
 
-ADDBuildingBase* UDDBuildingManager::CreateBuildingInstance(UWorld* World, const FName& RowName)
+ADDBuildingBase* UDDBuildingManager::CreateBuildingInstance(const FDDFactoryParams& Params)
 {
-	IDDFactoryInterface* BuildingFactory = FactoryManager->GetFactory(RowName);
+	IDDFactoryInterface* BuildingFactory = FactoryManager->GetFactory(Params.RowName);
 	if (!BuildingFactory)
 	{
+		UE_LOG(LogTemp,Warning,TEXT("Can't Find Factory"))
 		return nullptr;
 	}
-	check(BuildingFactory);
-	UObject* CreatedObject = BuildingFactory->CreateObject(World, RowName, nullptr, nullptr);
+	UObject* CreatedObject = BuildingFactory->CreateObject(Params);
 	return Cast<ADDBuildingBase>(CreatedObject);
 }
 
@@ -369,10 +369,16 @@ void UDDBuildingManager::OnBuildingAssetsLoaded(const FName& RowName)
 			BuildingPool.Add(RowName, FBuildingList());
 		}
 
+		FDDFactoryParams Params;
+		Params.World = GetWorld();
+		Params.RowName = RowName;
+		Params.Owner = nullptr;
+		Params.Instigator = nullptr;
+
 		int32 NumInstances = (BuildingData->BuildingType == EBuildingType::Trap) ? 10 : 3;
 		for (int32 i = 0; i < NumInstances; ++i)
 		{
-			ADDBuildingBase* NewBuilding = CreateBuildingInstance(GetWorld(), RowName);
+			ADDBuildingBase* NewBuilding = CreateBuildingInstance(Params);
 			if (NewBuilding)
 			{
 				BuildingPool[RowName].Buildings.Add(NewBuilding);
