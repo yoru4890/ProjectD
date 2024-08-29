@@ -50,7 +50,6 @@ void UDDBuildComponent::BeginPlay()
 
 	// GridBuildManager initialization
 	GridBuildManager = Cast<ADDGridBuildManager>(UGameplayStatics::GetActorOfClass(GetWorld(), ADDGridBuildManager::StaticClass()));
-	check(GridBuildManager);
 
 	PlayerState = CastChecked<ADDPlayerState>(UGameplayStatics::GetPlayerState(GetWorld(), 0));
 	check(PlayerState);
@@ -66,6 +65,10 @@ void UDDBuildComponent::TickComponent(float DeltaTime, ELevelTick TickType, FAct
 
 AActor* UDDBuildComponent::ReadyBuilding(const FName& RowName)
 {
+	if (!GridBuildManager)
+	{
+		return nullptr;
+	}
 	bIsSetBuilding = false;
 	if (PreviewBuilding) {
 		if (PreviewBuilding->GetRowName() == RowName) {
@@ -122,7 +125,7 @@ bool UDDBuildComponent::PlaceBuilding()
 
 	bool bCanPay = CanPayBuildCost(PreviewBuilding->GetRowName());
 
-	if (PreviewBuilding->IsHidden() || !bIsSetBuilding) {
+	if (PreviewBuilding->IsHidden() || !bIsSetBuilding || !GridBuildManager) {
 		return false;
 	}
 
@@ -151,7 +154,7 @@ bool UDDBuildComponent::PlaceBuilding()
 
 void UDDBuildComponent::CancelPlacedBuilding()
 {
-	if (!ManagedBuilding) {
+	if (!ManagedBuilding || !GridBuildManager) {
 		return;
 	}
 	const FDDBuildingBaseData& BuildingData = *BuildingManager->GetBuildingData(ManagedBuilding->GetRowName());
@@ -272,7 +275,7 @@ void UDDBuildComponent::StartManageTrace()
 
 void UDDBuildComponent::PerformBuildTrace()
 {
-	if (!PreviewBuilding)
+	if (!PreviewBuilding||!GridBuildManager)
 	{
 		return;
 	}
@@ -297,7 +300,6 @@ void UDDBuildComponent::PerformBuildTrace()
 			FVector BuildLocation = HitResult.Location;
 			FRotator TowerRotation;
 			bool CanBuildAtLoction = false;
-			check(GridBuildManager);
 			check(HitWarningWidgetInstance);
 
 			if (PreviewBuilding->GetBuildingType() == EBuildingType::Trap)
@@ -436,6 +438,10 @@ bool UDDBuildComponent::PayBuildCost(const FName& RowName) const
 
 void UDDBuildComponent::SetTowerZoneIsHiddenInGame(bool bIsHiddenInGame) const
 {
+	if (!GridBuildManager)
+	{
+		return;
+	}
 	GridBuildManager->SetTowerBuildingZoneMaterial(bIsHiddenInGame);
 }
 
