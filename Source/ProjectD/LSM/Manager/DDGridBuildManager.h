@@ -33,7 +33,6 @@ public:
 	{}
 
 };
-
 UCLASS()
 class PROJECTD_API ADDGridBuildManager : public AActor
 {
@@ -68,12 +67,14 @@ private:
 	// Array to store grid cell locations
 	TMap<FIntPoint, FGridCell> GridCellMap;
 
-	UPROPERTY(VisibleAnywhere)
-	TArray<TObjectPtr<UBoxComponent>> TowerZones;
+	UPROPERTY(EditAnyWhere)
+	TArray<TObjectPtr<UStaticMeshComponent>> TowerZones;
 
 	UPROPERTY(EditAnywhere)
 	float PlaneTolerance = 5.f;
 
+	UPROPERTY()
+	TObjectPtr<UStaticMesh> TowerZoneMeshAsset;
 public:
 	FORCEINLINE const float GetGridCellSize() const { return GridCellSize; };
 	const FVector GetNearestGridCellLocation(const FVector& HitLocation) const;
@@ -82,6 +83,7 @@ public:
 	const FVector GetGridCellNormalVector(const FVector& HitLocation) const;
 	bool SetGridCellAsOccupied(const FVector& HitLocation, const int32 OccupiedCellWidth);
 	bool SetGridCellAsBlank(const FVector& HitLocation, const int32 OccupiedCellWidth);
+	void SetTowerBuildingZoneMaterial(bool bIsHiddenInGame);
 
 private:
 	const FIntPoint ConvertWorldLocationToGridCell(const FVector& Location) const;
@@ -94,5 +96,7 @@ private:
 	void ShowDeugGrid();
 
 	void UpdateTowerZone();
+
+
 	
 };
