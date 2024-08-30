@@ -132,11 +132,10 @@ void ADDTowerStaticRotate::Attack()
 {
 	if (AttackStrategy)
 	{
-		IDDBuildingAttackStrategyInterface* AttackStrategyInterface = Cast<IDDBuildingAttackStrategyInterface>(AttackStrategy);
 		FVector FirePointLocation = BarrelStaticMeshComponent->GetSocketLocation(TEXT("FirePoint"));
 		FRotator FirePointDirection = BarrelStaticMeshComponent->GetSocketRotation(TEXT("FirePoint"));
 
-		AttackStrategyInterface->Attack(TargetEnemy, FirePointLocation, FirePointDirection);
+		AttackStrategy->Attack(TargetEnemy, FirePointLocation, FirePointDirection);
 	}
 	SetIsNowAttack(true);
 }

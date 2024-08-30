@@ -7,6 +7,7 @@
 #include "DDBuildingBaseData.h"
 #include "LSM/DDSetAssetInterface.h"
 #include "LSM/DDMaterials.h"
+#include "LSM/Building/AttackStrategies/DDBuildingAttackStrategyInterface.h"
 #include "DDBuildingBase.generated.h"
 
 UCLASS()
@@ -176,5 +177,5 @@ protected:
 	TObjectPtr<UMaterialInstanceDynamic> DynamicMaterialInstance;
 
 	UPROPERTY()
-	TObjectPtr<class UDDBaseAttackStrategy> AttackStrategy;
+	TScriptInterface<IDDBuildingAttackStrategyInterface> AttackStrategy;
 };

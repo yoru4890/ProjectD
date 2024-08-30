@@ -102,12 +102,14 @@ void ADDBuildingBase::SetAttackStrategy(TSubclassOf<class UDDBaseAttackStrategy>
 	{
 		UDDBaseAttackStrategy* StrategyInstance = NewObject<UDDBaseAttackStrategy>(this, AttackStrategyClass);
 
-		AttackStrategy = StrategyInstance;
-		// 인터페이스로 캐스팅하여 초기화
-		if (IDDBuildingAttackStrategyInterface* Interface = Cast<IDDBuildingAttackStrategyInterface>(AttackStrategy))
+		// 생성된 객체가 인터페이스를 구현하는지 확인 후 할당
+		if (StrategyInstance && StrategyInstance->GetClass()->ImplementsInterface(UDDBuildingAttackStrategyInterface::StaticClass()))
 		{
-			Interface->Initialize(this);
+			AttackStrategy = TScriptInterface<IDDBuildingAttackStrategyInterface>(StrategyInstance);
+
+			AttackStrategy->Initialize(this);
 		}
+
 	}
 }
 
