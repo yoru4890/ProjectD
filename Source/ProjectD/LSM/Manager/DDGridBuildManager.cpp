@@ -217,6 +217,10 @@ bool ADDGridBuildManager::SetGridCellAsBlank(const FVector& HitLocation, const i
 
 void ADDGridBuildManager::SetTowerBuildingZoneMaterial(bool bIsHiddenInGame)
 {
+	if (TowerZones.IsEmpty())
+	{
+		return;
+	}
 	for (auto& TowerZone : TowerZones)
 	{
 		TowerZone->SetHiddenInGame(bIsHiddenInGame);;
@@ -271,6 +275,10 @@ void ADDGridBuildManager::ShowDeugGrid()
 
 void ADDGridBuildManager::UpdateTowerZone()
 {
+	if (TowerZones.IsEmpty())
+	{
+		return;
+	}
 	for (UStaticMeshComponent* TowerZone : TowerZones)
 	{
 		// 메시의 바운딩 박스를 가져옵니다.
