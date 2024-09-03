@@ -85,6 +85,12 @@ private:
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<class UDDCantBuildWidget> HitWarningWidgetInstance;
 
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<UUserWidget> BuildWidgetClass;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class UDDCantBuildWidget> BuildWidgetInstance;
+
 	bool bIsSetBuilding = false;
 
 	void PerformBuildTrace();

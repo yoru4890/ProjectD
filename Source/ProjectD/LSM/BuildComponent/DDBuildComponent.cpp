@@ -19,12 +19,17 @@ UDDBuildComponent::UDDBuildComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
 
-	// ...
-
-	static ConstructorHelpers::FClassFinder<UUserWidget> WidgetClassFinder(TEXT("/Game/0000/LSM/Widget/LSM_WB_CantBuild.LSM_WB_CantBuild_C"));
-	if (WidgetClassFinder.Succeeded())
+	static ConstructorHelpers::FClassFinder<UUserWidget> HitWarningWidgetRef(TEXT("/Game/0000/LSM/Widget/LSM_WB_CantBuild.LSM_WB_CantBuild_C"));
+	if (HitWarningWidgetRef.Succeeded())
 	{
-		HitWarningWidgetClass = WidgetClassFinder.Class;
+		HitWarningWidgetClass = HitWarningWidgetRef.Class;
+	}
+
+	static ConstructorHelpers::FClassFinder<UUserWidget> BuildWidgetRef(TEXT("/Game/0000/LSM/Widget/BuildComponent/LSM_WBP_RM_StartBuild.LSM_WBP_RM_StartBuild_C"));
+
+	if (BuildWidgetRef.Succeeded())
+	{
+		BuildWidgetClass = BuildWidgetRef.Class;
 	}
 }
 
