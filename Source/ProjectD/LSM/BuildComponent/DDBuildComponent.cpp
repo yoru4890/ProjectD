@@ -11,6 +11,7 @@
 #include "YSY/Game/DDPlayerState.h"
 #include "LSM/Widget/DDCantBuildWidget.h"
 #include "LSM/Building/DDBuildingBase.h"
+#include "LSM/Widget/DDSelectBuildingWidget.h"
 
 // Sets default values for this component's properties
 UDDBuildComponent::UDDBuildComponent()
@@ -25,7 +26,7 @@ UDDBuildComponent::UDDBuildComponent()
 		HitWarningWidgetClass = HitWarningWidgetRef.Class;
 	}
 
-	static ConstructorHelpers::FClassFinder<UUserWidget> BuildWidgetRef(TEXT("/Game/0000/LSM/Widget/BuildComponent/LSM_WBP_RM_StartBuild.LSM_WBP_RM_StartBuild_C"));
+	static ConstructorHelpers::FClassFinder<UDDSelectBuildingWidget> BuildWidgetRef(TEXT("/Game/0000/LSM/Widget/BuildComponent/LSM_WBP_RM_SelectBuilding.LSM_WBP_RM_SelectBuilding_C"));
 
 	if (BuildWidgetRef.Succeeded())
 	{
@@ -39,12 +40,8 @@ void UDDBuildComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// 위젯 클래스를 설정하는 부분은 블루프린트에서 설정 가능
-	if (HitWarningWidgetClass)
-	{
-		HitWarningWidgetInstance = CastChecked<UDDCantBuildWidget>(CreateWidget<UUserWidget>(UGameplayStatics::GetPlayerController(GetWorld(), 0), HitWarningWidgetClass));
-	}
-
+	InitWidget();
+	BindEventsToWidget();
 	// BuildingManager가 초기화되었는지 확인
 	check(GetWorld());
 	UDDGameInstance* GameInstance = CastChecked<UDDGameInstance>(GetWorld()->GetGameInstance());
@@ -61,23 +58,41 @@ void UDDBuildComponent::BeginPlay()
 
 }
 
-
-// Called every frame
-void UDDBuildComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UDDBuildComponent::InitWidget()
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	// 위젯 클래스를 설정하는 부분은 블루프린트에서 설정 가능
+	if (HitWarningWidgetClass)
+	{
+		HitWarningWidgetInstance = CastChecked<UDDCantBuildWidget>(CreateWidget<UUserWidget>(UGameplayStatics::GetPlayerController(GetWorld(), 0), HitWarningWidgetClass));
+	}
+
+	if (BuildWidgetClass) 
+	{
+		BuildWidgetInstance = CreateWidget<UDDSelectBuildingWidget>(GetWorld(), BuildWidgetClass); (GetWorld(), BuildWidgetClass);
+	}
 }
 
-AActor* UDDBuildComponent::ReadyBuilding(const FName& RowName)
+void UDDBuildComponent::BindEventsToWidget()
 {
+	if (BuildWidgetInstance)
+	{
+		BuildWidgetInstance->OnBuildingSelected.AddDynamic(this, &UDDBuildComponent::ReadyBuilding);
+	
+		UE_LOG(LogTemp, Warning, TEXT("Called?"));
+	}
+}
+
+void UDDBuildComponent::ReadyBuilding(FName RowName)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Binding?"));
 	if (!GridBuildManager)
 	{
-		return nullptr;
+		return;
 	}
 	bIsSetBuilding = false;
 	if (PreviewBuilding) {
 		if (PreviewBuilding->GetRowName() == RowName) {
-			return PreviewBuilding;
+			return;
 		}
 		else {
 			CancelReadyBuilding();
@@ -96,7 +111,7 @@ AActor* UDDBuildComponent::ReadyBuilding(const FName& RowName)
 	// 추가: PreviewBuilding이 nullptr인지 확인
 	if (!PreviewBuilding) {
 		UE_LOG(LogTemp, Error, TEXT("Failed to spawn trap: PreviewBuilding is nullptr"));
-		return nullptr; // nullptr 반환하여 문제 발생을 방지
+		return; // nullptr 반환하여 문제 발생을 방지
 	}
 
 	bool bCanPay = CanPayBuildCost(RowName);
@@ -107,7 +122,7 @@ AActor* UDDBuildComponent::ReadyBuilding(const FName& RowName)
 	{
 		SetTowerZoneIsHiddenInGame(false);
 	}
-	return PreviewBuilding;
+	return;
 
 }
 

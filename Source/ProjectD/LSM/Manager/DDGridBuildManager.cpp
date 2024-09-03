@@ -223,6 +223,10 @@ void ADDGridBuildManager::SetTowerBuildingZoneMaterial(bool bIsHiddenInGame)
 	}
 	for (auto& TowerZone : TowerZones)
 	{
+		if (!TowerZone)
+		{
+			continue;
+		}
 		TowerZone->SetHiddenInGame(bIsHiddenInGame);;
 	}
 }
@@ -281,6 +285,10 @@ void ADDGridBuildManager::UpdateTowerZone()
 	}
 	for (UStaticMeshComponent* TowerZone : TowerZones)
 	{
+		if (!TowerZone)
+		{
+			continue;
+		}
 		// 메시의 바운딩 박스를 가져옵니다.
 		FBoxSphereBounds MeshBounds = TowerZone->GetStaticMesh()->GetBounds();
 		// 메시의 바운딩 박스에 TowerZone의 스케일을 적용합니다.

@@ -21,11 +21,9 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION(BlueprintCallable)
-	AActor* ReadyBuilding(const FName& RowName);
+	void ReadyBuilding(FName RowName);
 
 	UFUNCTION(BlueprintCallable)
 	void CancelReadyBuilding();
@@ -86,10 +84,10 @@ private:
 	TObjectPtr<class UDDCantBuildWidget> HitWarningWidgetInstance;
 
 	UPROPERTY(EditAnywhere, Category = "UI")
-	TSubclassOf<UUserWidget> BuildWidgetClass;
+	TSubclassOf<class UDDSelectBuildingWidget> BuildWidgetClass;
 
 	UPROPERTY(EditAnywhere)
-	TObjectPtr<class UDDCantBuildWidget> BuildWidgetInstance;
+	TObjectPtr<class UDDSelectBuildingWidget> BuildWidgetInstance;
 
 	bool bIsSetBuilding = false;
 
@@ -99,6 +97,10 @@ private:
 
 	bool CanPayBuildCost(const FName& RowName) const;
 	bool PayBuildCost(const FName& RowName) const;
+
+	void InitWidget();
+
+	void BindEventsToWidget();
 
 	void SetTowerZoneIsHiddenInGame(bool bIsHiddenInGame) const;
 	//bool CanPayUpgradeCost(const FName& RowName) const;
