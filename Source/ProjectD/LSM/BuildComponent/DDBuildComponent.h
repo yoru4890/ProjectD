@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "LSM/Building/DDBuildingBaseData.h"
 #include "DDBuildComponent.generated.h"
 
 
@@ -57,6 +58,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void StartManageTrace();
 
+	UFUNCTION()
+	void ShowStartBuildWidget();
+
 private:
 	UPROPERTY()
 	TObjectPtr<class UDDBuildingManager> BuildingManager;
@@ -84,10 +88,16 @@ private:
 	TObjectPtr<class UDDCantBuildWidget> HitWarningWidgetInstance;
 
 	UPROPERTY(EditAnywhere, Category = "UI")
-	TSubclassOf<class UDDSelectBuildingWidget> BuildWidgetClass;
+	TSubclassOf<class UDDSelectBuildingWidget> SelectBuildingWidgetClass;
 
 	UPROPERTY(EditAnywhere)
-	TObjectPtr<class UDDSelectBuildingWidget> BuildWidgetInstance;
+	TObjectPtr<class UDDSelectBuildingWidget> SelectBuildingWidgetInstance;
+
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<class UDDStartBuildWidget> StartBuildWidgetClass;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class UDDStartBuildWidget> StartBuildWidgetInstance;
 
 	bool bIsSetBuilding = false;
 
@@ -101,6 +111,9 @@ private:
 	void InitWidget();
 
 	void BindEventsToWidget();
+
+	UFUNCTION()
+	void ShowSelectBuildingWidget(EBuildingType BuildingType);
 
 	void SetTowerZoneIsHiddenInGame(bool bIsHiddenInGame) const;
 	//bool CanPayUpgradeCost(const FName& RowName) const;

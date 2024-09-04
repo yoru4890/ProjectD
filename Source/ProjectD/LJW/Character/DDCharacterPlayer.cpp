@@ -35,11 +35,11 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 	FollowCamera->bUsePawnControlRotation = false;
 
 	//Data
-	static ConstructorHelpers::FObjectFinder<UDDCharacterControlData> DataRef(TEXT("/Script/Engine.Blueprint'/Game/0000/LJW/Blueprints/BP_DDCharacterControlData.BP_DDCharacterControlData'"));
-	if (DataRef.Object)
-	{
-		CharacterControlManager = DataRef.Object;
-	}
+	//static ConstructorHelpers::FObjectFinder<UDDCharacterControlData> DataRef(TEXT("/Script/Engine.Blueprint'/Game/0000/LJW/Blueprints/BP_DDCharacterControlData.BP_DDCharacterControlData'"));
+	//if (DataRef.Object)
+	//{
+	//	CharacterControlManager = DataRef.Object;
+	//}
 	
 	//Weapon System Component
 	WeaponSystem = CreateDefaultSubobject<UDDWeaponSystemComponent>(TEXT("WeaponSystem"));
@@ -467,8 +467,10 @@ void ADDCharacterPlayer::OpenBuildWidget()
 {
 	if (CurrentPlayerMode == EPlayerMode::ManagementMode)
 	{
-		BuildWidget->AddToViewport();
+		BuildSystem->ShowStartBuildWidget();
 		SetPlayerUIMode();
+
+
 	}
 }
 
@@ -541,11 +543,11 @@ void ADDCharacterPlayer::WaveStart()
 
 void ADDCharacterPlayer::InitWidget()
 {
-	BuildWidget = CreateWidget(GetWorld(), BuildWidgetClass);
-	RMMachineGunWidget = CreateWidget(GetWorld(), RMMachineGunWidgetClass);
-	UpMachineGunWidget = CreateWidget(GetWorld(), UpMachineGunWidgetClass);
-	RMThornTrapWidget = CreateWidget(GetWorld(), RMThornTrapWidgetClass);
-	UpThornTrapWidget = CreateWidget(GetWorld(), UpThornTrapWidgetClass);
+	//BuildWidget = CreateWidget(GetWorld(), BuildWidgetClass);
+	//RMMachineGunWidget = CreateWidget(GetWorld(), RMMachineGunWidgetClass);
+	//UpMachineGunWidget = CreateWidget(GetWorld(), UpMachineGunWidgetClass);
+	//RMThornTrapWidget = CreateWidget(GetWorld(), RMThornTrapWidgetClass);
+	//UpThornTrapWidget = CreateWidget(GetWorld(), UpThornTrapWidgetClass);
 }
 
 void ADDCharacterPlayer::SetPlayerUIMode()

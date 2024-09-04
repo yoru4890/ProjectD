@@ -12,6 +12,7 @@
 #include "LSM/Widget/DDCantBuildWidget.h"
 #include "LSM/Building/DDBuildingBase.h"
 #include "LSM/Widget/DDSelectBuildingWidget.h"
+#include "LSM/Widget/DDStartBuildWidget.h"
 
 // Sets default values for this component's properties
 UDDBuildComponent::UDDBuildComponent()
@@ -26,12 +27,20 @@ UDDBuildComponent::UDDBuildComponent()
 		HitWarningWidgetClass = HitWarningWidgetRef.Class;
 	}
 
-	static ConstructorHelpers::FClassFinder<UDDSelectBuildingWidget> BuildWidgetRef(TEXT("/Game/0000/LSM/Widget/BuildComponent/LSM_WBP_RM_SelectBuilding.LSM_WBP_RM_SelectBuilding_C"));
+	static ConstructorHelpers::FClassFinder<UDDSelectBuildingWidget> SelectBuildingWidgetRef(TEXT("/Game/0000/LSM/Widget/BuildComponent/LSM_WBP_RM_SelectBuilding.LSM_WBP_RM_SelectBuilding_C"));
 
-	if (BuildWidgetRef.Succeeded())
+	if (SelectBuildingWidgetRef.Succeeded())
 	{
-		BuildWidgetClass = BuildWidgetRef.Class;
+		SelectBuildingWidgetClass = SelectBuildingWidgetRef.Class;
 	}
+
+	static ConstructorHelpers::FClassFinder<UDDStartBuildWidget> StartBuildWidgetRef(TEXT("/Game/0000/LSM/Widget/BuildComponent/LSM_WBP_RM_StartBuild.LSM_WBP_RM_StartBuild_C"));
+
+	if (StartBuildWidgetRef.Succeeded())
+	{
+		StartBuildWidgetClass = StartBuildWidgetRef.Class;
+	}
+
 }
 
 
@@ -66,38 +75,79 @@ void UDDBuildComponent::InitWidget()
 		HitWarningWidgetInstance = CastChecked<UDDCantBuildWidget>(CreateWidget<UUserWidget>(UGameplayStatics::GetPlayerController(GetWorld(), 0), HitWarningWidgetClass));
 	}
 
-	if (BuildWidgetClass) 
+	if (SelectBuildingWidgetClass)
 	{
-		BuildWidgetInstance = CreateWidget<UDDSelectBuildingWidget>(GetWorld(), BuildWidgetClass); (GetWorld(), BuildWidgetClass);
+		SelectBuildingWidgetInstance = CreateWidget<UDDSelectBuildingWidget>(GetWorld(), SelectBuildingWidgetClass);
+	}
+
+	if (StartBuildWidgetClass)
+	{
+		StartBuildWidgetInstance = CreateWidget<UDDStartBuildWidget>(GetWorld(), StartBuildWidgetClass);
 	}
 }
 
 void UDDBuildComponent::BindEventsToWidget()
 {
-	if (BuildWidgetInstance)
+	if (StartBuildWidgetInstance)
 	{
-		BuildWidgetInstance->OnBuildingSelected.AddDynamic(this, &UDDBuildComponent::ReadyBuilding);
-	
-		UE_LOG(LogTemp, Warning, TEXT("Called?"));
+		StartBuildWidgetInstance->OnBuildingTypeSelected.AddDynamic(this, &UDDBuildComponent::ShowSelectBuildingWidget);
+	}
+
+	if (SelectBuildingWidgetInstance)
+	{
+		SelectBuildingWidgetInstance->OnBuildingSelected.AddDynamic(this, &UDDBuildComponent::ReadyBuilding);
+	}
+
+	if (SelectBuildingWidgetInstance)
+	{
+		SelectBuildingWidgetInstance->OnBuildingSelectionCanceled.AddDynamic(this, &UDDBuildComponent::ShowStartBuildWidget);
+	}
+}
+
+void UDDBuildComponent::ShowSelectBuildingWidget(EBuildingType BuildingType)
+{
+	if (SelectBuildingWidgetInstance)
+	{
+		SelectBuildingWidgetInstance->SetBuildingType(BuildingType);
+		SelectBuildingWidgetInstance->AddToViewport();
+	}
+}
+
+void UDDBuildComponent::ShowStartBuildWidget()
+{
+	if (StartBuildWidgetInstance)
+	{
+		StartBuildWidgetInstance->AddToViewport();
 	}
 }
 
 void UDDBuildComponent::ReadyBuilding(FName RowName)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Binding?"));
+	AllStopTrace();
+	if (RowName==NAME_None)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Binding1?"));
+		return;
+	}
 	if (!GridBuildManager)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Binding2?"));
 		return;
 	}
 	bIsSetBuilding = false;
 	if (PreviewBuilding) {
 		if (PreviewBuilding->GetRowName() == RowName) {
+			UE_LOG(LogTemp, Warning, TEXT("Binding3?"));
+			StartBuildTrace();
 			return;
 		}
 		else {
+			UE_LOG(LogTemp, Warning, TEXT("Binding4?"));
 			CancelReadyBuilding();
 		}
 	}
+	StartBuildTrace();
+	UE_LOG(LogTemp, Warning, TEXT("Binding5?"));
 	UWorld* World = GetWorld();
 	check(World);
 
