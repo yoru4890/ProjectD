@@ -66,6 +66,10 @@ public:
 	UFUNCTION()
 	void ShowStartBuildWidget();
 
+	UFUNCTION()
+	void ShowUpgradeBuildingWidget();
+
+
 private:
 	UPROPERTY()
 	TObjectPtr<class UDDBuildingManager> BuildingManager;
@@ -103,6 +107,18 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<class UDDStartBuildWidget> StartBuildWidgetInstance;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UDDUpgradeBuildingWidget> UpgradeBuildingWidgetOption1Class;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class UDDUpgradeBuildingWidget> UpgradeBuildingWidgetOption1Instance;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UDDUpgradeBuildingWidget> UpgradeBuildingWidgetOption2Class;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class UDDUpgradeBuildingWidget> UpgradeBuildingWidgetOption2Instance;
 
 	bool bIsSetBuilding = false;
 

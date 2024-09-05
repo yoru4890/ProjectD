@@ -504,31 +504,33 @@ void ADDCharacterPlayer::PlaceBuilding()
 		//TODO : YSY or LJW Upgrade Widget
 
 		FName BuildingName = BuildSystem->GetManagedBuildingRowName();
+		SetPlayerCompleteDisableMode();
+		BuildSystem->ShowUpgradeBuildingWidget();
 		
-		if (BuildingName == NAME_None)
-		{
-			return;
-		}
-		else if (BuildingName == FName("MachineGunTower"))
-		{
-			RMMachineGunWidget->AddToViewport();
-			SetPlayerCompleteDisableMode();
-		}
-		else if (BuildingName == FName("UpgradeMachineGunTower"))
-		{
-			UpMachineGunWidget->AddToViewport();
-			SetPlayerCompleteDisableMode();
-		}
-		else if (BuildingName == FName("ThornTrap"))
-		{
-			RMThornTrapWidget->AddToViewport();
-			SetPlayerCompleteDisableMode();
-		}
-		else if (BuildingName == FName("UpgradeThornTrap"))
-		{
-			UpThornTrapWidget->AddToViewport();
-			SetPlayerCompleteDisableMode();
-		}
+		//if (BuildingName == NAME_None)
+		//{
+		//	return;
+		//}
+		//else if (BuildingName == FName("MachineGunTower"))
+		//{
+		//	RMMachineGunWidget->AddToViewport();
+		//	SetPlayerCompleteDisableMode();
+		//}
+		//else if (BuildingName == FName("UpgradeMachineGunTower"))
+		//{
+		//	UpMachineGunWidget->AddToViewport();
+		//	SetPlayerCompleteDisableMode();
+		//}
+		//else if (BuildingName == FName("ThornTrap"))
+		//{
+		//	RMThornTrapWidget->AddToViewport();
+		//	SetPlayerCompleteDisableMode();
+		//}
+		//else if (BuildingName == FName("UpgradeThornTrap"))
+		//{
+		//	UpThornTrapWidget->AddToViewport();
+		//	SetPlayerCompleteDisableMode();
+		//}
 
 		
 	}
@@ -539,6 +541,7 @@ void ADDCharacterPlayer::CancleBuildMode()
 	if (CurrentPlayerMode == EPlayerMode::BuildMode)
 	{
 		BuildSystem->CancelReadyBuilding();
+		CurrentPlayerMode = EPlayerMode::ManagementMode;
 	}
 }
 
@@ -575,9 +578,9 @@ void ADDCharacterPlayer::SetPlayerCompleteDisableMode()
 void ADDCharacterPlayer::SetPlayerMoveOnlyMode()
 {
 	FInputModeGameAndUI InputModeGameAndUIData;
-	PlayerController->SetIgnoreMoveInput(false); // 플레이어 움직임만 무시
-	PlayerController->SetIgnoreLookInput(false); // 카메라는 움직일 수 있음
-	PlayerController->SetInputMode(InputModeGameAndUIData); // UI와 게임 입력 모두 가능하게 설정
+	PlayerController->SetIgnoreMoveInput(false);
+	PlayerController->SetIgnoreLookInput(false);
+	PlayerController->SetInputMode(InputModeGameAndUIData); 
 	PlayerController->SetShowMouseCursor(true); // 마우스 커서 표시
 }
 

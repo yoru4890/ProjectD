@@ -13,6 +13,7 @@
 #include "LSM/Building/DDBuildingBase.h"
 #include "LSM/Widget/DDSelectBuildingWidget.h"
 #include "LSM/Widget/DDStartBuildWidget.h"
+#include "LSM/Widget/DDUpgradeBuildingWidget.h"
 
 // Sets default values for this component's properties
 UDDBuildComponent::UDDBuildComponent()
@@ -39,6 +40,22 @@ UDDBuildComponent::UDDBuildComponent()
 	if (StartBuildWidgetRef.Succeeded())
 	{
 		StartBuildWidgetClass = StartBuildWidgetRef.Class;
+	}
+
+
+	static ConstructorHelpers::FClassFinder<UDDUpgradeBuildingWidget> UpgradeBuildingWidgetOPtion1Ref(TEXT("/Game/0000/LSM/Widget/BuildComponent/LSM_WBP_RM_UpgradeBuilding_Option1.LSM_WBP_RM_UpgradeBuilding_Option1_C"));
+
+	if (UpgradeBuildingWidgetOPtion1Ref.Succeeded())
+	{
+		UpgradeBuildingWidgetOption1Class = UpgradeBuildingWidgetOPtion1Ref.Class;
+	}
+
+
+	static ConstructorHelpers::FClassFinder<UDDUpgradeBuildingWidget> UpgradeBuildingWidgetOPtion2Ref(TEXT("/Game/0000/LSM/Widget/BuildComponent/LSM_WBP_RM_UpgradeBuilding_Option2.LSM_WBP_RM_UpgradeBuilding_Option2_C"));
+
+	if (UpgradeBuildingWidgetOPtion2Ref.Succeeded())
+	{
+		UpgradeBuildingWidgetOption2Class = UpgradeBuildingWidgetOPtion2Ref.Class;
 	}
 
 }
@@ -84,6 +101,16 @@ void UDDBuildComponent::InitWidget()
 	{
 		StartBuildWidgetInstance = CreateWidget<UDDStartBuildWidget>(GetWorld(), StartBuildWidgetClass);
 	}
+
+	if (UpgradeBuildingWidgetOption1Class)
+	{
+		UpgradeBuildingWidgetOption1Instance = CreateWidget<UDDUpgradeBuildingWidget>(GetWorld(), UpgradeBuildingWidgetOption1Class);
+	}
+
+	if (UpgradeBuildingWidgetOption2Class)
+	{
+		UpgradeBuildingWidgetOption2Instance = CreateWidget<UDDUpgradeBuildingWidget>(GetWorld(), UpgradeBuildingWidgetOption2Class);
+	}
 }
 
 void UDDBuildComponent::BindEventsToWidget()
@@ -102,6 +129,16 @@ void UDDBuildComponent::BindEventsToWidget()
 	{
 		SelectBuildingWidgetInstance->OnBuildingSelectionCanceled.AddDynamic(this, &UDDBuildComponent::ShowStartBuildWidget);
 	}
+
+	if (UpgradeBuildingWidgetOption1Instance)
+	{
+		UpgradeBuildingWidgetOption1Instance->OnSellBuildingSelcted.AddDynamic(this, &UDDBuildComponent::CancelPlacedBuilding);
+	}
+
+	if (UpgradeBuildingWidgetOption2Instance)
+	{
+		UpgradeBuildingWidgetOption2Instance->OnSellBuildingSelcted.AddDynamic(this, &UDDBuildComponent::CancelPlacedBuilding);
+	}
 }
 
 void UDDBuildComponent::ShowSelectBuildingWidget(EBuildingType BuildingType)
@@ -117,7 +154,43 @@ void UDDBuildComponent::ShowStartBuildWidget()
 {
 	if (StartBuildWidgetInstance)
 	{
+		if (StartBuildWidgetInstance->IsInViewport() || SelectBuildingWidgetInstance->IsInViewport())
+		{
+			return;
+		}
 		StartBuildWidgetInstance->AddToViewport();
+	}
+}
+
+void UDDBuildComponent::ShowUpgradeBuildingWidget()
+{
+	UE_LOG(LogTemp, Warning, TEXT("123"));
+	if(!ManagedBuilding)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("1234"));
+		return;
+	}
+	if (UpgradeBuildingWidgetOption1Instance && UpgradeBuildingWidgetOption2Instance)
+	{
+		if (UpgradeBuildingWidgetOption1Instance->IsInViewport() || UpgradeBuildingWidgetOption2Instance->IsInViewport())
+		{
+			UE_LOG(LogTemp, Warning, TEXT("1235"));
+			return;
+		}
+		const FDDBuildingBaseData& BuildingData = *BuildingManager->GetBuildingData(ManagedBuilding->GetRowName());
+		TArray<FName> ChildrenRownames = BuildingData.ChildRowNames;
+
+		if (ChildrenRownames.Num() >= 2)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("1236"));
+			UpgradeBuildingWidgetOption2Instance->AddToViewport();
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("1237"));
+			UpgradeBuildingWidgetOption1Instance->AddToViewport();
+		}
+
 	}
 }
 
