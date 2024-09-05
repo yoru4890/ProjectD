@@ -8,6 +8,8 @@
 #include "DDBuildComponent.generated.h"
 
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStartBuild);
+
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent), Blueprintable)
 class PROJECTD_API UDDBuildComponent : public UActorComponent
 {
@@ -22,6 +24,9 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
+	// 위젯이 생성될 때 호출되는 Delegate
+	UPROPERTY(BlueprintAssignable, Category = "Event")
+	FOnStartBuild OnStartBuild;
 
 	UFUNCTION(BlueprintCallable)
 	void ReadyBuilding(FName RowName);

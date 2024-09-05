@@ -172,6 +172,12 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 		PlaceBuildingAction = PlaceBuildingRef.Object;
 	}
 
+	static ConstructorHelpers::FObjectFinder<UInputAction>CancleBuildModeRef(TEXT("/Script/EnhancedInput.InputAction'/Game/0000/LJW/Input/IA_Player_CancleBuildMode.IA_Player_CancleBuildMode'"));
+	if (nullptr != CancleBuildModeRef.Object)
+	{
+		CancleBuildModeAction = CancleBuildModeRef.Object;
+	}
+
 #pragma endregion
 
 }
@@ -189,6 +195,7 @@ void ADDCharacterPlayer::BeginPlay()
 	
 	SetCharacterControl();
 	InitWidget();
+	BindBuildingEvents();
 	
 }
 
@@ -251,6 +258,8 @@ void ADDCharacterPlayer::SetupPlayerInputComponent(class UInputComponent* Player
 	EnhancedInputComponent->BindAction(WaveStartAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::WaveStart);
 
 	EnhancedInputComponent->BindAction(PlaceBuildingAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::PlaceBuilding);
+
+	EnhancedInputComponent->BindAction(CancleBuildModeAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::CancleBuildMode);
 }
 
 void ADDCharacterPlayer::SetCharacterControl()
@@ -468,25 +477,15 @@ void ADDCharacterPlayer::OpenBuildWidget()
 	if (CurrentPlayerMode == EPlayerMode::ManagementMode)
 	{
 		BuildSystem->ShowStartBuildWidget();
-		SetPlayerUIMode();
-
-
+		SetPlayerMoveOnlyMode();
 	}
 }
 
-void ADDCharacterPlayer::BuildTrapOrTower(const FName& BuildingName)
+void ADDCharacterPlayer::BuildTrapOrTower()
 {
 	FInputModeGameOnly InputModeGameOnlyData;
 
 	CurrentPlayerMode = EPlayerMode::BuildMode;
-	BuildSystem->AllStopTrace();
-	BuildSystem->StartBuildTrace();
-	BuildSystem->ReadyBuilding(BuildingName);
-	PlayerController->SetShowMouseCursor(false);
-	PlayerController->SetInputMode(InputModeGameOnlyData);
-	PlayerController->SetIgnoreMoveInput(false);
-	BuildWidget->SetVisibility(ESlateVisibility::Visible);
-	BuildWidget->RemoveFromParent();
 }
 
 void ADDCharacterPlayer::PlaceBuilding()
@@ -495,9 +494,9 @@ void ADDCharacterPlayer::PlaceBuilding()
 	{
 		if (BuildSystem->PlaceBuilding())
 		{
-			CurrentPlayerMode = EPlayerMode::ManagementMode;
+			/*CurrentPlayerMode = EPlayerMode::ManagementMode;
 			BuildSystem->AllStopTrace();
-			BuildSystem->StartManageTrace();
+			BuildSystem->StartManageTrace();*/
 		}
 	}
 	else if (CurrentPlayerMode == EPlayerMode::ManagementMode)
@@ -513,26 +512,39 @@ void ADDCharacterPlayer::PlaceBuilding()
 		else if (BuildingName == FName("MachineGunTower"))
 		{
 			RMMachineGunWidget->AddToViewport();
-			SetPlayerUIMode();
+			SetPlayerCompleteDisableMode();
 		}
 		else if (BuildingName == FName("UpgradeMachineGunTower"))
 		{
 			UpMachineGunWidget->AddToViewport();
-			SetPlayerUIMode();
+			SetPlayerCompleteDisableMode();
 		}
 		else if (BuildingName == FName("ThornTrap"))
 		{
 			RMThornTrapWidget->AddToViewport();
-			SetPlayerUIMode();
+			SetPlayerCompleteDisableMode();
 		}
 		else if (BuildingName == FName("UpgradeThornTrap"))
 		{
 			UpThornTrapWidget->AddToViewport();
-			SetPlayerUIMode();
+			SetPlayerCompleteDisableMode();
 		}
 
 		
 	}
+}
+
+void ADDCharacterPlayer::CancleBuildMode()
+{
+	if (CurrentPlayerMode == EPlayerMode::BuildMode)
+	{
+		BuildSystem->CancelReadyBuilding();
+	}
+}
+
+void ADDCharacterPlayer::BindBuildingEvents()
+{
+	BuildSystem->OnStartBuild.AddDynamic(this, &ADDCharacterPlayer::BuildTrapOrTower);
 }
 
 void ADDCharacterPlayer::WaveStart()
@@ -550,13 +562,23 @@ void ADDCharacterPlayer::InitWidget()
 	//UpThornTrapWidget = CreateWidget(GetWorld(), UpThornTrapWidgetClass);
 }
 
-void ADDCharacterPlayer::SetPlayerUIMode()
+void ADDCharacterPlayer::SetPlayerCompleteDisableMode()
 {
 	FInputModeUIOnly InputModeUIOnlyData;
 	PlayerController->SetIgnoreMoveInput(true);
+	PlayerController->SetIgnoreLookInput(true);
 	PlayerController->StopMovement();
 	PlayerController->SetInputMode(InputModeUIOnlyData);
 	PlayerController->SetShowMouseCursor(true);
+}
+
+void ADDCharacterPlayer::SetPlayerMoveOnlyMode()
+{
+	FInputModeGameAndUI InputModeGameAndUIData;
+	PlayerController->SetIgnoreMoveInput(false); // 플레이어 움직임만 무시
+	PlayerController->SetIgnoreLookInput(false); // 카메라는 움직일 수 있음
+	PlayerController->SetInputMode(InputModeGameAndUIData); // UI와 게임 입력 모두 가능하게 설정
+	PlayerController->SetShowMouseCursor(true); // 마우스 커서 표시
 }
 
 void ADDCharacterPlayer::Die()

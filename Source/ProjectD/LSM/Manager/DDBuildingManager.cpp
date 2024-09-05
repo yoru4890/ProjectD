@@ -147,6 +147,11 @@ bool UDDBuildingManager::IsBuildingUnlocked(const FName& RowName) const
 {
 	const FDDBuildingBaseData* BuildingStruct = GetBuildingData(RowName);
 
+	if (!BuildingStruct)
+	{
+		return false;
+	}
+
 	bool bIsUnlocked = BuildingStruct->bIsUnlocked;
 
 	return bIsUnlocked;
@@ -156,6 +161,11 @@ bool UDDBuildingManager::IsBuildingUnlocked(const FName& RowName) const
 bool UDDBuildingManager::IsParentUnlocked(const FName& RowName)
 {
 	FDDBuildingBaseData* BuildingStruct = GetBuildingData(RowName);
+
+	if (!BuildingStruct)
+	{
+		return false;
+	}
 
 	FName ParentName = BuildingStruct->ParentRowName;
 
@@ -175,6 +185,11 @@ bool UDDBuildingManager::IsParentUnlocked(const FName& RowName)
 bool UDDBuildingManager::UnlockBuilding(const FName& RowName)
 {
 	FDDBuildingBaseData* BuildingStruct = GetBuildingData(RowName);
+
+	if (!BuildingStruct)
+	{
+		return false;
+	}
 
 	FName ParentName = BuildingStruct->ParentRowName;
 
@@ -206,6 +221,13 @@ bool UDDBuildingManager::UnlockBuilding(const FName& RowName)
 
 bool UDDBuildingManager::LockBuilding(const FName& RowName)
 {
+	FDDBuildingBaseData* BuildingStruct = GetBuildingData(RowName);
+
+	if (!BuildingStruct)
+	{
+		return false;
+	}
+
 	TArray<FName> Stack;
 	Stack.Push(RowName);
 

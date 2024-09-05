@@ -126,28 +126,27 @@ void UDDBuildComponent::ReadyBuilding(FName RowName)
 	AllStopTrace();
 	if (RowName==NAME_None)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Binding1?"));
+		UE_LOG(LogTemp, Warning, TEXT("Name None?"));
 		return;
 	}
 	if (!GridBuildManager)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Binding2?"));
+		UE_LOG(LogTemp, Warning, TEXT("GridBuildManager is not"));
 		return;
 	}
 	bIsSetBuilding = false;
 	if (PreviewBuilding) {
 		if (PreviewBuilding->GetRowName() == RowName) {
-			UE_LOG(LogTemp, Warning, TEXT("Binding3?"));
+			UE_LOG(LogTemp, Warning, TEXT("Already preview building"));
 			StartBuildTrace();
+			OnStartBuild.Broadcast();
 			return;
 		}
 		else {
-			UE_LOG(LogTemp, Warning, TEXT("Binding4?"));
+			UE_LOG(LogTemp, Warning, TEXT("New Preview Building"));
 			CancelReadyBuilding();
 		}
 	}
-	StartBuildTrace();
-	UE_LOG(LogTemp, Warning, TEXT("Binding5?"));
 	UWorld* World = GetWorld();
 	check(World);
 
@@ -172,6 +171,8 @@ void UDDBuildComponent::ReadyBuilding(FName RowName)
 	{
 		SetTowerZoneIsHiddenInGame(false);
 	}
+	StartBuildTrace();
+	OnStartBuild.Broadcast();
 	return;
 
 }
@@ -181,11 +182,8 @@ void UDDBuildComponent::CancelReadyBuilding()
 	check(PreviewBuilding);
 	BuildingManager->DestroyBuilding(*PreviewBuilding);
 	PreviewBuilding = nullptr;
-	GetWorld()->GetTimerManager().ClearTimer(BuildTraceTimerHandle);
-	if (HitWarningWidgetInstance && HitWarningWidgetInstance->IsInViewport())
-	{
-		HitWarningWidgetInstance->RemoveFromParent();
-	}
+	AllStopTrace();
+	StartManageTrace();
 }
 
 
@@ -216,8 +214,9 @@ bool UDDBuildComponent::PlaceBuilding()
 	{
 		SetTowerZoneIsHiddenInGame(true);
 	}
-
 	PreviewBuilding = nullptr;
+
+	ReadyBuilding(BuildingRowName);
 
 	return true;
 }
