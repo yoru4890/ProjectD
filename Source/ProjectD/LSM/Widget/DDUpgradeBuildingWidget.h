@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "LSM/Building/DDBuildingBaseData.h"
 #include "DDUpgradeBuildingWidget.generated.h"
 
 /**
@@ -18,6 +19,11 @@ class PROJECTD_API UDDUpgradeBuildingWidget : public UUserWidget
 	GENERATED_BODY()
 
 public:
+	FORCEINLINE void SetBuildingType(EBuildingType InBuildingType) { BuildingType = InBuildingType; }
+
+	FORCEINLINE void SetBuildingRowName(FName InRowName) { RowName = InRowName; }
+
+
 	UPROPERTY(BlueprintCallable, Category = "Events")
 	FOnUpgradeBuildingSelected OnUpgradeBuildingSelected;
 
@@ -27,5 +33,8 @@ public:
 private:
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	EBuildingType BuildingType;
+
+	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	FName RowName;
 	
 };

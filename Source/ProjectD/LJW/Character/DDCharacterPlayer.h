@@ -197,8 +197,9 @@ public:
 //BuildWidget
 public:
 	void InitWidget();
-	void SetPlayerCompleteDisableMode();
+	void SetPlayerCanNotMoveMode();
 	void SetPlayerMoveOnlyMode();
+	void SetPlayerGameMode();
 
 
 protected:

@@ -394,6 +394,7 @@ void ADDCharacterPlayer::EquipMelee()
 	{
 		WeaponSystem->EquipMeleeWeapon();
 		CurrentPlayerMode = EPlayerMode::CombatMode;
+		SetPlayerGameMode();
 		BuildSystem->AllStopTrace();
 	}
 }
@@ -406,6 +407,7 @@ void ADDCharacterPlayer::EquipRange()
 	{
 		WeaponSystem->EquipRangeWeapon();
 		CurrentPlayerMode = EPlayerMode::CombatMode;
+		SetPlayerGameMode();
 		BuildSystem->AllStopTrace();
 	}
 }
@@ -468,6 +470,10 @@ bool ADDCharacterPlayer::IsMaxAggro()
 
 void ADDCharacterPlayer::EnterManagementMode()
 {
+	if (CurrentPlayerMode == EPlayerMode::BuildMode)
+	{
+		return;
+	}
 	CurrentPlayerMode = EPlayerMode::ManagementMode;
 	BuildSystem->StartManageTrace();
 }
@@ -504,7 +510,7 @@ void ADDCharacterPlayer::PlaceBuilding()
 		//TODO : YSY or LJW Upgrade Widget
 
 		FName BuildingName = BuildSystem->GetManagedBuildingRowName();
-		SetPlayerCompleteDisableMode();
+		SetPlayerCanNotMoveMode();
 		BuildSystem->ShowUpgradeBuildingWidget();
 		
 		//if (BuildingName == NAME_None)
@@ -565,13 +571,12 @@ void ADDCharacterPlayer::InitWidget()
 	//UpThornTrapWidget = CreateWidget(GetWorld(), UpThornTrapWidgetClass);
 }
 
-void ADDCharacterPlayer::SetPlayerCompleteDisableMode()
+void ADDCharacterPlayer::SetPlayerCanNotMoveMode()
 {
-	FInputModeUIOnly InputModeUIOnlyData;
+	FInputModeGameAndUI InputModeGameAndUIData;
 	PlayerController->SetIgnoreMoveInput(true);
 	PlayerController->SetIgnoreLookInput(true);
-	PlayerController->StopMovement();
-	PlayerController->SetInputMode(InputModeUIOnlyData);
+	PlayerController->SetInputMode(InputModeGameAndUIData);
 	PlayerController->SetShowMouseCursor(true);
 }
 
@@ -582,6 +587,16 @@ void ADDCharacterPlayer::SetPlayerMoveOnlyMode()
 	PlayerController->SetIgnoreLookInput(false);
 	PlayerController->SetInputMode(InputModeGameAndUIData); 
 	PlayerController->SetShowMouseCursor(true); // 마우스 커서 표시
+}
+
+void ADDCharacterPlayer::SetPlayerGameMode()
+{
+	FInputModeGameOnly InputModeGameOnly;
+	PlayerController->SetIgnoreMoveInput(false);
+	PlayerController->SetIgnoreLookInput(false);
+	PlayerController->SetInputMode(InputModeGameOnly);
+	PlayerController->SetShowMouseCursor(false); // 마우스 커서 표시
+
 }
 
 void ADDCharacterPlayer::Die()
