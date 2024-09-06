@@ -118,7 +118,7 @@ float ADDEnemyBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 			if (PointDamageEvent->HitInfo.BoneName == Weakpoint)
 			{
 				ActualDamage *= 1.5f; // TODO : YSY WeakPoint Caculation
-				UE_LOG(LogTemp, Warning, TEXT("WeakPoint"));
+				//UE_LOG(LogTemp, Warning, TEXT("WeakPoint"));
 			}
 		}
 	}
@@ -216,6 +216,10 @@ void ADDEnemyBase::InitializeEnemy(const FDDEnemyData& EnemyData)
 
 void ADDEnemyBase::SplineMove()
 {
+	if (bIsDead)
+	{
+		return;
+	}
 	FVector Destination = AIMoveRoute->GetSplinePointasWorldPosition(RouteIndex);
 	RouteIndex++;
 	EnemyAIController->MoveToLocation(Destination);
@@ -342,7 +346,6 @@ void ADDEnemyBase::SplineMoveFinish()
 	if (AIMoveRoute && AIMoveRoute->IsSplineEnd(RouteIndex))
 	{
 		ArrivalAtGoal();
-		UE_LOG(LogTemp, Warning, TEXT("%d"), RouteIndex);
 	}
 }
 
@@ -358,7 +361,7 @@ void ADDEnemyBase::ArrivalAtGoal()
 
 	if (OnSubRemainingLivesSignature.IsBound())
 	{
-		//OnSubRemainingLivesSignature.Execute(1);
+		OnSubRemainingLivesSignature.Execute(1);
 	}
 
 }
@@ -377,6 +380,7 @@ void ADDEnemyBase::Die()
 	ADDPlayerState* DDPlayerState = Cast<ADDPlayerState>(UGameplayStatics::GetPlayerState(GetWorld(), 0));
 
 	DDPlayerState->AddGold(GoldDropAmount);
+	//EnemyAIController->StopAI();
 }
 
 void ADDEnemyBase::UpdateWidgetScale()
@@ -479,20 +483,19 @@ void ADDEnemyBase::Activate()
 	SetActorHiddenInGame(false);
 	GetMesh()->SetVisibility(true);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	SetActorEnableCollision(true);
 	SetActorLocation(AIMoveRoute->GetSplinePointasWorldPosition(0));
 	EnemyAIController->RunAI();
 	bIsDead = false;
 	GetCharacterMovement()->MaxWalkSpeed = MovementSpeed;
-
+	SetActorEnableCollision(true);
+	GetCharacterMovement()->GravityScale = 1.0f;
 }
 
 void ADDEnemyBase::Deactivate()
 {
 	if (AIMoveRoute)
 	{
-		SetActorLocation({ AIMoveRoute->GetSplinePointasWorldPosition(0) });
+		SetActorLocation({ AIMoveRoute->GetSplinePointasWorldPosition(0) + FVector(0,0,500.0f) });
 		EnemyAIController->StopMovement();
 	}
 	GetMesh()->GetAnimInstance()->Montage_Stop(0.01f);
@@ -507,9 +510,9 @@ void ADDEnemyBase::Deactivate()
 	//EnemyAIController->StopAI();
 	SetActorTickEnabled(false);
 	SetActorHiddenInGame(true);
-	SetActorEnableCollision(false);
 	RouteIndex = 0;
-	
+	SetActorEnableCollision(false);
+	GetCharacterMovement()->GravityScale = 0.0f;
 }
 
 void ADDEnemyBase::SetAIMoveRoute(TArray<class AAISplineRoute*> Splines, int32 Index)

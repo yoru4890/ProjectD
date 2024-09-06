@@ -25,7 +25,7 @@ ADDEnemyAIController::ADDEnemyAIController()
 		ownedBT = BTFinder.Object;
 	}
 
-	ReceiveMoveCompleted.AddDynamic(this, &ADDEnemyAIController::OnMoveCompleted);
+	//ReceiveMoveCompleted.AddDynamic(this, &ADDEnemyAIController::OnMoveCompleted);
 
 
 }
