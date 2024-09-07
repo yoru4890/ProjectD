@@ -42,7 +42,7 @@ public:
 
 	// 새로운 함수: 트랩 업그레이드
 	UFUNCTION(BlueprintCallable)
-	bool UpgradeBuilding(const FName& RowName);
+	void UpgradeBuilding(const FName RowName);
 
 	// 새로운 함수: 트랩 업그레이드
 	UFUNCTION(BlueprintCallable)

@@ -135,6 +135,11 @@ void UDDBuildComponent::BindEventsToWidget()
 		UpgradeBuildingWidgetOption1Instance->OnSellBuildingSelcted.AddDynamic(this, &UDDBuildComponent::CancelPlacedBuilding);
 	}
 
+	if (UpgradeBuildingWidgetOption1Instance)
+	{
+		UpgradeBuildingWidgetOption1Instance->OnUpgradeBuildingSelected.AddDynamic(this, &UDDBuildComponent::UpgradeBuilding);
+	}
+
 	if (UpgradeBuildingWidgetOption2Instance)
 	{
 		UpgradeBuildingWidgetOption2Instance->OnSellBuildingSelcted.AddDynamic(this, &UDDBuildComponent::CancelPlacedBuilding);
@@ -164,17 +169,14 @@ void UDDBuildComponent::ShowStartBuildWidget()
 
 void UDDBuildComponent::ShowUpgradeBuildingWidget()
 {
-	UE_LOG(LogTemp, Warning, TEXT("123"));
 	if(!ManagedBuilding)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("1234"));
 		return;
 	}
 	if (UpgradeBuildingWidgetOption1Instance && UpgradeBuildingWidgetOption2Instance)
 	{
 		if (UpgradeBuildingWidgetOption1Instance->IsInViewport() || UpgradeBuildingWidgetOption2Instance->IsInViewport())
 		{
-			UE_LOG(LogTemp, Warning, TEXT("1235"));
 			return;
 		}
 		const FDDBuildingBaseData& BuildingData = *BuildingManager->GetBuildingData(ManagedBuilding->GetRowName());
@@ -182,12 +184,14 @@ void UDDBuildComponent::ShowUpgradeBuildingWidget()
 
 		if (ChildrenRownames.Num() >= 2)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("1236"));
+			UpgradeBuildingWidgetOption2Instance->SetBuildingRowName(ManagedBuilding->GetRowName());
+			UpgradeBuildingWidgetOption2Instance->SetBuildingType(ManagedBuilding->GetBuildingType());
 			UpgradeBuildingWidgetOption2Instance->AddToViewport();
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("1237"));
+			UpgradeBuildingWidgetOption1Instance->SetBuildingRowName(ManagedBuilding->GetRowName());
+			UpgradeBuildingWidgetOption1Instance->SetBuildingType(ManagedBuilding->GetBuildingType());
 			UpgradeBuildingWidgetOption1Instance->AddToViewport();
 		}
 
@@ -255,6 +259,7 @@ void UDDBuildComponent::CancelReadyBuilding()
 	check(PreviewBuilding);
 	BuildingManager->DestroyBuilding(*PreviewBuilding);
 	PreviewBuilding = nullptr;
+	SetTowerZoneIsHiddenInGame(true);
 	AllStopTrace();
 	StartManageTrace();
 }
@@ -310,24 +315,24 @@ void UDDBuildComponent::CancelPlacedBuilding()
 	ManagedBuilding = nullptr;
 }
 
-bool UDDBuildComponent::UpgradeBuilding(const FName& RowName)
+void UDDBuildComponent::UpgradeBuilding(const FName RowName)
 {
 	if (!ManagedBuilding)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Upgrade Failed : ManagedBuilding is null"));
-		return false;
+		return;
 	}
 	FDDBuildingBaseData& UpgradeBuildingData = *BuildingManager->GetBuildingData(RowName);
 	if (!UpgradeBuildingData.bIsUnlocked)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Upgrade Failed : UpgradeBuildingData is Lock"));
-		return false;
+		return;
 	}
 
 	if (!CanPayBuildCost(RowName))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Upgrade Failed : Cost Lacked"));
-		return false;
+		return;
 	}
 
 	FDDBuildingBaseData& ManagedBuildingData = *BuildingManager->GetBuildingData(ManagedBuilding->GetRowName());
@@ -335,7 +340,7 @@ bool UDDBuildComponent::UpgradeBuilding(const FName& RowName)
 	if (!ManagedBuildingData.ChildRowNames.Contains(RowName))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Upgrade Failed : Mangaged Building is Final Building"));
-		return false;
+		return;
 	}
 
 	UE_LOG(LogTemp, Warning, TEXT("Upgrade Gold : %d"), UpgradeBuildingData.BuildCost);
@@ -353,7 +358,7 @@ bool UDDBuildComponent::UpgradeBuilding(const FName& RowName)
 	if (!NewBuilding)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Upgrade Failed"));
-		return false;
+		return;
 	}
 	BuildingManager->DestroyBuilding(*ManagedBuilding);
 	ManagedBuilding = nullptr;
@@ -362,7 +367,7 @@ bool UDDBuildComponent::UpgradeBuilding(const FName& RowName)
 	ManagedBuilding->SetCanAttack(true);
 	ManagedBuilding->SetMaterialToPreview(true);
 	PayBuildCost(RowName);
-	return true;
+	return;
 }
 
 FName UDDBuildComponent::GetManagedBuildingRowName()
@@ -393,6 +398,14 @@ void UDDBuildComponent::StopBuildTrace()
 	{
 		HitWarningWidgetInstance->RemoveFromParent();
 	}
+	if (StartBuildWidgetInstance)
+	{
+		StartBuildWidgetInstance->RemoveFromParent();
+	}
+	if (SelectBuildingWidgetInstance)
+	{
+		SelectBuildingWidgetInstance->RemoveFromParent();
+	}
 }
 
 void UDDBuildComponent::StartBuildTrace()
@@ -407,6 +420,15 @@ void UDDBuildComponent::StopManageTrace()
 	{
 		ManagedBuilding->SetMaterialToOriginal();
 		ManagedBuilding = nullptr;
+		if (UpgradeBuildingWidgetOption1Instance->IsInViewport())
+		{
+			UpgradeBuildingWidgetOption1Instance->RemoveFromParent();
+		}
+
+		if (UpgradeBuildingWidgetOption2Instance->IsInViewport())
+		{
+			UpgradeBuildingWidgetOption2Instance->RemoveFromParent();
+		}
 	}
 }
 
