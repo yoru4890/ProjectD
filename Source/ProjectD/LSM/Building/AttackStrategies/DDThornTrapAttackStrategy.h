@@ -15,6 +15,6 @@ class PROJECTD_API UDDThornTrapAttackStrategy : public UDDBaseAttackStrategy
 	GENERATED_BODY()
 
 public:
-	virtual void Attack(AActor* TargetEnemy, const FVector& FireLocation = FVector(0, 0, 0), const FRotator& FireRotation = FRotator(0, 0, 0)) override;
+	virtual void Attack(AActor* TargetEnemy, UStaticMeshComponent* FireStaticMesh) override;
 	
 };

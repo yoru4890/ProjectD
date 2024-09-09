@@ -55,8 +55,6 @@ void ADDProjectileBase::ConfigureProjectile(float InDamageAmount, TSubclassOf<UD
 	ExplosionRadius = InExplosionRadius;
 	MaxPenetrationCount = InMaxPenetrationCount;
 
-	GetWorld()->GetTimerManager().SetTimer(LifeSpanTimerHandle, this, &ADDProjectileBase::OnLifeTimeExpired, MaxLifeTime, false);
-
 	LaunchProjectile();
 }
 
@@ -121,7 +119,7 @@ void ADDProjectileBase::SetSound(const FDDProjectileData& LoadedAsset)
 
 void ADDProjectileBase::SetMeshs(const FDDProjectileData& LoadedAsset)
 {
-	if (LoadedAsset.FlyingSound.IsValid())
+	if (LoadedAsset.StaticMesh.IsValid())
 	{
 		UStaticMesh* StaticMesh = LoadedAsset.StaticMesh.Get();
 		StaticMeshComponent->SetStaticMesh(StaticMesh);
@@ -147,7 +145,9 @@ void ADDProjectileBase::OnCollisionBeginOverlap(UPrimitiveComponent* OverlappedC
 	{
 		if (bIsExplosive)
 		{
-
+			UE_LOG(LogTemp, Warning, TEXT("TestDestroy"));
+			StopLifeTimeTimer();
+			ProjectileManager->DestroyProjectile(this);
 		}
 		else 
 		{
@@ -207,6 +207,8 @@ void ADDProjectileBase::LaunchProjectile()
 		ProjectileMovementComponent->ProjectileGravityScale = 0.0f;
 
 		ProjectileMovementComponent->Velocity = GetActorForwardVector() * ProjectileSpeed;
+
+		GetWorld()->GetTimerManager().SetTimer(LifeSpanTimerHandle, this, &ADDProjectileBase::OnLifeTimeExpired, MaxLifeTime, false);
 	}
 }
 

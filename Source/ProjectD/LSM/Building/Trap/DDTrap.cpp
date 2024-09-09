@@ -26,7 +26,7 @@ void ADDTrap::Attack()
 		TSet<TObjectPtr<AActor>> Targets = EnemiesInRanged;
 		for (auto& Target : Targets)
 		{
-			AttackStrategy->Attack(Target);
+			AttackStrategy->Attack(Target,nullptr);
 		}
 	}
 }

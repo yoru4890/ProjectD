@@ -22,7 +22,7 @@ void UDDBaseAttackStrategy::Initialize(ADDBuildingBase* InOwningTower)
 }
 
 
-void UDDBaseAttackStrategy::Attack(AActor* TargetEnemy, const FVector& FireLocation, const FRotator& FireRotation)
+void UDDBaseAttackStrategy::Attack(AActor* TargetEnemy, UStaticMeshComponent* FireStaticMesh)
 {
 	
 
