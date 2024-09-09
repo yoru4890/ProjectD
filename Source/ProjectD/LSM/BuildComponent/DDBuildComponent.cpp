@@ -144,6 +144,11 @@ void UDDBuildComponent::BindEventsToWidget()
 	{
 		UpgradeBuildingWidgetOption2Instance->OnSellBuildingSelcted.AddDynamic(this, &UDDBuildComponent::CancelPlacedBuilding);
 	}
+
+	if (UpgradeBuildingWidgetOption2Instance)
+	{
+		UpgradeBuildingWidgetOption2Instance->OnUpgradeBuildingSelected.AddDynamic(this, &UDDBuildComponent::UpgradeBuilding);
+	}
 }
 
 void UDDBuildComponent::ShowSelectBuildingWidget(EBuildingType BuildingType)
@@ -322,6 +327,14 @@ void UDDBuildComponent::UpgradeBuilding(const FName RowName)
 		UE_LOG(LogTemp, Warning, TEXT("Upgrade Failed : ManagedBuilding is null"));
 		return;
 	}
+	FDDBuildingBaseData& ManagedBuildingData = *BuildingManager->GetBuildingData(ManagedBuilding->GetRowName());
+
+	if (!ManagedBuildingData.ChildRowNames.Contains(RowName))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Upgrade Failed : Mangaged Building is Final Building"));
+		return;
+	}
+
 	FDDBuildingBaseData& UpgradeBuildingData = *BuildingManager->GetBuildingData(RowName);
 	if (!UpgradeBuildingData.bIsUnlocked)
 	{
@@ -332,14 +345,6 @@ void UDDBuildComponent::UpgradeBuilding(const FName RowName)
 	if (!CanPayBuildCost(RowName))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Upgrade Failed : Cost Lacked"));
-		return;
-	}
-
-	FDDBuildingBaseData& ManagedBuildingData = *BuildingManager->GetBuildingData(ManagedBuilding->GetRowName());
-
-	if (!ManagedBuildingData.ChildRowNames.Contains(RowName))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Upgrade Failed : Mangaged Building is Final Building"));
 		return;
 	}
 
