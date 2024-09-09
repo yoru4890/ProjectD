@@ -26,6 +26,7 @@ void UDDHpBarWidget::NativeConstruct()
 		CharacterWidget->SetupCharacterWidget(this);
 	}
 
+	OwnerName->SetVisibility(ESlateVisibility::Hidden);
 	HpProgressBar->SetPercent(CurrentHp / MaxHp);
 	SetVisiblePorgressBar(false);
 }
@@ -55,7 +56,7 @@ void UDDHpBarWidget::SetVisiblePorgressBar(bool bIsVisible)
 {
 	auto NewVisible = bIsVisible ? ESlateVisibility::Visible : ESlateVisibility::Hidden;
 	HpProgressBar->SetVisibility(NewVisible);
-	OwnerName->SetVisibility(NewVisible);
+	//OwnerName->SetVisibility(NewVisible);
 }
 
 void UDDHpBarWidget::SetOwnerName(const FName& EnemyName)

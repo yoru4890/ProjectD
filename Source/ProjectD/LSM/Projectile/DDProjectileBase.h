@@ -44,6 +44,9 @@ protected:
 	UFUNCTION()
 	virtual void OnCollisionEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
+	UFUNCTION()
+	virtual void LaunchProjectile();
+
 private:
 	void SetupCollisionResponses();
 	void SetParticeEffects(const FDDProjectileData& LoadedAsset);
@@ -53,12 +56,13 @@ private:
 	void OnLifeTimeExpired();
 	void StopLifeTimeTimer();
 
-	void LaunchProjectile();
 
 	void Explode();
 	void ApplyDamageToActor(AActor* OtherActor);
 
-
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UProjectileMovementComponent> ProjectileMovementComponent;
 
 private:
 	FName RowName;
@@ -71,6 +75,9 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	float ProjectileSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
+	float ProjectileAcceleration;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	float MaxSpeed;
@@ -92,9 +99,6 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UStaticMeshComponent> StaticMeshComponent;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UProjectileMovementComponent> ProjectileMovementComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UNiagaraComponent> TrailNiagaraComponent;
