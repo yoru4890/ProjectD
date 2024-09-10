@@ -62,6 +62,8 @@ protected:
 
 	void StopAttackEffect();
 
+	void DisableAttackNiagaraComponent();
+
 	virtual void ResetCanAttack();
 
 private:

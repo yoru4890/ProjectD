@@ -21,6 +21,9 @@ struct FDDProjectileData : public FTableRowBase
 	TSoftObjectPtr<class UStaticMesh> StaticMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
+	TSoftObjectPtr<class UNiagaraSystem> ExplosionEffect;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")
 	TSoftObjectPtr<class UNiagaraSystem> ImpactEffect;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects")

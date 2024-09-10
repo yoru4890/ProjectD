@@ -18,11 +18,6 @@ ADDProjectileBase::ADDProjectileBase()
 	StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComoponent"));
 	RootComponent = StaticMeshComponent;
 
-	// 나이아가라 시스템 컴포넌트 생성
-	TrailNiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("NiagaraComponent"));
-	TrailNiagaraComponent->SetupAttachment(RootComponent);
-	TrailNiagaraComponent->SetAutoActivate(false);  // 기본적으로 비활성화
-
 	ProjectileMovementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("UProjectileMovementComponent"));
 	ProjectileMovementComponent->SetUpdatedComponent(RootComponent);
 
@@ -40,6 +35,16 @@ void ADDProjectileBase::BeginPlay()
 {
 	Super::BeginPlay();
 	
+}
+
+void ADDProjectileBase::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+	if (GetActorLocation().Z < HeightToPool)
+	{
+		StopLifeTimeTimer();
+		ProjectileManager->DestroyProjectile(this);
+	}
 }
 
 #pragma region SetupAndInitialization
@@ -63,6 +68,7 @@ void ADDProjectileBase::SetAssetAndManager(const FDDProjectileData& LoadedAsset,
 	SetMeshs(LoadedAsset);
 	SetSound(LoadedAsset);
 	SetParticeEffects(LoadedAsset);
+	SetAttachNiagaraComponent();
 	ProjectileManager = InProjectileManager;
 }
 
@@ -94,6 +100,66 @@ void ADDProjectileBase::SetParticeEffects(const FDDProjectileData& LoadedAsset)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("%s : ImpactEffect not loaded"), RowName);
 	}
+
+	if (LoadedAsset.ExplosionEffect.IsValid())
+	{
+		ExplosionEffect = LoadedAsset.ExplosionEffect.Get();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%s : ExplosionEffect not loaded"), RowName);
+	}
+}
+
+void ADDProjectileBase::SetAttachNiagaraComponent()
+{
+	USceneComponent* TargetComponent = nullptr;
+	FName TrailSocketName = FName("TrailPoint");
+	if (StaticMeshComponent->DoesSocketExist(TrailSocketName))
+	{
+		TargetComponent = StaticMeshComponent;
+	}
+	if (TargetComponent && TrailEffect)
+	{
+		UNiagaraComponent* NewNiagaraComponent = NewObject<UNiagaraComponent>(this);
+		TrailNiagaraComponent = NewNiagaraComponent;
+		TrailNiagaraComponent->SetAsset(TrailEffect);
+		TrailNiagaraComponent->SetupAttachment(TargetComponent, TrailSocketName);
+		TrailNiagaraComponent->SetAutoActivate(false);  // 기본적으로 비활성화
+		TrailNiagaraComponent->RegisterComponent();
+
+		TrailNiagaraComponent->OnSystemFinished.AddDynamic(this, &ADDProjectileBase::OnTrailEffectFinished);
+	}
+
+	if (ImpactEffect)
+	{
+		UNiagaraComponent* NewNiagaraComponent = NewObject<UNiagaraComponent>(this);
+		ImpactNiagaraComponent = NewNiagaraComponent;
+		ImpactNiagaraComponent->SetAsset(ImpactEffect);
+		ImpactNiagaraComponent->SetAutoActivate(false);  // 기본적으로 비활성화
+		ImpactNiagaraComponent->RegisterComponent();
+	}
+
+	if (ExplosionEffect)
+	{
+		UNiagaraComponent* NewNiagaraComponent = NewObject<UNiagaraComponent>(this);
+		ExplosionNiagaraComponent = NewNiagaraComponent;
+		ExplosionNiagaraComponent->SetAsset(ExplosionEffect);
+		ExplosionNiagaraComponent->SetupAttachment(RootComponent);
+		ExplosionNiagaraComponent->SetAutoActivate(false);  // 기본적으로 비활성화
+		ExplosionNiagaraComponent->RegisterComponent();
+	}
+}
+
+void ADDProjectileBase::OnTrailEffectFinished(UNiagaraComponent* PSystem)
+{
+	// 나이아가라 이펙트가 끝나면 미사일을 풀로 보냄
+	if (ProjectileManager)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("OnTrailEffectFinished Called"));
+		StopLifeTimeTimer();  // 타이머 정지
+		ProjectileManager->DestroyProjectile(this);  // 풀에 돌려보냄
+	}
 }
 
 void ADDProjectileBase::SetSound(const FDDProjectileData& LoadedAsset)
@@ -115,6 +181,8 @@ void ADDProjectileBase::SetSound(const FDDProjectileData& LoadedAsset)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("%s : FlyingSound not loaded"), RowName);
 	}
+
+
 }
 
 void ADDProjectileBase::SetMeshs(const FDDProjectileData& LoadedAsset)
@@ -145,16 +213,26 @@ void ADDProjectileBase::OnCollisionBeginOverlap(UPrimitiveComponent* OverlappedC
 	{
 		if (bIsExplosive)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("TestDestroy"));
-			StopLifeTimeTimer();
-			ProjectileManager->DestroyProjectile(this);
+			ExplosionNiagaraComponent->SetActive(true);
 		}
 		else 
 		{
 
 		}
-		//ProjectileManager->DestroyProjectile(this);
-		//StopLifeTimeTimer();
+
+		if (!TrailNiagaraComponent)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("OnCollisionBeginOverlap Called"));
+			StopLifeTimeTimer();
+			ProjectileManager->DestroyProjectile(this);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("TrailNiagaraComponent->Deactivate()"));
+			ProjectileMovementComponent->SetActive(false);
+			StaticMeshComponent->SetVisibility(false);
+			TrailNiagaraComponent->Deactivate();
+		}
 	}
 }
 
@@ -218,12 +296,18 @@ void ADDProjectileBase::SetProjectileState(bool bIsActive)
 	{
 		// 활성화: 충돌 활성화, 액터 표시, 틱 활성화
 		ProjectileMovementComponent->SetUpdatedComponent(RootComponent);
+		StaticMeshComponent->SetVisibility(true);
 		SetActorHiddenInGame(false);
 		SetActorEnableCollision(true);
 		SetActorTickEnabled(true);
 
 		// 나이아가라 이펙트 및 사운드 활성화 (선택 사항)
 		if (TrailNiagaraComponent && !TrailNiagaraComponent->IsActive())
+		{
+			TrailNiagaraComponent->SetActive(true);
+
+		}
+		else if (TrailNiagaraComponent->IsActive())
 		{
 			TrailNiagaraComponent->Activate();
 		}
@@ -240,15 +324,12 @@ void ADDProjectileBase::SetProjectileState(bool bIsActive)
 			ProjectileMovementComponent->SetActive(false);
 		}
 
+
 		SetActorHiddenInGame(true);
 		SetActorEnableCollision(false);
 		SetActorTickEnabled(false);
 
 		// 나이아가라 이펙트 및 사운드 비활성화 (선택 사항)
-		if (TrailNiagaraComponent && TrailNiagaraComponent->IsActive())
-		{
-			TrailNiagaraComponent->Deactivate();
-		}
 	}
 }
 

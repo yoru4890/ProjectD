@@ -319,14 +319,14 @@ void ADDBuildingBase::SetCanAttack(const bool bInCanAttack)
 		if (GetWorld()->GetTimerManager().IsTimerActive(AttackCooldownTimerHandle))
 		{
 			GetWorld()->GetTimerManager().ClearTimer(AttackCooldownTimerHandle);
-			UE_LOG(LogTemp, Warning, TEXT("Attack Timer Test"));
+			//UE_LOG(LogTemp, Warning, TEXT("Attack Timer Test"));
 		}
 	}
 	else
 	{
 		AttackCollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	}
-	StopAttackEffect();
+	DisableAttackNiagaraComponent();
 }
 
 void ADDBuildingBase::ExecuteAttackEffects()
@@ -336,7 +336,6 @@ void ADDBuildingBase::ExecuteAttackEffects()
 	PlayAttackAnimation();
 	PlayAttackSound();
 
-	UE_LOG(LogTemp, Warning, TEXT("testest"));
 	// 타이머를 설정하여 쿨타임 후 bCanAttack을 true로 변경
 	GetWorld()->GetTimerManager().SetTimer(AttackCooldownTimerHandle, this, &ADDBuildingBase::ResetCanAttack, AttackCoolTime, false);
 }
@@ -345,22 +344,44 @@ void ADDBuildingBase::PlayAttackEffectAtSocket()
 {
 	for (auto& AttackNiagaraComponent : AttackNiagaraComponents)
 	{
-		AttackNiagaraComponent->SetActive(true);
+		// 컴포넌트가 비활성화되어 있는 경우 먼저 활성화
+		if (!AttackNiagaraComponent->IsActive())
+		{
+			AttackNiagaraComponent->SetActive(true);
+		}
+
+		// 파티클 이펙트 재생
+		AttackNiagaraComponent->Activate();
 	}
 
 }
 
 void ADDBuildingBase::StopAttackEffect()
 {
+    for (auto& AttackNiagaraComponent : AttackNiagaraComponents)
+    {
+        if (AttackNiagaraComponent && AttackNiagaraComponent->IsActive())
+        {
+            // 나이아가라 이펙트를 부드럽게 중지
+            AttackNiagaraComponent->Deactivate();
+        }
+    }
+}
+
+void ADDBuildingBase::DisableAttackNiagaraComponent()
+{
 	for (auto& AttackNiagaraComponent : AttackNiagaraComponents)
 	{
-		AttackNiagaraComponent->SetActive(false);
+		if (AttackNiagaraComponent)
+		{
+			AttackNiagaraComponent->SetActive(false);
+		}
 	}
 }
 
 void ADDBuildingBase::ResetCanAttack()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Building attack cooltime reset"));
+	//UE_LOG(LogTemp, Warning, TEXT("Building attack cooltime reset"));
 	bCanAttack = true;
 }
 

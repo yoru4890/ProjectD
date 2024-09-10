@@ -36,14 +36,14 @@ void ADDTowerStaticRotate::Tick(float DeltaTime)
 
 	if (!TargetEnemy)
 	{
-		SetIsNowAttack(false);
+		StopAttackEffect();
 		return;
 	}
 
 	if (IsEnemyInSight() && bCanAttack)
 	{
 		StartAttackProcedure();
-		UE_LOG(LogTemp, Warning, TEXT("Tower Tick Test"));
+		//UE_LOG(LogTemp, Warning, TEXT("Tower Tick Test"));
 	}
 }
 
@@ -139,7 +139,7 @@ void ADDTowerStaticRotate::Attack()
 
 void ADDTowerStaticRotate::StartAttackProcedure()
 {
-	UE_LOG(LogTemp, Warning, TEXT("StartAttackProcedure"));
+	//UE_LOG(LogTemp, Warning, TEXT("StartAttackProcedure"));
 	ExecuteAttackEffects();
 	if (bCanRecoli)
 	{
