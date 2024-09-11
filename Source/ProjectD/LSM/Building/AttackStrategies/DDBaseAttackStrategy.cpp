@@ -22,7 +22,7 @@ void UDDBaseAttackStrategy::Initialize(ADDBuildingBase* InOwningTower)
 }
 
 
-void UDDBaseAttackStrategy::Attack(AActor* TargetEnemy, const FVector& FireLocation, const FRotator& FireRotation)
+void UDDBaseAttackStrategy::Attack(AActor* TargetEnemy, UStaticMeshComponent* FireStaticMesh)
 {
 	
 
@@ -36,7 +36,7 @@ void UDDBaseAttackStrategy::ApplyFireDotDamge(AActor* TargetEnemy)
     {
         DamageInterface->ApplyDamageOverTime(DotDamageType, DotDuration, DotInterval, DotDamage);
 
-        UE_LOG(LogTemp, Warning, TEXT("Apply Direct Damage"));
+        //UE_LOG(LogTemp, Warning, TEXT("Apply Direct Damage"));
     }
 }
 
@@ -48,7 +48,7 @@ void UDDBaseAttackStrategy::ApplyAcidDotDamge(AActor* TargetEnemy)
     {
         DamageInterface->ApplyDamageOverTime(DotDamageType, DotDuration, DotInterval, DotDamage);
 
-        UE_LOG(LogTemp, Warning, TEXT("Apply Direct Damage"));
+        //UE_LOG(LogTemp, Warning, TEXT("Apply Direct Damage"));
     }
 }
 
@@ -62,7 +62,7 @@ void UDDBaseAttackStrategy::ApplyDirectDamage(AActor* TargetEnemy)
         DamageEvent.DamageTypeClass = DamageType;
         DamageInterface->ApplyDamage(Damage, DamageEvent, nullptr, OwningTower);
 
-        UE_LOG(LogTemp, Warning, TEXT("Apply Direct Damage"));
+        //UE_LOG(LogTemp, Warning, TEXT("Apply Direct Damage"));
     }
 }
 

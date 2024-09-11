@@ -10,6 +10,14 @@
  *
  */
 
+UENUM(BlueprintType)
+enum class ETrapType : uint8
+{
+	ThornTrap UMETA(DisplayName = "ThornTrap"),
+	ElementalTrap UMETA(DisplayName = "ElementalTrap"),
+	Unknown
+};
+
 USTRUCT(BlueprintType)
 struct FDDTrapData : public FDDBuildingBaseData
 {
@@ -18,4 +26,7 @@ struct FDDTrapData : public FDDBuildingBaseData
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<class ADDTrap> TrapClass; // Æ®·¦ Å¬·¡½º
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	ETrapType TrapType;
 };

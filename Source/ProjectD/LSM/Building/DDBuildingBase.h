@@ -7,6 +7,7 @@
 #include "DDBuildingBaseData.h"
 #include "LSM/DDSetAssetInterface.h"
 #include "LSM/DDMaterials.h"
+#include "LSM/Building/AttackStrategies/DDBuildingAttackStrategyInterface.h"
 #include "DDBuildingBase.generated.h"
 
 UCLASS()
@@ -60,6 +61,8 @@ protected:
 	virtual void ModifyMeshAndAttackCollision() const;
 
 	void StopAttackEffect();
+
+	void DisableAttackNiagaraComponent();
 
 	virtual void ResetCanAttack();
 
@@ -176,5 +179,5 @@ protected:
 	TObjectPtr<UMaterialInstanceDynamic> DynamicMaterialInstance;
 
 	UPROPERTY()
-	TObjectPtr<class UDDBaseAttackStrategy> AttackStrategy;
+	TScriptInterface<IDDBuildingAttackStrategyInterface> AttackStrategy;
 };

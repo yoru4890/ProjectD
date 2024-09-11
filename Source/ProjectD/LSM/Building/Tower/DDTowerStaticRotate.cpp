@@ -36,14 +36,14 @@ void ADDTowerStaticRotate::Tick(float DeltaTime)
 
 	if (!TargetEnemy)
 	{
-		SetIsNowAttack(false);
+		StopAttackEffect();
 		return;
 	}
 
 	if (IsEnemyInSight() && bCanAttack)
 	{
 		StartAttackProcedure();
-		UE_LOG(LogTemp, Warning, TEXT("Tower Tick Test"));
+		//UE_LOG(LogTemp, Warning, TEXT("Tower Tick Test"));
 	}
 }
 
@@ -132,18 +132,14 @@ void ADDTowerStaticRotate::Attack()
 {
 	if (AttackStrategy)
 	{
-		IDDBuildingAttackStrategyInterface* AttackStrategyInterface = Cast<IDDBuildingAttackStrategyInterface>(AttackStrategy);
-		FVector FirePointLocation = BarrelStaticMeshComponent->GetSocketLocation(TEXT("FirePoint"));
-		FRotator FirePointDirection = BarrelStaticMeshComponent->GetSocketRotation(TEXT("FirePoint"));
-
-		AttackStrategyInterface->Attack(TargetEnemy, FirePointLocation, FirePointDirection);
+		AttackStrategy->Attack(TargetEnemy, BarrelStaticMeshComponent);
 	}
 	SetIsNowAttack(true);
 }
 
 void ADDTowerStaticRotate::StartAttackProcedure()
 {
-	UE_LOG(LogTemp, Warning, TEXT("StartAttackProcedure"));
+	//UE_LOG(LogTemp, Warning, TEXT("StartAttackProcedure"));
 	ExecuteAttackEffects();
 	if (bCanRecoli)
 	{

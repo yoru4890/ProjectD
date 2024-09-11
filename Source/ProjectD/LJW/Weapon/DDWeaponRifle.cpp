@@ -16,6 +16,7 @@ ADDWeaponRifle::ADDWeaponRifle()
 
 void ADDWeaponRifle::BeginPlay()
 {
+	Super::BeginPlay();
 	CameraManager = UGameplayStatics::GetPlayerController(GetWorld(), 0)->PlayerCameraManager;
 
 }
