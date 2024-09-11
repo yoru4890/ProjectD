@@ -4,8 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "LSM/Building/DDBuildingBaseData.h"
 #include "DDBuildComponent.generated.h"
 
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStartBuild);
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent), Blueprintable)
 class PROJECTD_API UDDBuildComponent : public UActorComponent
@@ -21,11 +24,12 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	// 위젯이 생성될 때 호출되는 Delegate
+	UPROPERTY(BlueprintAssignable, Category = "Event")
+	FOnStartBuild OnStartBuild;
 
 	UFUNCTION(BlueprintCallable)
-	AActor* ReadyBuilding(const FName& RowName);
+	void ReadyBuilding(FName RowName);
 
 	UFUNCTION(BlueprintCallable)
 	void CancelReadyBuilding();
@@ -38,7 +42,7 @@ public:
 
 	// 새로운 함수: 트랩 업그레이드
 	UFUNCTION(BlueprintCallable)
-	bool UpgradeBuilding(const FName& RowName);
+	void UpgradeBuilding(const FName RowName);
 
 	// 새로운 함수: 트랩 업그레이드
 	UFUNCTION(BlueprintCallable)
@@ -58,6 +62,13 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void StartManageTrace();
+
+	UFUNCTION()
+	void ShowStartBuildWidget();
+
+	UFUNCTION()
+	void ShowUpgradeBuildingWidget();
+
 
 private:
 	UPROPERTY()
@@ -85,6 +96,30 @@ private:
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<class UDDCantBuildWidget> HitWarningWidgetInstance;
 
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<class UDDSelectBuildingWidget> SelectBuildingWidgetClass;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class UDDSelectBuildingWidget> SelectBuildingWidgetInstance;
+
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<class UDDStartBuildWidget> StartBuildWidgetClass;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class UDDStartBuildWidget> StartBuildWidgetInstance;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UDDUpgradeBuildingWidget> UpgradeBuildingWidgetOption1Class;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class UDDUpgradeBuildingWidget> UpgradeBuildingWidgetOption1Instance;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UDDUpgradeBuildingWidget> UpgradeBuildingWidgetOption2Class;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class UDDUpgradeBuildingWidget> UpgradeBuildingWidgetOption2Instance;
+
 	bool bIsSetBuilding = false;
 
 	void PerformBuildTrace();
@@ -93,6 +128,13 @@ private:
 
 	bool CanPayBuildCost(const FName& RowName) const;
 	bool PayBuildCost(const FName& RowName) const;
+
+	void InitWidget();
+
+	void BindEventsToWidget();
+
+	UFUNCTION()
+	void ShowSelectBuildingWidget(EBuildingType BuildingType);
 
 	void SetTowerZoneIsHiddenInGame(bool bIsHiddenInGame) const;
 	//bool CanPayUpgradeCost(const FName& RowName) const;

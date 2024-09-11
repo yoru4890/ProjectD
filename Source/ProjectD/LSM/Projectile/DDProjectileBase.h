@@ -20,6 +20,7 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
 
 public:
 
@@ -44,11 +45,27 @@ protected:
 	UFUNCTION()
 	virtual void OnCollisionEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
-	void LaunchProjectile();
+	UFUNCTION()
+	virtual void LaunchProjectile();
 
 private:
 	void SetupCollisionResponses();
 	void SetParticeEffects(const FDDProjectileData& LoadedAsset);
+	void SetAttachNiagaraComponent();
+
+	void HandleEffectCompletion();
+
+	void AllStopNiagaraEffect();
+
+	UFUNCTION()
+	void OnTrailEffectFinished(class UNiagaraComponent* PSystem);
+
+	UFUNCTION()
+	void OnImpactEffectFinished(class UNiagaraComponent* PSystem);
+
+	UFUNCTION()
+	void OnExplosionEffectFinished(class UNiagaraComponent* PSystem);
+
 	void SetSound(const FDDProjectileData& LoadedAsset);
 	void SetMeshs(const FDDProjectileData& LoadedAsset);
 
@@ -59,8 +76,12 @@ private:
 	void Explode();
 	void ApplyDamageToActor(AActor* OtherActor);
 
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UProjectileMovementComponent> ProjectileMovementComponent;
 
-
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UStaticMeshComponent> StaticMeshComponent;
 private:
 	FName RowName;
 
@@ -72,6 +93,9 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	float ProjectileSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
+	float ProjectileAcceleration;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement", meta = (AllowPrivateAccess = "true"))
 	float MaxSpeed;
@@ -92,19 +116,22 @@ private:
 	int32 CurrentPenetrationCount;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UStaticMeshComponent> StaticMeshComponent;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UProjectileMovementComponent> ProjectileMovementComponent;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UNiagaraComponent> TrailNiagaraComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UNiagaraComponent> ExplosionNiagaraComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UNiagaraComponent> ImpactNiagaraComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "VFX", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UNiagaraSystem> ImpactEffect;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "VFX", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UNiagaraSystem> TrailEffect;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "VFX", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UNiagaraSystem> ExplosionEffect;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "VFX", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<USoundBase> ImpactSound;
@@ -117,5 +144,10 @@ private:
 
 	FTimerHandle LifeSpanTimerHandle;
 
+	float HeightToPool = -2000.f;
+
+	bool bTrailEffectFinished;
+	bool bImpactEffectFinished;
+	bool bExplosionEffectFinished;
 
 };

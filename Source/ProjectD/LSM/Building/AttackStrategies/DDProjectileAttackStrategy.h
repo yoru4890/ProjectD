@@ -19,7 +19,7 @@ protected:
 	void ConfigureProjectile();
 
 protected:
-	virtual void Attack(AActor* TargetEnemy, const FVector& FireLocation, const FRotator& FireRotation) override;
+	virtual void Attack(AActor* TargetEnemy, UStaticMeshComponent* FireStaticMesh) override;
 
 protected:
 	UPROPERTY()
@@ -38,8 +38,12 @@ protected:
 
 	int32 MaxPenetrationCount;
 
-private:
+	UPROPERTY()
+	TObjectPtr<AActor> TargetActor;
+
 	UPROPERTY()
 	TObjectPtr<class UDDProjectileManager> ProjectileManager;
+
+private:
 	
 };

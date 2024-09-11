@@ -42,7 +42,6 @@ void ADDMissileProjectile::Tick(float DeltaTime)
 void ADDMissileProjectile::SetTargetActor(AActor* InTargetActor)
 {
     TargetActor = InTargetActor;
-    // 타겟 위치에 랜덤 오프셋 추가
     FVector RandomOffset = FVector(FMath::RandRange(-100.0f, 100.0f), FMath::RandRange(-100.0f, 100.0f), 0.0f);
     TargetLocation = InTargetActor->GetActorLocation() + RandomOffset;
 

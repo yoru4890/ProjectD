@@ -35,11 +35,11 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 	FollowCamera->bUsePawnControlRotation = false;
 
 	//Data
-	static ConstructorHelpers::FObjectFinder<UDDCharacterControlData> DataRef(TEXT("/Script/Engine.Blueprint'/Game/0000/LJW/Blueprints/BP_DDCharacterControlData.BP_DDCharacterControlData'"));
-	if (DataRef.Object)
-	{
-		CharacterControlManager = DataRef.Object;
-	}
+	//static ConstructorHelpers::FObjectFinder<UDDCharacterControlData> DataRef(TEXT("/Script/Engine.Blueprint'/Game/0000/LJW/Blueprints/BP_DDCharacterControlData.BP_DDCharacterControlData'"));
+	//if (DataRef.Object)
+	//{
+	//	CharacterControlManager = DataRef.Object;
+	//}
 	
 	//Weapon System Component
 	WeaponSystem = CreateDefaultSubobject<UDDWeaponSystemComponent>(TEXT("WeaponSystem"));
@@ -172,6 +172,12 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 		PlaceBuildingAction = PlaceBuildingRef.Object;
 	}
 
+	static ConstructorHelpers::FObjectFinder<UInputAction>CancleBuildModeRef(TEXT("/Script/EnhancedInput.InputAction'/Game/0000/LJW/Input/IA_Player_CancleBuildMode.IA_Player_CancleBuildMode'"));
+	if (nullptr != CancleBuildModeRef.Object)
+	{
+		CancleBuildModeAction = CancleBuildModeRef.Object;
+	}
+
 #pragma endregion
 
 }
@@ -189,6 +195,7 @@ void ADDCharacterPlayer::BeginPlay()
 	
 	SetCharacterControl();
 	InitWidget();
+	BindBuildingEvents();
 	
 }
 
@@ -251,6 +258,8 @@ void ADDCharacterPlayer::SetupPlayerInputComponent(class UInputComponent* Player
 	EnhancedInputComponent->BindAction(WaveStartAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::WaveStart);
 
 	EnhancedInputComponent->BindAction(PlaceBuildingAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::PlaceBuilding);
+
+	EnhancedInputComponent->BindAction(CancleBuildModeAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::CancleBuildMode);
 }
 
 void ADDCharacterPlayer::SetCharacterControl()
@@ -385,6 +394,7 @@ void ADDCharacterPlayer::EquipMelee()
 	{
 		WeaponSystem->EquipMeleeWeapon();
 		CurrentPlayerMode = EPlayerMode::CombatMode;
+		SetPlayerGameMode();
 		BuildSystem->AllStopTrace();
 	}
 }
@@ -397,6 +407,7 @@ void ADDCharacterPlayer::EquipRange()
 	{
 		WeaponSystem->EquipRangeWeapon();
 		CurrentPlayerMode = EPlayerMode::CombatMode;
+		SetPlayerGameMode();
 		BuildSystem->AllStopTrace();
 	}
 }
@@ -459,6 +470,10 @@ bool ADDCharacterPlayer::IsMaxAggro()
 
 void ADDCharacterPlayer::EnterManagementMode()
 {
+	if (CurrentPlayerMode == EPlayerMode::BuildMode)
+	{
+		return;
+	}
 	CurrentPlayerMode = EPlayerMode::ManagementMode;
 	BuildSystem->StartManageTrace();
 }
@@ -467,24 +482,16 @@ void ADDCharacterPlayer::OpenBuildWidget()
 {
 	if (CurrentPlayerMode == EPlayerMode::ManagementMode)
 	{
-		BuildWidget->AddToViewport();
-		SetPlayerUIMode();
+		BuildSystem->ShowStartBuildWidget();
+		SetPlayerMoveOnlyMode();
 	}
 }
 
-void ADDCharacterPlayer::BuildTrapOrTower(const FName& BuildingName)
+void ADDCharacterPlayer::BuildTrapOrTower()
 {
 	FInputModeGameOnly InputModeGameOnlyData;
 
 	CurrentPlayerMode = EPlayerMode::BuildMode;
-	BuildSystem->AllStopTrace();
-	BuildSystem->StartBuildTrace();
-	BuildSystem->ReadyBuilding(BuildingName);
-	PlayerController->SetShowMouseCursor(false);
-	PlayerController->SetInputMode(InputModeGameOnlyData);
-	PlayerController->SetIgnoreMoveInput(false);
-	BuildWidget->SetVisibility(ESlateVisibility::Visible);
-	BuildWidget->RemoveFromParent();
 }
 
 void ADDCharacterPlayer::PlaceBuilding()
@@ -493,9 +500,9 @@ void ADDCharacterPlayer::PlaceBuilding()
 	{
 		if (BuildSystem->PlaceBuilding())
 		{
-			CurrentPlayerMode = EPlayerMode::ManagementMode;
+			/*CurrentPlayerMode = EPlayerMode::ManagementMode;
 			BuildSystem->AllStopTrace();
-			BuildSystem->StartManageTrace();
+			BuildSystem->StartManageTrace();*/
 		}
 	}
 	else if (CurrentPlayerMode == EPlayerMode::ManagementMode)
@@ -503,34 +510,50 @@ void ADDCharacterPlayer::PlaceBuilding()
 		//TODO : YSY or LJW Upgrade Widget
 
 		FName BuildingName = BuildSystem->GetManagedBuildingRowName();
+		SetPlayerCanNotMoveMode();
+		BuildSystem->ShowUpgradeBuildingWidget();
 		
-		if (BuildingName == NAME_None)
-		{
-			return;
-		}
-		else if (BuildingName == FName("MachineGunTower"))
-		{
-			RMMachineGunWidget->AddToViewport();
-			SetPlayerUIMode();
-		}
-		else if (BuildingName == FName("UpgradeMachineGunTower"))
-		{
-			UpMachineGunWidget->AddToViewport();
-			SetPlayerUIMode();
-		}
-		else if (BuildingName == FName("ThornTrap"))
-		{
-			RMThornTrapWidget->AddToViewport();
-			SetPlayerUIMode();
-		}
-		else if (BuildingName == FName("UpgradeThornTrap"))
-		{
-			UpThornTrapWidget->AddToViewport();
-			SetPlayerUIMode();
-		}
+		//if (BuildingName == NAME_None)
+		//{
+		//	return;
+		//}
+		//else if (BuildingName == FName("MachineGunTower"))
+		//{
+		//	RMMachineGunWidget->AddToViewport();
+		//	SetPlayerCompleteDisableMode();
+		//}
+		//else if (BuildingName == FName("UpgradeMachineGunTower"))
+		//{
+		//	UpMachineGunWidget->AddToViewport();
+		//	SetPlayerCompleteDisableMode();
+		//}
+		//else if (BuildingName == FName("ThornTrap"))
+		//{
+		//	RMThornTrapWidget->AddToViewport();
+		//	SetPlayerCompleteDisableMode();
+		//}
+		//else if (BuildingName == FName("UpgradeThornTrap"))
+		//{
+		//	UpThornTrapWidget->AddToViewport();
+		//	SetPlayerCompleteDisableMode();
+		//}
 
 		
 	}
+}
+
+void ADDCharacterPlayer::CancleBuildMode()
+{
+	if (CurrentPlayerMode == EPlayerMode::BuildMode)
+	{
+		BuildSystem->CancelReadyBuilding();
+		CurrentPlayerMode = EPlayerMode::ManagementMode;
+	}
+}
+
+void ADDCharacterPlayer::BindBuildingEvents()
+{
+	BuildSystem->OnStartBuild.AddDynamic(this, &ADDCharacterPlayer::BuildTrapOrTower);
 }
 
 void ADDCharacterPlayer::WaveStart()
@@ -541,20 +564,39 @@ void ADDCharacterPlayer::WaveStart()
 
 void ADDCharacterPlayer::InitWidget()
 {
-	BuildWidget = CreateWidget(GetWorld(), BuildWidgetClass);
-	RMMachineGunWidget = CreateWidget(GetWorld(), RMMachineGunWidgetClass);
-	UpMachineGunWidget = CreateWidget(GetWorld(), UpMachineGunWidgetClass);
-	RMThornTrapWidget = CreateWidget(GetWorld(), RMThornTrapWidgetClass);
-	UpThornTrapWidget = CreateWidget(GetWorld(), UpThornTrapWidgetClass);
+	//BuildWidget = CreateWidget(GetWorld(), BuildWidgetClass);
+	//RMMachineGunWidget = CreateWidget(GetWorld(), RMMachineGunWidgetClass);
+	//UpMachineGunWidget = CreateWidget(GetWorld(), UpMachineGunWidgetClass);
+	//RMThornTrapWidget = CreateWidget(GetWorld(), RMThornTrapWidgetClass);
+	//UpThornTrapWidget = CreateWidget(GetWorld(), UpThornTrapWidgetClass);
 }
 
-void ADDCharacterPlayer::SetPlayerUIMode()
+void ADDCharacterPlayer::SetPlayerCanNotMoveMode()
 {
-	FInputModeUIOnly InputModeUIOnlyData;
+	FInputModeGameAndUI InputModeGameAndUIData;
 	PlayerController->SetIgnoreMoveInput(true);
-	PlayerController->StopMovement();
-	PlayerController->SetInputMode(InputModeUIOnlyData);
+	PlayerController->SetIgnoreLookInput(true);
+	PlayerController->SetInputMode(InputModeGameAndUIData);
 	PlayerController->SetShowMouseCursor(true);
+}
+
+void ADDCharacterPlayer::SetPlayerMoveOnlyMode()
+{
+	FInputModeGameAndUI InputModeGameAndUIData;
+	PlayerController->SetIgnoreMoveInput(false);
+	PlayerController->SetIgnoreLookInput(false);
+	PlayerController->SetInputMode(InputModeGameAndUIData); 
+	PlayerController->SetShowMouseCursor(true); // 마우스 커서 표시
+}
+
+void ADDCharacterPlayer::SetPlayerGameMode()
+{
+	FInputModeGameOnly InputModeGameOnly;
+	PlayerController->SetIgnoreMoveInput(false);
+	PlayerController->SetIgnoreLookInput(false);
+	PlayerController->SetInputMode(InputModeGameOnly);
+	PlayerController->SetShowMouseCursor(false); // 마우스 커서 표시
+
 }
 
 void ADDCharacterPlayer::Die()
