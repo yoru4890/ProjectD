@@ -44,6 +44,8 @@ protected:
 	UFUNCTION()
 	virtual void OnCollisionEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
+	void LaunchProjectile();
+
 private:
 	void SetupCollisionResponses();
 	void SetParticeEffects(const FDDProjectileData& LoadedAsset);
@@ -53,7 +55,6 @@ private:
 	void OnLifeTimeExpired();
 	void StopLifeTimeTimer();
 
-	void LaunchProjectile();
 
 	void Explode();
 	void ApplyDamageToActor(AActor* OtherActor);
