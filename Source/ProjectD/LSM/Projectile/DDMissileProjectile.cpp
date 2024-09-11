@@ -3,7 +3,10 @@
 
 #include "LSM/Projectile/DDMissileProjectile.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "NiagaraComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Kismet/KismetSystemLibrary.h"
+#include "YSY/Collision/CollisionChannel.h"
 
 void ADDMissileProjectile::Tick(float DeltaTime)
 {
@@ -51,11 +54,57 @@ void ADDMissileProjectile::SetTargetActor(AActor* InTargetActor)
 
 void ADDMissileProjectile::LaunchProjectile()
 {
+    bTrailEffectFinished = true;
+    bExplosionEffectFinished = true;
     bApexHeightForRotate = false;
     bIsDescending = false;
     bIsMissileHidden = false;  // 미사일 숨김 상태 초기화
     TargetActor = nullptr;
+
+    TrailNiagaraComponent->SetActive(true);
+    bTrailEffectFinished = false;
+
     Super::LaunchProjectile();
+}
+
+void ADDMissileProjectile::SetAssetAndManager(const FDDProjectileData& LoadedAsset, UDDProjectileManager* InProjectileManager)
+{
+    Super::SetAssetAndManager(LoadedAsset, InProjectileManager);
+    SetAttachNiagaraComponent();
+
+}
+
+void ADDMissileProjectile::SetAttachNiagaraComponent()
+{
+    USceneComponent* TargetComponent = nullptr;
+    FName TrailSocketName = FName("TrailPoint");
+    if (StaticMeshComponent->DoesSocketExist(TrailSocketName))
+    {
+        TargetComponent = StaticMeshComponent;
+    }
+    if (TargetComponent && TrailEffect)
+    {
+        UNiagaraComponent* NewNiagaraComponent = NewObject<UNiagaraComponent>(this);
+        TrailNiagaraComponent = NewNiagaraComponent;
+        TrailNiagaraComponent->SetAsset(TrailEffect);
+        TrailNiagaraComponent->SetupAttachment(TargetComponent, TrailSocketName);
+        TrailNiagaraComponent->SetAutoActivate(false);  // 기본적으로 비활성화
+        TrailNiagaraComponent->RegisterComponent();
+
+        TrailNiagaraComponent->OnSystemFinished.AddDynamic(this, &ADDMissileProjectile::OnTrailEffectFinished);
+    }
+
+    if (ExplosionEffect)
+    {
+        UNiagaraComponent* NewNiagaraComponent = NewObject<UNiagaraComponent>(this);
+        ExplosionNiagaraComponent = NewNiagaraComponent;
+        ExplosionNiagaraComponent->SetAsset(ExplosionEffect);
+        ExplosionNiagaraComponent->SetupAttachment(RootComponent);
+        ExplosionNiagaraComponent->SetAutoActivate(false);  // 기본적으로 비활성화
+        ExplosionNiagaraComponent->RegisterComponent();
+
+        ExplosionNiagaraComponent->OnSystemFinished.AddDynamic(this, &ADDMissileProjectile::OnExplosionEffectFinished);
+    }
 }
 
 void ADDMissileProjectile::ReachApexAndStartDescent()
@@ -79,4 +128,72 @@ void ADDMissileProjectile::ApplyDescentAcceleration(float DeltaTime)
 {
     FVector AccelerationVector = GetActorForwardVector() * DescentAcceleration * DeltaTime;
     ProjectileMovementComponent->Velocity += AccelerationVector;
+}
+
+void ADDMissileProjectile::OnCollisionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+    ProjectileMovementComponent->SetActive(false);
+    StaticMeshComponent->SetVisibility(false);
+
+    if (ExplosionNiagaraComponent)
+    {
+        ExplosionNiagaraComponent->SetActive(true);
+        bExplosionEffectFinished = false;
+    }
+
+    if (TrailNiagaraComponent)
+    {
+        TrailNiagaraComponent->Deactivate();
+    }
+    ApplyRadialDamage();
+    SetActorEnableCollision(false);
+}
+
+void ADDMissileProjectile::ApplyRadialDamage()
+{
+    // 폭발 범위 내에 있는 적들만 찾아 데미지를 적용
+    TArray<AActor*> OverlappedActors;
+
+    // 적들이 속하는 오브젝트 타입 (ECC_Pawn을 사용해 적을 찾는다고 가정)
+    TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+    ObjectTypes.Add(UEngineTypes::ConvertToObjectType(GTCHANNEL_ENEMY)); // 적이 ECC_Pawn 채널에 있을 경우
+
+    // SphereOverlapActors를 사용해 폭발 범위 내의 적 찾기
+    UKismetSystemLibrary::SphereOverlapActors(
+        GetWorld(),
+        GetActorLocation(),      // 폭발 중심
+        ExplosionRadius,         // 폭발 반경
+        ObjectTypes,             // Pawn 채널에 속하는 적들만 탐색
+        nullptr,                 // 특정 클래스의 액터만 찾고 싶으면 지정 (여기서는 생략)
+        TArray<AActor*>(),       // 제외할 액터 목록 (여기서는 생략)
+        OverlappedActors         // 결과로 얻은 적들
+    );
+
+    // 찾은 액터들에게 데미지 적용 (IDamageInterface를 구현한 경우에만)
+    for (AActor* Actor : OverlappedActors)
+    {
+        ApplyDamageToActor(Actor);
+    }
+
+    UE_LOG(LogTemp, Warning, TEXT("Explosion applied to %d enemies"), OverlappedActors.Num());
+}
+
+void ADDMissileProjectile::OnTrailEffectFinished(UNiagaraComponent* PSystem)
+{
+    bTrailEffectFinished = true;
+    HandleEffectCompletion();
+}
+
+void ADDMissileProjectile::OnExplosionEffectFinished(UNiagaraComponent* PSystem)
+{
+    bExplosionEffectFinished = true;
+    HandleEffectCompletion();
+}
+
+void ADDMissileProjectile::HandleEffectCompletion()
+{
+    if (bTrailEffectFinished && bExplosionEffectFinished)
+    {
+        ReturnToPool();
+    }
 }
