@@ -12,6 +12,14 @@
  * 
  */
 
+UENUM(BlueprintType)
+enum class ETowerType : uint8
+{
+	MachineGunTower UMETA(DisplayName = "MachineGunTower"),
+	TankTower UMETA(DisplayName = "TankTower"),
+	MissileTower UMETA(DisplayName = "MissileTower"),
+	Unknown
+};
 
 USTRUCT(BlueprintType)
 struct FDDTowerData : public FDDBuildingBaseData
@@ -23,10 +31,13 @@ public:
 	TSubclassOf<class ADDTowerBase> TowerClass; // 타워 클래스
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	ETowerType TowerType;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector BarrelMeshOffset; // 배럴매쉬 조정값
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector WaistMeshOffset; // 배럴매쉬 조정값
+	FVector WaistMeshOffset; // 허리메쉬 조정값
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float TowerAttackRange; // 타워 공격범위

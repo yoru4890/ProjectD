@@ -14,8 +14,6 @@ void UDDProjectileAttackStrategy::InitializeProjectile(FName& ProjectileName)
     ProjectileManager = MyGameInstance->GetProjectileManager();
     check(ProjectileManager);
 
-    UDDAssetManager* AssetManager = MyGameInstance->GetAssetManager();
-
     // 투사체 데이터를 가져옴
     FDDProjectileData* ProjectileData = ProjectileManager->GetProjectileData(ProjectileRowName);
 
@@ -37,12 +35,9 @@ void UDDProjectileAttackStrategy::ConfigureProjectile()
     Projectile->ConfigureProjectile(Damage,DamageType, ProjectileSpeed, ProjectileMaxSpeed, ProjectileLifeTime, bIsExplosive, ExplosionRadius, MaxPenetrationCount);
 }
 
-void UDDProjectileAttackStrategy::Attack(AActor* TargetEnemy, const FVector& FireLocation, const FRotator& FireRotation)
+void UDDProjectileAttackStrategy::Attack(AActor* TargetEnemy, UStaticMeshComponent* FireStaticMesh)
 {
-    Super::Attack(TargetEnemy, FireLocation, FireRotation);
+    Super::Attack(TargetEnemy, FireStaticMesh);
     UE_LOG(LogTemp, Warning, TEXT("Projectile Attack"));
-    FRotator Rotator = OwningTower->GetFireStaticMeshComponent()->GetRelativeRotation();
-    Projectile = ProjectileManager->SpawnProjectile(GetWorld(), ProjectileRowName, FireLocation, FireRotation,nullptr,nullptr);
-    ConfigureProjectile();
 
 }
