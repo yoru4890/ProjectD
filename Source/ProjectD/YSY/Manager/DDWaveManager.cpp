@@ -160,6 +160,7 @@ void UDDWaveManager::StageEnd()
 void UDDWaveManager::AddEnemyNumber()
 {
 	TotalEnemyCount++;
+	UE_LOG(LogTemp, Warning, TEXT("%d"), TotalEnemyCount);
 }
 
 void UDDWaveManager::SubEnemyNumber()
