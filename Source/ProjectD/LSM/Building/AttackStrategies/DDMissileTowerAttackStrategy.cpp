@@ -34,7 +34,10 @@ void UDDMissileTowerAttackStrategy::Attack(AActor* TargetEnemy, UStaticMeshCompo
 			Projectile = ProjectileManager->SpawnProjectile(GetWorld(), ProjectileRowName, FirePointLocation, FirePointDirection, nullptr, nullptr);
 			ADDMissileProjectile*  MissileProjectile = Cast<ADDMissileProjectile>(Projectile);
 			ConfigureProjectile();
-			MissileProjectile->SetTargetActor(TargetEnemy);
+			if (MissileProjectile)
+			{
+				MissileProjectile->SetTargetActor(TargetEnemy);
+			}
 
 			UE_LOG(LogTemp, Warning, TEXT("Strategy Fire"));
 		}

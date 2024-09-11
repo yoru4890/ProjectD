@@ -326,7 +326,7 @@ void ADDBuildingBase::SetCanAttack(const bool bInCanAttack)
 	{
 		AttackCollisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	}
-	DisableAttackNiagaraComponent();
+	StopAttackEffect();
 }
 
 void ADDBuildingBase::ExecuteAttackEffects()

@@ -10,6 +10,8 @@
 #include "YSY/Interface/DamageInterface.h"
 #include "Engine/DamageEvents.h"
 // Sets default values
+// 
+// TODO: 이펙트가 존재하지 않는 경우는 플래그를 풀에서 꺼낼떄마다 True로 바꿔야함
 ADDProjectileBase::ADDProjectileBase()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
@@ -22,6 +24,11 @@ ADDProjectileBase::ADDProjectileBase()
 	ProjectileMovementComponent->SetUpdatedComponent(RootComponent);
 
 	SetupCollisionResponses();
+
+	// 초기화 상태 플래그
+	bTrailEffectFinished = true;
+	bImpactEffectFinished = true;
+	bExplosionEffectFinished = true;
 
 
 }
@@ -138,6 +145,8 @@ void ADDProjectileBase::SetAttachNiagaraComponent()
 		ImpactNiagaraComponent->SetAsset(ImpactEffect);
 		ImpactNiagaraComponent->SetAutoActivate(false);  // 기본적으로 비활성화
 		ImpactNiagaraComponent->RegisterComponent();
+
+		ImpactNiagaraComponent->OnSystemFinished.AddDynamic(this, &ADDProjectileBase::OnImpactEffectFinished);
 	}
 
 	if (ExplosionEffect)
@@ -148,18 +157,57 @@ void ADDProjectileBase::SetAttachNiagaraComponent()
 		ExplosionNiagaraComponent->SetupAttachment(RootComponent);
 		ExplosionNiagaraComponent->SetAutoActivate(false);  // 기본적으로 비활성화
 		ExplosionNiagaraComponent->RegisterComponent();
+
+		ExplosionNiagaraComponent->OnSystemFinished.AddDynamic(this, &ADDProjectileBase::OnExplosionEffectFinished);
+	}
+}
+
+void ADDProjectileBase::HandleEffectCompletion()
+{
+	if (bTrailEffectFinished && bImpactEffectFinished && bExplosionEffectFinished)
+	{
+		// 나이아가라 이펙트가 끝나면 미사일을 풀로 보냄
+		if (ProjectileManager)
+		{
+			/*UE_LOG(LogTemp, Warning, TEXT("OnTrailEffectFinished Called"));*/
+			StopLifeTimeTimer();  // 타이머 정지
+			ProjectileManager->DestroyProjectile(this);  // 풀에 돌려보냄
+		}
+	}
+}
+
+void ADDProjectileBase::AllStopNiagaraEffect()
+{
+	if (TrailNiagaraComponent)
+	{
+		TrailNiagaraComponent->Deactivate();
+	}
+	if (ExplosionNiagaraComponent)
+	{
+		ExplosionNiagaraComponent->Deactivate();
+	}
+	if (ImpactNiagaraComponent)
+	{
+		ImpactNiagaraComponent->Deactivate();
 	}
 }
 
 void ADDProjectileBase::OnTrailEffectFinished(UNiagaraComponent* PSystem)
 {
-	// 나이아가라 이펙트가 끝나면 미사일을 풀로 보냄
-	if (ProjectileManager)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("OnTrailEffectFinished Called"));
-		StopLifeTimeTimer();  // 타이머 정지
-		ProjectileManager->DestroyProjectile(this);  // 풀에 돌려보냄
-	}
+	bTrailEffectFinished = true;
+	HandleEffectCompletion();
+}
+
+void ADDProjectileBase::OnImpactEffectFinished(UNiagaraComponent* PSystem)
+{
+	bImpactEffectFinished = true;
+	HandleEffectCompletion();
+}
+
+void ADDProjectileBase::OnExplosionEffectFinished(UNiagaraComponent* PSystem)
+{
+	bExplosionEffectFinished = true;
+	HandleEffectCompletion();
 }
 
 void ADDProjectileBase::SetSound(const FDDProjectileData& LoadedAsset)
@@ -206,18 +254,20 @@ void ADDProjectileBase::OnCollisionBeginOverlap(UPrimitiveComponent* OverlappedC
 {
 	CurrentPenetrationCount++;
 
-	ApplyDamageToActor(OtherActor);
-
+	UE_LOG(LogTemp, Warning, TEXT("Projectile Begin ovelap"));
 
 	if (CurrentPenetrationCount >= MaxPenetrationCount)
 	{
 		if (bIsExplosive)
 		{
-			ExplosionNiagaraComponent->SetActive(true);
+			if (ExplosionNiagaraComponent)
+			{
+				ExplosionNiagaraComponent->SetActive(true);
+			}
 		}
 		else 
 		{
-
+			ApplyDamageToActor(OtherActor);
 		}
 
 		if (!TrailNiagaraComponent)
@@ -302,15 +352,8 @@ void ADDProjectileBase::SetProjectileState(bool bIsActive)
 		SetActorTickEnabled(true);
 
 		// 나이아가라 이펙트 및 사운드 활성화 (선택 사항)
-		if (TrailNiagaraComponent && !TrailNiagaraComponent->IsActive())
-		{
-			TrailNiagaraComponent->SetActive(true);
-
-		}
-		else if (TrailNiagaraComponent->IsActive())
-		{
-			TrailNiagaraComponent->Activate();
-		}
+		TrailNiagaraComponent->SetActive(true);
+		bTrailEffectFinished = false;
 
 		// 필요한 경우 추가 초기화 로직
 		CurrentPenetrationCount = 0;  // 관통 횟수 초기화
@@ -324,6 +367,9 @@ void ADDProjectileBase::SetProjectileState(bool bIsActive)
 			ProjectileMovementComponent->SetActive(false);
 		}
 
+		bTrailEffectFinished = true;
+		bImpactEffectFinished = true;
+		bExplosionEffectFinished = true;
 
 		SetActorHiddenInGame(true);
 		SetActorEnableCollision(false);

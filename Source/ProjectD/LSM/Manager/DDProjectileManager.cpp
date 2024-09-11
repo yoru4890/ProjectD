@@ -63,6 +63,7 @@ ADDProjectileBase* UDDProjectileManager::SpawnProjectile(UWorld* World, const FN
 	NewProjectile->SetActorRotation(Rotation);
 	NewProjectile->SetProjectileState(true);
 
+	UE_LOG(LogTemp, Warning, TEXT("Spawn Check"));
 	return NewProjectile;
 }
 

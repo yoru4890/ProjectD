@@ -53,9 +53,18 @@ private:
 	void SetParticeEffects(const FDDProjectileData& LoadedAsset);
 	void SetAttachNiagaraComponent();
 
+	void HandleEffectCompletion();
+
+	void AllStopNiagaraEffect();
 
 	UFUNCTION()
 	void OnTrailEffectFinished(class UNiagaraComponent* PSystem);
+
+	UFUNCTION()
+	void OnImpactEffectFinished(class UNiagaraComponent* PSystem);
+
+	UFUNCTION()
+	void OnExplosionEffectFinished(class UNiagaraComponent* PSystem);
 
 	void SetSound(const FDDProjectileData& LoadedAsset);
 	void SetMeshs(const FDDProjectileData& LoadedAsset);
@@ -136,5 +145,9 @@ private:
 	FTimerHandle LifeSpanTimerHandle;
 
 	float HeightToPool = -2000.f;
+
+	bool bTrailEffectFinished;
+	bool bImpactEffectFinished;
+	bool bExplosionEffectFinished;
 
 };
