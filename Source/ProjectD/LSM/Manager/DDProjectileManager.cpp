@@ -33,6 +33,7 @@ void UDDProjectileManager::SetupCommonReferences(UWorld* World)
 
 ADDProjectileBase* UDDProjectileManager::SpawnProjectile(UWorld* World, const FName& RowName, const FVector& Location, const FRotator& Rotation, AActor* Owner, APawn* Instigator)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Pool Num :%d"), ProjectilePool[RowName].Projectiles.Num());
 	if (!ProjectilePool.Contains(RowName))
 	{
 		ProjectilePool.Add(RowName, FProjectileList());
@@ -45,6 +46,7 @@ ADDProjectileBase* UDDProjectileManager::SpawnProjectile(UWorld* World, const FN
 		NewProjectile = ProjectilePool[RowName].Projectiles.Pop();
 		if (NewProjectile)
 		{
+			UE_LOG(LogTemp, Warning, TEXT("Spawn Check Row Name :%s"), *NewProjectile->GetName());
 			// Todo : 초기 설정
 		}
 	}
@@ -63,7 +65,6 @@ ADDProjectileBase* UDDProjectileManager::SpawnProjectile(UWorld* World, const FN
 	NewProjectile->SetActorRotation(Rotation);
 	NewProjectile->SetProjectileState(true);
 
-	UE_LOG(LogTemp, Warning, TEXT("Spawn Check"));
 	return NewProjectile;
 }
 
@@ -83,6 +84,7 @@ ADDProjectileBase* UDDProjectileManager::CreateProjectileInstance(const FDDFacto
 
 void UDDProjectileManager::DestroyProjectile(ADDProjectileBase* Projectile)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Return to Pool Call"));
 	ProjectilePool[Projectile->GetRowName()].Projectiles.Add(Projectile);
 	Projectile->SetActorLocation(FVector(-1000,-1000,-1000));
 	Projectile->SetProjectileState(false);

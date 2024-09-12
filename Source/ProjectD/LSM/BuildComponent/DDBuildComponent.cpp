@@ -327,11 +327,17 @@ void UDDBuildComponent::UpgradeBuilding(const FName RowName)
 		UE_LOG(LogTemp, Warning, TEXT("Upgrade Failed : ManagedBuilding is null"));
 		return;
 	}
+	UE_LOG(LogTemp, Warning, TEXT("RownName For Upgrade : %s"), *RowName.ToString());
 	FDDBuildingBaseData& ManagedBuildingData = *BuildingManager->GetBuildingData(ManagedBuilding->GetRowName());
+
+	UE_LOG(LogTemp, Warning, TEXT("RownName To ManagedBuilding : %s"), *ManagedBuilding->GetRowName().ToString());
 
 	if (!ManagedBuildingData.ChildRowNames.Contains(RowName))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Upgrade Failed : Mangaged Building is Final Building"));
+		UE_LOG(LogTemp, Warning, TEXT("RownName For Upgrade : %s"), *RowName.ToString());
+		UE_LOG(LogTemp, Warning, TEXT("Child Names Num : %d"), ManagedBuildingData.ChildRowNames.Num());
+
 		return;
 	}
 
