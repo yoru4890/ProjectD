@@ -22,7 +22,7 @@ public:
 protected:
 	virtual void LaunchProjectile() override;
 	virtual void SetAssetAndManager(const FDDProjectileData& LoadedAsset, class  UDDProjectileManager* InProjectileManager) override;
-	virtual void SetAttachNiagaraComponent() override;
+	void SetAttachNiagaraComponent();
 
 	void ReachApexAndStartDescent();
 
@@ -45,6 +45,12 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UNiagaraComponent> ExplosionNiagaraComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UAudioComponent> ImpactAudioComponent;
+
+
+
 
 	UFUNCTION()
 	void OnTrailEffectFinished(class UNiagaraComponent* PSystem);

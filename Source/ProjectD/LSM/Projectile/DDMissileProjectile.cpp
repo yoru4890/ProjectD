@@ -7,6 +7,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "YSY/Collision/CollisionChannel.h"
+#include "Components/AudioComponent.h"
 
 void ADDMissileProjectile::Tick(float DeltaTime)
 {
@@ -78,6 +79,7 @@ void ADDMissileProjectile::SetAttachNiagaraComponent()
 {
     USceneComponent* TargetComponent = nullptr;
     FName TrailSocketName = FName("TrailPoint");
+    FName FireSocketName = FName("FirePoint");
     if (StaticMeshComponent->DoesSocketExist(TrailSocketName))
     {
         TargetComponent = StaticMeshComponent;
@@ -94,12 +96,18 @@ void ADDMissileProjectile::SetAttachNiagaraComponent()
         TrailNiagaraComponent->OnSystemFinished.AddDynamic(this, &ADDMissileProjectile::OnTrailEffectFinished);
     }
 
-    if (ExplosionEffect)
+    TargetComponent = nullptr;
+    if (StaticMeshComponent->DoesSocketExist(FireSocketName))
+    {
+        TargetComponent = StaticMeshComponent;
+    }
+
+    if (TargetComponent && ExplosionEffect)
     {
         UNiagaraComponent* NewNiagaraComponent = NewObject<UNiagaraComponent>(this);
         ExplosionNiagaraComponent = NewNiagaraComponent;
         ExplosionNiagaraComponent->SetAsset(ExplosionEffect);
-        ExplosionNiagaraComponent->SetupAttachment(RootComponent);
+        ExplosionNiagaraComponent->SetupAttachment(TargetComponent, FireSocketName);
         ExplosionNiagaraComponent->SetAutoActivate(false);  // 기본적으로 비활성화
         ExplosionNiagaraComponent->RegisterComponent();
 
@@ -134,6 +142,7 @@ void ADDMissileProjectile::OnCollisionBeginOverlap(UPrimitiveComponent* Overlapp
 {
     ProjectileMovementComponent->SetActive(false);
     StaticMeshComponent->SetVisibility(false);
+    FlyingAudioComponent->Stop();
 
     if (ExplosionNiagaraComponent)
     {
@@ -146,6 +155,7 @@ void ADDMissileProjectile::OnCollisionBeginOverlap(UPrimitiveComponent* Overlapp
         TrailNiagaraComponent->Deactivate();
     }
     ApplyRadialDamage();
+    ImpactAudioComponent->SetActive(true);
     SetActorEnableCollision(false);
 }
 
@@ -187,6 +197,7 @@ void ADDMissileProjectile::OnTrailEffectFinished(UNiagaraComponent* PSystem)
 void ADDMissileProjectile::OnExplosionEffectFinished(UNiagaraComponent* PSystem)
 {
     bExplosionEffectFinished = true;
+    ImpactAudioComponent->Stop();
     HandleEffectCompletion();
 }
 

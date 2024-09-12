@@ -9,6 +9,7 @@
 #include "LSM/Manager/DDProjectileManager.h"
 #include "YSY/Interface/DamageInterface.h"
 #include "Engine/DamageEvents.h"
+#include "Components/AudioComponent.h"
 // Sets default values
 // 
 // TODO: 이펙트가 존재하지 않는 경우는 플래그를 풀에서 꺼낼떄마다 True로 바꿔야함
@@ -75,6 +76,7 @@ void ADDProjectileBase::SetAssetAndManager(const FDDProjectileData& LoadedAsset,
 	SetMeshs(LoadedAsset);
 	SetSound(LoadedAsset);
 	SetParticeEffects(LoadedAsset);
+	SetAttachAudioComponent();
 	ProjectileManager = InProjectileManager;
 }
 
@@ -117,10 +119,6 @@ void ADDProjectileBase::SetParticeEffects(const FDDProjectileData& LoadedAsset)
 	}
 }
 
-void ADDProjectileBase::SetAttachNiagaraComponent()
-{
-}
-
 void ADDProjectileBase::SetSound(const FDDProjectileData& LoadedAsset)
 {
 	if (LoadedAsset.ImpactSound.IsValid())
@@ -144,6 +142,19 @@ void ADDProjectileBase::SetSound(const FDDProjectileData& LoadedAsset)
 
 }
 
+void ADDProjectileBase::SetAttachAudioComponent()
+{
+	if (FlyingSound)
+	{
+		UAudioComponent* NewAudioComponent = NewObject<UAudioComponent>(this);
+		FlyingAudioComponent = NewAudioComponent;
+		FlyingAudioComponent->SetupAttachment(RootComponent);
+		FlyingAudioComponent->SetAutoActivate(false);
+		FlyingAudioComponent->SetSound(FlyingSound);
+		FlyingAudioComponent->RegisterComponent();
+	}
+}
+
 void ADDProjectileBase::SetMeshs(const FDDProjectileData& LoadedAsset)
 {
 	if (LoadedAsset.StaticMesh.IsValid())
@@ -165,14 +176,19 @@ void ADDProjectileBase::OnCollisionBeginOverlap(UPrimitiveComponent* OverlappedC
 {
 	CurrentPenetrationCount++;
 
+	if (ImpactSound)
+	{
+		//UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
+	}
+
 	UE_LOG(LogTemp, Warning, TEXT("Projectile Begin ovelap"));
 }
 
 void ADDProjectileBase::OnCollisionHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	ProjectileMovementComponent->StopMovementImmediately();
-	ProjectileMovementComponent->SetActive(false);
-	this->SetActorLocation(GetActorLocation() + GetActorForwardVector() * 50.f);
+	//ProjectileMovementComponent->StopMovementImmediately();
+	//ProjectileMovementComponent->SetActive(false);
+	//this->SetActorLocation(GetActorLocation() + GetActorForwardVector() * 50.f);
 }
 
 void ADDProjectileBase::OnCollisionEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
@@ -182,11 +198,6 @@ void ADDProjectileBase::OnCollisionEndOverlap(UPrimitiveComponent* OverlappedCom
 #pragma endregion CollisionAndCallbacks
 
 #pragma region AttackAndExplode
-
-void ADDProjectileBase::Explode()
-{
-
-}
 
 void ADDProjectileBase::ApplyDamageToActor(AActor* OtherActor)
 {
@@ -217,6 +228,11 @@ void ADDProjectileBase::LaunchProjectile()
 		ProjectileMovementComponent->ProjectileGravityScale = 0.0f;
 
 		ProjectileMovementComponent->Velocity = GetActorForwardVector() * ProjectileSpeed;
+
+		if (FlyingAudioComponent)
+		{
+			FlyingAudioComponent->SetActive(true);
+		}
 
 		GetWorld()->GetTimerManager().SetTimer(LifeSpanTimerHandle, this, &ADDProjectileBase::OnLifeTimeExpired, MaxLifeTime, false);
 	}

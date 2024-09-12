@@ -510,6 +510,10 @@ void ADDCharacterPlayer::PlaceBuilding()
 		//TODO : YSY or LJW Upgrade Widget
 
 		FName BuildingName = BuildSystem->GetManagedBuildingRowName();
+		if (BuildingName == NAME_None)
+		{
+			return;
+		}
 		SetPlayerCanNotMoveMode();
 		BuildSystem->ShowUpgradeBuildingWidget();
 		
@@ -573,10 +577,10 @@ void ADDCharacterPlayer::InitWidget()
 
 void ADDCharacterPlayer::SetPlayerCanNotMoveMode()
 {
-	FInputModeGameAndUI InputModeGameAndUIData;
+	FInputModeUIOnly InputModeUIOnly;
 	PlayerController->SetIgnoreMoveInput(true);
 	PlayerController->SetIgnoreLookInput(true);
-	PlayerController->SetInputMode(InputModeGameAndUIData);
+	PlayerController->SetInputMode(InputModeUIOnly);
 	PlayerController->SetShowMouseCursor(true);
 }
 
