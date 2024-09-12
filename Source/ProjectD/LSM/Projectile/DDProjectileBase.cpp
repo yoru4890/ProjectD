@@ -10,6 +10,7 @@
 #include "YSY/Interface/DamageInterface.h"
 #include "Engine/DamageEvents.h"
 #include "Components/AudioComponent.h"
+#include "Kismet/GameplayStatics.h"
 // Sets default values
 // 
 // TODO: 이펙트가 존재하지 않는 경우는 플래그를 풀에서 꺼낼떄마다 True로 바꿔야함
@@ -178,7 +179,8 @@ void ADDProjectileBase::OnCollisionBeginOverlap(UPrimitiveComponent* OverlappedC
 
 	if (ImpactSound)
 	{
-		//UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
+		UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, OtherActor->GetActorLocation());
+		UE_LOG(LogTemp, Warning, TEXT("Impact Sound Play"));
 	}
 
 	UE_LOG(LogTemp, Warning, TEXT("Projectile Begin ovelap"));

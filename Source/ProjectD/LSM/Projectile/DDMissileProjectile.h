@@ -46,8 +46,6 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UNiagaraComponent> ExplosionNiagaraComponent;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Audio", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UAudioComponent> ImpactAudioComponent;
 
 
 

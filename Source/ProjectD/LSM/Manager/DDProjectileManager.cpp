@@ -106,6 +106,7 @@ void UDDProjectileManager::GetSoftObjectPtrsInProjectile(const FName& RowName, T
 	AssetsToLoad.Add(ProjectileData->StaticMesh);
 	AssetsToLoad.Add(ProjectileData->ImpactEffect);
 	AssetsToLoad.Add(ProjectileData->TrailEffect);
+	AssetsToLoad.Add(ProjectileData->ExplosionEffect);
 	AssetsToLoad.Add(ProjectileData->ImpactSound);
 	AssetsToLoad.Add(ProjectileData->FlyingSound);
 }
