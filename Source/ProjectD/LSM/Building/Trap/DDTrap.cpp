@@ -23,11 +23,10 @@ void ADDTrap::Attack()
 	if (!EnemiesInRanged.IsEmpty())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Attack"));
-		IDDBuildingAttackStrategyInterface* AttackStrategyInterface = Cast<IDDBuildingAttackStrategyInterface>(AttackStrategy);
 		TSet<TObjectPtr<AActor>> Targets = EnemiesInRanged;
 		for (auto& Target : Targets)
 		{
-			AttackStrategyInterface->Attack(Target);
+			AttackStrategy->Attack(Target,nullptr);
 		}
 	}
 }

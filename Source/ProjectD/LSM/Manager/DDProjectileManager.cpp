@@ -59,10 +59,11 @@ ADDProjectileBase* UDDProjectileManager::SpawnProjectile(UWorld* World, const FN
 		NewProjectile = CreateProjectileInstance(Params);
 	}
 
-	NewProjectile->SetProjectileState(true);
 	NewProjectile->SetActorLocation(Location);
 	NewProjectile->SetActorRotation(Rotation);
+	NewProjectile->SetProjectileState(true);
 
+	UE_LOG(LogTemp, Warning, TEXT("Spawn Check"));
 	return NewProjectile;
 }
 
@@ -83,6 +84,7 @@ ADDProjectileBase* UDDProjectileManager::CreateProjectileInstance(const FDDFacto
 void UDDProjectileManager::DestroyProjectile(ADDProjectileBase* Projectile)
 {
 	ProjectilePool[Projectile->GetRowName()].Projectiles.Add(Projectile);
+	Projectile->SetActorLocation(FVector(-1000,-1000,-1000));
 	Projectile->SetProjectileState(false);
 }
 

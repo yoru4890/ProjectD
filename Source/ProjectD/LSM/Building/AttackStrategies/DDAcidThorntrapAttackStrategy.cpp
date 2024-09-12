@@ -3,7 +3,7 @@
 
 #include "LSM/Building/AttackStrategies/DDAcidThorntrapAttackStrategy.h"
 
-void UDDAcidThorntrapAttackStrategy::Attack(AActor* TargetEnemy, const FVector& FireLocation, const FRotator& FireRotation)
+void UDDAcidThorntrapAttackStrategy::Attack(AActor* TargetEnemy, UStaticMeshComponent* FireStaticMesh)
 {
 	ApplyDirectDamage(TargetEnemy);
 	ApplyAcidDotDamge(TargetEnemy);
