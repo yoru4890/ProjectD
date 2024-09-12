@@ -9,6 +9,7 @@
 #include "LSM/Manager/DDProjectileManager.h"
 #include "YSY/Interface/DamageInterface.h"
 #include "Engine/DamageEvents.h"
+#include "Components/AudioComponent.h"
 // Sets default values
 // 
 // TODO: 이펙트가 존재하지 않는 경우는 플래그를 풀에서 꺼낼떄마다 True로 바꿔야함
@@ -26,6 +27,7 @@ ADDProjectileBase::ADDProjectileBase()
 	SetupCollisionResponses();
 
 	// 초기화 상태 플래그
+	bIsInPool = true;
 	bTrailEffectFinished = true;
 	bImpactEffectFinished = true;
 	bExplosionEffectFinished = true;
@@ -49,8 +51,7 @@ void ADDProjectileBase::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	if (GetActorLocation().Z < HeightToPool)
 	{
-		StopLifeTimeTimer();
-		ProjectileManager->DestroyProjectile(this);
+		ProjectileMovementComponent->SetActive(false);
 	}
 }
 
@@ -75,7 +76,7 @@ void ADDProjectileBase::SetAssetAndManager(const FDDProjectileData& LoadedAsset,
 	SetMeshs(LoadedAsset);
 	SetSound(LoadedAsset);
 	SetParticeEffects(LoadedAsset);
-	SetAttachNiagaraComponent();
+	SetAttachAudioComponent();
 	ProjectileManager = InProjectileManager;
 }
 
@@ -118,98 +119,6 @@ void ADDProjectileBase::SetParticeEffects(const FDDProjectileData& LoadedAsset)
 	}
 }
 
-void ADDProjectileBase::SetAttachNiagaraComponent()
-{
-	USceneComponent* TargetComponent = nullptr;
-	FName TrailSocketName = FName("TrailPoint");
-	if (StaticMeshComponent->DoesSocketExist(TrailSocketName))
-	{
-		TargetComponent = StaticMeshComponent;
-	}
-	if (TargetComponent && TrailEffect)
-	{
-		UNiagaraComponent* NewNiagaraComponent = NewObject<UNiagaraComponent>(this);
-		TrailNiagaraComponent = NewNiagaraComponent;
-		TrailNiagaraComponent->SetAsset(TrailEffect);
-		TrailNiagaraComponent->SetupAttachment(TargetComponent, TrailSocketName);
-		TrailNiagaraComponent->SetAutoActivate(false);  // 기본적으로 비활성화
-		TrailNiagaraComponent->RegisterComponent();
-
-		TrailNiagaraComponent->OnSystemFinished.AddDynamic(this, &ADDProjectileBase::OnTrailEffectFinished);
-	}
-
-	if (ImpactEffect)
-	{
-		UNiagaraComponent* NewNiagaraComponent = NewObject<UNiagaraComponent>(this);
-		ImpactNiagaraComponent = NewNiagaraComponent;
-		ImpactNiagaraComponent->SetAsset(ImpactEffect);
-		ImpactNiagaraComponent->SetAutoActivate(false);  // 기본적으로 비활성화
-		ImpactNiagaraComponent->RegisterComponent();
-
-		ImpactNiagaraComponent->OnSystemFinished.AddDynamic(this, &ADDProjectileBase::OnImpactEffectFinished);
-	}
-
-	if (ExplosionEffect)
-	{
-		UNiagaraComponent* NewNiagaraComponent = NewObject<UNiagaraComponent>(this);
-		ExplosionNiagaraComponent = NewNiagaraComponent;
-		ExplosionNiagaraComponent->SetAsset(ExplosionEffect);
-		ExplosionNiagaraComponent->SetupAttachment(RootComponent);
-		ExplosionNiagaraComponent->SetAutoActivate(false);  // 기본적으로 비활성화
-		ExplosionNiagaraComponent->RegisterComponent();
-
-		ExplosionNiagaraComponent->OnSystemFinished.AddDynamic(this, &ADDProjectileBase::OnExplosionEffectFinished);
-	}
-}
-
-void ADDProjectileBase::HandleEffectCompletion()
-{
-	if (bTrailEffectFinished && bImpactEffectFinished && bExplosionEffectFinished)
-	{
-		// 나이아가라 이펙트가 끝나면 미사일을 풀로 보냄
-		if (ProjectileManager)
-		{
-			/*UE_LOG(LogTemp, Warning, TEXT("OnTrailEffectFinished Called"));*/
-			StopLifeTimeTimer();  // 타이머 정지
-			ProjectileManager->DestroyProjectile(this);  // 풀에 돌려보냄
-		}
-	}
-}
-
-void ADDProjectileBase::AllStopNiagaraEffect()
-{
-	if (TrailNiagaraComponent)
-	{
-		TrailNiagaraComponent->Deactivate();
-	}
-	if (ExplosionNiagaraComponent)
-	{
-		ExplosionNiagaraComponent->Deactivate();
-	}
-	if (ImpactNiagaraComponent)
-	{
-		ImpactNiagaraComponent->Deactivate();
-	}
-}
-
-void ADDProjectileBase::OnTrailEffectFinished(UNiagaraComponent* PSystem)
-{
-	bTrailEffectFinished = true;
-	HandleEffectCompletion();
-}
-
-void ADDProjectileBase::OnImpactEffectFinished(UNiagaraComponent* PSystem)
-{
-	bImpactEffectFinished = true;
-	HandleEffectCompletion();
-}
-
-void ADDProjectileBase::OnExplosionEffectFinished(UNiagaraComponent* PSystem)
-{
-	bExplosionEffectFinished = true;
-	HandleEffectCompletion();
-}
-
 void ADDProjectileBase::SetSound(const FDDProjectileData& LoadedAsset)
 {
 	if (LoadedAsset.ImpactSound.IsValid())
@@ -233,6 +142,19 @@ void ADDProjectileBase::SetSound(const FDDProjectileData& LoadedAsset)
 
 }
 
+void ADDProjectileBase::SetAttachAudioComponent()
+{
+	if (FlyingSound)
+	{
+		UAudioComponent* NewAudioComponent = NewObject<UAudioComponent>(this);
+		FlyingAudioComponent = NewAudioComponent;
+		FlyingAudioComponent->SetupAttachment(RootComponent);
+		FlyingAudioComponent->SetAutoActivate(false);
+		FlyingAudioComponent->SetSound(FlyingSound);
+		FlyingAudioComponent->RegisterComponent();
+	}
+}
+
 void ADDProjectileBase::SetMeshs(const FDDProjectileData& LoadedAsset)
 {
 	if (LoadedAsset.StaticMesh.IsValid())
@@ -254,43 +176,19 @@ void ADDProjectileBase::OnCollisionBeginOverlap(UPrimitiveComponent* OverlappedC
 {
 	CurrentPenetrationCount++;
 
-	UE_LOG(LogTemp, Warning, TEXT("Projectile Begin ovelap"));
-
-	if (CurrentPenetrationCount >= MaxPenetrationCount)
+	if (ImpactSound)
 	{
-		if (bIsExplosive)
-		{
-			if (ExplosionNiagaraComponent)
-			{
-				ExplosionNiagaraComponent->SetActive(true);
-			}
-		}
-		else 
-		{
-			ApplyDamageToActor(OtherActor);
-		}
-
-		if (!TrailNiagaraComponent)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("OnCollisionBeginOverlap Called"));
-			StopLifeTimeTimer();
-			ProjectileManager->DestroyProjectile(this);
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("TrailNiagaraComponent->Deactivate()"));
-			ProjectileMovementComponent->SetActive(false);
-			StaticMeshComponent->SetVisibility(false);
-			TrailNiagaraComponent->Deactivate();
-		}
+		//UGameplayStatics::PlaySoundAtLocation(this, ImpactSound, GetActorLocation());
 	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Projectile Begin ovelap"));
 }
 
 void ADDProjectileBase::OnCollisionHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	ProjectileMovementComponent->StopMovementImmediately();
-	ProjectileMovementComponent->SetActive(false);
-	this->SetActorLocation(GetActorLocation() + GetActorForwardVector() * 50.f);
+	//ProjectileMovementComponent->StopMovementImmediately();
+	//ProjectileMovementComponent->SetActive(false);
+	//this->SetActorLocation(GetActorLocation() + GetActorForwardVector() * 50.f);
 }
 
 void ADDProjectileBase::OnCollisionEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
@@ -300,11 +198,6 @@ void ADDProjectileBase::OnCollisionEndOverlap(UPrimitiveComponent* OverlappedCom
 #pragma endregion CollisionAndCallbacks
 
 #pragma region AttackAndExplode
-
-void ADDProjectileBase::Explode()
-{
-
-}
 
 void ADDProjectileBase::ApplyDamageToActor(AActor* OtherActor)
 {
@@ -336,6 +229,11 @@ void ADDProjectileBase::LaunchProjectile()
 
 		ProjectileMovementComponent->Velocity = GetActorForwardVector() * ProjectileSpeed;
 
+		if (FlyingAudioComponent)
+		{
+			FlyingAudioComponent->SetActive(true);
+		}
+
 		GetWorld()->GetTimerManager().SetTimer(LifeSpanTimerHandle, this, &ADDProjectileBase::OnLifeTimeExpired, MaxLifeTime, false);
 	}
 }
@@ -351,12 +249,9 @@ void ADDProjectileBase::SetProjectileState(bool bIsActive)
 		SetActorEnableCollision(true);
 		SetActorTickEnabled(true);
 
-		// 나이아가라 이펙트 및 사운드 활성화 (선택 사항)
-		TrailNiagaraComponent->SetActive(true);
-		bTrailEffectFinished = false;
-
 		// 필요한 경우 추가 초기화 로직
 		CurrentPenetrationCount = 0;  // 관통 횟수 초기화
+		bIsInPool = false;
 	}
 	else
 	{
@@ -370,6 +265,7 @@ void ADDProjectileBase::SetProjectileState(bool bIsActive)
 		bTrailEffectFinished = true;
 		bImpactEffectFinished = true;
 		bExplosionEffectFinished = true;
+		bIsInPool = true;
 
 		SetActorHiddenInGame(true);
 		SetActorEnableCollision(false);
@@ -377,11 +273,6 @@ void ADDProjectileBase::SetProjectileState(bool bIsActive)
 
 		// 나이아가라 이펙트 및 사운드 비활성화 (선택 사항)
 	}
-}
-
-void ADDProjectileBase::SetStaticMeshRotator(FRotator Rotator)
-{
-	StaticMeshComponent->SetRelativeRotation(Rotator);
 }
 
 void ADDProjectileBase::OnLifeTimeExpired()
@@ -399,8 +290,7 @@ void ADDProjectileBase::OnLifeTimeExpired()
 	}
 	UE_LOG(LogTemp, Error, TEXT("Projectile is Destroyed because of LifeTime"));
 	// 프로젝타일 제거
-	ProjectileManager->DestroyProjectile(this);
-	StopLifeTimeTimer();
+	ReturnToPool();
 
 }
 
@@ -411,6 +301,17 @@ void ADDProjectileBase::StopLifeTimeTimer()
 	{
 		GetWorld()->GetTimerManager().ClearTimer(LifeSpanTimerHandle);
 	}
+}
+
+void ADDProjectileBase::ReturnToPool()
+{
+	if (!ProjectileManager || bIsInPool)
+	{
+		return;
+	}
+
+	StopLifeTimeTimer();
+	ProjectileManager->DestroyProjectile(this);
 }
 
 #pragma endregion Utility
