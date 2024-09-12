@@ -3,9 +3,9 @@
 
 #include "LSM/Building/AttackStrategies/DDThornTrapAttackStrategy.h"
 
-void UDDThornTrapAttackStrategy::Attack(AActor* TargetEnemy, const FVector& FireLocation, const FRotator& FireRotation)
+void UDDThornTrapAttackStrategy::Attack(AActor* TargetEnemy, UStaticMeshComponent* FireStaticMesh)
 {
-	Super::Attack(TargetEnemy, FireLocation, FireRotation);
+	Super::Attack(TargetEnemy, FireStaticMesh);
 
 	ApplyDirectDamage(TargetEnemy);
 }

@@ -109,6 +109,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> PlaceBuildingAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> CancleBuildModeAction;
+
 	UPROPERTY(EditAnywhere, Category = Character)
 	float MouseSpeed;
 	
@@ -173,10 +176,15 @@ public:
 	void OpenBuildWidget();
 
 	UFUNCTION(BlueprintCallable)
-	void BuildTrapOrTower(const FName& BuildingName);
+	void BuildTrapOrTower();
 
 	UFUNCTION(BlueprintCallable)
 	void PlaceBuilding();
+
+	UFUNCTION(BlueprintCallable)
+	void CancleBuildMode();
+
+	void BindBuildingEvents();
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Build, Meta = (AllowPrivateAccess = "true"))
@@ -189,7 +197,10 @@ public:
 //BuildWidget
 public:
 	void InitWidget();
-	void SetPlayerUIMode();
+	void SetPlayerCanNotMoveMode();
+	void SetPlayerMoveOnlyMode();
+	void SetPlayerGameMode();
+
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, Meta = (AllowPrivateAccess = "true"))
