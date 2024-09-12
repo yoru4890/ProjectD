@@ -2,6 +2,7 @@
 
 
 #include "YSY/Game/DDPlayerState.h"
+#include "Kismet/GameplayStatics.h"
 
 ADDPlayerState::ADDPlayerState()
 {
@@ -48,5 +49,39 @@ bool ADDPlayerState::SubtractLikePoint(const int32 InLikePoint)
 	else
 	{
 		return false;
+	}
+}
+
+void ADDPlayerState::CreateSaveFile(const FString& SlotName)
+{
+	UDDSaveGame* TempSaveGame = Cast<UDDSaveGame>(UGameplayStatics::CreateSaveGameObject(UDDSaveGame::StaticClass()));
+	UGameplayStatics::SaveGameToSlot(TempSaveGame, SlotName, 0);
+}
+
+void ADDPlayerState::SaveGame(const FString& SlotName)
+{
+	UDDSaveGame* TempSaveGame = Cast<UDDSaveGame>(UGameplayStatics::LoadGameFromSlot(SlotName, 0));
+
+	if (TempSaveGame)
+	{
+		UGameplayStatics::SaveGameToSlot(TempSaveGame, SlotName, 0);
+	}
+	else
+	{
+		CreateSaveFile(SlotName);
+	}
+}
+
+void ADDPlayerState::LoadGame(const FString& SlotName)
+{
+	UDDSaveGame* TempSaveGame = Cast<UDDSaveGame>(UGameplayStatics::LoadGameFromSlot(SlotName, 0));
+
+	if (TempSaveGame)
+	{
+		DDSaveGame = TempSaveGame;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("There's not SaveSlot: %s"), *SlotName);
 	}
 }

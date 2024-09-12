@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerState.h"
+#include "YSY/Save/DDSaveGame.h"
 #include "DDPlayerState.generated.h"
 
 
@@ -50,9 +51,15 @@ public:
 
 	bool SubtractLikePoint(const int32 InLikePoint);
 
-	
+	// Save
+	void CreateSaveFile(const FString& SlotName);
 
+	void SaveGame(const FString& SlotName);
+
+	void LoadGame(const FString& SlotName);
 private:
 	int32 Gold;
 	int32 LikePoint;
+
+	TObjectPtr<UDDSaveGame> DDSaveGame;
 };
