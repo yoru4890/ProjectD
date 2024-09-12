@@ -78,3 +78,23 @@ Content/*
 !Content/0000
 Content/0000/SYS/*
 Content/0000/KHJ/*
+
+#Enemy Mesh
+!Content/BattleMechPack/Ironclad/Mesh/SK_Ironclad.uasset
+!Content/BattleMechPack/Ironclad/Mesh/Ironclad_Skeleton.uasset
+
+!Content/BattleMechPack/Doomshot/Mesh/SK_Doomshot.uasset
+!Content/BattleMechPack/Doomshot/Mesh/SKEL_Doomshot_Skeleton.uasset
+
+!Content/BattleMechPack/Legio/Mesh/SK_Legio.uasset
+!Content/BattleMechPack/Legio/Mesh/SKEL_Legio_Skeleton.uasset
+
+!Content/BattleMechPack/Obliterator/Mesh/SK_Obliterator.uasset
+!Content/BattleMechPack/Obliterator/Mesh/SKEL_Obliterator_Skeleton.uasset
+
+!Content/BattleMechPack/Pushfire/Mesh/SK_Pushfire.uasset
+!Content/BattleMechPack/Pushfire/Mesh/SKEL_Pushfire_Skeleton.uasset
+
+
+!Content/BattleMechPack/ShockBomber/Mesh/SK_ShockBomber.uasset
+!Content/BattleMechPack/ShockBomber/Mesh/ShockBomber_Skeleton.uasset
