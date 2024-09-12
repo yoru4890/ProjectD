@@ -77,7 +77,7 @@ void UDDBuildComponent::BeginPlay()
 	check(BuildingManager);
 
 	// GridBuildManager initialization
-	GridBuildManager = Cast<ADDGridBuildManager>(UGameplayStatics::GetActorOfClass(GetWorld(), ADDGridBuildManager::StaticClass()));
+	InitGridBuildManager();
 
 	PlayerState = CastChecked<ADDPlayerState>(UGameplayStatics::GetPlayerState(GetWorld(), 0));
 	check(PlayerState);
@@ -612,6 +612,11 @@ void UDDBuildComponent::SetTowerZoneIsHiddenInGame(bool bIsHiddenInGame) const
 		return;
 	}
 	GridBuildManager->SetTowerBuildingZoneMaterial(bIsHiddenInGame);
+}
+
+void UDDBuildComponent::InitGridBuildManager()
+{
+	GridBuildManager = Cast<ADDGridBuildManager>(UGameplayStatics::GetActorOfClass(GetWorld(), ADDGridBuildManager::StaticClass()));
 }
 
 //bool UDDBuildComponent::CanPayUpgradeCost(const FName& RowName) const

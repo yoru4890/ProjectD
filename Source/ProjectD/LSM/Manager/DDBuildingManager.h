@@ -98,4 +98,7 @@ private:
 	TObjectPtr<class UDDFactoryManager> FactoryManager;
 	TObjectPtr<class UDDAssetManager> AssetManager;
 
+	// Save
+public:
+	void SaveUnlockBuilding(const TMap<FName, bool>& BuildingUnlocked);
 };

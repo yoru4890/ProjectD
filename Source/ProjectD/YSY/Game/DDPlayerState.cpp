@@ -3,6 +3,8 @@
 
 #include "YSY/Game/DDPlayerState.h"
 #include "Kismet/GameplayStatics.h"
+#include "YSY/Game/DDGameInstance.h"
+#include "LSM/Manager/DDBuildingManager.h"
 
 ADDPlayerState::ADDPlayerState()
 {
@@ -35,6 +37,7 @@ bool ADDPlayerState::SubtractGold(const int32 InGold)
 void ADDPlayerState::AddLikePoint(const int32 InLikePoint)
 {
 	LikePoint += InLikePoint;
+	DDSaveGame->SetCurrentLikePoint(LikePoint);
 	OnLikePointChanged.Broadcast(LikePoint);  // LikePoint가 변경될 때 델리게이트 호출
 }
 
@@ -43,7 +46,8 @@ bool ADDPlayerState::SubtractLikePoint(const int32 InLikePoint)
 	if (CheckLikePoint(InLikePoint))
 	{
 		LikePoint -= InLikePoint;
-		OnLikePointChanged.Broadcast(LikePoint);  // LikePoint가 변경될 때 델리게이트 호출
+		DDSaveGame->SetCurrentLikePoint(LikePoint);
+		OnLikePointChanged.Broadcast(LikePoint);	// LikePoint가 변경될 때 델리게이트 호출
 		return true;
 	}
 	else
@@ -52,24 +56,21 @@ bool ADDPlayerState::SubtractLikePoint(const int32 InLikePoint)
 	}
 }
 
+void ADDPlayerState::AutoSaveGame()
+{
+	UGameplayStatics::SaveGameToSlot(DDSaveGame, DDSaveGame->GetSaveSlotName(), 0);
+}
+
 void ADDPlayerState::CreateSaveFile(const FString& SlotName)
 {
-	UDDSaveGame* TempSaveGame = Cast<UDDSaveGame>(UGameplayStatics::CreateSaveGameObject(UDDSaveGame::StaticClass()));
-	UGameplayStatics::SaveGameToSlot(TempSaveGame, SlotName, 0);
+	DDSaveGame = Cast<UDDSaveGame>(UGameplayStatics::CreateSaveGameObject(UDDSaveGame::StaticClass()));
+	UGameplayStatics::SaveGameToSlot(DDSaveGame, SlotName, 0);
 }
 
 void ADDPlayerState::SaveGame(const FString& SlotName)
 {
-	UDDSaveGame* TempSaveGame = Cast<UDDSaveGame>(UGameplayStatics::LoadGameFromSlot(SlotName, 0));
-
-	if (TempSaveGame)
-	{
-		UGameplayStatics::SaveGameToSlot(TempSaveGame, SlotName, 0);
-	}
-	else
-	{
-		CreateSaveFile(SlotName);
-	}
+	DDSaveGame->SetSaveSlotName(SlotName);
+	UGameplayStatics::SaveGameToSlot(DDSaveGame, SlotName, 0);
 }
 
 void ADDPlayerState::LoadGame(const FString& SlotName)
@@ -79,9 +80,20 @@ void ADDPlayerState::LoadGame(const FString& SlotName)
 	if (TempSaveGame)
 	{
 		DDSaveGame = TempSaveGame;
+		DDSaveGame->SetSaveSlotName(SlotName);
+		LikePoint = DDSaveGame->GetCurrentLikePoint();
+
+		auto TempGameInstance = Cast<UDDGameInstance>(GetWorld()->GetGameInstance());
+		auto TempBuildingManager = TempGameInstance->GetBuildingManager();
+		TempBuildingManager->SaveUnlockBuilding(DDSaveGame->GetBuildingUnlocked());
 	}
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("There's not SaveSlot: %s"), *SlotName);
 	}
+}
+
+void ADDPlayerState::UpdateBuildingLockState(const FName& BuildingName, const bool& bIsUnlocked)
+{
+	DDSaveGame->SetBuildingLockState(BuildingName, bIsUnlocked);
 }

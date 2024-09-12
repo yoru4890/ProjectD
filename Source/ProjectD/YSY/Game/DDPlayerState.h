@@ -51,15 +51,34 @@ public:
 
 	bool SubtractLikePoint(const int32 InLikePoint);
 
+	const int32 GetScore() const noexcept { return Score; }
+
+	void SetScore(const int32& NewScore) { Score = NewScore; }
+
 	// Save
+	UFUNCTION(BlueprintCallable, Category = "Save")
+	void AutoSaveGame();
+
+	UFUNCTION(BlueprintCallable, Category = "Save")
 	void CreateSaveFile(const FString& SlotName);
 
+	UFUNCTION(BlueprintCallable, Category = "Save")
 	void SaveGame(const FString& SlotName);
 
+	UFUNCTION(BlueprintCallable, Category = "Save")
 	void LoadGame(const FString& SlotName);
+
+	UFUNCTION(BlueprintCallable, Category = "Save")
+	UDDSaveGame* GetSaveGame() const { return DDSaveGame; }
+
+	UFUNCTION(BlueprintCallable, Category = "Save")
+	void UpdateBuildingLockState(const FName& BuildingName, const bool& bIsUnlocked);
+
 private:
 	int32 Gold;
 	int32 LikePoint;
+	int32 Score;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Save", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UDDSaveGame> DDSaveGame;
 };

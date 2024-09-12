@@ -6,41 +6,6 @@
 #include "GameFramework/SaveGame.h"
 #include "DDSaveGame.generated.h"
 
-USTRUCT(BlueprintType)
-struct FSaveGameData
-{
-	GENERATED_BODY()
-
-	UPROPERTY()
-	TArray<int32> StageLikePoints;
-
-	UPROPERTY()
-	TArray<bool> StageCleared;
-
-	UPROPERTY()
-	int32 TotalLikePoint;
-
-	UPROPERTY()
-	TMap<FName, bool> TrapUnlocked;
-
-	UPROPERTY()
-	TMap<FName, bool> TowerUnlocked;
-
-	FSaveGameData& operator=(const FSaveGameData& Other)
-	{
-		if (this != &Other)
-		{
-			StageLikePoints = Other.StageLikePoints;
-			StageCleared = Other.StageCleared;
-			TotalLikePoint = Other.TotalLikePoint;
-			TrapUnlocked = Other.TrapUnlocked;
-			TowerUnlocked = Other.TowerUnlocked;
-		}
-
-		return *this;
-	}
-};
-
 UCLASS()
 class PROJECTD_API UDDSaveGame : public USaveGame
 {
@@ -48,22 +13,31 @@ class PROJECTD_API UDDSaveGame : public USaveGame
 	
 public:
 	FORCEINLINE const FString GetSaveSlotName() const noexcept { return SaveSlotName; }
-	
-	FORCEINLINE const int32 GetSaveIndex() const noexcept { return SaveIndex; }
+	FORCEINLINE const int32 GetCurrentLikePoint() const noexcept { return CurrentLikePoint; }
+	FORCEINLINE const TMap<FName, bool> GetBuildingUnlocked() const noexcept { return BuildingUnlocked; }
 
-	FORCEINLINE const FSaveGameData GetSaveGameData() const noexcept { return SaveGameData; }
 
 	void SetSaveSlotName(const FString& NewSaveSlotName) { SaveSlotName = NewSaveSlotName; }
-	void SetSaveIndex(const int32& NewSaveIndex) { SaveIndex = NewSaveIndex; }
-	void SetSaveGameData(const FSaveGameData& NewSaveGameData) { SaveGameData = NewSaveGameData; }
+	void SetCurrentLikePoint(const int32& NewCurrentLikePoint) { CurrentLikePoint = NewCurrentLikePoint; }
+
+	void SetBuildingLockState(const FName& BuildingName, const bool& bIsUnlocked);
 
 private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "SaveData", Meta = (AllowPrivateAccess = "true"))
 	FString SaveSlotName;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "SaveData", Meta = (AllowPrivateAccess = "true"))
-	int32 SaveIndex;
+	TArray<int32> StageLikePoints;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "SaveData", Meta = (AllowPrivateAccess = "true"))
-	FSaveGameData SaveGameData;
+	TArray<bool> StageCleared;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "SaveData", Meta = (AllowPrivateAccess = "true"))
+	int32 TotalLikePoint;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "SaveData", Meta = (AllowPrivateAccess = "true"))
+	int32 CurrentLikePoint;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "SaveData", Meta = (AllowPrivateAccess = "true"))
+	TMap<FName, bool> BuildingUnlocked;
 };
