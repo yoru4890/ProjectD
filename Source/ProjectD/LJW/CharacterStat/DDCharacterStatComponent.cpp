@@ -36,7 +36,7 @@ void UDDCharacterStatComponent::SetHp(float NewHp)
 	//CurrentHp = FMath::Clamp<float>(NewHp, 0.0f, BaseStat.MaxHp);
 	OnHpChanged.Broadcast(CurrentHp);
 
-	UE_LOG(LogTemp, Warning, TEXT("%f"), CurrentHp);
+	//UE_LOG(LogTemp, Warning, TEXT("%f"), CurrentHp);
 }
 
 

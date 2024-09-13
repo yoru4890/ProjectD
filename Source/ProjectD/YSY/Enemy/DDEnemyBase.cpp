@@ -111,7 +111,7 @@ float ADDEnemyBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEve
 	{
 		FPointDamageEvent* PointDamageEvent = (FPointDamageEvent*)(&DamageEvent);
 
-		UE_LOG(LogTemp, Warning, TEXT("%s"), *(PointDamageEvent->HitInfo.BoneName.ToString()));
+		//UE_LOG(LogTemp, Warning, TEXT("%s"), *(PointDamageEvent->HitInfo.BoneName.ToString()));
 
 		for (const FName& Weakpoint : WeakPoints)
 		{
@@ -498,7 +498,7 @@ void ADDEnemyBase::Deactivate()
 		SetActorLocation({ AIMoveRoute->GetSplinePointasWorldPosition(0) + FVector(0,0,500.0f) });
 		EnemyAIController->StopMovement();
 	}
-	GetMesh()->GetAnimInstance()->Montage_Stop(0.01f);
+	//GetMesh()->GetAnimInstance()->Montage_Stop(0.01f);
 	AttackFinished();
 	if (bIsAggroState)
 	{

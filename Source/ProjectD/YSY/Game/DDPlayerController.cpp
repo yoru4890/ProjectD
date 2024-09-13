@@ -19,11 +19,13 @@ ADDPlayerController::ADDPlayerController()
 	{
 		MainWidgetClass = MainWidgetClassRef.Class;
 	}
+
+	MainWidget = CreateWidget(GetWorld(), MainWidgetClass);
 }
 
 void ADDPlayerController::ShowMainWidget()
 {
-	MainWidget = CreateWidget(GetWorld(), MainWidgetClass);
+	
 	auto PlayerWidgetInterface = Cast<IDDCharacterWidgetInterface>(GetPawn());
 	ensure(PlayerWidgetInterface);
 	if (PlayerWidgetInterface)
@@ -32,18 +34,27 @@ void ADDPlayerController::ShowMainWidget()
 		PlayerWidgetInterface->SetupCharacterWidget(TempMainWidget->GetHpBarWidget());
 
 		auto TempPlayerState = Cast<ADDPlayerState>(UGameplayStatics::GetPlayerState(GetWorld(), 0));
-		TempPlayerState->OnGoldChanged.AddDynamic(TempMainWidget, &UDDMainWidget::SetGoldText);
+		if (!TempPlayerState->OnGoldChanged.IsBound())
+		{
+			TempPlayerState->OnGoldChanged.AddDynamic(TempMainWidget, &UDDMainWidget::SetGoldText);
+		}
 		TempMainWidget->SetGoldText(TempPlayerState->GetGold());
 
 		auto TempGameInstance = Cast<UDDGameInstance>(GetGameInstance());
 
 		auto TempWaveManager = TempGameInstance->GetWaveManager();
 
-		TempWaveManager->OnRemainingLivesChanged.AddDynamic(TempMainWidget, &UDDMainWidget::SetRemainingLivesText);
+		if (!TempWaveManager->OnRemainingLivesChanged.IsBound())
+		{
+			TempWaveManager->OnRemainingLivesChanged.AddDynamic(TempMainWidget, &UDDMainWidget::SetRemainingLivesText);
+		}
 
 		TempMainWidget->SetRemainingLivesText(TempWaveManager->GetRemainingLives());
 
-		TempWaveManager->OnWaveChangedSignature.AddDynamic(TempMainWidget, &UDDMainWidget::SetWaveText);
+		if (!TempWaveManager->OnWaveChangedSignature.IsBound())
+		{
+			TempWaveManager->OnWaveChangedSignature.AddDynamic(TempMainWidget, &UDDMainWidget::SetWaveText);
+		}
 
 		TempMainWidget->SetWaveText(TempWaveManager->GetCurrentWave(), TempWaveManager->GetMaxWave());
 	}

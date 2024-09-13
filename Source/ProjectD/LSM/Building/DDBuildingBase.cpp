@@ -349,9 +349,13 @@ void ADDBuildingBase::PlayAttackEffectAtSocket()
 		{
 			AttackNiagaraComponent->SetActive(true);
 		}
+		else
+		{
+			AttackNiagaraComponent->Deactivate();
+		}
 
 		// 파티클 이펙트 재생
-		AttackNiagaraComponent->Activate();
+		AttackNiagaraComponent->SetActive(true);
 	}
 
 }

@@ -35,7 +35,10 @@ public:
 	EBuildingType BuildingType; // 빌딩의 타입
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TObjectPtr<UTexture2D> BuildingImage; // 빌딩의 이미지
+	TObjectPtr<UTexture2D> BuildingRealImage; // 빌딩의 실제 이미지
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TObjectPtr<UTexture2D> BuildingIconImage; // 빌딩의 아이콘 이미지
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 OccupiedCellWidth; // 그리드를 차지하는 크기
