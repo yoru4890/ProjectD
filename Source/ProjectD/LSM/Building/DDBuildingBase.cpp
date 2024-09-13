@@ -85,12 +85,14 @@ void ADDBuildingBase::InitFromDataTable(const FName& InRowName, const FDDBuildin
 	Damage = BuildingData.Damage;
 	bIsAnimated = BuildingData.bIsAnimated;
 	bIsDot = BuildingData.bIsDot;
+	DotDamageType = BuildingData.DotDamageType;
 	DotDamage = BuildingData.DotDamage;
 	DotDuration = BuildingData.DotDuration;
 	DotInterval = BuildingData.DotInterval;
-	bIsSlow = BuildingData.bIsSlow;
-	SlowAmount = BuildingData.SlowAmount;
-	SlowDuration = BuildingData.SlowDuration;
+	bIsDebuff = BuildingData.bIsDebuff;
+	DebuffType = BuildingData.DebuffType;
+	DebuffRate = BuildingData.DebuffRate;
+	DebuffDuration = BuildingData.DebuffDuration;
 	bCanAttack = false;
 	DamageType = BuildingData.DamageType;
 	//UE_LOG(LogTemp, Warning, TEXT("MeshZAxisModify is : %f"), BuildingData.MeshZAxisModify);
@@ -332,9 +334,9 @@ void ADDBuildingBase::SetCanAttack(const bool bInCanAttack)
 void ADDBuildingBase::ExecuteAttackEffects()
 {
 	bCanAttack = false;
-	PlayAttackEffectAtSocket();
-	PlayAttackAnimation();
-	PlayAttackSound();
+	//PlayAttackEffectAtSocket();
+	//PlayAttackAnimation();
+	//PlayAttackSound();
 
 	// 타이머를 설정하여 쿨타임 후 bCanAttack을 true로 변경
 	GetWorld()->GetTimerManager().SetTimer(AttackCooldownTimerHandle, this, &ADDBuildingBase::ResetCanAttack, AttackCoolTime, false);

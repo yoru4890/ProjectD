@@ -7,7 +7,7 @@
 #include "DDBuildingBaseData.h"
 #include "LSM/DDSetAssetInterface.h"
 #include "LSM/DDMaterials.h"
-#include "LSM/Building/AttackStrategies/DDBuildingAttackStrategyInterface.h"
+#include "YSY/Interface/DamageInterface.h"
 #include "DDBuildingBase.generated.h"
 
 UCLASS()
@@ -29,12 +29,16 @@ public:
 	FORCEINLINE const int32 GetCellWidth() const { return CellWidth; }
 	FORCEINLINE const EBuildingType GetBuildingType() const { return BuildingType; }
 	FORCEINLINE const float GetDamage() const { return Damage; }
+	FORCEINLINE const bool GetIsDot() const { return bIsDot; }
 	FORCEINLINE const TSubclassOf<UDamageType> GetDamageType() const { return DamageType; }
 	FORCEINLINE const float GetDotDamage() const { return DotDamage; }
+	FORCEINLINE const EDotDamageType GetDotDamageType() const { return DotDamageType; }
 	FORCEINLINE const float GetDotDuration() const { return DotDuration; }
 	FORCEINLINE const float GetDotInterval() const { return DotInterval; }
-	FORCEINLINE const float GetSlowAmount() const { return SlowAmount; }
-	FORCEINLINE const float GeSlowDuration() const { return SlowDuration; }
+	FORCEINLINE const bool GetIsDebuff() const { return bIsDebuff; }
+	FORCEINLINE const EDebuffType GetDebuffType() const { return DebuffType; }
+	FORCEINLINE const float GetDebuffRate() const { return DebuffRate; }
+	FORCEINLINE const float GetDebuffDuration() const { return DebuffDuration; }
 	FORCEINLINE class UNiagaraSystem* GetHitEffect() const { return HitEffect; }
 	FORCEINLINE const UStaticMeshComponent* GetFireStaticMeshComponent() const { return StaticMeshComponents[0]; }
 
@@ -66,15 +70,16 @@ protected:
 
 	virtual void ResetCanAttack();
 
+	void PlayAttackAnimation();
+	void PlayAttackEffectAtSocket();
+	void PlayAttackSound();
+
+	FTimerHandle AttackCooldownTimerHandle;
+
 private:
 	void SetParticeEffects(const FDDBuildingBaseData& LoadedAsset);
 	void SetSound(const FDDBuildingBaseData& LoadedAsset);
 	void SetAttackStrategy(TSubclassOf<class UDDBaseAttackStrategy> AttackStrategyClass);
-	void PlayAttackEffectAtSocket();
-	void PlayAttackAnimation();
-	void PlayAttackSound();
-
-	FTimerHandle AttackCooldownTimerHandle;
 
 
 protected:
@@ -118,6 +123,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsDot; // 도트 공격 빌딩 여부
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EDotDamageType DotDamageType; // 도트 공격 타입
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bIsDot"))
 	float DotDamage; // 도트 공격 데미지
 
@@ -128,13 +136,16 @@ protected:
 	float DotInterval; // 도트 공격 간격
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bIsSlow; // 이동 속도 감소 빌딩 여부
+	bool bIsDebuff; // 디버프 여부
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EDebuffType DebuffType; // 디버프 타입
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bIsSlow"))
-	float SlowAmount; // 이동 속도 감소 비율 (0.0 ~ 1.0, 예: 0.5는 50% 감소)
+	float DebuffRate; // 디버프 비율 (0.0 ~ 1.0, 예: 0.5는 50% 감소)
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bIsSlow"))
-	float SlowDuration; // 이동 속도 감소 지속 시간
+	float DebuffDuration; // 디버프 지속 시간
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<UDamageType> DamageType; // 빌딩의 데미지 타입
@@ -179,5 +190,5 @@ protected:
 	TObjectPtr<UMaterialInstanceDynamic> DynamicMaterialInstance;
 
 	UPROPERTY()
-	TScriptInterface<IDDBuildingAttackStrategyInterface> AttackStrategy;
+	TScriptInterface<class IDDBuildingAttackStrategyInterface> AttackStrategy;
 };

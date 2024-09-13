@@ -32,7 +32,10 @@ void UDDProjectileAttackStrategy::InitializeProjectile(FName& ProjectileName)
 
 void UDDProjectileAttackStrategy::ConfigureProjectile()
 {
-    Projectile->ConfigureProjectile(Damage,DamageType, ProjectileSpeed, ProjectileMaxSpeed, ProjectileLifeTime, bIsExplosive, ExplosionRadius, MaxPenetrationCount);
+    if (Projectile)
+    {
+        Projectile->ConfigureProjectile(Damage, DamageType, ProjectileSpeed, ProjectileMaxSpeed, ProjectileLifeTime, bIsExplosive, ExplosionRadius, MaxPenetrationCount);
+    }
 }
 
 void UDDProjectileAttackStrategy::Attack(AActor* TargetEnemy, UStaticMeshComponent* FireStaticMesh)

@@ -35,7 +35,11 @@ private:
 
 	virtual void Attack() override;
 
+	virtual void ExecuteAttackEffects() override;
+
 	void StartAttackProcedure();
+
+
 
 
 private:

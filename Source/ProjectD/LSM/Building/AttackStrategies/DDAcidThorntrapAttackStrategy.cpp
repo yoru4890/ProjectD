@@ -6,5 +6,5 @@
 void UDDAcidThorntrapAttackStrategy::Attack(AActor* TargetEnemy, UStaticMeshComponent* FireStaticMesh)
 {
 	ApplyDirectDamage(TargetEnemy);
-	ApplyAcidDotDamge(TargetEnemy);
+	ApplyDotDamge(TargetEnemy);
 }
