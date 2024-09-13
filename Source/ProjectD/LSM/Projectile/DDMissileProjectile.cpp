@@ -140,6 +140,8 @@ void ADDMissileProjectile::ApplyDescentAcceleration(float DeltaTime)
 
 void ADDMissileProjectile::OnCollisionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+    Super::OnCollisionBeginOverlap(OverlappedComponent, OtherActor, OtherComp, OtherBodyIndex, bFromSweep, SweepResult);
+
     ProjectileMovementComponent->SetActive(false);
     StaticMeshComponent->SetVisibility(false);
     FlyingAudioComponent->Stop();
@@ -155,7 +157,6 @@ void ADDMissileProjectile::OnCollisionBeginOverlap(UPrimitiveComponent* Overlapp
         TrailNiagaraComponent->Deactivate();
     }
     ApplyRadialDamage();
-    ImpactAudioComponent->SetActive(true);
     SetActorEnableCollision(false);
 }
 
@@ -197,7 +198,6 @@ void ADDMissileProjectile::OnTrailEffectFinished(UNiagaraComponent* PSystem)
 void ADDMissileProjectile::OnExplosionEffectFinished(UNiagaraComponent* PSystem)
 {
     bExplosionEffectFinished = true;
-    ImpactAudioComponent->Stop();
     HandleEffectCompletion();
 }
 

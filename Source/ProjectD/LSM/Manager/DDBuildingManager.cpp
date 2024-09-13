@@ -37,7 +37,7 @@ void UDDBuildingManager::Initialize()
 	}
 
 	SetBuildingSellCost();
-	HandleBuildingPoolsOnLevelChange();
+	//HandleBuildingPoolsOnLevelChange();
 }
 
 void UDDBuildingManager::SetupCommonReferences(UWorld* World)
@@ -213,6 +213,8 @@ bool UDDBuildingManager::UnlockBuilding(const FName& RowName)
 		UE_LOG(LogTemp, Warning, TEXT("Here3"));
 		BuildingStruct->bIsUnlocked = true;
 
+		PlayerState->UpdateBuildingLockState(RowName, true);
+
 		return true;
 	}
 	UE_LOG(LogTemp, Warning, TEXT("Here4"));
@@ -254,6 +256,9 @@ bool UDDBuildingManager::LockBuilding(const FName& RowName)
 
 	PlayerState->AddLikePoint(LockBuildingData->UnlockCost);
 	LockBuildingData->bIsUnlocked = false;
+
+	PlayerState->UpdateBuildingLockState(RowName, false);
+
 	return true;
 }
 
@@ -410,6 +415,16 @@ void UDDBuildingManager::OnBuildingAssetsLoaded(const FName& RowName)
 				NewBuilding->SetCanAttack(false);
 			}
 		}
+	}
+}
+
+void UDDBuildingManager::SaveUnlockBuilding(const TMap<FName, bool>& BuildingUnlocked)
+{
+	for (const auto& [BuildingName, Unlocked] : BuildingUnlocked)
+	{
+		FDDBuildingBaseData* BuildingData = GetBuildingData(BuildingName);
+
+		BuildingData->bIsUnlocked = Unlocked;
 	}
 }
 
