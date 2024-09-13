@@ -140,4 +140,7 @@ private:
 	//bool CanPayUpgradeCost(const FName& RowName) const;
 	//bool PayUpgradeCost(const FName& RowName) const;
 
+public:
+	UFUNCTION(BlueprintCallable)
+	void InitGridBuildManager();
 };
