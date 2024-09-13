@@ -20,6 +20,7 @@
 #include "YSY/Interface/AggroTargetInterface.h"
 #include "YSY/Collision/CollisionChannel.h"
 #include "YSY/Game/DDPlayerState.h"
+#include "Components/AudioComponent.h"
 
 // Sets default values
 ADDEnemyBase::ADDEnemyBase()
@@ -645,15 +646,16 @@ void ADDEnemyBase::PlayAttackEffect()
 		for (const auto& LocationName : AttackEffectInfo.LocationNames)
 		{
 			auto Location = GetMesh()->GetSocketLocation(LocationName);
+			auto Rotation = GetMesh()->GetSocketRotation(LocationName);
 
 			if (AttackEffectInfo.CascadeEffect)
 			{
-				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), AttackEffectInfo.CascadeEffect, Location, FRotator::ZeroRotator, FVector(AttackEffectInfo.EffectScale));
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), AttackEffectInfo.CascadeEffect, Location, Rotation, FVector(AttackEffectInfo.EffectScale));
 			}
 
 			if (AttackEffectInfo.NiagaraEffect)
 			{
-				UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), AttackEffectInfo.NiagaraEffect, Location, FRotator::ZeroRotator, FVector(AttackEffectInfo.EffectScale));
+				UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), AttackEffectInfo.NiagaraEffect, Location, Rotation, FVector(AttackEffectInfo.EffectScale));
 			}
 		}
 	}
@@ -668,15 +670,16 @@ void ADDEnemyBase::PlayDeathEffect()
 		for (const auto& LocationName : DeathEffectInfo.LocationNames)
 		{
 			auto Location = GetMesh()->GetSocketLocation(LocationName);
+			auto Rotation = GetMesh()->GetSocketRotation(LocationName);
 
 			if (DeathEffectInfo.CascadeEffect)
 			{
-				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DeathEffectInfo.CascadeEffect, Location, FRotator::ZeroRotator, FVector(DeathEffectInfo.EffectScale));
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DeathEffectInfo.CascadeEffect, Location, Rotation, FVector(DeathEffectInfo.EffectScale));
 			}
 
 			if (DeathEffectInfo.NiagaraEffect)
 			{
-				UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), DeathEffectInfo.NiagaraEffect, Location, FRotator::ZeroRotator, FVector(DeathEffectInfo.EffectScale));
+				UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), DeathEffectInfo.NiagaraEffect, Location, Rotation, FVector(DeathEffectInfo.EffectScale));
 			}
 		}
 	}

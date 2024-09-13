@@ -148,6 +148,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "DD", Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UDDEnemyStatComponent> Stat;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "DD", Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UAudioComponent> AudioComponent;
 private:
 
 #pragma region FEnemyData
