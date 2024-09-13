@@ -334,9 +334,6 @@ void ADDBuildingBase::SetCanAttack(const bool bInCanAttack)
 void ADDBuildingBase::ExecuteAttackEffects()
 {
 	bCanAttack = false;
-	//PlayAttackEffectAtSocket();
-	//PlayAttackAnimation();
-	//PlayAttackSound();
 
 	// 타이머를 설정하여 쿨타임 후 bCanAttack을 true로 변경
 	GetWorld()->GetTimerManager().SetTimer(AttackCooldownTimerHandle, this, &ADDBuildingBase::ResetCanAttack, AttackCoolTime, false);
