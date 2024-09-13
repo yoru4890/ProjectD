@@ -13,9 +13,9 @@ void UDDMissileTowerAttackStrategy::Initialize(ADDBuildingBase* InOwningTower)
 
 	ProjectileSpeed = 300;
 	ProjectileMaxSpeed = 30000;
-	ProjectileLifeTime = 20;
+	ProjectileLifeTime = 10;
 	bIsExplosive = true;
-	ExplosionRadius = 5;
+	ExplosionRadius = 250;
 	MaxPenetrationCount = 1;
 }
 
@@ -33,11 +33,11 @@ void UDDMissileTowerAttackStrategy::Attack(AActor* TargetEnemy, UStaticMeshCompo
 			FirePointDirection.Pitch = 85.f;
 			Projectile = ProjectileManager->SpawnProjectile(GetWorld(), ProjectileRowName, FirePointLocation, FirePointDirection, nullptr, nullptr);
 			ADDMissileProjectile*  MissileProjectile = Cast<ADDMissileProjectile>(Projectile);
-			ConfigureProjectile();
 			if (MissileProjectile)
 			{
 				MissileProjectile->SetTargetActor(TargetEnemy);
 			}
+			ConfigureProjectile();
 
 			UE_LOG(LogTemp, Warning, TEXT("Strategy Fire"));
 		}
