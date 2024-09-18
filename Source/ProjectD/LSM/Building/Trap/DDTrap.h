@@ -5,14 +5,14 @@
 #include "CoreMinimal.h"
 #include "LSM/Building/DDBuildingBase.h"
 #include "LSM/Building/DDBuildingAttackInterface.h"
-#include "LSM/Building/DDMontageControlNotifyInterface.h"
+#include "LSM/Building/Trap/DDTrapAttackEffectInterface.h"
 #include "DDTrap.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class PROJECTD_API ADDTrap : public ADDBuildingBase , public IDDBuildingAttackInterface, public IDDMontageControlNotifyInterface
+class PROJECTD_API ADDTrap : public ADDBuildingBase , public IDDBuildingAttackInterface, public IDDTrapAttackEffectInterface
 {
 	GENERATED_BODY()
 public:
@@ -24,9 +24,7 @@ protected:
 public:
 	virtual void Attack() override;
 
-	virtual void PauseMontage();
-
-	virtual void ResumeMontage();
+	virtual void StartAttackEffect() override;
 
 protected:
 	virtual void ModifyMeshAndAttackCollision() const override;

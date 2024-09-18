@@ -31,12 +31,9 @@ void ADDTrap::Attack()
 	}
 }
 
-void ADDTrap::PauseMontage()
+void ADDTrap::StartAttackEffect()
 {
-}
-
-void ADDTrap::ResumeMontage()
-{
+	PlayAttackEffectAtSocket();
 }
 
 void ADDTrap::ModifyMeshAndAttackCollision() const

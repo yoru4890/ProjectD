@@ -23,9 +23,9 @@ void UDDBuildingAnimInstance::PlayAnimationMontage(UAnimMontage* InMontage)
             CurrentMontage = InMontage;
 
             // 공격 몽타주가 끝나면 bIsAttacking을 false로 설정
-            FOnMontageEnded MontageEndedDelegate;
-            MontageEndedDelegate.BindUObject(this, &UDDBuildingAnimInstance::OnMontageEnded);
-            Montage_SetEndDelegate(MontageEndedDelegate, InMontage);
+            //FOnMontageEnded MontageEndedDelegate;
+            //MontageEndedDelegate.BindUObject(this, &UDDBuildingAnimInstance::OnMontageEnded);
+            //Montage_SetEndDelegate(MontageEndedDelegate, InMontage);
         }
         else
         {

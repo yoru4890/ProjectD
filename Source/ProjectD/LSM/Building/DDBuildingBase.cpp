@@ -119,8 +119,8 @@ void ADDBuildingBase::SetAttackStrategy(TSubclassOf<class UDDBaseAttackStrategy>
 void ADDBuildingBase::SetAssets(const FDDBuildingBaseData& LoadedAsset)
 {
 	SetMeshs(LoadedAsset);
-	SetParticeEffects(LoadedAsset);
 	ModifyMeshAndAttackCollision();
+	SetParticeEffects(LoadedAsset);
 	SetSound(LoadedAsset);
 	SetAttackStrategy(LoadedAsset.AttackStrategy);
 
