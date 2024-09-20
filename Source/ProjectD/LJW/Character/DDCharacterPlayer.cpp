@@ -18,6 +18,7 @@
 #include "Blueprint/UserWidget.h"
 #include "YSY/UI/DDPlayerHPBarWidget.h"
 #include "LJW/CharacterStat/DDCharacterStatComponent.h"
+#include "NiagaraComponent.h"
 
 ADDCharacterPlayer::ADDCharacterPlayer()
 {
@@ -53,41 +54,19 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 	//BuildComponent
 	BuildSystem = CreateDefaultSubobject<UDDBuildComponent>(TEXT("BuildSystem"));
 
-	//BuildWidget
-	static ConstructorHelpers::FClassFinder<UUserWidget> BuildWidgetFinder(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/0000/YSY/Widget/YSY_WBP_RM_Select.YSY_WBP_RM_Select_C'"));
+	//BuildHudNiagaraComponent
+	BuildHudNiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("BuildHudNiagaraComponent"));
+	BuildHudNiagaraComponent->SetupAttachment(RootComponent);
+	BuildHudNiagaraComponent->SetAutoActivate(false);
 
-	if (BuildWidgetFinder.Succeeded())
+	static ConstructorHelpers::FObjectFinder<UNiagaraSystem> HudNiagaraRef(TEXT("/Game/0000/LSM/VFX/NS_uiScriptor.NS_uiScriptor"));
+	if (HudNiagaraRef.Succeeded())
 	{
-		BuildWidgetClass = BuildWidgetFinder.Class;
+		BuildHudNiagaraComponent->SetAsset(HudNiagaraRef.Object);
 	}
 
-	static ConstructorHelpers::FClassFinder<UUserWidget> RMMachineGunWidgetFinder(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/0000/YSY/Widget/YSY_WBP_RM_MachineGun.YSY_WBP_RM_MachineGun_C'"));
 
-	if (RMMachineGunWidgetFinder.Succeeded())
-	{
-		RMMachineGunWidgetClass = RMMachineGunWidgetFinder.Class;
-	}
 
-	static ConstructorHelpers::FClassFinder<UUserWidget> UpMachineGunWidgetFinder(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/0000/YSY/Widget/YSY_WBP_RM_UpMachineGun.YSY_WBP_RM_UpMachineGun_C'"));
-
-	if (UpMachineGunWidgetFinder.Succeeded())
-	{
-		UpMachineGunWidgetClass = UpMachineGunWidgetFinder.Class;
-	}
-
-	static ConstructorHelpers::FClassFinder<UUserWidget> RMThornTrapWidgetFinder(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/0000/YSY/Widget/YSY_WBP_RM_ThornTrap.YSY_WBP_RM_ThornTrap_C'"));
-
-	if (RMThornTrapWidgetFinder.Succeeded())
-	{
-		RMThornTrapWidgetClass = RMThornTrapWidgetFinder.Class;
-	}
-
-	static ConstructorHelpers::FClassFinder<UUserWidget> UpThornTrapWidgetFinder(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/0000/YSY/Widget/YSY_WBP_RM_UpThornTrap.YSY_WBP_RM_UpThornTrap_C'"));
-
-	if (UpThornTrapWidgetFinder.Succeeded())
-	{
-		UpThornTrapWidgetClass = UpThornTrapWidgetFinder.Class;
-	}
 
 	//StatComponent
 	Stat = CreateDefaultSubobject<UDDCharacterStatComponent>(TEXT("Stat"));
@@ -194,7 +173,6 @@ void ADDCharacterPlayer::BeginPlay()
 	}
 	
 	SetCharacterControl();
-	InitWidget();
 	BindBuildingEvents();
 	
 }
@@ -396,6 +374,7 @@ void ADDCharacterPlayer::EquipMelee()
 		CurrentPlayerMode = EPlayerMode::CombatMode;
 		SetPlayerGameMode();
 		BuildSystem->AllStopTrace();
+		BuildHudNiagaraComponent->SetActive(false);
 	}
 }
 
@@ -409,6 +388,7 @@ void ADDCharacterPlayer::EquipRange()
 		CurrentPlayerMode = EPlayerMode::CombatMode;
 		SetPlayerGameMode();
 		BuildSystem->AllStopTrace();
+		BuildHudNiagaraComponent->SetActive(false);
 	}
 }
 
@@ -474,6 +454,7 @@ void ADDCharacterPlayer::EnterManagementMode()
 	{
 		return;
 	}
+	BuildHudNiagaraComponent->SetActive(true);
 	CurrentPlayerMode = EPlayerMode::ManagementMode;
 	BuildSystem->StartManageTrace();
 }
@@ -516,33 +497,6 @@ void ADDCharacterPlayer::PlaceBuilding()
 		}
 		SetPlayerCanNotMoveMode();
 		BuildSystem->ShowUpgradeBuildingWidget();
-		
-		//if (BuildingName == NAME_None)
-		//{
-		//	return;
-		//}
-		//else if (BuildingName == FName("MachineGunTower"))
-		//{
-		//	RMMachineGunWidget->AddToViewport();
-		//	SetPlayerCompleteDisableMode();
-		//}
-		//else if (BuildingName == FName("UpgradeMachineGunTower"))
-		//{
-		//	UpMachineGunWidget->AddToViewport();
-		//	SetPlayerCompleteDisableMode();
-		//}
-		//else if (BuildingName == FName("ThornTrap"))
-		//{
-		//	RMThornTrapWidget->AddToViewport();
-		//	SetPlayerCompleteDisableMode();
-		//}
-		//else if (BuildingName == FName("UpgradeThornTrap"))
-		//{
-		//	UpThornTrapWidget->AddToViewport();
-		//	SetPlayerCompleteDisableMode();
-		//}
-
-		
 	}
 }
 
@@ -564,15 +518,6 @@ void ADDCharacterPlayer::WaveStart()
 {
 	auto GameInstance = Cast<UDDGameInstance>(GetGameInstance());
 	GameInstance->GetWaveManager()->WaveStart();
-}
-
-void ADDCharacterPlayer::InitWidget()
-{
-	//BuildWidget = CreateWidget(GetWorld(), BuildWidgetClass);
-	//RMMachineGunWidget = CreateWidget(GetWorld(), RMMachineGunWidgetClass);
-	//UpMachineGunWidget = CreateWidget(GetWorld(), UpMachineGunWidgetClass);
-	//RMThornTrapWidget = CreateWidget(GetWorld(), RMThornTrapWidgetClass);
-	//UpThornTrapWidget = CreateWidget(GetWorld(), UpThornTrapWidgetClass);
 }
 
 void ADDCharacterPlayer::SetPlayerCanNotMoveMode()

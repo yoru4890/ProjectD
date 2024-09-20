@@ -46,8 +46,9 @@ public:
 	virtual void InitFromDataTable(const FName& InRowName, const FDDBuildingBaseData& BuildingData);
 	virtual void  SetCanAttack(const bool bInCanAttack);
 	void SetAssets(const FDDBuildingBaseData& LoadedAsset);
-	void SetMaterialToPreview(bool bCanPay);
-	void SetMaterialToOriginal();
+	void SetBuildingToPreview(bool bCanPay);
+	void SetBuildingToOriginal();
+	void ActivateMatrixNiagara(bool IsPlay);
 
 protected:
 	virtual void ExecuteAttackEffects();
@@ -152,6 +153,9 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	TArray<TObjectPtr<class UNiagaraComponent>> AttackNiagaraComponents;
+
+	UPROPERTY(EditAnywhere)
+	TObjectPtr<class UNiagaraComponent> MatrixNiagaraComponent;
 
 	UPROPERTY(EditAnywhere)
 	TObjectPtr<class UNiagaraSystem> AttackEffect;

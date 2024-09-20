@@ -190,48 +190,21 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Build, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UDDBuildComponent> BuildSystem;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Build, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UNiagaraComponent> BuildHudNiagaraComponent;
+
 // Wave System
 public:
 	void WaveStart();
 
-//BuildWidget
+//Input Mode
 public:
-	void InitWidget();
 	void SetPlayerCanNotMoveMode();
 	void SetPlayerMoveOnlyMode();
 	void SetPlayerGameMode();
 
 
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, Meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<class UUserWidget> BuildWidgetClass;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, Meta = (AllowPrivateAccess = "true"))
-	UUserWidget* BuildWidget;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, Meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<class UUserWidget> RMMachineGunWidgetClass;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, Meta = (AllowPrivateAccess = "true"))
-	UUserWidget* RMMachineGunWidget;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, Meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<class UUserWidget> UpMachineGunWidgetClass;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, Meta = (AllowPrivateAccess = "true"))
-	UUserWidget* UpMachineGunWidget;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, Meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<class UUserWidget> RMThornTrapWidgetClass;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, Meta = (AllowPrivateAccess = "true"))
-	UUserWidget* RMThornTrapWidget;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, Meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<class UUserWidget> UpThornTrapWidgetClass;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, Meta = (AllowPrivateAccess = "true"))
-	UUserWidget* UpThornTrapWidget;
 
 // Stat
 public:

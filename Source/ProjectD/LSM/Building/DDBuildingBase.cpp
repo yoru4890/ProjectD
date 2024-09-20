@@ -30,6 +30,17 @@ ADDBuildingBase::ADDBuildingBase()
 	MeshContainerComponent = CreateDefaultSubobject<USceneComponent>(TEXT("MashContainerComponent"));
 	MeshContainerComponent->SetupAttachment(RootComponent);
 
+	MatrixNiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("MatrixNiagaraComponent"));
+	MatrixNiagaraComponent->SetupAttachment(RootComponent);
+	MatrixNiagaraComponent->SetRelativeScale3D(FVector(3,5,2.5));
+	MatrixNiagaraComponent->SetAutoActivate(false);
+
+	static ConstructorHelpers::FObjectFinder<UNiagaraSystem> MatrixNiagaraRef(TEXT("/Game/0000/LSM/VFX/NS_techDigitalRain3D.NS_techDigitalRain3D"));
+	if (MatrixNiagaraRef.Succeeded())
+	{
+		MatrixNiagaraComponent->SetAsset(MatrixNiagaraRef.Object);
+	}
+
 
 }
 
@@ -180,6 +191,10 @@ void ADDBuildingBase::SetParticeEffects(const FDDBuildingBaseData& LoadedAsset)
 	// 찾아낸 FirePoint 소켓들에 대해 나이아가라 컴포넌트 생성 및 설정
 	for (const FName& SocketName : FirePointSockets)
 	{
+		if (!AttackEffect)
+		{
+			return;
+		}
 		USceneComponent* TargetComponent = nullptr;
 
 		if (SkeletalMeshComponents.Num() > 0 && SkeletalMeshComponents[0]->DoesSocketExist(SocketName))
@@ -509,15 +524,15 @@ void ADDBuildingBase::ModifyMeshAndAttackCollision() const
 }
 
 
-void ADDBuildingBase::SetMaterialToPreview(bool bCanPay)
+void ADDBuildingBase::SetBuildingToPreview(bool bCanPay)
 {
 	if (bCanPay)
 	{
-		DynamicMaterialInstance->SetVectorParameterValue("Param", FLinearColor(0, 0, 0.6f, 1));
+		DynamicMaterialInstance->SetVectorParameterValue("Param", FLinearColor(0, 0, 0.6f, 0.6f));
 	}
 	else
 	{
-		DynamicMaterialInstance->SetVectorParameterValue("Param", FLinearColor(0.6, 0, 0, 1));
+		DynamicMaterialInstance->SetVectorParameterValue("Param", FLinearColor(0.6, 0, 0, 0.6f));
 	}
 
 	for (auto& OriginalMaterial : OriginalMaterials)
@@ -527,9 +542,10 @@ void ADDBuildingBase::SetMaterialToPreview(bool bCanPay)
 			OriginalMaterial.Key->SetMaterial(MaterialIndex, DynamicMaterialInstance);
 		}
 	}
+	ActivateMatrixNiagara(true);
 }
 
-void ADDBuildingBase::SetMaterialToOriginal()
+void ADDBuildingBase::SetBuildingToOriginal()
 {
 	for (auto& OriginalMaterial : OriginalMaterials)
 	{
@@ -538,6 +554,12 @@ void ADDBuildingBase::SetMaterialToOriginal()
 			OriginalMaterial.Key->SetMaterial(MaterialIndex, OriginalMaterial.Value.Materials[MaterialIndex]);
 		}
 	}
+	ActivateMatrixNiagara(false);
+}
+
+void ADDBuildingBase::ActivateMatrixNiagara(bool IsPlay)
+{
+	MatrixNiagaraComponent->SetActive(IsPlay);
 }
 
 #pragma endregion UtilityFunctions

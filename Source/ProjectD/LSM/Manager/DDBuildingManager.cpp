@@ -119,6 +119,7 @@ ADDBuildingBase* UDDBuildingManager::SpawnBuilding(UWorld* World, const FName& R
 void UDDBuildingManager::DestroyBuilding(ADDBuildingBase& Building)
 {
 	BuildingPool[Building.GetRowName()].Buildings.Add(Building);
+	Building.SetBuildingToOriginal();
 	Building.SetActorHiddenInGame(true);
 	Building.SetActorEnableCollision(false);
 	Building.SetActorTickEnabled(false);
