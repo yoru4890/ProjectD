@@ -36,6 +36,10 @@ ADDEnemyBase::ADDEnemyBase()
 	HpBar->SetRelativeLocation(FVector(0.0f, 0.0f, 180.0f));
 
 	Stat = CreateDefaultSubobject<UDDEnemyStatComponent>(TEXT("Stat"));
+	
+	AttackAudio = CreateDefaultSubobject<UAudioComponent>(TEXT("AttackSound"));
+	AttackAudio->SetupAttachment(GetMesh());
+	AttackAudio->bAutoActivate = false;
 
 	static ConstructorHelpers::FClassFinder<UUserWidget> HpBarWidgetRef(TEXT("/Game/0000/YSY/Widget/YSY_WBP_EnemyHpBar.YSY_WBP_EnemyHpBar_C"));
 	if (HpBarWidgetRef.Class)
@@ -178,6 +182,10 @@ void ADDEnemyBase::InitializeEnemy(const FDDEnemyData& EnemyData)
 	bIsBoss = EnemyData.bIsBoss;
 	bIsElite = EnemyData.bIsElite;
 	AttackEffects = EnemyData.AttackEffects;
+	AttackAudio->SetSound(EnemyData.AttackSound);
+	AttackAudio->SetVolumeMultiplier(EnemyData.VolumeMultiplier);
+	AttackAudio->SetPitchMultiplier(EnemyData.PitchMultiplier);
+	SoundStartTime = EnemyData.SoundStartTime;
 	DeathEffects = EnemyData.DeathEffects;
 	GetCapsuleComponent()->SetCapsuleRadius(EnemyData.CapsuleRadiusSize);
 	GetCapsuleComponent()->SetCapsuleHalfHeight(EnemyData.CapsuleHalfHeightSize);
@@ -213,6 +221,8 @@ void ADDEnemyBase::InitializeEnemy(const FDDEnemyData& EnemyData)
 	AttackMontage = DuplicateObject<UAnimMontage>(EnemyAttackMontage, this);
 
 	BindingAnimNotify();
+
+
 }
 
 void ADDEnemyBase::SplineMove()
@@ -375,6 +385,12 @@ void ADDEnemyBase::Die()
 		return;
 	}
 	bIsDead = true;
+	AttackAudio->Stop();
+	for (const auto& Elem : NiagaraAttackEffect)
+	{
+		Elem->DestroyComponent();
+	}
+	NiagaraAttackEffect.Empty();
 	PlayDeathEffect();
 	OnSetVisibleHpBarDelegate.ExecuteIfBound(false);
 	OnDie.Broadcast(EnemyName, this);
@@ -639,10 +655,11 @@ void ADDEnemyBase::ShowHpBarbyAttack()
 
 void ADDEnemyBase::PlayAttackEffect()
 {
+	AttackAudio->Play(SoundStartTime);
+	NiagaraAttackEffect.Empty();
+
 	for (const auto& AttackEffectInfo : AttackEffects)
 	{
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), AttackEffectInfo.SoundEffect, GetActorLocation(), AttackEffectInfo.VolumeMultiplier, AttackEffectInfo.PitchMultiplier, AttackEffectInfo.SoundStartTime);
-		
 		for (const auto& LocationName : AttackEffectInfo.LocationNames)
 		{
 			auto Location = GetMesh()->GetSocketLocation(LocationName);
@@ -655,7 +672,9 @@ void ADDEnemyBase::PlayAttackEffect()
 
 			if (AttackEffectInfo.NiagaraEffect)
 			{
-				UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), AttackEffectInfo.NiagaraEffect, Location, Rotation, FVector(AttackEffectInfo.EffectScale));
+				auto TempEffect = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), AttackEffectInfo.NiagaraEffect, Location, Rotation, FVector(AttackEffectInfo.EffectScale));
+				
+				NiagaraAttackEffect.Add(TempEffect);
 			}
 		}
 	}
