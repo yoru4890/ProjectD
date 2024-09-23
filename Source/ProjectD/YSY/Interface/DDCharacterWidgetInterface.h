@@ -22,4 +22,5 @@ class PROJECTD_API IDDCharacterWidgetInterface
 
 public:
 	virtual void SetupCharacterWidget(class UDDUserWidget* InUserWidget) = 0;
+	virtual void SetupRifleAmmoText(class UDDUserWidget* InUserWidget) {};
 };

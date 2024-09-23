@@ -10,6 +10,9 @@
 #include "Kismet/GameplayStatics.h"
 #include "YSY/Game/DDGameInstance.h"
 #include "YSY/Manager/DDWaveManager.h"
+#include "LJW/Character/DDCharacterPlayer.h"
+#include "LJW/Weapon/DDWeaponRifle.h"
+#include "LJW/Weapon/DDWeaponSystemComponent.h"
 
 ADDPlayerController::ADDPlayerController()
 {
@@ -27,6 +30,8 @@ void ADDPlayerController::ShowMainWidget()
 {
 	
 	auto PlayerWidgetInterface = Cast<IDDCharacterWidgetInterface>(GetPawn());
+	ADDCharacterPlayer* MyCharacter = Cast<ADDCharacterPlayer>(GetPawn());
+
 	ensure(PlayerWidgetInterface);
 	if (PlayerWidgetInterface)
 	{
@@ -56,7 +61,19 @@ void ADDPlayerController::ShowMainWidget()
 			TempWaveManager->OnWaveChangedSignature.AddDynamic(TempMainWidget, &UDDMainWidget::SetWaveText);
 		}
 
+		//TODO:
 		TempMainWidget->SetWaveText(TempWaveManager->GetCurrentWave(), TempWaveManager->GetMaxWave());
+
+		if (MyCharacter)
+		{
+			ADDWeaponRifle* WeaponRifle = Cast<ADDWeaponRifle>(MyCharacter->GetWeaponComp()->GetCurrentRangeWeaponInstance());
+			if (WeaponRifle)
+			{
+				WeaponRifle->OnLoadedAmmoChanged.AddDynamic(TempMainWidget, &UDDMainWidget::SetLoadedRifleAmmoText);
+
+				WeaponRifle->OnUnLoadedAmmoChanged.AddDynamic(TempMainWidget, &UDDMainWidget::SetUnLoadedRifleAmmoText);
+			}
+		}
 	}
 	MainWidget->AddToViewport();
 	

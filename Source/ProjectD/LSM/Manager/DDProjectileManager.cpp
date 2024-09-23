@@ -33,17 +33,17 @@ void UDDProjectileManager::SetupCommonReferences(UWorld* World)
 
 ADDProjectileBase* UDDProjectileManager::SpawnProjectile(UWorld* World, const FName& RowName, const FVector& Location, const FRotator& Rotation, AActor* Owner, APawn* Instigator)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Pool Num :%d"), ProjectilePool[RowName].Projectiles.Num());
-	if (!ProjectilePool.Contains(RowName))
+	UE_LOG(LogTemp, Warning, TEXT("Pool Num :%d"), ProjectilePools[RowName].Projectiles.Num());
+	if (!ProjectilePools.Contains(RowName))
 	{
-		ProjectilePool.Add(RowName, FProjectileList());
+		ProjectilePools.Add(RowName, FProjectileList());
 	}
 
 	ADDProjectileBase* NewProjectile = nullptr;
 
-	if (ProjectilePool[RowName].Projectiles.Num() > 0)
+	if (ProjectilePools[RowName].Projectiles.Num() > 0)
 	{
-		NewProjectile = ProjectilePool[RowName].Projectiles.Pop();
+		NewProjectile = ProjectilePools[RowName].Projectiles.Pop();
 		if (NewProjectile)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Spawn Check Row Name :%s"), *NewProjectile->GetName());
@@ -85,7 +85,7 @@ ADDProjectileBase* UDDProjectileManager::CreateProjectileInstance(const FDDFacto
 void UDDProjectileManager::DestroyProjectile(ADDProjectileBase* Projectile)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Return to Pool Call"));
-	ProjectilePool[Projectile->GetRowName()].Projectiles.Add(Projectile);
+	ProjectilePools[Projectile->GetRowName()].Projectiles.Add(Projectile);
 	Projectile->SetActorLocation(FVector(-1000,-1000,-1000));
 	Projectile->SetProjectileState(false);
 }
@@ -111,11 +111,37 @@ void UDDProjectileManager::GetSoftObjectPtrsInProjectile(const FName& RowName, T
 	AssetsToLoad.Add(ProjectileData->FlyingSound);
 }
 
+void UDDProjectileManager::HandleProjectilePoolsOnLevelChange()
+{
+	// Iterate over all the Projectile Pools
+	for (auto& Pool : ProjectilePools)
+	{
+		// Get the list of projectiles
+		FProjectileList& ProjectileList = Pool.Value;
+
+		// Destroy each projectile in the list
+		for (auto& Projectile : ProjectileList.Projectiles)
+		{
+			if (Projectile)
+			{
+				Projectile->Destroy();
+			}
+		}
+
+		// Clear the array of projectiles
+		ProjectileList.Projectiles.Empty();
+	}
+
+	// Finally, clear the entire ProjectilePools map
+	ProjectilePools.Empty();
+}
+
 void UDDProjectileManager::LoadProjectileAssets(const FName& RowName)
 {
 	bool bIsAlreadyLoaded = GetProjectileData(RowName)->bIsLoaded;
 	if (bIsAlreadyLoaded)
 	{
+		OnProjectileAssetsLoaded(RowName);
 		return;
 	}
 	TArray<TSoftObjectPtr<UObject>> AssetsToLoad;
@@ -137,9 +163,9 @@ void UDDProjectileManager::OnProjectileAssetsLoaded(const FName& RowName)
 	UE_LOG(LogTemp, Warning, TEXT("Assets for RowName %s loaded."), *RowName.ToString());
 
 	// 풀에 해당 RowName에 대한 액터 추가
-	if (!ProjectilePool.Contains(RowName))
+	if (!ProjectilePools.Contains(RowName))
 	{
-		ProjectilePool.Add(RowName, FProjectileList());
+		ProjectilePools.Add(RowName, FProjectileList());
 	}
 
 	int PoolSize = GetProjectileData(RowName)->PoolSize;
@@ -156,7 +182,7 @@ void UDDProjectileManager::OnProjectileAssetsLoaded(const FName& RowName)
 		ADDProjectileBase* NewProjectile = CreateProjectileInstance(Params);
 		if (NewProjectile)
 		{
-			ProjectilePool[RowName].Projectiles.Add(NewProjectile);
+			ProjectilePools[RowName].Projectiles.Add(NewProjectile);
 			NewProjectile->SetProjectileState(false);
 			UE_LOG(LogTemp, Warning, TEXT("Projectile %d for RowName %s added to pool."), i + 1, *RowName.ToString());
 		}

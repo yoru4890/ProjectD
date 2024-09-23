@@ -466,11 +466,12 @@ void ADDBuildingBase::ModifyMeshAndAttackCollision() const
 
 	FBox CombinedBox(ForceInit); // 빈 경계로 초기화
 
-
+	int32 StaticNum = 0;
 
 	// 각 자식 컴포넌트에 대해 경계를 계산하고 합침
 	for (UMeshComponent* MeshComponent : MeshComponents)
 	{
+		StaticNum++;
 		if (!MeshComponent)
 		{
 			//UE_LOG(LogTemp, Warning, TEXT("MeshComponent is not valid."));
@@ -481,6 +482,10 @@ void ADDBuildingBase::ModifyMeshAndAttackCollision() const
 
 		if (UStaticMeshComponent* StaticMeshComponent = Cast<UStaticMeshComponent>(MeshComponent))
 		{
+			if (StaticNum != 3)
+			{
+				continue;
+			}
 			if (UStaticMesh* StaticMesh = StaticMeshComponent->GetStaticMesh())
 			{
 				ComponentBox = StaticMesh->GetBoundingBox();

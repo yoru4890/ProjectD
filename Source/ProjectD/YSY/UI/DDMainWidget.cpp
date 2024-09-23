@@ -18,6 +18,16 @@ void UDDMainWidget::SetGoldText(int32 CurrentGold)
 	GoldText->SetText(FText::FromString(GoldString));
 }
 
+void UDDMainWidget::SetLoadedRifleAmmoText(int32 CurrentLoadedAmmo)
+{
+	LoadedRifleAmmoText->SetText(FText::AsNumber(CurrentLoadedAmmo));
+}
+
+void UDDMainWidget::SetUnLoadedRifleAmmoText(int32 CurrentUnLoadedAmmo)
+{
+	UnLoadedRifleAmmoText->SetText(FText::AsNumber(CurrentUnLoadedAmmo));
+}
+
 void UDDMainWidget::SetRemainingLivesText(int32 CurrentLives)
 {
 	FString RemainingLivesString = FString::Printf(TEXT("%d"), CurrentLives);
@@ -37,4 +47,6 @@ void UDDMainWidget::NativeConstruct()
 	WaveText = Cast<UTextBlock>(GetWidgetFromName(TEXT("WaveText")));
 	GoldText = Cast<UTextBlock>(GetWidgetFromName(TEXT("GoldText")));
 	RemainingLivesText = Cast<UTextBlock>(GetWidgetFromName(TEXT("RemainingLivesText")));
+	LoadedRifleAmmoText = Cast<UTextBlock>(GetWidgetFromName(TEXT("LoadedRifleAmmo")));
+	UnLoadedRifleAmmoText = Cast<UTextBlock>(GetWidgetFromName(TEXT("UnLoadedRifleAmmo")));
 }

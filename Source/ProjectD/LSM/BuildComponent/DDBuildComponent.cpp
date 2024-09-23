@@ -500,7 +500,14 @@ void UDDBuildComponent::PerformBuildTrace()
 
 			if (CanBuildAtLoction) {
 				FVector NearestCellLocation = GridBuildManager->GetNearestGridCellLocation(BuildLocation);
-				PreviewBuilding->SetActorLocation(NearestCellLocation);
+				if (PreviewBuilding->GetBuildingType() == EBuildingType::Tower)
+				{
+					PreviewBuilding->SetActorLocation(BuildLocation);
+				}
+				else if (PreviewBuilding->GetBuildingType() == EBuildingType::Trap)
+				{
+					PreviewBuilding->SetActorLocation(NearestCellLocation);
+				}
 				FVector NormalVector = GridBuildManager->GetGridCellNormalVector(BuildLocation);
 				FRotator ActorRotation = FRotationMatrix::MakeFromZ(NormalVector).Rotator();
 				if (PreviewBuilding->GetBuildingType() == EBuildingType::Tower)

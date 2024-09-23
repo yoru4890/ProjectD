@@ -56,6 +56,7 @@ public:
 	void WeaponEndAiming();
 	
 	void WeaponAttack();
+	void ReloadWeapon();
 
 	//조건 모음
 	bool IsUnequipMontage(const UAnimMontage* Montage) const;
@@ -69,6 +70,8 @@ public:
 	void FinishRifleZoom(); //Timeline Finish(End)
 	UFUNCTION()
 	void InitTimeline();
+
+	ADDWeaponBase* GetCurrentRangeWeaponInstance();
 
 public:
 	FOnGetIsAimingSignature OnGetAimingDelegate;

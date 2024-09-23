@@ -23,7 +23,7 @@ void UDDProjectileAttackStrategy::InitializeProjectile(FName& ProjectileName)
         return;
     }
 
-    if (ProjectileData && !ProjectileData->bIsLoaded)
+    if (ProjectileData)
     {
         // 비동기 로딩 함수 호출
         ProjectileManager->LoadProjectileAssets(ProjectileRowName);

@@ -65,6 +65,10 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 		BuildHudNiagaraComponent->SetAsset(HudNiagaraRef.Object);
 	}
 
+	BuildHudNiagaraComponent->SetRelativeRotation(FQuat(FRotator(0.0f, 90.0f, 0.f)));
+	BuildHudNiagaraComponent->SetRelativeScale3D(FVector(7.0f));
+	BuildHudNiagaraComponent->SetRelativeLocation(FVector(60.0f, 0.0f, 50.f));
+
 
 
 
@@ -157,6 +161,12 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 		CancleBuildModeAction = CancleBuildModeRef.Object;
 	}
 
+	static ConstructorHelpers::FObjectFinder<UInputAction>ReloadRef(TEXT("/Script/EnhancedInput.InputAction'/Game/0000/LJW/Input/IA_Player_Reload.IA_Player_Reload'"));
+	if (nullptr != ReloadRef.Object)
+	{
+		ReloadAction = ReloadRef.Object;
+	}
+
 #pragma endregion
 
 }
@@ -228,6 +238,8 @@ void ADDCharacterPlayer::SetupPlayerInputComponent(class UInputComponent* Player
 	EnhancedInputComponent->BindAction(SubSkillAction, ETriggerEvent::Completed, this, &ADDCharacterPlayer::WeaponEndAiming);
 
 	EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Completed, this, &ADDCharacterPlayer::WeaponAttack);
+
+	EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::WeaponReload);
 
 	EnhancedInputComponent->BindAction(EnterManagementModeAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::EnterManagementMode);
 	
@@ -431,6 +443,14 @@ void ADDCharacterPlayer::WeaponAttack()
 	}
 }
 
+void ADDCharacterPlayer::WeaponReload()
+{
+	if (CurrentPlayerMode == EPlayerMode::CombatMode)
+	{
+		WeaponSystem->ReloadWeapon();
+	}
+}
+
 void ADDCharacterPlayer::AddAggro()
 {
 	CurrentAggroNum++;
@@ -450,7 +470,7 @@ bool ADDCharacterPlayer::IsMaxAggro()
 
 void ADDCharacterPlayer::EnterManagementMode()
 {
-	if (CurrentPlayerMode == EPlayerMode::BuildMode)
+	if (CurrentPlayerMode == EPlayerMode::BuildMode || PlayerAnimInstance->IsAnyMontagePlaying())
 	{
 		return;
 	}
@@ -553,6 +573,7 @@ void ADDCharacterPlayer::Die()
 
 }
 
+//TODO: SetupRifleAmmoText로 바꾸기
 void ADDCharacterPlayer::SetupCharacterWidget(UDDUserWidget* InUserWidget)
 {
 	UDDPlayerHPBarWidget* HpBarWidget = Cast<UDDPlayerHPBarWidget>(InUserWidget);

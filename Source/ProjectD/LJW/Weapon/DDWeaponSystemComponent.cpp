@@ -5,11 +5,13 @@
 #include "YSY/Game/DDDataManager.h"
 #include "LJW/Weapon/DDWeaponBase.h"
 #include "LJW/Weapon/DDWeaponCudgel.h"
+#include "LJW/Weapon//DDWeaponRifle.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include <Kismet/KismetSystemLibrary.h>
 #include "LJW/Interface/CameraFOVInterface.h"
 #include "YSY/Game/DDGameInstance.h"
+#include "YSY/Game/DDPlayerState.h"
 
 
 
@@ -48,7 +50,7 @@ void UDDWeaponSystemComponent::InitializeWeapon()
 	// 싱글톤에서 data들을 얻음, 데이터 순서 중요
 	UDDGameInstance* MyGameInstance = Cast<UDDGameInstance>(GetWorld()->GetGameInstance());
 	auto WeaponDatas = MyGameInstance->GetDataManager()->GetWeaponDataTable();
-	
+
 	//Player에 무기 장착
 	if (GetOwner())
 	{
@@ -223,13 +225,36 @@ void UDDWeaponSystemComponent::WeaponAttack()
 		//Aim 중 일 때만 가능
 		if (OnGetAimingDelegate.Execute())
 		{
-			PlayerAnimInstance->Montage_Play(CurrentWeapon->GetAttackMontage());
-			CurrentWeapon->Attack();
-			
+			ADDWeaponRifle* WeaponRifle = Cast<ADDWeaponRifle>(CurrentWeapon);
+			if (WeaponRifle->SubtractLoadedRifleAmmo(1))
+			{
+				PlayerAnimInstance->Montage_Play(CurrentWeapon->GetAttackMontage());
+				CurrentWeapon->Attack();
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Reload Cast Error"));
+			}
 		}
 	}
 	
 
+}
+
+void UDDWeaponSystemComponent::ReloadWeapon()
+{
+	if (CurrentWeapon == Weapons[CurrentRangeWeapon] && CanAttacking())
+	{
+		ADDWeaponRifle* WeaponRifle = Cast<ADDWeaponRifle>(CurrentWeapon);
+		if (WeaponRifle->Reload())
+		{
+			PlayerAnimInstance->Montage_Play(WeaponRifle->GetReloadMontage());
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Reload Cast Error"));
+		}
+	}
 }
 
 //조건 모음
@@ -320,6 +345,18 @@ void UDDWeaponSystemComponent::InitTimeline()
 	RifleZoomTL.SetTimelineFinishedFunc(OnTimelineEventDelegate);
 
 	bIsOnTimeline = false;
+}
+
+ADDWeaponBase* UDDWeaponSystemComponent::GetCurrentRangeWeaponInstance()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Weapons Num : %d"),Weapons.Num());
+	UE_LOG(LogTemp, Warning, TEXT("CurrentRangeWeapon : %d"), CurrentRangeWeapon);
+	if (Weapons.IsValidIndex(CurrentRangeWeapon))
+	{
+		return Weapons[CurrentRangeWeapon];
+	}
+	UE_LOG(LogTemp, Warning, TEXT("GetCurrentRangeWeaponInstance error"));
+	return nullptr;
 }
 
 

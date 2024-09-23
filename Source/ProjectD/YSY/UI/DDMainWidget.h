@@ -22,6 +22,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetGoldText(int32 CurrentGold);
 	UFUNCTION(BlueprintCallable)
+	void SetLoadedRifleAmmoText(int32 CurrentLoadedAmmo);
+	UFUNCTION(BlueprintCallable)
+	void SetUnLoadedRifleAmmoText(int32 CurrentUnLoadedAmmo);
+	UFUNCTION(BlueprintCallable)
 	void SetRemainingLivesText(int32 CurrentLives);
 
 protected:
@@ -33,6 +37,12 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr<class UTextBlock> GoldText;
+
+	UPROPERTY()
+	TObjectPtr<class UTextBlock> LoadedRifleAmmoText;
+
+	UPROPERTY()
+	TObjectPtr<class UTextBlock> UnLoadedRifleAmmoText;
 
 	UPROPERTY()
 	TObjectPtr<class UTextBlock> RemainingLivesText;
