@@ -37,11 +37,13 @@ void UDDAssetManager::LoadAssetsAsync(const TArray<TSoftObjectPtr<UObject>>& Ass
 		//if (!Asset.IsNull() && !Asset.IsValid())
 		if (!Asset.IsNull())
 		{
-			SoftObjectPaths.Add(Asset.ToSoftObjectPath());
+			FSoftObjectPath Path = Asset.ToSoftObjectPath();
+			SoftObjectPaths.Add(Path);
+			UE_LOG(LogTemp, Log, TEXT("Asset to load: %s"), *Path.ToString());  // 경로 로그 추가
 		}
 		else
 		{
-			//UE_LOG(LogTemp, Warning, TEXT("%s is already loaded."), *Asset.ToString());
+			UE_LOG(LogTemp, Warning, TEXT("Asset is null: %s"), *Asset.ToString());  // 널 포인터 체크
 		}
 	}
 	if (SoftObjectPaths.Num() > 0)
