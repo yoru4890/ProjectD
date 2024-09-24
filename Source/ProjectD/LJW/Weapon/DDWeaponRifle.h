@@ -30,7 +30,9 @@ public:
 	FORCEINLINE UAnimMontage* GetReloadMontage() { return ReloadAnim; }
 	virtual void SubSkill() override;
 	virtual void Attack() override;
+	virtual void ResetWeaponState();
 	bool Reload();
+	void FireEmptyGun();
 
 	// Ammo
 	UFUNCTION(BlueprintCallable, Category = "Ammo")
@@ -64,6 +66,9 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon, meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UAnimMontage> ReloadAnim;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<USoundBase> EmptyGunSound;
 	
 	const float AttackRange = 2500.0f;
 
@@ -73,4 +78,6 @@ private:
 
 	int32 LoadedAmmo;
 	int32 UnLoadedAmmo;
+
+	bool IsPlayEmptySound;
 };

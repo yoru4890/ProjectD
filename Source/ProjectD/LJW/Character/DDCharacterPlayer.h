@@ -22,6 +22,8 @@ enum class EPlayerMode : uint8
 	Unknow UMETA(DisplayName = "Unknown")
 };
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnVisibilityAmmoTextChanged, bool, IsVisible);
+
 UCLASS()
 class PROJECTD_API ADDCharacterPlayer : public ADDCharacterBase, public ICameraFOVInterface, public IDDPlayerComponentsAnimInterface, public IAggroTargetInterface, public IDDCharacterWidgetInterface, public IDamageInterface
 {
@@ -29,6 +31,8 @@ class PROJECTD_API ADDCharacterPlayer : public ADDCharacterBase, public ICameraF
 	
 public:
 	ADDCharacterPlayer();
+	FOnVisibilityAmmoTextChanged OnVisibilityAmmoTextChanged;
+
 
 protected:
 	
@@ -37,6 +41,8 @@ protected:
 
 public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	
 	
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon, Meta = (AllowPrivateAccess = "true"))
@@ -130,7 +136,7 @@ protected:
 //Mesh Section
 protected:
 
-	void CreateLeaderPoseSkeletalMesh(USkeletalMeshComponent* USkeletalMesh, const FString& Name, const FString& Path );
+	void CreateLeaderPoseSkeletalMesh(TObjectPtr<USkeletalMeshComponent>& USkeletalMesh, const FString& Name, const FString& Path );
 
 
 	UPROPERTY(VisibleAnywhere, Category = Anim)
@@ -212,6 +218,7 @@ protected:
 
 // Stat
 public:
+	void Spawn();
 	void Die();
 
 protected:
@@ -221,7 +228,28 @@ protected:
 // CharacterWidgetInterface
 public:
 	virtual void SetupCharacterWidget(class UDDUserWidget* InUserWidget);
+	virtual void SetupRifleAmmoText(class UDDUserWidget* InUserWidget);
 
+// DamageEffect
+public:
+
+	void PopulateMaterials(TObjectPtr<USkeletalMeshComponent> MeshComponent, TArray<TObjectPtr<UMaterialInterface>>& MaterialArray);
+
+	void SetMaterialForMesh(TObjectPtr<USkeletalMeshComponent> MeshComponent, TObjectPtr<UMaterialInterface> Material);
+
+	void RestoreMaterialsForMesh(TObjectPtr<USkeletalMeshComponent> MeshComponent, const TArray<TObjectPtr<UMaterialInterface>>& OriginalMaterials);
+
+	void DamageInterval();
+
+	virtual void ApplyHitMaterial();
+
+	virtual void RestoreOriginalMaterials();
+
+
+	FTimerHandle DamageTimer;
+	FTimerHandle RestoreOriginalMateirlTimer;
+
+	bool CanBeDamaged = true;
 // DamageInterface
 public:
 	virtual float ApplyDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser);

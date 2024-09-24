@@ -21,12 +21,20 @@ public:
 	void SetWaveText(int32 CurrentWave, int32 MaxWave);
 	UFUNCTION(BlueprintCallable)
 	void SetGoldText(int32 CurrentGold);
+
+	UFUNCTION(BlueprintCallable)
+	void SetRifleAmmoText(int32 CurrentLoadedAmmo, int32 CurrentUnLoadedAmmo);
+	UFUNCTION(BlueprintCallable)
+	void GetRifleAmmoFromText(int32& OutLoadedAmmo, int32& OutUnLoadedAmmo);
 	UFUNCTION(BlueprintCallable)
 	void SetLoadedRifleAmmoText(int32 CurrentLoadedAmmo);
 	UFUNCTION(BlueprintCallable)
 	void SetUnLoadedRifleAmmoText(int32 CurrentUnLoadedAmmo);
 	UFUNCTION(BlueprintCallable)
 	void SetRemainingLivesText(int32 CurrentLives);
+	UFUNCTION(BlueprintCallable)
+	void SetVisibilityAmmoText(bool IsVisible);
+
 
 protected:
     virtual void NativeConstruct() override;
@@ -39,10 +47,7 @@ protected:
 	TObjectPtr<class UTextBlock> GoldText;
 
 	UPROPERTY()
-	TObjectPtr<class UTextBlock> LoadedRifleAmmoText;
-
-	UPROPERTY()
-	TObjectPtr<class UTextBlock> UnLoadedRifleAmmoText;
+	TObjectPtr<class UTextBlock> RifleAmmoText;
 
 	UPROPERTY()
 	TObjectPtr<class UTextBlock> RemainingLivesText;

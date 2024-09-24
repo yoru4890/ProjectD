@@ -17,6 +17,12 @@ ADDWeaponRifle::ADDWeaponRifle()
 	{
 		ReloadAnim = ReloadRef.Object;
 	}
+
+	static ConstructorHelpers::FObjectFinder<USoundBase> EmptyGunSoundRef(TEXT("/Game/Scifi_Arsenal_Vol2/SFX/Empty_Shot_01.Empty_Shot_01"));
+	if (EmptyGunSoundRef.Succeeded())
+	{
+		EmptyGunSound = EmptyGunSoundRef.Object;
+	}
 }
 
 void ADDWeaponRifle::BeginPlay()
@@ -28,6 +34,7 @@ void ADDWeaponRifle::BeginPlay()
 
 	LoadedAmmo = 30;
 	UnLoadedAmmo = 30;
+	IsPlayEmptySound = false;
 
 }
 
@@ -40,12 +47,23 @@ void ADDWeaponRifle::SubSkill()
 
 void ADDWeaponRifle::Attack()
 {
-	UE_LOG(LogTemp, Warning, TEXT("AttkackkFire"));
-
-	if (LoadedAmmo < 0)
+	if (!bCanAttack)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("Attack Cooltime"));
 		return;
 	}
+
+	Super::Attack();
+
+	if (LoadedAmmo <= 0 && !IsPlayEmptySound)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No Ammo WeaponRifile"));
+		IsPlayEmptySound = true;
+		FireEmptyGun();
+		return;
+	}
+	SubtractLoadedRifleAmmo(1);
+	IsPlayEmptySound = false;
 	FHitResult HitResult;
 
 	const FVector StartTrace = CameraManager->GetCameraLocation();
@@ -76,6 +94,19 @@ void ADDWeaponRifle::Attack()
 
 }
 
+void ADDWeaponRifle::ResetWeaponState()
+{
+	IsPlayEmptySound = false;
+}
+
+void ADDWeaponRifle::FireEmptyGun()
+{
+	if (EmptyGunSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, EmptyGunSound, GetActorLocation());
+	}
+}
+
 bool ADDWeaponRifle::Reload()
 {
 	return AddLoadedRifleAmmo();
@@ -83,16 +114,17 @@ bool ADDWeaponRifle::Reload()
 
 bool ADDWeaponRifle::AddLoadedRifleAmmo()
 {
-	if (UnLoadedAmmo <= 0)
+	if (UnLoadedAmmo <= 0 || LoadedAmmo==MaxAmmoPerMagazine)
 	{
 		return false;
 	}
 	int32 AmmoToLoad = FMath::Min(UnLoadedAmmo, MaxAmmoPerMagazine - LoadedAmmo);
 	LoadedAmmo += AmmoToLoad;
+	SubtractUnloadedRifleAmmo(AmmoToLoad);
 
 	OnLoadedAmmoChanged.Broadcast(LoadedAmmo);
+	UE_LOG(LogTemp, Warning, TEXT("LoadedAmmo : %d"), LoadedAmmo);
 
-	SubtractUnloadedRifleAmmo(AmmoToLoad);
 
 	return true;
 }
@@ -133,6 +165,7 @@ bool ADDWeaponRifle::SubtractUnloadedRifleAmmo(const int32 InAmmo)
 	{
 		UnLoadedAmmo -= InAmmo;
 		OnUnLoadedAmmoChanged.Broadcast(UnLoadedAmmo);
+		UE_LOG(LogTemp, Warning, TEXT("UnLoadedAmmo : %d"), UnLoadedAmmo);
 		return true;
 	}
 	return false;

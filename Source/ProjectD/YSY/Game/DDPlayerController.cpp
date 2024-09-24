@@ -37,6 +37,7 @@ void ADDPlayerController::ShowMainWidget()
 	{
 		auto TempMainWidget = Cast<UDDMainWidget>(MainWidget);
 		PlayerWidgetInterface->SetupCharacterWidget(TempMainWidget->GetHpBarWidget());
+		PlayerWidgetInterface->SetupRifleAmmoText(TempMainWidget);
 
 		auto TempPlayerState = Cast<ADDPlayerState>(UGameplayStatics::GetPlayerState(GetWorld(), 0));
 		if (!TempPlayerState->OnGoldChanged.IsBound())
@@ -61,19 +62,8 @@ void ADDPlayerController::ShowMainWidget()
 			TempWaveManager->OnWaveChangedSignature.AddDynamic(TempMainWidget, &UDDMainWidget::SetWaveText);
 		}
 
-		//TODO:
 		TempMainWidget->SetWaveText(TempWaveManager->GetCurrentWave(), TempWaveManager->GetMaxWave());
 
-		if (MyCharacter)
-		{
-			ADDWeaponRifle* WeaponRifle = Cast<ADDWeaponRifle>(MyCharacter->GetWeaponComp()->GetCurrentRangeWeaponInstance());
-			if (WeaponRifle)
-			{
-				WeaponRifle->OnLoadedAmmoChanged.AddDynamic(TempMainWidget, &UDDMainWidget::SetLoadedRifleAmmoText);
-
-				WeaponRifle->OnUnLoadedAmmoChanged.AddDynamic(TempMainWidget, &UDDMainWidget::SetUnLoadedRifleAmmoText);
-			}
-		}
 	}
 	MainWidget->AddToViewport();
 	

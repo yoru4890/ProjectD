@@ -130,6 +130,7 @@ void UDDWeaponSystemComponent::PlayUnequipMontage()
 {
 	if (CurrentWeapon->GetUnequipWeaponMontage())
 	{
+		CurrentWeapon->ResetWeaponState();
 		PlayerAnimInstance->Montage_Play(CurrentWeapon->GetUnequipWeaponMontage());
 	}
 }
@@ -197,7 +198,7 @@ void UDDWeaponSystemComponent::WeaponEndAiming()
 		}
 	}
 }
-
+//TODO: WeaponBase의 자식으로 MeleeWeapon과 RangeWeapon을 만들어서 각각의 무기가 상속받게하고 WeaponAttack에서는 Melee와 Range 캐스팅해서 이 두개로만 다룸
 void UDDWeaponSystemComponent::WeaponAttack()
 {
 	//Melee
@@ -226,14 +227,19 @@ void UDDWeaponSystemComponent::WeaponAttack()
 		if (OnGetAimingDelegate.Execute())
 		{
 			ADDWeaponRifle* WeaponRifle = Cast<ADDWeaponRifle>(CurrentWeapon);
-			if (WeaponRifle->SubtractLoadedRifleAmmo(1))
+			if (!CurrentWeapon->GetCanAttack())
+			{
+				return;
+			}
+			if (WeaponRifle->GetLoadedAmmo()>0)
 			{
 				PlayerAnimInstance->Montage_Play(CurrentWeapon->GetAttackMontage());
 				CurrentWeapon->Attack();
 			}
 			else
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Reload Cast Error"));
+				CurrentWeapon->Attack();
+				UE_LOG(LogTemp, Warning, TEXT("No Ammo"));
 			}
 		}
 	}
@@ -252,7 +258,7 @@ void UDDWeaponSystemComponent::ReloadWeapon()
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Reload Cast Error"));
+			UE_LOG(LogTemp, Warning, TEXT("Can't Reload"));
 		}
 	}
 }

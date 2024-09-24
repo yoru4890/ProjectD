@@ -19,6 +19,8 @@
 #include "YSY/UI/DDPlayerHPBarWidget.h"
 #include "LJW/CharacterStat/DDCharacterStatComponent.h"
 #include "NiagaraComponent.h"
+#include "LJW/Weapon/DDWeaponRifle.h"
+#include "YSY/UI/DDMainWidget.h"
 
 ADDCharacterPlayer::ADDCharacterPlayer()
 {
@@ -237,7 +239,8 @@ void ADDCharacterPlayer::SetupPlayerInputComponent(class UInputComponent* Player
 	EnhancedInputComponent->BindAction(SubSkillAction, ETriggerEvent::Canceled, this, &ADDCharacterPlayer::WeaponEndAiming);
 	EnhancedInputComponent->BindAction(SubSkillAction, ETriggerEvent::Completed, this, &ADDCharacterPlayer::WeaponEndAiming);
 
-	EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Completed, this, &ADDCharacterPlayer::WeaponAttack);
+	//EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Completed, this, &ADDCharacterPlayer::WeaponAttack);
+	EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &ADDCharacterPlayer::WeaponAttack);
 
 	EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::WeaponReload);
 
@@ -343,7 +346,7 @@ void ADDCharacterPlayer::Walk(const FInputActionValue& Value)
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 }
 
-void ADDCharacterPlayer::CreateLeaderPoseSkeletalMesh(USkeletalMeshComponent* SkeletalMesh, const FString& Name, const FString& Path)
+void ADDCharacterPlayer::CreateLeaderPoseSkeletalMesh(TObjectPtr<USkeletalMeshComponent>& SkeletalMesh, const FString& Name, const FString& Path)
 {
 	SkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(*Name);
 	SkeletalMesh->SetupAttachment(GetMesh());
@@ -382,6 +385,7 @@ void ADDCharacterPlayer::EquipMelee()
 {
 	if (!(PlayerAnimInstance->IsAnyMontagePlaying()))
 	{
+		OnVisibilityAmmoTextChanged.Broadcast(false);
 		WeaponSystem->EquipMeleeWeapon();
 		CurrentPlayerMode = EPlayerMode::CombatMode;
 		SetPlayerGameMode();
@@ -396,6 +400,7 @@ void ADDCharacterPlayer::EquipRange()
 
 	if (!(PlayerAnimInstance->IsAnyMontagePlaying()))
 	{
+		OnVisibilityAmmoTextChanged.Broadcast(true);
 		WeaponSystem->EquipRangeWeapon();
 		CurrentPlayerMode = EPlayerMode::CombatMode;
 		SetPlayerGameMode();
@@ -568,12 +573,15 @@ void ADDCharacterPlayer::SetPlayerGameMode()
 
 }
 
+void ADDCharacterPlayer::Spawn()
+{
+}
+
 void ADDCharacterPlayer::Die()
 {
 
 }
 
-//TODO: SetupRifleAmmoText로 바꾸기
 void ADDCharacterPlayer::SetupCharacterWidget(UDDUserWidget* InUserWidget)
 {
 	UDDPlayerHPBarWidget* HpBarWidget = Cast<UDDPlayerHPBarWidget>(InUserWidget);
@@ -582,15 +590,102 @@ void ADDCharacterPlayer::SetupCharacterWidget(UDDUserWidget* InUserWidget)
 	{
 		// TODO : YSY or LJW Remove MagicNumber. Need to StatComponent
 		Stat->SetHp(500.0f);
-		HpBarWidget->UpdateStat(500.0f);
-		HpBarWidget->UpdateHpBar(500.0f);
+		HpBarWidget->UpdateStat(Stat->GetCurrentHp());
+		HpBarWidget->UpdateHpBar(Stat->GetCurrentHp());
 		Stat->OnHpChanged.AddUObject(HpBarWidget, &UDDPlayerHPBarWidget::UpdateHpBar);
 	}
 }
 
+void ADDCharacterPlayer::SetupRifleAmmoText(UDDUserWidget* InUserWidget)
+{
+	ADDWeaponRifle* WeaponRifle = Cast<ADDWeaponRifle>(WeaponSystem->GetCurrentRangeWeaponInstance());
+	if (WeaponRifle && InUserWidget)
+	{
+		UDDMainWidget* MainWidget = Cast<UDDMainWidget>(InUserWidget);
+		if (MainWidget)
+		{
+			WeaponRifle->OnLoadedAmmoChanged.AddDynamic(MainWidget, &UDDMainWidget::SetLoadedRifleAmmoText);
+			WeaponRifle->OnUnLoadedAmmoChanged.AddDynamic(MainWidget, &UDDMainWidget::SetUnLoadedRifleAmmoText);
+			MainWidget->SetRifleAmmoText(WeaponRifle->GetLoadedAmmo(), WeaponRifle->GetUnloadedAmmo());
+			MainWidget->SetVisibilityAmmoText(false);
+			OnVisibilityAmmoTextChanged.AddDynamic(MainWidget, &UDDMainWidget::SetVisibilityAmmoText);
+		}
+	}
+}
+
+void ADDCharacterPlayer::PopulateMaterials(TObjectPtr<USkeletalMeshComponent> MeshComponent, TArray<TObjectPtr<UMaterialInterface>>& MaterialArray)
+{
+	if (MeshComponent)
+	{
+		for (int32 i = 0; i < MeshComponent->GetNumMaterials(); ++i)
+		{
+			MaterialArray.Add(MeshComponent->GetMaterial(i));
+		}
+	}
+}
+
+void ADDCharacterPlayer::SetMaterialForMesh(TObjectPtr<USkeletalMeshComponent> MeshComponent, TObjectPtr<UMaterialInterface> Material)
+{
+	if (MeshComponent && Material)
+	{
+		for (int32 i = 0; i < MeshComponent->GetNumMaterials(); ++i)
+		{
+			MeshComponent->SetMaterial(i, Material);
+		}
+	}
+}
+
+void ADDCharacterPlayer::RestoreMaterialsForMesh(TObjectPtr<USkeletalMeshComponent> MeshComponent, const TArray<TObjectPtr<UMaterialInterface>>& OriginalMaterials)
+{
+	if (MeshComponent)
+	{
+		for (int32 i = 0; i < OriginalMaterials.Num(); ++i)
+		{
+			MeshComponent->SetMaterial(i, OriginalMaterials[i]);
+		}
+	}
+}
+
+void ADDCharacterPlayer::DamageInterval()
+{
+	CanBeDamaged = true;
+}
+
+void ADDCharacterPlayer::ApplyHitMaterial()
+{
+	CanBeDamaged = false;
+}
+
+void ADDCharacterPlayer::RestoreOriginalMaterials()
+{
+}
+
 float ADDCharacterPlayer::ApplyDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
+	if (!CanBeDamaged)
+	{
+		return -1.f;
+	}
+	UE_LOG(LogTemp, Warning, TEXT("Character Damaged"));
 	Stat->ApplyDamage(DamageAmount);
+	ApplyHitMaterial();
+	// 1초 후 원래 메터리얼 복구
+	GetWorldTimerManager().SetTimer(
+		DamageTimer,
+		this,
+		&ADDCharacterPlayer::DamageInterval,
+		0.5f, // 복구 지연 시간
+		false // 반복하지 않음
+	);
+
+	GetWorldTimerManager().SetTimer(
+		RestoreOriginalMateirlTimer,
+		this,
+		&ADDCharacterPlayer::RestoreOriginalMaterials,
+		0.2f, // 복구 지연 시간
+		false // 반복하지 않음
+	);
+
 	return DamageAmount;
 }
 
