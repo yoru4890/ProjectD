@@ -61,6 +61,7 @@ ADDEnemyBase::ADDEnemyBase()
 	GetCharacterMovement()->bPushForceUsingZOffset = true;
 	GetCharacterMovement()->bPushForceScaledToMass = true;
 	GetCharacterMovement()->PushForceFactor = 0.0f;
+	SetActorEnableCollision(false);
 }
 
 void ADDEnemyBase::PostInitializeComponents()
@@ -388,7 +389,10 @@ void ADDEnemyBase::Die()
 	AttackAudio->Stop();
 	for (const auto& Elem : NiagaraAttackEffect)
 	{
-		Elem->DestroyComponent();
+		if (Elem)
+		{
+			Elem->DestroyComponent();
+		}
 	}
 	NiagaraAttackEffect.Empty();
 	PlayDeathEffect();
@@ -416,7 +420,6 @@ void ADDEnemyBase::UpdateWidgetScale()
 void ADDEnemyBase::CaculateHackingDamage(float& ActualDamage)
 {
 	// TODO : YSY HackingDamage
-	UE_LOG(LogTemp, Warning, TEXT("Hacking"));
 
 	switch (EnemyType)
 	{
@@ -441,7 +444,6 @@ void ADDEnemyBase::CaculateHackingDamage(float& ActualDamage)
 void ADDEnemyBase::CaculatePiercingDamage(float& ActualDamage)
 {
 	// TODO : YSY PiercingDamage
-	UE_LOG(LogTemp, Warning, TEXT("Piercing"));
 
 	switch (EnemyType)
 	{
@@ -465,7 +467,6 @@ void ADDEnemyBase::CaculatePiercingDamage(float& ActualDamage)
 void ADDEnemyBase::CaculateCorrosionDamage(float& ActualDamage)
 {
 	// TODO : YSY CorrosionDamage
-	UE_LOG(LogTemp, Warning, TEXT("Corrosion"));
 
 	switch (EnemyType)
 	{
@@ -488,7 +489,6 @@ void ADDEnemyBase::CaculateCorrosionDamage(float& ActualDamage)
 
 void ADDEnemyBase::Activate()
 {
-	RouteIndex = 0;
 	ensure(Stat);
 	if (!Stat)
 	{
@@ -501,11 +501,13 @@ void ADDEnemyBase::Activate()
 	GetMesh()->SetVisibility(true);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	SetActorLocation(AIMoveRoute->GetSplinePointasWorldPosition(0));
+	RouteIndex = 0;
 	EnemyAIController->RunAI();
 	bIsDead = false;
 	GetCharacterMovement()->MaxWalkSpeed = MovementSpeed;
 	SetActorEnableCollision(true);
 	GetCharacterMovement()->GravityScale = 1.0f;
+	GetMesh()->SetCollisionObjectType(GTCHANNEL_TOWER);
 }
 
 void ADDEnemyBase::Deactivate()
@@ -524,7 +526,7 @@ void ADDEnemyBase::Deactivate()
 	}
 	bIsAggroState = false;
 	GetCharacterMovement()->MaxWalkSpeed = 0.0f;
-	//EnemyAIController->StopAI();
+	EnemyAIController->StopAI();
 	SetActorTickEnabled(false);
 	SetActorHiddenInGame(true);
 	RouteIndex = 0;
