@@ -101,4 +101,16 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = Data)
 	TArray<FEffectData> DeathEffects;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	TObjectPtr<USoundBase> AttackSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	float SoundStartTime;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	float VolumeMultiplier{ 1.0f };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
+	float PitchMultiplier{ 1.0f };
 };
