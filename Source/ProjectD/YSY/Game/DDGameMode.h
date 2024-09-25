@@ -16,7 +16,6 @@ class PROJECTD_API ADDGameMode : public AGameModeBase
 	
 public:
 	ADDGameMode();
-
 	//UFUNCTION(BlueprintCallable, Category = "UMG_Game")
 	//void ChangeMenuWidget(TSubclassOf<UUserWidget> NewWidgetClass);
 };
