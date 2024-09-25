@@ -21,6 +21,8 @@
 #include "NiagaraComponent.h"
 #include "LJW/Weapon/DDWeaponRifle.h"
 #include "YSY/UI/DDMainWidget.h"
+#include "Engine/TargetPoint.h"
+#include "Kismet/GameplayStatics.h"
 
 ADDCharacterPlayer::ADDCharacterPlayer()
 {
@@ -43,12 +45,12 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 	//{
 	//	CharacterControlManager = DataRef.Object;
 	//}
-	
+
 	//Weapon System Component
 	WeaponSystem = CreateDefaultSubobject<UDDWeaponSystemComponent>(TEXT("WeaponSystem"));
-	
+
 	//PlayerMode
-	CurrentPlayerMode = EPlayerMode::CombatMode; 
+	CurrentPlayerMode = EPlayerMode::CombatMode;
 
 	//Collision
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("Player"));
@@ -186,15 +188,15 @@ void ADDCharacterPlayer::BeginPlay()
 	Super::BeginPlay();
 
 	PlayerController = Cast<APlayerController>(GetController());
-	if (PlayerController) 
+	if (PlayerController)
 	{
 		EnableInput(PlayerController);
 	}
-	
+
 	SetCharacterControl();
 	BindBuildingEvents();
 	Spawn();
-	
+
 }
 
 void ADDCharacterPlayer::PostInitializeComponents()
@@ -223,16 +225,16 @@ void ADDCharacterPlayer::SetupPlayerInputComponent(class UInputComponent* Player
 	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
 	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Canceled, this, &ACharacter::StopJumping);
 	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
-	
+
 	//Move
 	EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ADDCharacterPlayer::Move);
 	EnhancedInputComponent->BindAction(BackMoveAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::BackMoveTrue);
 	EnhancedInputComponent->BindAction(BackMoveAction, ETriggerEvent::Canceled, this, &ADDCharacterPlayer::BackMoveFalse);
 	EnhancedInputComponent->BindAction(BackMoveAction, ETriggerEvent::Completed, this, &ADDCharacterPlayer::BackMoveFalse);
-	
+
 	//Look
 	EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ADDCharacterPlayer::Look);
-	
+
 	//Sprint
 	EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Triggered, this, &ADDCharacterPlayer::Sprint);
 	EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Canceled, this, &ADDCharacterPlayer::Walk);
@@ -241,7 +243,7 @@ void ADDCharacterPlayer::SetupPlayerInputComponent(class UInputComponent* Player
 	//Weapon System
 	EnhancedInputComponent->BindAction(EquipMeleeAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::EquipMelee);
 	EnhancedInputComponent->BindAction(EquipRangeAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::EquipRange);
-	
+
 	EnhancedInputComponent->BindAction(SubSkillAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::WeaponSubSkill);
 	EnhancedInputComponent->BindAction(SubSkillAction, ETriggerEvent::Triggered, this, &ADDCharacterPlayer::WeaponStartAiming);
 	EnhancedInputComponent->BindAction(SubSkillAction, ETriggerEvent::Canceled, this, &ADDCharacterPlayer::WeaponEndAiming);
@@ -255,7 +257,7 @@ void ADDCharacterPlayer::SetupPlayerInputComponent(class UInputComponent* Player
 	EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::WeaponReload);
 
 	EnhancedInputComponent->BindAction(EnterManagementModeAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::EnterManagementMode);
-	
+
 	EnhancedInputComponent->BindAction(EnterBuildModeAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::OpenBuildWidget);
 
 	EnhancedInputComponent->BindAction(WaveStartAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::WaveStart);
@@ -267,14 +269,14 @@ void ADDCharacterPlayer::SetupPlayerInputComponent(class UInputComponent* Player
 
 void ADDCharacterPlayer::SetCharacterControl()
 {
-	
+
 	UDDCharacterControlData* NewPlayerControlData = CharacterControlManager;
 	check(NewPlayerControlData);
 
 	SetCharacterControlData(NewPlayerControlData);
 
-	
-	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer())) 
+
+	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 	{
 		Subsystem->ClearAllMappings();
 		UInputMappingContext* NewMappingContext = NewPlayerControlData->InputMappingContext;
@@ -424,7 +426,7 @@ void ADDCharacterPlayer::WeaponSubSkill()
 	if (CurrentPlayerMode == EPlayerMode::CombatMode)
 	{
 		WeaponSystem->WeaponSubSkill();
-		
+
 	}
 }
 
@@ -436,7 +438,7 @@ void ADDCharacterPlayer::WeaponStartAiming()
 		WeaponSystem->WeaponStartAiming();
 		GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 	}
-	
+
 }
 
 void ADDCharacterPlayer::WeaponEndAiming()
@@ -577,7 +579,7 @@ void ADDCharacterPlayer::SetPlayerMoveOnlyMode()
 	FInputModeGameAndUI InputModeGameAndUIData;
 	PlayerController->SetIgnoreMoveInput(false);
 	PlayerController->SetIgnoreLookInput(false);
-	PlayerController->SetInputMode(InputModeGameAndUIData); 
+	PlayerController->SetInputMode(InputModeGameAndUIData);
 	PlayerController->SetShowMouseCursor(true); // 마우스 커서 표시
 }
 
@@ -594,20 +596,45 @@ void ADDCharacterPlayer::SetPlayerGameMode()
 void ADDCharacterPlayer::Spawn()
 {
 	Stat->SetHp(PlayerMaxHp);
+	this->SetActorLocation(SpawnLocation);
 	// 입력 활성화
 	EnableInput(Cast<APlayerController>(GetController()));
+	IsDie = false;
 }
 
 void ADDCharacterPlayer::Die()
 {
 	// 입력 비활성화
 	DisableInput(Cast<APlayerController>(GetController()));
+	IsDie = true;
+	WeaponAttackEnd();
+	WeaponEndAiming();
 
 	if (PlayerAnimInstance && DieMontage)
 	{
 		// 몽타주 재생 및 종료 델리게이트 설정
 		PlayerAnimInstance->Montage_Play(DieMontage);
-		PlayerAnimInstance->OnMontageEnded.AddDynamic(this, &ADDCharacterPlayer::OnDieMontageEnded);
+		if (!PlayerAnimInstance->OnMontageEnded.IsAlreadyBound(this, &ADDCharacterPlayer::OnDieMontageEnded))
+		{
+			PlayerAnimInstance->OnMontageEnded.AddDynamic(this, &ADDCharacterPlayer::OnDieMontageEnded);
+		}
+		FindSpawnPoint();
+	}
+}
+
+void ADDCharacterPlayer::FindSpawnPoint()
+{
+	// Get all actors of class ATargetPoint with the tag "Spawn"
+	AActor* SpawnPoint = UGameplayStatics::GetActorOfClass(GetWorld(), ATargetPoint::StaticClass());
+	SpawnLocation = this->GetActorLocation() + FVector(0, 0, 300.f);
+
+	if (SpawnPoint)
+	{
+		SpawnLocation = SpawnPoint->GetActorLocation();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No spawn point found with tag 'Spawn'"));
 	}
 }
 
@@ -618,6 +645,7 @@ void ADDCharacterPlayer::OnDieMontageEnded(UAnimMontage* Montage, bool bInterrup
 		// 델리게이트 해제 (중복 호출 방지)
 		PlayerAnimInstance->OnMontageEnded.RemoveDynamic(this, &ADDCharacterPlayer::OnDieMontageEnded);
 		Spawn();
+
 
 		if (!bInterrupted)
 		{
@@ -706,7 +734,7 @@ void ADDCharacterPlayer::RestoreOriginalMaterials()
 
 float ADDCharacterPlayer::ApplyDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	if (!CanBeDamaged)
+	if (!CanBeDamaged || IsDie)
 	{
 		return -1.f;
 	}

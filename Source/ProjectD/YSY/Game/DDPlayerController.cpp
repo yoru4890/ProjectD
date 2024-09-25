@@ -69,6 +69,11 @@ void ADDPlayerController::ShowMainWidget()
 	
 }
 
+UUserWidget* ADDPlayerController::GetMainWidget()
+{
+	return MainWidget;
+}
+
 void ADDPlayerController::BeginPlay()
 {
 	Super::BeginPlay();

@@ -223,10 +223,14 @@ protected:
 //Spawn And Die
 protected:
 	TObjectPtr<UAnimMontage> DieMontage;
-	UFUNCTION()
+	bool IsDie = false;
 	void Spawn();
 	void Die();
+	void FindSpawnPoint();
+	UFUNCTION()
 	void OnDieMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+
+	FVector SpawnLocation;
 
 // Stat
 public:
