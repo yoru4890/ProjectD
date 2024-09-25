@@ -130,8 +130,8 @@ void UDDWeaponSystemComponent::PlayUnequipMontage()
 {
 	if (CurrentWeapon->GetUnequipWeaponMontage())
 	{
-		CurrentWeapon->ResetWeaponState();
 		PlayerAnimInstance->Montage_Play(CurrentWeapon->GetUnequipWeaponMontage());
+		ResetWeaponState();
 	}
 }
 
@@ -227,20 +227,19 @@ void UDDWeaponSystemComponent::WeaponAttack()
 		if (OnGetAimingDelegate.Execute())
 		{
 			ADDWeaponRifle* WeaponRifle = Cast<ADDWeaponRifle>(CurrentWeapon);
-			if (!CurrentWeapon->GetCanAttack())
+			if (!CurrentWeapon->GetCanAttack() || PlayerAnimInstance->IsAnyMontagePlaying())
 			{
 				return;
 			}
 			if (WeaponRifle->GetLoadedAmmo()>0)
 			{
 				PlayerAnimInstance->Montage_Play(CurrentWeapon->GetAttackMontage());
-				CurrentWeapon->Attack();
 			}
 			else
 			{
-				CurrentWeapon->Attack();
 				UE_LOG(LogTemp, Warning, TEXT("No Ammo"));
 			}
+			CurrentWeapon->Attack();
 		}
 	}
 	
@@ -260,6 +259,14 @@ void UDDWeaponSystemComponent::ReloadWeapon()
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Can't Reload"));
 		}
+	}
+}
+
+void UDDWeaponSystemComponent::ResetWeaponState()
+{
+	for (auto& Weapon : Weapons)
+	{
+		Weapon->ResetWeaponState();
 	}
 }
 

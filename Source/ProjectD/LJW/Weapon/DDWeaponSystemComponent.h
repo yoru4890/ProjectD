@@ -58,6 +58,8 @@ public:
 	void WeaponAttack();
 	void ReloadWeapon();
 
+	void ResetWeaponState();
+
 	//조건 모음
 	bool IsUnequipMontage(const UAnimMontage* Montage) const;
 	bool CanMeleeSubSkill();

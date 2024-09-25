@@ -55,15 +55,17 @@ void ADDWeaponRifle::Attack()
 
 	Super::Attack();
 
-	if (LoadedAmmo <= 0 && !IsPlayEmptySound)
+	if (LoadedAmmo <= 0)
 	{
+		if (!IsPlayEmptySound)
+		{
+			FireEmptyGun();
+			IsPlayEmptySound = true;
+		}
 		UE_LOG(LogTemp, Warning, TEXT("No Ammo WeaponRifile"));
-		IsPlayEmptySound = true;
-		FireEmptyGun();
 		return;
 	}
 	SubtractLoadedRifleAmmo(1);
-	IsPlayEmptySound = false;
 	FHitResult HitResult;
 
 	const FVector StartTrace = CameraManager->GetCameraLocation();
@@ -73,7 +75,7 @@ void ADDWeaponRifle::Attack()
 
 	FColor DrawColor = IsDetect ? FColor::Green : FColor::Red;
 
-	//DrawDebugLine(GetWorld(), StartTrace, EndTrace, DrawColor, false, 5.0f);
+	DrawDebugLine(GetWorld(), StartTrace, EndTrace, DrawColor, false, 5.0f);
 	if (IsDetect)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Trace : %s"), *(HitResult.GetActor()->GetFName().ToString()));

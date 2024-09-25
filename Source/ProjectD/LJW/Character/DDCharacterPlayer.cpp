@@ -169,6 +169,13 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 		ReloadAction = ReloadRef.Object;
 	}
 
+	//Spawn And Die
+	static ConstructorHelpers::FObjectFinder<UAnimMontage>DieRef(TEXT("/Game/0000/LJW/Animation/AnimMontage/dead01_Montage.dead01_Montage"));
+	if (nullptr != DieRef.Object)
+	{
+		DieMontage = DieRef.Object;
+	}
+
 #pragma endregion
 
 }
@@ -186,6 +193,7 @@ void ADDCharacterPlayer::BeginPlay()
 	
 	SetCharacterControl();
 	BindBuildingEvents();
+	Spawn();
 	
 }
 
@@ -241,6 +249,8 @@ void ADDCharacterPlayer::SetupPlayerInputComponent(class UInputComponent* Player
 
 	//EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Completed, this, &ADDCharacterPlayer::WeaponAttack);
 	EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &ADDCharacterPlayer::WeaponAttack);
+	EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Completed, this, &ADDCharacterPlayer::WeaponAttackEnd);
+	EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Canceled, this, &ADDCharacterPlayer::WeaponAttackEnd);
 
 	EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::WeaponReload);
 
@@ -448,6 +458,15 @@ void ADDCharacterPlayer::WeaponAttack()
 	}
 }
 
+void ADDCharacterPlayer::WeaponAttackEnd()
+{
+	if (CurrentPlayerMode == EPlayerMode::CombatMode)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AttackEnd"));
+		WeaponSystem->ResetWeaponState();
+	}
+}
+
 void ADDCharacterPlayer::WeaponReload()
 {
 	if (CurrentPlayerMode == EPlayerMode::CombatMode)
@@ -575,11 +594,37 @@ void ADDCharacterPlayer::SetPlayerGameMode()
 
 void ADDCharacterPlayer::Spawn()
 {
+	Stat->SetHp(PlayerMaxHp);
+	// 입력 활성화
+	EnableInput(Cast<APlayerController>(GetController()));
 }
 
 void ADDCharacterPlayer::Die()
 {
+	// 입력 비활성화
+	DisableInput(Cast<APlayerController>(GetController()));
 
+	if (PlayerAnimInstance && DieMontage)
+	{
+		// 몽타주 재생 및 종료 델리게이트 설정
+		PlayerAnimInstance->Montage_Play(DieMontage);
+		PlayerAnimInstance->OnMontageEnded.AddDynamic(this, &ADDCharacterPlayer::OnDieMontageEnded);
+	}
+}
+
+void ADDCharacterPlayer::OnDieMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	if (Montage == DieMontage)
+	{
+		// 델리게이트 해제 (중복 호출 방지)
+		PlayerAnimInstance->OnMontageEnded.RemoveDynamic(this, &ADDCharacterPlayer::OnDieMontageEnded);
+		Spawn();
+
+		if (!bInterrupted)
+		{
+			// 방해받았을 경우
+		}
+	}
 }
 
 void ADDCharacterPlayer::SetupCharacterWidget(UDDUserWidget* InUserWidget)
@@ -589,7 +634,7 @@ void ADDCharacterPlayer::SetupCharacterWidget(UDDUserWidget* InUserWidget)
 	if (HpBarWidget)
 	{
 		// TODO : YSY or LJW Remove MagicNumber. Need to StatComponent
-		Stat->SetHp(500.0f);
+		//Stat->SetHp(10.0f);
 		HpBarWidget->UpdateStat(Stat->GetCurrentHp());
 		HpBarWidget->UpdateHpBar(Stat->GetCurrentHp());
 		Stat->OnHpChanged.AddUObject(HpBarWidget, &UDDPlayerHPBarWidget::UpdateHpBar);

@@ -160,6 +160,7 @@ protected:
 	void WeaponStartAiming();
 	void WeaponEndAiming();
 	void WeaponAttack();
+	void WeaponAttackEnd();
 	void WeaponReload();
 
 protected:
@@ -216,14 +217,22 @@ public:
 
 protected:
 
-// Stat
-public:
+//Spawn And Die
+protected:
+	TObjectPtr<UAnimMontage> DieMontage;
+	UFUNCTION()
 	void Spawn();
 	void Die();
+	void OnDieMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+
+// Stat
+public:
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Build, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UDDCharacterStatComponent> Stat;
+
+	float PlayerMaxHp = 10.f;
 
 // CharacterWidgetInterface
 public:
