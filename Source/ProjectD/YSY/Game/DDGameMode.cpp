@@ -2,9 +2,11 @@
 
 
 #include "YSY/Game/DDGameMode.h"
+#include "YSY/Game/DDPlayerState.h"
 #include "GameFramework/HUD.h"
 #include "GameFramework/GameStateBase.h"
 #include "GameFramework/PlayerState.h"
+#include "Kismet/GameplayStatics.h"
 
 ADDGameMode::ADDGameMode()
 {

@@ -20,6 +20,7 @@
 #include "YSY/Interface/AggroTargetInterface.h"
 #include "YSY/Collision/CollisionChannel.h"
 #include "YSY/Game/DDPlayerState.h"
+#include "Components/AudioComponent.h"
 
 // Sets default values
 ADDEnemyBase::ADDEnemyBase()
@@ -35,6 +36,10 @@ ADDEnemyBase::ADDEnemyBase()
 	HpBar->SetRelativeLocation(FVector(0.0f, 0.0f, 180.0f));
 
 	Stat = CreateDefaultSubobject<UDDEnemyStatComponent>(TEXT("Stat"));
+	
+	AttackAudio = CreateDefaultSubobject<UAudioComponent>(TEXT("AttackSound"));
+	AttackAudio->SetupAttachment(GetMesh());
+	AttackAudio->bAutoActivate = false;
 
 	static ConstructorHelpers::FClassFinder<UUserWidget> HpBarWidgetRef(TEXT("/Game/0000/YSY/Widget/YSY_WBP_EnemyHpBar.YSY_WBP_EnemyHpBar_C"));
 	if (HpBarWidgetRef.Class)
@@ -56,6 +61,7 @@ ADDEnemyBase::ADDEnemyBase()
 	GetCharacterMovement()->bPushForceUsingZOffset = true;
 	GetCharacterMovement()->bPushForceScaledToMass = true;
 	GetCharacterMovement()->PushForceFactor = 0.0f;
+	SetActorEnableCollision(false);
 }
 
 void ADDEnemyBase::PostInitializeComponents()
@@ -177,6 +183,10 @@ void ADDEnemyBase::InitializeEnemy(const FDDEnemyData& EnemyData)
 	bIsBoss = EnemyData.bIsBoss;
 	bIsElite = EnemyData.bIsElite;
 	AttackEffects = EnemyData.AttackEffects;
+	AttackAudio->SetSound(EnemyData.AttackSound);
+	AttackAudio->SetVolumeMultiplier(EnemyData.VolumeMultiplier);
+	AttackAudio->SetPitchMultiplier(EnemyData.PitchMultiplier);
+	SoundStartTime = EnemyData.SoundStartTime;
 	DeathEffects = EnemyData.DeathEffects;
 	GetCapsuleComponent()->SetCapsuleRadius(EnemyData.CapsuleRadiusSize);
 	GetCapsuleComponent()->SetCapsuleHalfHeight(EnemyData.CapsuleHalfHeightSize);
@@ -212,6 +222,8 @@ void ADDEnemyBase::InitializeEnemy(const FDDEnemyData& EnemyData)
 	AttackMontage = DuplicateObject<UAnimMontage>(EnemyAttackMontage, this);
 
 	BindingAnimNotify();
+
+
 }
 
 void ADDEnemyBase::SplineMove()
@@ -354,7 +366,7 @@ void ADDEnemyBase::ArrivalAtGoal()
 	GetMesh()->SetVisibility(false, true);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	EnemyAIController->StopAI();
+	//EnemyAIController->StopAI();
 	OnDie.Broadcast(EnemyName, this);
 
 	// TODO : YSY Caculate Potal Count, Remove MagicNum
@@ -374,6 +386,15 @@ void ADDEnemyBase::Die()
 		return;
 	}
 	bIsDead = true;
+	AttackAudio->Stop();
+	for (const auto& Elem : NiagaraAttackEffect)
+	{
+		if (Elem)
+		{
+			Elem->DestroyComponent();
+		}
+	}
+	NiagaraAttackEffect.Empty();
 	PlayDeathEffect();
 	OnSetVisibleHpBarDelegate.ExecuteIfBound(false);
 	OnDie.Broadcast(EnemyName, this);
@@ -399,7 +420,6 @@ void ADDEnemyBase::UpdateWidgetScale()
 void ADDEnemyBase::CaculateHackingDamage(float& ActualDamage)
 {
 	// TODO : YSY HackingDamage
-	UE_LOG(LogTemp, Warning, TEXT("Hacking"));
 
 	switch (EnemyType)
 	{
@@ -424,7 +444,6 @@ void ADDEnemyBase::CaculateHackingDamage(float& ActualDamage)
 void ADDEnemyBase::CaculatePiercingDamage(float& ActualDamage)
 {
 	// TODO : YSY PiercingDamage
-	UE_LOG(LogTemp, Warning, TEXT("Piercing"));
 
 	switch (EnemyType)
 	{
@@ -448,7 +467,6 @@ void ADDEnemyBase::CaculatePiercingDamage(float& ActualDamage)
 void ADDEnemyBase::CaculateCorrosionDamage(float& ActualDamage)
 {
 	// TODO : YSY CorrosionDamage
-	UE_LOG(LogTemp, Warning, TEXT("Corrosion"));
 
 	switch (EnemyType)
 	{
@@ -471,7 +489,6 @@ void ADDEnemyBase::CaculateCorrosionDamage(float& ActualDamage)
 
 void ADDEnemyBase::Activate()
 {
-	RouteIndex = 0;
 	ensure(Stat);
 	if (!Stat)
 	{
@@ -484,11 +501,13 @@ void ADDEnemyBase::Activate()
 	GetMesh()->SetVisibility(true);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	SetActorLocation(AIMoveRoute->GetSplinePointasWorldPosition(0));
+	RouteIndex = 0;
 	EnemyAIController->RunAI();
 	bIsDead = false;
 	GetCharacterMovement()->MaxWalkSpeed = MovementSpeed;
 	SetActorEnableCollision(true);
 	GetCharacterMovement()->GravityScale = 1.0f;
+	GetMesh()->SetCollisionObjectType(GTCHANNEL_TOWER);
 }
 
 void ADDEnemyBase::Deactivate()
@@ -507,7 +526,7 @@ void ADDEnemyBase::Deactivate()
 	}
 	bIsAggroState = false;
 	GetCharacterMovement()->MaxWalkSpeed = 0.0f;
-	//EnemyAIController->StopAI();
+	EnemyAIController->StopAI();
 	SetActorTickEnabled(false);
 	SetActorHiddenInGame(true);
 	RouteIndex = 0;
@@ -638,22 +657,26 @@ void ADDEnemyBase::ShowHpBarbyAttack()
 
 void ADDEnemyBase::PlayAttackEffect()
 {
+	AttackAudio->Play(SoundStartTime);
+	NiagaraAttackEffect.Empty();
+
 	for (const auto& AttackEffectInfo : AttackEffects)
 	{
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), AttackEffectInfo.SoundEffect, GetActorLocation(), AttackEffectInfo.VolumeMultiplier, AttackEffectInfo.PitchMultiplier, AttackEffectInfo.SoundStartTime);
-		
 		for (const auto& LocationName : AttackEffectInfo.LocationNames)
 		{
 			auto Location = GetMesh()->GetSocketLocation(LocationName);
+			auto Rotation = GetMesh()->GetSocketRotation(LocationName);
 
 			if (AttackEffectInfo.CascadeEffect)
 			{
-				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), AttackEffectInfo.CascadeEffect, Location, FRotator::ZeroRotator, FVector(AttackEffectInfo.EffectScale));
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), AttackEffectInfo.CascadeEffect, Location, Rotation, FVector(AttackEffectInfo.EffectScale));
 			}
 
 			if (AttackEffectInfo.NiagaraEffect)
 			{
-				UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), AttackEffectInfo.NiagaraEffect, Location, FRotator::ZeroRotator, FVector(AttackEffectInfo.EffectScale));
+				auto TempEffect = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), AttackEffectInfo.NiagaraEffect, Location, Rotation, FVector(AttackEffectInfo.EffectScale));
+				
+				NiagaraAttackEffect.Add(TempEffect);
 			}
 		}
 	}
@@ -668,15 +691,16 @@ void ADDEnemyBase::PlayDeathEffect()
 		for (const auto& LocationName : DeathEffectInfo.LocationNames)
 		{
 			auto Location = GetMesh()->GetSocketLocation(LocationName);
+			auto Rotation = GetMesh()->GetSocketRotation(LocationName);
 
 			if (DeathEffectInfo.CascadeEffect)
 			{
-				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DeathEffectInfo.CascadeEffect, Location, FRotator::ZeroRotator, FVector(DeathEffectInfo.EffectScale));
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), DeathEffectInfo.CascadeEffect, Location, Rotation, FVector(DeathEffectInfo.EffectScale));
 			}
 
 			if (DeathEffectInfo.NiagaraEffect)
 			{
-				UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), DeathEffectInfo.NiagaraEffect, Location, FRotator::ZeroRotator, FVector(DeathEffectInfo.EffectScale));
+				UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), DeathEffectInfo.NiagaraEffect, Location, Rotation, FVector(DeathEffectInfo.EffectScale));
 			}
 		}
 	}

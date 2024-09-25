@@ -148,6 +148,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "DD", Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UDDEnemyStatComponent> Stat;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "DD", Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UAudioComponent> AttackAudio;
 private:
 
 #pragma region FEnemyData
@@ -199,6 +202,9 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DD", meta = (AllowPrivateAccess = "true"))
 	TArray<FEffectData> DeathEffects;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DD", meta = (AllowPrivateAccess = "true"))
+	float SoundStartTime;
+
 #pragma endregion
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DD", meta = (AllowPrivateAccess = "true"));
@@ -227,4 +233,7 @@ private:
 	TObjectPtr<AActor> Player;
 
 	FTimerHandle HpBarTH{};
+
+	UPROPERTY()
+	TArray<class UNiagaraComponent*> NiagaraAttackEffect;
 };

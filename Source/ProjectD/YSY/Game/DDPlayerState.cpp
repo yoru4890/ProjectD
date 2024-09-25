@@ -47,6 +47,10 @@ bool ADDPlayerState::SubtractLikePoint(const int32 InLikePoint)
 	if (CheckLikePoint(InLikePoint))
 	{
 		LikePoint -= InLikePoint;
+		if (!DDSaveGame) {
+			CreateSaveFile("SaveFile");
+			UE_LOG(LogTemp, Warning, TEXT("Create Save File, Because of None SaveFile"));
+		}
 		DDSaveGame->SetCurrentLikePoint(LikePoint);
 		OnLikePointChanged.Broadcast(LikePoint);	// LikePoint가 변경될 때 델리게이트 호출
 		return true;
