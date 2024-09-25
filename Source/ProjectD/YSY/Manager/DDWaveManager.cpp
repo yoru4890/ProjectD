@@ -8,9 +8,27 @@
 #include "YSY/Manager/DDEnemySpawnManager.h"
 #include "YSY/Game/DDGameInstance.h"
 #include "YSY/Game/DDDataManager.h"
+#include "Blueprint/UserWidget.h"
 
 UDDWaveManager::UDDWaveManager()
 {
+	static ConstructorHelpers::FClassFinder<UUserWidget> VictoryWidgetClassRef(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/0000/PSA/Widget/04_MainStage/Result/PSA_WBP_Result_Victory.PSA_WBP_Result_Victory_C'"));
+
+	if (VictoryWidgetClassRef.Class)
+	{
+		VictoryWidgetClass = VictoryWidgetClassRef.Class;
+	}
+
+	VictoryWidget = CreateWidget(GetWorld(), VictoryWidgetClass);
+
+	static ConstructorHelpers::FClassFinder<UUserWidget> FailedWidgetClassRef(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/0000/PSA/Widget/04_MainStage/Result/PSA_WBP_Result_Failed.PSA_WBP_Result_Failed_C'"));
+
+	if (FailedWidgetClassRef.Class)
+	{
+		FailedWidgetClass = FailedWidgetClassRef.Class;
+	}
+
+	FailedWidget = CreateWidget(GetWorld(), FailedWidgetClass);
 }
 
 void UDDWaveManager::Initialize()
@@ -146,6 +164,7 @@ void UDDWaveManager::WaveEnd()
 	if (CurrentWave++ >= StageWaveInfo[CurrentStage].EnemyCountsPerWave.Num() - 1)
 	{
 		StageEnd();
+		return;
 	}
 
 	OnWaveChangedSignature.Broadcast(CurrentWave, MaxWave);
@@ -155,6 +174,8 @@ void UDDWaveManager::WaveEnd()
 void UDDWaveManager::StageEnd()
 {
 	UE_LOG(LogTemp, Warning, TEXT("StageEnd"));
+
+	VictoryWidget->AddToViewport();
 }
 
 void UDDWaveManager::AddEnemyNumber()
@@ -190,7 +211,7 @@ void UDDWaveManager::SubtractRemainingLives(int32 Amount)
 	RemainingLives = std::max(0, RemainingLives);
 	if (RemainingLives <= 0)
 	{
-		//TODO : YSY Stage Fail Widget
+		FailedWidget->AddToViewport();
 	}
 	OnRemainingLivesChanged.Broadcast(RemainingLives);
 }
