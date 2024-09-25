@@ -366,7 +366,7 @@ void ADDEnemyBase::ArrivalAtGoal()
 	GetMesh()->SetVisibility(false, true);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	EnemyAIController->StopAI();
+	//EnemyAIController->StopAI();
 	OnDie.Broadcast(EnemyName, this);
 
 	// TODO : YSY Caculate Potal Count, Remove MagicNum

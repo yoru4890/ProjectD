@@ -80,4 +80,16 @@ private:
 	TArray<int32> GateOrders;
 
 	TArray<TArray<int32>> PathGateMappings;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, Meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class UUserWidget> VictoryWidgetClass;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, Meta = (AllowPrivateAccess = "true"))
+	UUserWidget* VictoryWidget;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, Meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class UUserWidget> FailedWidgetClass;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, Meta = (AllowPrivateAccess = "true"))
+	UUserWidget* FailedWidget;
 };
