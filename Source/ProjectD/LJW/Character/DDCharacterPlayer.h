@@ -153,9 +153,12 @@ public:
 
 	virtual class UDDWeaponSystemComponent* GetWeaponComp() override;
 
-protected:
+	UFUNCTION(BlueprintCallable)
 	void EquipMelee();
+	UFUNCTION(BlueprintCallable)
 	void EquipRange();
+
+protected:
 	void WeaponSubSkill();
 	void WeaponStartAiming();
 	void WeaponEndAiming();

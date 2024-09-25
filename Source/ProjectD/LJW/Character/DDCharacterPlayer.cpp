@@ -390,7 +390,6 @@ UDDWeaponSystemComponent* ADDCharacterPlayer::GetWeaponComp()
 }
 
 
-
 void ADDCharacterPlayer::EquipMelee()
 {
 	if (!(PlayerAnimInstance->IsAnyMontagePlaying()))
