@@ -30,7 +30,8 @@ public:
 	FORCEINLINE UAnimMontage* GetReloadMontage() { return ReloadAnim; }
 	virtual void SubSkill() override;
 	virtual void Attack() override;
-	virtual void ResetWeaponState();
+	virtual void ResetWeaponSound() override;
+	virtual void ResetWeaponState() override;
 	bool Reload();
 	void FireEmptyGun();
 
@@ -76,6 +77,8 @@ private:
 
 	const int32 MaxUnLoadedAmmo = 120;
 
+	const int32 InitialLoadedAmmo = 30;
+	const int32 InitialUnLoadedAmmo = 60;
 	int32 LoadedAmmo;
 	int32 UnLoadedAmmo;
 

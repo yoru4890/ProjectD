@@ -106,6 +106,7 @@ void ADDBuildingBase::InitFromDataTable(const FName& InRowName, const FDDBuildin
 	DebuffDuration = BuildingData.DebuffDuration;
 	bCanAttack = false;
 	DamageType = BuildingData.DamageType;
+	MeshZAxisModify = BuildingData.MeshZAxisModify;
 	//UE_LOG(LogTemp, Warning, TEXT("MeshZAxisModify is : %f"), BuildingData.MeshZAxisModify);
 }
 

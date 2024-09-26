@@ -4,6 +4,7 @@
 #include "LSM/Building/Trap/DDTrap.h"
 #include "Components/BoxComponent.h"
 #include "Engine/DamageEvents.h"
+#include "LSM/Building/Trap/DDTrapData.h"
 #include "LSM/Building/AttackStrategies/DDBuildingAttackStrategyInterface.h"
 
 ADDTrap::ADDTrap()

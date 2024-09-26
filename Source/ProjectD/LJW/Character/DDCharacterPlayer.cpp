@@ -195,7 +195,7 @@ void ADDCharacterPlayer::BeginPlay()
 
 	SetCharacterControl();
 	BindBuildingEvents();
-	Spawn();
+	ResetPlayerState();
 
 }
 
@@ -464,7 +464,7 @@ void ADDCharacterPlayer::WeaponAttackEnd()
 	if (CurrentPlayerMode == EPlayerMode::CombatMode)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("AttackEnd"));
-		WeaponSystem->ResetWeaponState();
+		WeaponSystem->ResetWeaponSound();
 	}
 }
 
@@ -567,10 +567,10 @@ void ADDCharacterPlayer::WaveStart()
 
 void ADDCharacterPlayer::SetPlayerCanNotMoveMode()
 {
-	FInputModeUIOnly InputModeUIOnly;
+	FInputModeGameAndUI InputModeGameAndUIData;
 	PlayerController->SetIgnoreMoveInput(true);
 	PlayerController->SetIgnoreLookInput(true);
-	PlayerController->SetInputMode(InputModeUIOnly);
+	PlayerController->SetInputMode(InputModeGameAndUIData);
 	PlayerController->SetShowMouseCursor(true);
 }
 
@@ -600,9 +600,9 @@ void ADDCharacterPlayer::Spawn()
 
 	Stat->SetHp(PlayerMaxHp);
 	this->SetActorLocation(SpawnLocation);
+	IsDie = false;
 	// 입력 활성화
 	EnableInput(Cast<APlayerController>(GetController()));
-	IsDie = false;
 }
 
 void ADDCharacterPlayer::Die()
@@ -662,6 +662,12 @@ void ADDCharacterPlayer::OnDieMontageEnded(UAnimMontage* Montage, bool bInterrup
 			// 방해받았을 경우
 		}
 	}
+}
+
+void ADDCharacterPlayer::ResetPlayerState()
+{
+	Stat->SetHp(PlayerMaxHp);
+	WeaponSystem->ResetWeaponState();
 }
 
 void ADDCharacterPlayer::SetupCharacterWidget(UDDUserWidget* InUserWidget)

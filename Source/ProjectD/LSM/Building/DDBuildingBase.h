@@ -142,10 +142,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EDebuffType DebuffType; // 디버프 타입
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bIsSlow"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bIsDebuff"))
 	float DebuffRate; // 디버프 비율 (0.0 ~ 1.0, 예: 0.5는 50% 감소)
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bIsSlow"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bIsDebuff"))
 	float DebuffDuration; // 디버프 지속 시간
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
