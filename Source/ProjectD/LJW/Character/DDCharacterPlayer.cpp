@@ -18,6 +18,11 @@
 #include "Blueprint/UserWidget.h"
 #include "YSY/UI/DDPlayerHPBarWidget.h"
 #include "LJW/CharacterStat/DDCharacterStatComponent.h"
+#include "NiagaraComponent.h"
+#include "LJW/Weapon/DDWeaponRifle.h"
+#include "YSY/UI/DDMainWidget.h"
+#include "Engine/TargetPoint.h"
+#include "Kismet/GameplayStatics.h"
 
 ADDCharacterPlayer::ADDCharacterPlayer()
 {
@@ -40,12 +45,12 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 	//{
 	//	CharacterControlManager = DataRef.Object;
 	//}
-	
+
 	//Weapon System Component
 	WeaponSystem = CreateDefaultSubobject<UDDWeaponSystemComponent>(TEXT("WeaponSystem"));
-	
+
 	//PlayerMode
-	CurrentPlayerMode = EPlayerMode::CombatMode; 
+	CurrentPlayerMode = EPlayerMode::CombatMode;
 
 	//Collision
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("Player"));
@@ -53,41 +58,23 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 	//BuildComponent
 	BuildSystem = CreateDefaultSubobject<UDDBuildComponent>(TEXT("BuildSystem"));
 
-	//BuildWidget
-	static ConstructorHelpers::FClassFinder<UUserWidget> BuildWidgetFinder(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/0000/YSY/Widget/YSY_WBP_RM_Select.YSY_WBP_RM_Select_C'"));
+	//BuildHudNiagaraComponent
+	BuildHudNiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("BuildHudNiagaraComponent"));
+	BuildHudNiagaraComponent->SetupAttachment(RootComponent);
+	BuildHudNiagaraComponent->SetAutoActivate(false);
 
-	if (BuildWidgetFinder.Succeeded())
+	static ConstructorHelpers::FObjectFinder<UNiagaraSystem> HudNiagaraRef(TEXT("/Game/0000/LSM/VFX/NS_uiScriptor.NS_uiScriptor"));
+	if (HudNiagaraRef.Succeeded())
 	{
-		BuildWidgetClass = BuildWidgetFinder.Class;
+		BuildHudNiagaraComponent->SetAsset(HudNiagaraRef.Object);
 	}
 
-	static ConstructorHelpers::FClassFinder<UUserWidget> RMMachineGunWidgetFinder(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/0000/YSY/Widget/YSY_WBP_RM_MachineGun.YSY_WBP_RM_MachineGun_C'"));
+	BuildHudNiagaraComponent->SetRelativeRotation(FQuat(FRotator(0.0f, 90.0f, 0.f)));
+	BuildHudNiagaraComponent->SetRelativeScale3D(FVector(7.0f));
+	BuildHudNiagaraComponent->SetRelativeLocation(FVector(60.0f, 0.0f, 50.f));
 
-	if (RMMachineGunWidgetFinder.Succeeded())
-	{
-		RMMachineGunWidgetClass = RMMachineGunWidgetFinder.Class;
-	}
 
-	static ConstructorHelpers::FClassFinder<UUserWidget> UpMachineGunWidgetFinder(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/0000/YSY/Widget/YSY_WBP_RM_UpMachineGun.YSY_WBP_RM_UpMachineGun_C'"));
 
-	if (UpMachineGunWidgetFinder.Succeeded())
-	{
-		UpMachineGunWidgetClass = UpMachineGunWidgetFinder.Class;
-	}
-
-	static ConstructorHelpers::FClassFinder<UUserWidget> RMThornTrapWidgetFinder(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/0000/YSY/Widget/YSY_WBP_RM_ThornTrap.YSY_WBP_RM_ThornTrap_C'"));
-
-	if (RMThornTrapWidgetFinder.Succeeded())
-	{
-		RMThornTrapWidgetClass = RMThornTrapWidgetFinder.Class;
-	}
-
-	static ConstructorHelpers::FClassFinder<UUserWidget> UpThornTrapWidgetFinder(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/0000/YSY/Widget/YSY_WBP_RM_UpThornTrap.YSY_WBP_RM_UpThornTrap_C'"));
-
-	if (UpThornTrapWidgetFinder.Succeeded())
-	{
-		UpThornTrapWidgetClass = UpThornTrapWidgetFinder.Class;
-	}
 
 	//StatComponent
 	Stat = CreateDefaultSubobject<UDDCharacterStatComponent>(TEXT("Stat"));
@@ -178,6 +165,19 @@ ADDCharacterPlayer::ADDCharacterPlayer()
 		CancleBuildModeAction = CancleBuildModeRef.Object;
 	}
 
+	static ConstructorHelpers::FObjectFinder<UInputAction>ReloadRef(TEXT("/Script/EnhancedInput.InputAction'/Game/0000/LJW/Input/IA_Player_Reload.IA_Player_Reload'"));
+	if (nullptr != ReloadRef.Object)
+	{
+		ReloadAction = ReloadRef.Object;
+	}
+
+	//Spawn And Die
+	static ConstructorHelpers::FObjectFinder<UAnimMontage>DieRef(TEXT("/Game/0000/LJW/Animation/AnimMontage/dead01_Montage.dead01_Montage"));
+	if (nullptr != DieRef.Object)
+	{
+		DieMontage = DieRef.Object;
+	}
+
 #pragma endregion
 
 }
@@ -188,15 +188,15 @@ void ADDCharacterPlayer::BeginPlay()
 	Super::BeginPlay();
 
 	PlayerController = Cast<APlayerController>(GetController());
-	if (PlayerController) 
+	if (PlayerController)
 	{
 		EnableInput(PlayerController);
 	}
-	
+
 	SetCharacterControl();
-	InitWidget();
 	BindBuildingEvents();
-	
+	Spawn();
+
 }
 
 void ADDCharacterPlayer::PostInitializeComponents()
@@ -225,16 +225,16 @@ void ADDCharacterPlayer::SetupPlayerInputComponent(class UInputComponent* Player
 	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
 	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Canceled, this, &ACharacter::StopJumping);
 	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
-	
+
 	//Move
 	EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ADDCharacterPlayer::Move);
 	EnhancedInputComponent->BindAction(BackMoveAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::BackMoveTrue);
 	EnhancedInputComponent->BindAction(BackMoveAction, ETriggerEvent::Canceled, this, &ADDCharacterPlayer::BackMoveFalse);
 	EnhancedInputComponent->BindAction(BackMoveAction, ETriggerEvent::Completed, this, &ADDCharacterPlayer::BackMoveFalse);
-	
+
 	//Look
 	EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ADDCharacterPlayer::Look);
-	
+
 	//Sprint
 	EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Triggered, this, &ADDCharacterPlayer::Sprint);
 	EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Canceled, this, &ADDCharacterPlayer::Walk);
@@ -243,16 +243,21 @@ void ADDCharacterPlayer::SetupPlayerInputComponent(class UInputComponent* Player
 	//Weapon System
 	EnhancedInputComponent->BindAction(EquipMeleeAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::EquipMelee);
 	EnhancedInputComponent->BindAction(EquipRangeAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::EquipRange);
-	
+
 	EnhancedInputComponent->BindAction(SubSkillAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::WeaponSubSkill);
 	EnhancedInputComponent->BindAction(SubSkillAction, ETriggerEvent::Triggered, this, &ADDCharacterPlayer::WeaponStartAiming);
 	EnhancedInputComponent->BindAction(SubSkillAction, ETriggerEvent::Canceled, this, &ADDCharacterPlayer::WeaponEndAiming);
 	EnhancedInputComponent->BindAction(SubSkillAction, ETriggerEvent::Completed, this, &ADDCharacterPlayer::WeaponEndAiming);
 
-	EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Completed, this, &ADDCharacterPlayer::WeaponAttack);
+	//EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Completed, this, &ADDCharacterPlayer::WeaponAttack);
+	EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &ADDCharacterPlayer::WeaponAttack);
+	EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Completed, this, &ADDCharacterPlayer::WeaponAttackEnd);
+	EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Canceled, this, &ADDCharacterPlayer::WeaponAttackEnd);
+
+	EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::WeaponReload);
 
 	EnhancedInputComponent->BindAction(EnterManagementModeAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::EnterManagementMode);
-	
+
 	EnhancedInputComponent->BindAction(EnterBuildModeAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::OpenBuildWidget);
 
 	EnhancedInputComponent->BindAction(WaveStartAction, ETriggerEvent::Started, this, &ADDCharacterPlayer::WaveStart);
@@ -264,14 +269,14 @@ void ADDCharacterPlayer::SetupPlayerInputComponent(class UInputComponent* Player
 
 void ADDCharacterPlayer::SetCharacterControl()
 {
-	
+
 	UDDCharacterControlData* NewPlayerControlData = CharacterControlManager;
 	check(NewPlayerControlData);
 
 	SetCharacterControlData(NewPlayerControlData);
 
-	
-	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer())) 
+
+	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 	{
 		Subsystem->ClearAllMappings();
 		UInputMappingContext* NewMappingContext = NewPlayerControlData->InputMappingContext;
@@ -353,7 +358,7 @@ void ADDCharacterPlayer::Walk(const FInputActionValue& Value)
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 }
 
-void ADDCharacterPlayer::CreateLeaderPoseSkeletalMesh(USkeletalMeshComponent* SkeletalMesh, const FString& Name, const FString& Path)
+void ADDCharacterPlayer::CreateLeaderPoseSkeletalMesh(TObjectPtr<USkeletalMeshComponent>& SkeletalMesh, const FString& Name, const FString& Path)
 {
 	SkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(*Name);
 	SkeletalMesh->SetupAttachment(GetMesh());
@@ -391,10 +396,12 @@ void ADDCharacterPlayer::EquipMelee()
 {
 	if (!(PlayerAnimInstance->IsAnyMontagePlaying()))
 	{
+		OnVisibilityAmmoTextChanged.Broadcast(false);
 		WeaponSystem->EquipMeleeWeapon();
 		CurrentPlayerMode = EPlayerMode::CombatMode;
 		SetPlayerGameMode();
 		BuildSystem->AllStopTrace();
+		BuildHudNiagaraComponent->SetActive(false);
 	}
 }
 
@@ -404,10 +411,12 @@ void ADDCharacterPlayer::EquipRange()
 
 	if (!(PlayerAnimInstance->IsAnyMontagePlaying()))
 	{
+		OnVisibilityAmmoTextChanged.Broadcast(true);
 		WeaponSystem->EquipRangeWeapon();
 		CurrentPlayerMode = EPlayerMode::CombatMode;
 		SetPlayerGameMode();
 		BuildSystem->AllStopTrace();
+		BuildHudNiagaraComponent->SetActive(false);
 	}
 }
 
@@ -417,7 +426,7 @@ void ADDCharacterPlayer::WeaponSubSkill()
 	if (CurrentPlayerMode == EPlayerMode::CombatMode)
 	{
 		WeaponSystem->WeaponSubSkill();
-		
+
 	}
 }
 
@@ -429,7 +438,7 @@ void ADDCharacterPlayer::WeaponStartAiming()
 		WeaponSystem->WeaponStartAiming();
 		GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 	}
-	
+
 }
 
 void ADDCharacterPlayer::WeaponEndAiming()
@@ -447,6 +456,23 @@ void ADDCharacterPlayer::WeaponAttack()
 	if (CurrentPlayerMode == EPlayerMode::CombatMode)
 	{
 		WeaponSystem->WeaponAttack();
+	}
+}
+
+void ADDCharacterPlayer::WeaponAttackEnd()
+{
+	if (CurrentPlayerMode == EPlayerMode::CombatMode)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AttackEnd"));
+		WeaponSystem->ResetWeaponState();
+	}
+}
+
+void ADDCharacterPlayer::WeaponReload()
+{
+	if (CurrentPlayerMode == EPlayerMode::CombatMode)
+	{
+		WeaponSystem->ReloadWeapon();
 	}
 }
 
@@ -469,10 +495,11 @@ bool ADDCharacterPlayer::IsMaxAggro()
 
 void ADDCharacterPlayer::EnterManagementMode()
 {
-	if (CurrentPlayerMode == EPlayerMode::BuildMode)
+	if (CurrentPlayerMode == EPlayerMode::BuildMode || PlayerAnimInstance->IsAnyMontagePlaying())
 	{
 		return;
 	}
+	BuildHudNiagaraComponent->SetActive(true);
 	CurrentPlayerMode = EPlayerMode::ManagementMode;
 	BuildSystem->StartManageTrace();
 }
@@ -515,33 +542,6 @@ void ADDCharacterPlayer::PlaceBuilding()
 		}
 		SetPlayerCanNotMoveMode();
 		BuildSystem->ShowUpgradeBuildingWidget();
-		
-		//if (BuildingName == NAME_None)
-		//{
-		//	return;
-		//}
-		//else if (BuildingName == FName("MachineGunTower"))
-		//{
-		//	RMMachineGunWidget->AddToViewport();
-		//	SetPlayerCompleteDisableMode();
-		//}
-		//else if (BuildingName == FName("UpgradeMachineGunTower"))
-		//{
-		//	UpMachineGunWidget->AddToViewport();
-		//	SetPlayerCompleteDisableMode();
-		//}
-		//else if (BuildingName == FName("ThornTrap"))
-		//{
-		//	RMThornTrapWidget->AddToViewport();
-		//	SetPlayerCompleteDisableMode();
-		//}
-		//else if (BuildingName == FName("UpgradeThornTrap"))
-		//{
-		//	UpThornTrapWidget->AddToViewport();
-		//	SetPlayerCompleteDisableMode();
-		//}
-
-		
 	}
 }
 
@@ -565,15 +565,6 @@ void ADDCharacterPlayer::WaveStart()
 	GameInstance->GetWaveManager()->WaveStart();
 }
 
-void ADDCharacterPlayer::InitWidget()
-{
-	//BuildWidget = CreateWidget(GetWorld(), BuildWidgetClass);
-	//RMMachineGunWidget = CreateWidget(GetWorld(), RMMachineGunWidgetClass);
-	//UpMachineGunWidget = CreateWidget(GetWorld(), UpMachineGunWidgetClass);
-	//RMThornTrapWidget = CreateWidget(GetWorld(), RMThornTrapWidgetClass);
-	//UpThornTrapWidget = CreateWidget(GetWorld(), UpThornTrapWidgetClass);
-}
-
 void ADDCharacterPlayer::SetPlayerCanNotMoveMode()
 {
 	FInputModeUIOnly InputModeUIOnly;
@@ -588,7 +579,7 @@ void ADDCharacterPlayer::SetPlayerMoveOnlyMode()
 	FInputModeGameAndUI InputModeGameAndUIData;
 	PlayerController->SetIgnoreMoveInput(false);
 	PlayerController->SetIgnoreLookInput(false);
-	PlayerController->SetInputMode(InputModeGameAndUIData); 
+	PlayerController->SetInputMode(InputModeGameAndUIData);
 	PlayerController->SetShowMouseCursor(true); // 마우스 커서 표시
 }
 
@@ -602,9 +593,75 @@ void ADDCharacterPlayer::SetPlayerGameMode()
 
 }
 
+void ADDCharacterPlayer::Spawn()
+{
+	// 캐릭터를 다시 활성화
+	SetActorHiddenInGame(false);
+
+	Stat->SetHp(PlayerMaxHp);
+	this->SetActorLocation(SpawnLocation);
+	// 입력 활성화
+	EnableInput(Cast<APlayerController>(GetController()));
+	IsDie = false;
+}
+
 void ADDCharacterPlayer::Die()
 {
+	// 입력 비활성화
+	DisableInput(Cast<APlayerController>(GetController()));
+	IsDie = true;
+	WeaponAttackEnd();
+	WeaponEndAiming();
 
+	if (PlayerAnimInstance && DieMontage)
+	{
+		// 몽타주 재생 및 종료 델리게이트 설정
+		PlayerAnimInstance->Montage_Play(DieMontage);
+		if (!PlayerAnimInstance->OnMontageEnded.IsAlreadyBound(this, &ADDCharacterPlayer::OnDieMontageEnded))
+		{
+			PlayerAnimInstance->OnMontageEnded.AddDynamic(this, &ADDCharacterPlayer::OnDieMontageEnded);
+		}
+		FindSpawnPoint();
+	}
+}
+
+void ADDCharacterPlayer::FindSpawnPoint()
+{
+	// Get all actors of class ATargetPoint with the tag "Spawn"
+	AActor* SpawnPoint = UGameplayStatics::GetActorOfClass(GetWorld(), ATargetPoint::StaticClass());
+	SpawnLocation = this->GetActorLocation() + FVector(0, 0, 300.f);
+
+	if (SpawnPoint)
+	{
+		SpawnLocation = SpawnPoint->GetActorLocation();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("No spawn point found with tag 'Spawn'"));
+	}
+}
+
+void ADDCharacterPlayer::OnDieMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	if (Montage == DieMontage)
+	{
+		// 델리게이트 해제 (중복 호출 방지)
+		PlayerAnimInstance->OnMontageEnded.RemoveDynamic(this, &ADDCharacterPlayer::OnDieMontageEnded);
+		
+		// 캐릭터를 비활성화 (보이지 않도록)
+		SetActorHiddenInGame(true);
+
+		Spawn();
+
+		// 2초 후에 Spawn 함수를 호출하도록 타이머 설정
+		//GetWorld()->GetTimerManager().SetTimer(SpawnTimer, this, &ADDCharacterPlayer::Spawn, 2.0f, false);
+
+
+		if (!bInterrupted)
+		{
+			// 방해받았을 경우
+		}
+	}
 }
 
 void ADDCharacterPlayer::SetupCharacterWidget(UDDUserWidget* InUserWidget)
@@ -614,16 +671,103 @@ void ADDCharacterPlayer::SetupCharacterWidget(UDDUserWidget* InUserWidget)
 	if (HpBarWidget)
 	{
 		// TODO : YSY or LJW Remove MagicNumber. Need to StatComponent
-		Stat->SetHp(500.0f);
-		HpBarWidget->UpdateStat(500.0f);
-		HpBarWidget->UpdateHpBar(500.0f);
+		//Stat->SetHp(10.0f);
+		HpBarWidget->UpdateStat(Stat->GetCurrentHp());
+		HpBarWidget->UpdateHpBar(Stat->GetCurrentHp());
 		Stat->OnHpChanged.AddUObject(HpBarWidget, &UDDPlayerHPBarWidget::UpdateHpBar);
 	}
 }
 
+void ADDCharacterPlayer::SetupRifleAmmoText(UDDUserWidget* InUserWidget)
+{
+	ADDWeaponRifle* WeaponRifle = Cast<ADDWeaponRifle>(WeaponSystem->GetCurrentRangeWeaponInstance());
+	if (WeaponRifle && InUserWidget)
+	{
+		UDDMainWidget* MainWidget = Cast<UDDMainWidget>(InUserWidget);
+		if (MainWidget)
+		{
+			WeaponRifle->OnLoadedAmmoChanged.AddDynamic(MainWidget, &UDDMainWidget::SetLoadedRifleAmmoText);
+			WeaponRifle->OnUnLoadedAmmoChanged.AddDynamic(MainWidget, &UDDMainWidget::SetUnLoadedRifleAmmoText);
+			MainWidget->SetRifleAmmoText(WeaponRifle->GetLoadedAmmo(), WeaponRifle->GetUnloadedAmmo());
+			MainWidget->SetVisibilityAmmoText(false);
+			OnVisibilityAmmoTextChanged.AddDynamic(MainWidget, &UDDMainWidget::SetVisibilityAmmoText);
+		}
+	}
+}
+
+void ADDCharacterPlayer::PopulateMaterials(TObjectPtr<USkeletalMeshComponent> MeshComponent, TArray<TObjectPtr<UMaterialInterface>>& MaterialArray)
+{
+	if (MeshComponent)
+	{
+		for (int32 i = 0; i < MeshComponent->GetNumMaterials(); ++i)
+		{
+			MaterialArray.Add(MeshComponent->GetMaterial(i));
+		}
+	}
+}
+
+void ADDCharacterPlayer::SetMaterialForMesh(TObjectPtr<USkeletalMeshComponent> MeshComponent, TObjectPtr<UMaterialInterface> Material)
+{
+	if (MeshComponent && Material)
+	{
+		for (int32 i = 0; i < MeshComponent->GetNumMaterials(); ++i)
+		{
+			MeshComponent->SetMaterial(i, Material);
+		}
+	}
+}
+
+void ADDCharacterPlayer::RestoreMaterialsForMesh(TObjectPtr<USkeletalMeshComponent> MeshComponent, const TArray<TObjectPtr<UMaterialInterface>>& OriginalMaterials)
+{
+	if (MeshComponent)
+	{
+		for (int32 i = 0; i < OriginalMaterials.Num(); ++i)
+		{
+			MeshComponent->SetMaterial(i, OriginalMaterials[i]);
+		}
+	}
+}
+
+void ADDCharacterPlayer::DamageInterval()
+{
+	CanBeDamaged = true;
+}
+
+void ADDCharacterPlayer::ApplyHitMaterial()
+{
+	CanBeDamaged = false;
+}
+
+void ADDCharacterPlayer::RestoreOriginalMaterials()
+{
+}
+
 float ADDCharacterPlayer::ApplyDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
+	if (!CanBeDamaged || IsDie)
+	{
+		return -1.f;
+	}
+	UE_LOG(LogTemp, Warning, TEXT("Character Damaged"));
 	Stat->ApplyDamage(DamageAmount);
+	ApplyHitMaterial();
+	// 1초 후 원래 메터리얼 복구
+	GetWorldTimerManager().SetTimer(
+		DamageTimer,
+		this,
+		&ADDCharacterPlayer::DamageInterval,
+		0.5f, // 복구 지연 시간
+		false // 반복하지 않음
+	);
+
+	GetWorldTimerManager().SetTimer(
+		RestoreOriginalMateirlTimer,
+		this,
+		&ADDCharacterPlayer::RestoreOriginalMaterials,
+		0.2f, // 복구 지연 시간
+		false // 반복하지 않음
+	);
+
 	return DamageAmount;
 }
 

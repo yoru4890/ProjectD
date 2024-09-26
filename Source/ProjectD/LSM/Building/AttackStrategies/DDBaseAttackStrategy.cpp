@@ -14,11 +14,15 @@ void UDDBaseAttackStrategy::Initialize(ADDBuildingBase* InOwningTower)
 	OwningTower = InOwningTower;
 	DamageType = InOwningTower->GetDamageType();
 	Damage = InOwningTower->GetDamage();
+    bIsDot = InOwningTower->GetIsDot();
 	DotDamage = InOwningTower->GetDotDamage();
+    DotDamageType = InOwningTower->GetDotDamageType();
 	DotDuration = InOwningTower->GetDotDuration();
 	DotInterval = InOwningTower->GetDotInterval();
-	SlowAmount = InOwningTower->GetSlowAmount();
-	SlowDuration = InOwningTower->GeSlowDuration();
+    bIsDebuff = InOwningTower->GetIsDebuff();
+    DebuffType = InOwningTower->GetDebuffType();
+    DebuffRate = InOwningTower->GetDebuffRate();
+    DebuffDuration = InOwningTower->GetDebuffDuration();
 }
 
 
@@ -28,21 +32,8 @@ void UDDBaseAttackStrategy::Attack(AActor* TargetEnemy, UStaticMeshComponent* Fi
 
 }
 
-void UDDBaseAttackStrategy::ApplyFireDotDamge(AActor* TargetEnemy)
+void UDDBaseAttackStrategy::ApplyDotDamge(AActor* TargetEnemy)
 {
-    EDotDamageType DotDamageType = EDotDamageType::Fire;
-    IDamageInterface* DamageInterface = Cast<IDamageInterface>(TargetEnemy);
-    if (DamageInterface)
-    {
-        DamageInterface->ApplyDamageOverTime(DotDamageType, DotDuration, DotInterval, DotDamage);
-
-        //UE_LOG(LogTemp, Warning, TEXT("Apply Direct Damage"));
-    }
-}
-
-void UDDBaseAttackStrategy::ApplyAcidDotDamge(AActor* TargetEnemy)
-{
-    EDotDamageType DotDamageType = EDotDamageType::Acid;
     IDamageInterface* DamageInterface = Cast<IDamageInterface>(TargetEnemy);
     if (DamageInterface)
     {
@@ -66,9 +57,14 @@ void UDDBaseAttackStrategy::ApplyDirectDamage(AActor* TargetEnemy)
     }
 }
 
-void UDDBaseAttackStrategy::ApplySlowEffect(AActor* TargetEnemy)
+void UDDBaseAttackStrategy::ApplyDebuff(AActor* TargetEnemy)
 {
-	//UE_LOG(LogTemp, Warning, TEXT("Apply Slow Effect"));
+    IDamageInterface* DamageInterface = Cast<IDamageInterface>(TargetEnemy);
+    if (DamageInterface)
+    {
+        DamageInterface->ApplyDebuff(DebuffType, DebuffDuration, DebuffRate);
+
+    }
 }
 
 void UDDBaseAttackStrategy::PlayHitEffect(AActor* TargetEnemy, FVector Location, FRotator Rotation, FName SocketName, bool bAttachToTarget)

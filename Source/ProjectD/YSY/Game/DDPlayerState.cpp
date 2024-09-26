@@ -10,6 +10,7 @@ ADDPlayerState::ADDPlayerState()
 {
 	Gold = 10000;
 	LikePoint = 5;
+	UnLoadedRifleAmmo = 60;
 }
 
 void ADDPlayerState::AddGold(const int32 InGold)
@@ -59,6 +60,56 @@ bool ADDPlayerState::SubtractLikePoint(const int32 InLikePoint)
 		return false;
 	}
 }
+
+//void ADDPlayerState::AddLoadedRifleAmmo()
+//{
+//	const int32 MaxAmmoPerMagazine = 30;
+//
+//	int32 AmmoToLoad = FMath::Min(UnLoadedRifleAmmo, MaxAmmoPerMagazine - LoadedRifleAmmo);
+//	LoadedRifleAmmo += AmmoToLoad;
+//
+//	OnLoadedAmmoChanged.Broadcast(LoadedRifleAmmo);
+//	
+//	SubtractUnloadedRifleAmmo(AmmoToLoad);
+//}
+//
+//bool ADDPlayerState::SubtractLoadedRifleAmmo()
+//{
+//	if (LoadedRifleAmmo > 0)
+//	{
+//		LoadedRifleAmmo--;
+//		OnLoadedAmmoChanged.Broadcast(LoadedRifleAmmo);
+//		return true;
+//	}
+//	return false;
+//}
+//
+//void ADDPlayerState::AddUnloadedRifleAmmo(const int32 InAmmo)
+//{
+//	const int32 MaxUnLoadedAmmo = 120;
+//
+//	if (UnLoadedRifleAmmo + InAmmo > MaxUnLoadedAmmo)
+//	{
+//		UnLoadedRifleAmmo = MaxUnLoadedAmmo;
+//	}
+//	else
+//	{
+//		UnLoadedRifleAmmo += InAmmo;
+//	}
+//
+//	OnUnLoadedAmmoChanged.Broadcast(UnLoadedRifleAmmo);
+//}
+//
+//bool ADDPlayerState::SubtractUnloadedRifleAmmo(const int32 InAmmo)
+//{
+//	if (UnLoadedRifleAmmo >= InAmmo)
+//	{
+//		UnLoadedRifleAmmo -= InAmmo;
+//		OnUnLoadedAmmoChanged.Broadcast(UnLoadedRifleAmmo);
+//		return true;
+//	}
+//	return false;
+//}
 
 void ADDPlayerState::AutoSaveGame()
 {

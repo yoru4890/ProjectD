@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
 #include "NiagaraSystem.h"
+#include "YSY/Interface/DamageInterface.h"
 #include "DDBuildingBaseData.generated.h"
 
 /**
@@ -74,6 +75,9 @@ public:
 	bool bIsDot; // 도트 공격 여부
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bIsDot"))
+	EDotDamageType DotDamageType; // 도트 데미지 타입
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bIsDot"))
 	float DotDamage; // 도트 공격 데미지
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bIsDot"))
@@ -83,13 +87,16 @@ public:
 	float DotInterval; // 도트 공격 간격
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bIsSlow; // 이동 속도 감소 여부
+	bool bIsDebuff; // 디버프 여부
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bIsSlow"))
-	float SlowAmount; // 이동 속도 감소 비율 (0.0 ~ 1.0, 예: 0.5는 50% 감소)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bIsDebuff"))
+	EDebuffType DebuffType; // 디버프 타입
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bIsSlow"))
-	float SlowDuration; // 이동 속도 감소 지속 시간
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bIsDebuff"))
+	float DebuffRate; // 디버프 비율
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (EditCondition = "bIsDebuff"))
+	float DebuffDuration; // 디버프 지속시간
 
 	// Static mesh array, visible only if MeshType is StaticMesh
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

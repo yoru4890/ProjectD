@@ -72,6 +72,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void HandleBuildingPoolsOnLevelChange();
 
+	UFUNCTION(BlueprintCallable)
+	void AllClearPools();
+
 	void DestroyBuilding(class ADDBuildingBase& Building);
 
 	void GetSoftObjectPtrsInBuilding(const FName& RowName, TArray<TSoftObjectPtr<UObject>>& AssetsToLoad);

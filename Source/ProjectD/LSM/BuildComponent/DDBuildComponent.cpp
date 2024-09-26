@@ -247,7 +247,7 @@ void UDDBuildComponent::ReadyBuilding(FName RowName)
 
 	bool bCanPay = CanPayBuildCost(RowName);
 
-	PreviewBuilding->SetMaterialToPreview(bCanPay);
+	PreviewBuilding->SetBuildingToPreview(bCanPay);
 
 	if (PreviewBuilding->GetBuildingType() == EBuildingType::Tower)
 	{
@@ -284,7 +284,7 @@ bool UDDBuildComponent::PlaceBuilding()
 		return false;
 	}
 
-	PreviewBuilding->SetMaterialToOriginal();
+	PreviewBuilding->SetBuildingToOriginal();
 
 	GridBuildManager->SetGridCellAsOccupied(PreviewBuilding->GetActorLocation(), PreviewBuilding->GetCellWidth());
 
@@ -376,7 +376,7 @@ void UDDBuildComponent::UpgradeBuilding(const FName RowName)
 
 	ManagedBuilding = NewBuilding;
 	ManagedBuilding->SetCanAttack(true);
-	ManagedBuilding->SetMaterialToPreview(true);
+	ManagedBuilding->SetBuildingToPreview(true);
 	PayBuildCost(RowName);
 	return;
 }
@@ -429,7 +429,7 @@ void UDDBuildComponent::StopManageTrace()
 	GetWorld()->GetTimerManager().ClearTimer(ManageTraceTimerHandle);
 	if (ManagedBuilding)
 	{
-		ManagedBuilding->SetMaterialToOriginal();
+		ManagedBuilding->SetBuildingToOriginal();
 		ManagedBuilding = nullptr;
 		if (UpgradeBuildingWidgetOption1Instance->IsInViewport())
 		{
@@ -500,7 +500,14 @@ void UDDBuildComponent::PerformBuildTrace()
 
 			if (CanBuildAtLoction) {
 				FVector NearestCellLocation = GridBuildManager->GetNearestGridCellLocation(BuildLocation);
-				PreviewBuilding->SetActorLocation(NearestCellLocation);
+				if (PreviewBuilding->GetBuildingType() == EBuildingType::Tower)
+				{
+					PreviewBuilding->SetActorLocation(BuildLocation);
+				}
+				else if (PreviewBuilding->GetBuildingType() == EBuildingType::Trap)
+				{
+					PreviewBuilding->SetActorLocation(NearestCellLocation);
+				}
 				FVector NormalVector = GridBuildManager->GetGridCellNormalVector(BuildLocation);
 				FRotator ActorRotation = FRotationMatrix::MakeFromZ(NormalVector).Rotator();
 				if (PreviewBuilding->GetBuildingType() == EBuildingType::Tower)
@@ -581,16 +588,16 @@ void UDDBuildComponent::PerformManageTrace()
 			{
 				if (ManagedBuilding)
 				{
-					ManagedBuilding->SetMaterialToOriginal();
+					ManagedBuilding->SetBuildingToOriginal();
 				}
 				ManagedBuilding = Cast<ADDBuildingBase>(HitActor);// HitResult에서 맞은 Actor를 가져옴
-				ManagedBuilding->SetMaterialToPreview(true);
+				ManagedBuilding->SetBuildingToPreview(true);
 				//UE_LOG(LogTemp, Warning, TEXT("Manage Building Changed"));
 			}
 		}
 		else {
 			if (ManagedBuilding) {
-				ManagedBuilding->SetMaterialToOriginal();
+				ManagedBuilding->SetBuildingToOriginal();
 				ManagedBuilding = nullptr;
 			}
 		}

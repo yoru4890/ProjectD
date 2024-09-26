@@ -15,10 +15,26 @@ ADDWeaponBase::ADDWeaponBase()
 }
 
 
+void ADDWeaponBase::Attack()
+{
+	if (!bCanAttack)
+	{
+		return;
+	}
+	bCanAttack = false;
+	GetWorldTimerManager().SetTimer(
+		AttackCoolTimeHandler,
+		[this]() { SetCanAttack(true); }, // 람다를 사용하여 매개변수 전달
+		AttackCooltime, // 타이머 간격
+		false // 반복하지 않음
+	);
+}
+
 // Called when the game starts or when spawned
 void ADDWeaponBase::BeginPlay()
 {
 	Super::BeginPlay();
+	bCanAttack = true;
 }
 
 

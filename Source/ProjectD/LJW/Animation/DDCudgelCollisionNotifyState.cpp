@@ -7,6 +7,7 @@
 
 void UDDCudgelCollisionNotifyState::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration, const FAnimNotifyEventReference& EventReference)
 {
+	UE_LOG(LogTemp,Warning,TEXT("Cudgel Collision QueryOnly changed"))
 	//Collision On
 	auto PlayerComp = Cast<IDDPlayerComponentsAnimInterface>(MeshComp->GetOwner());
 
