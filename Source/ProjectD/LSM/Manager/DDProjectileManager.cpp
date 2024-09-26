@@ -111,7 +111,7 @@ void UDDProjectileManager::GetSoftObjectPtrsInProjectile(const FName& RowName, T
 	AssetsToLoad.Add(ProjectileData->FlyingSound);
 }
 
-void UDDProjectileManager::HandleProjectilePoolsOnLevelChange()
+void UDDProjectileManager::AllClearPools()
 {
 	// Iterate over all the Projectile Pools
 	for (auto& Pool : ProjectilePools)
