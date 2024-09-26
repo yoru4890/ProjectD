@@ -137,6 +137,14 @@ void ADDTowerStaticRotate::Attack()
 	SetIsNowAttack(true);
 }
 
+void ADDTowerStaticRotate::ExecuteAttackEffects()
+{
+	Super::ExecuteAttackEffects();
+	PlayAttackEffectAtSocket();
+	PlayAttackAnimation();
+	PlayAttackSound();
+}
+
 void ADDTowerStaticRotate::StartAttackProcedure()
 {
 	//UE_LOG(LogTemp, Warning, TEXT("StartAttackProcedure"));

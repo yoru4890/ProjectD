@@ -19,6 +19,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ShowMainWidget();
 
+	UFUNCTION(BlueprintCallable)
+	UUserWidget* GetMainWidget();
+
+
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -27,5 +32,5 @@ private:
 	TSubclassOf<class UUserWidget> MainWidgetClass;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, Meta = (AllowPrivateAccess = "true"))
-	UUserWidget* MainWidget;
+	TObjectPtr<UUserWidget> MainWidget;
 };

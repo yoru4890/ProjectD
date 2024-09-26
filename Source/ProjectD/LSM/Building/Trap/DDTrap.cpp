@@ -31,6 +31,11 @@ void ADDTrap::Attack()
 	}
 }
 
+void ADDTrap::StartAttackEffect()
+{
+	PlayAttackEffectAtSocket();
+}
+
 void ADDTrap::ModifyMeshAndAttackCollision() const
 {
 	Super::ModifyMeshAndAttackCollision();
@@ -48,6 +53,13 @@ void ADDTrap::ResetCanAttack()
 	{
 		ExecuteAttackEffects();
 	}
+}
+
+void ADDTrap::ExecuteAttackEffects()
+{
+	Super::ExecuteAttackEffects();
+	// 트랩은 이펙트와 사운드를 몽타주에서 관리
+	PlayAttackAnimation();
 }
 
 void ADDTrap::OnBoxCollisionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
