@@ -222,7 +222,10 @@ protected:
 
 //Spawn And Die
 protected:
+	UPROPERTY()
 	TObjectPtr<UAnimMontage> DieMontage;
+	FTimerHandle SpawnTimer;
+
 	bool IsDie = false;
 	void Spawn();
 	void Die();

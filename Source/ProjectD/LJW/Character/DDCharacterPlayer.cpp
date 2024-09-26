@@ -595,6 +595,10 @@ void ADDCharacterPlayer::SetPlayerGameMode()
 
 void ADDCharacterPlayer::Spawn()
 {
+	// 캐릭터를 다시 활성화
+	SetActorHiddenInGame(false);
+	SetActorEnableCollision(true);
+
 	Stat->SetHp(PlayerMaxHp);
 	this->SetActorLocation(SpawnLocation);
 	// 입력 활성화
@@ -644,7 +648,15 @@ void ADDCharacterPlayer::OnDieMontageEnded(UAnimMontage* Montage, bool bInterrup
 	{
 		// 델리게이트 해제 (중복 호출 방지)
 		PlayerAnimInstance->OnMontageEnded.RemoveDynamic(this, &ADDCharacterPlayer::OnDieMontageEnded);
+		
+		// 캐릭터를 비활성화 (보이지 않도록)
+		SetActorHiddenInGame(true);
+		SetActorEnableCollision(false);
+
 		Spawn();
+
+		// 2초 후에 Spawn 함수를 호출하도록 타이머 설정
+		//GetWorld()->GetTimerManager().SetTimer(SpawnTimer, this, &ADDCharacterPlayer::Spawn, 2.0f, false);
 
 
 		if (!bInterrupted)
