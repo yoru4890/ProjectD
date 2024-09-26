@@ -202,6 +202,7 @@ void UDDWaveManager::StageEnd()
 	auto TempPlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 	TempPlayerController->StopMovement();
 	TempPlayerController->DisableInput(TempPlayerController);
+	TempPlayerController->SetIgnoreMoveInput(true);
 	VictoryWidget->AddToViewport();
 	//TempPlayerController->EnableInput(TempPlayerController);
 }
