@@ -10,6 +10,7 @@ ADDPlayerState::ADDPlayerState()
 {
 	Gold = 10000;
 	LikePoint = 5;
+	CreateSaveFile("SaveFile");
 	UnLoadedRifleAmmo = 60;
 }
 

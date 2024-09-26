@@ -11,7 +11,6 @@
 #include "Blueprint/UserWidget.h"
 #include "YSY/Game/DDPlayerState.h"
 
-
 UDDWaveManager::UDDWaveManager()
 {
 	static ConstructorHelpers::FClassFinder<UUserWidget> VictoryWidgetClassRef(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/0000/PSA/Widget/04_MainStage/Result/PSA_WBP_Result_Victory.PSA_WBP_Result_Victory_C'"));
@@ -112,6 +111,7 @@ void UDDWaveManager::InitStage(int32 StageNum)
 
 void UDDWaveManager::SetSplines()
 {
+	Splines.Empty();
 	TArray<AActor*> OutActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AAISplineRoute::StaticClass(), OutActors);
 
@@ -199,8 +199,11 @@ void UDDWaveManager::StageEnd()
 		TempPlayerState->AddLikePoint(GettingLikePoint);
 	}
 	// TODO : YSY Connect GettingLikePoint
+	auto TempPlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	TempPlayerController->StopMovement();
+	TempPlayerController->DisableInput(TempPlayerController);
 	VictoryWidget->AddToViewport();
-
+	//TempPlayerController->EnableInput(TempPlayerController);
 }
 
 void UDDWaveManager::AddEnemyNumber()
