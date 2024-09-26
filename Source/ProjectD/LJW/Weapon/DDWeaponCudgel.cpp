@@ -33,6 +33,7 @@ void ADDWeaponCudgel::SubSkill()
 
 void ADDWeaponCudgel::Attack()
 {
+	Super::Attack();
 	//Cudgel Attack
 	UE_LOG(LogTemp, Warning, TEXT("Attack"));
 }

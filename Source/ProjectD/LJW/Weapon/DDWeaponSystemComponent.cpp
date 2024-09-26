@@ -5,11 +5,13 @@
 #include "YSY/Game/DDDataManager.h"
 #include "LJW/Weapon/DDWeaponBase.h"
 #include "LJW/Weapon/DDWeaponCudgel.h"
+#include "LJW/Weapon//DDWeaponRifle.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include <Kismet/KismetSystemLibrary.h>
 #include "LJW/Interface/CameraFOVInterface.h"
 #include "YSY/Game/DDGameInstance.h"
+#include "YSY/Game/DDPlayerState.h"
 
 
 
@@ -48,7 +50,7 @@ void UDDWeaponSystemComponent::InitializeWeapon()
 	// 싱글톤에서 data들을 얻음, 데이터 순서 중요
 	UDDGameInstance* MyGameInstance = Cast<UDDGameInstance>(GetWorld()->GetGameInstance());
 	auto WeaponDatas = MyGameInstance->GetDataManager()->GetWeaponDataTable();
-	
+
 	//Player에 무기 장착
 	if (GetOwner())
 	{
@@ -129,6 +131,7 @@ void UDDWeaponSystemComponent::PlayUnequipMontage()
 	if (CurrentWeapon->GetUnequipWeaponMontage())
 	{
 		PlayerAnimInstance->Montage_Play(CurrentWeapon->GetUnequipWeaponMontage());
+		ResetWeaponState();
 	}
 }
 
@@ -195,7 +198,7 @@ void UDDWeaponSystemComponent::WeaponEndAiming()
 		}
 	}
 }
-
+//TODO: WeaponBase의 자식으로 MeleeWeapon과 RangeWeapon을 만들어서 각각의 무기가 상속받게하고 WeaponAttack에서는 Melee와 Range 캐스팅해서 이 두개로만 다룸
 void UDDWeaponSystemComponent::WeaponAttack()
 {
 	//Melee
@@ -223,13 +226,48 @@ void UDDWeaponSystemComponent::WeaponAttack()
 		//Aim 중 일 때만 가능
 		if (OnGetAimingDelegate.Execute())
 		{
-			PlayerAnimInstance->Montage_Play(CurrentWeapon->GetAttackMontage());
+			ADDWeaponRifle* WeaponRifle = Cast<ADDWeaponRifle>(CurrentWeapon);
+			if (!CurrentWeapon->GetCanAttack() || PlayerAnimInstance->IsAnyMontagePlaying())
+			{
+				return;
+			}
+			if (WeaponRifle->GetLoadedAmmo()>0)
+			{
+				PlayerAnimInstance->Montage_Play(CurrentWeapon->GetAttackMontage());
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("No Ammo"));
+			}
 			CurrentWeapon->Attack();
-			
 		}
 	}
 	
 
+}
+
+void UDDWeaponSystemComponent::ReloadWeapon()
+{
+	if (CurrentWeapon == Weapons[CurrentRangeWeapon] && CanAttacking())
+	{
+		ADDWeaponRifle* WeaponRifle = Cast<ADDWeaponRifle>(CurrentWeapon);
+		if (WeaponRifle->Reload())
+		{
+			PlayerAnimInstance->Montage_Play(WeaponRifle->GetReloadMontage());
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Can't Reload"));
+		}
+	}
+}
+
+void UDDWeaponSystemComponent::ResetWeaponState()
+{
+	for (auto& Weapon : Weapons)
+	{
+		Weapon->ResetWeaponState();
+	}
 }
 
 //조건 모음
@@ -320,6 +358,18 @@ void UDDWeaponSystemComponent::InitTimeline()
 	RifleZoomTL.SetTimelineFinishedFunc(OnTimelineEventDelegate);
 
 	bIsOnTimeline = false;
+}
+
+ADDWeaponBase* UDDWeaponSystemComponent::GetCurrentRangeWeaponInstance()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Weapons Num : %d"),Weapons.Num());
+	UE_LOG(LogTemp, Warning, TEXT("CurrentRangeWeapon : %d"), CurrentRangeWeapon);
+	if (Weapons.IsValidIndex(CurrentRangeWeapon))
+	{
+		return Weapons[CurrentRangeWeapon];
+	}
+	UE_LOG(LogTemp, Warning, TEXT("GetCurrentRangeWeaponInstance error"));
+	return nullptr;
 }
 
 

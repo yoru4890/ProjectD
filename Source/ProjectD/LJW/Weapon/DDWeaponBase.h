@@ -14,21 +14,22 @@ UCLASS()
 class PROJECTD_API ADDWeaponBase : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	// Sets default values for this actor's properties
 	ADDWeaponBase();
 
 public:
 
 	void InitData(const FName& RowName, const FDDWeaponData& WeaponData);
+	virtual void ResetWeaponState(){}
 
 	void DisableWeapon();
 	void EnableWeapon();
 
 	//Equip, Unequip GET/SET
 
-	FORCEINLINE UAnimMontage* GetEquipWeaponMontage() const noexcept{ return EquipWeaponAnim; }
+	FORCEINLINE UAnimMontage* GetEquipWeaponMontage() const noexcept { return EquipWeaponAnim; }
 	void SetEquipWeaponMontage(UAnimMontage* InMontage) { EquipWeaponAnim = InMontage; }
 
 	FORCEINLINE UAnimMontage* GetUnequipWeaponMontage() const noexcept { return UnequipWeaponAnim; }
@@ -42,10 +43,14 @@ public:
 
 	FORCEINLINE FName GetSocketName() const noexcept { return WeaponSocketName; }
 
-	
+	FORCEINLINE bool GetCanAttack() const noexcept { return bCanAttack; }
+
+	FORCEINLINE void SetCanAttack(bool bInCanAttack) { bCanAttack = bInCanAttack; }
+
+
 	virtual void SubSkill() {};
-	virtual void Attack() {};
-	
+	virtual void Attack();
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -98,5 +103,10 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon)
 	TObjectPtr<UAnimMontage> AttackAnim;
-	
+
+	FTimerHandle AttackCoolTimeHandler;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon)
+	bool bCanAttack;
+
 };

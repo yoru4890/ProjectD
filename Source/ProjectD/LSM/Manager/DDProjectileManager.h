@@ -33,6 +33,9 @@ public:
 
 	void GetSoftObjectPtrsInProjectile(const FName& RowName, TArray<TSoftObjectPtr<UObject>>& AssetsToLoad);
 
+	UFUNCTION(BlueprintCallable)
+	void HandleProjectilePoolsOnLevelChange();
+
 
 	const TMap<FName, FDDProjectileData>& GetProjectileDataTable() const;
 
@@ -52,7 +55,7 @@ private:
 	void OnProjectileAssetsLoaded(const FName& RowName);
 
 	class ADDProjectileBase* CreateProjectileInstance(const FDDFactoryParams& Params);
-	TMap<FName, FProjectileList> ProjectilePool;
+	TMap<FName, FProjectileList> ProjectilePools;
 	TObjectPtr<class UDDGameInstance> MyGameInstance;
 	TObjectPtr<class UDDFactoryManager> FactoryManager;
 	TObjectPtr<class UDDAssetManager> AssetManager;
