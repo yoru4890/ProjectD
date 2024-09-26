@@ -10,6 +10,9 @@
 #include "Kismet/GameplayStatics.h"
 #include "YSY/Game/DDGameInstance.h"
 #include "YSY/Manager/DDWaveManager.h"
+#include "LJW/Character/DDCharacterPlayer.h"
+#include "LJW/Weapon/DDWeaponRifle.h"
+#include "LJW/Weapon/DDWeaponSystemComponent.h"
 
 ADDPlayerController::ADDPlayerController()
 {
@@ -27,11 +30,14 @@ void ADDPlayerController::ShowMainWidget()
 {
 	
 	auto PlayerWidgetInterface = Cast<IDDCharacterWidgetInterface>(GetPawn());
+	ADDCharacterPlayer* MyCharacter = Cast<ADDCharacterPlayer>(GetPawn());
+
 	ensure(PlayerWidgetInterface);
 	if (PlayerWidgetInterface)
 	{
 		auto TempMainWidget = Cast<UDDMainWidget>(MainWidget);
 		PlayerWidgetInterface->SetupCharacterWidget(TempMainWidget->GetHpBarWidget());
+		PlayerWidgetInterface->SetupRifleAmmoText(TempMainWidget);
 
 		auto TempPlayerState = Cast<ADDPlayerState>(UGameplayStatics::GetPlayerState(GetWorld(), 0));
 		if (!TempPlayerState->OnGoldChanged.IsBound())
@@ -57,9 +63,15 @@ void ADDPlayerController::ShowMainWidget()
 		}
 
 		TempMainWidget->SetWaveText(TempWaveManager->GetCurrentWave(), TempWaveManager->GetMaxWave());
+
 	}
 	MainWidget->AddToViewport();
 	
+}
+
+UUserWidget* ADDPlayerController::GetMainWidget()
+{
+	return MainWidget;
 }
 
 void ADDPlayerController::BeginPlay()

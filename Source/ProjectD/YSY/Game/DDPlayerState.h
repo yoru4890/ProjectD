@@ -55,6 +55,7 @@ public:
 
 	void SetScore(const int32& NewScore) { Score = NewScore; }
 
+
 	// Save
 	UFUNCTION(BlueprintCallable, Category = "Save")
 	void AutoSaveGame();
@@ -84,6 +85,9 @@ private:
 	int32 Gold;
 	int32 LikePoint;
 	int32 Score;
+
+	int32 LoadedRifleAmmo;
+	int32 UnLoadedRifleAmmo;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Save", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<UDDSaveGame> DDSaveGame;

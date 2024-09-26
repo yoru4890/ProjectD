@@ -30,6 +30,17 @@ ADDBuildingBase::ADDBuildingBase()
 	MeshContainerComponent = CreateDefaultSubobject<USceneComponent>(TEXT("MashContainerComponent"));
 	MeshContainerComponent->SetupAttachment(RootComponent);
 
+	MatrixNiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("MatrixNiagaraComponent"));
+	MatrixNiagaraComponent->SetupAttachment(RootComponent);
+	MatrixNiagaraComponent->SetRelativeScale3D(FVector(3,5,2.5));
+	MatrixNiagaraComponent->SetAutoActivate(false);
+
+	static ConstructorHelpers::FObjectFinder<UNiagaraSystem> MatrixNiagaraRef(TEXT("/Game/0000/LSM/VFX/NS_techDigitalRain3D.NS_techDigitalRain3D"));
+	if (MatrixNiagaraRef.Succeeded())
+	{
+		MatrixNiagaraComponent->SetAsset(MatrixNiagaraRef.Object);
+	}
+
 
 }
 
@@ -85,12 +96,14 @@ void ADDBuildingBase::InitFromDataTable(const FName& InRowName, const FDDBuildin
 	Damage = BuildingData.Damage;
 	bIsAnimated = BuildingData.bIsAnimated;
 	bIsDot = BuildingData.bIsDot;
+	DotDamageType = BuildingData.DotDamageType;
 	DotDamage = BuildingData.DotDamage;
 	DotDuration = BuildingData.DotDuration;
 	DotInterval = BuildingData.DotInterval;
-	bIsSlow = BuildingData.bIsSlow;
-	SlowAmount = BuildingData.SlowAmount;
-	SlowDuration = BuildingData.SlowDuration;
+	bIsDebuff = BuildingData.bIsDebuff;
+	DebuffType = BuildingData.DebuffType;
+	DebuffRate = BuildingData.DebuffRate;
+	DebuffDuration = BuildingData.DebuffDuration;
 	bCanAttack = false;
 	DamageType = BuildingData.DamageType;
 	//UE_LOG(LogTemp, Warning, TEXT("MeshZAxisModify is : %f"), BuildingData.MeshZAxisModify);
@@ -117,8 +130,8 @@ void ADDBuildingBase::SetAttackStrategy(TSubclassOf<class UDDBaseAttackStrategy>
 void ADDBuildingBase::SetAssets(const FDDBuildingBaseData& LoadedAsset)
 {
 	SetMeshs(LoadedAsset);
-	SetParticeEffects(LoadedAsset);
 	ModifyMeshAndAttackCollision();
+	SetParticeEffects(LoadedAsset);
 	SetSound(LoadedAsset);
 	SetAttackStrategy(LoadedAsset.AttackStrategy);
 
@@ -178,6 +191,10 @@ void ADDBuildingBase::SetParticeEffects(const FDDBuildingBaseData& LoadedAsset)
 	// 찾아낸 FirePoint 소켓들에 대해 나이아가라 컴포넌트 생성 및 설정
 	for (const FName& SocketName : FirePointSockets)
 	{
+		if (!AttackEffect)
+		{
+			return;
+		}
 		USceneComponent* TargetComponent = nullptr;
 
 		if (SkeletalMeshComponents.Num() > 0 && SkeletalMeshComponents[0]->DoesSocketExist(SocketName))
@@ -332,9 +349,6 @@ void ADDBuildingBase::SetCanAttack(const bool bInCanAttack)
 void ADDBuildingBase::ExecuteAttackEffects()
 {
 	bCanAttack = false;
-	PlayAttackEffectAtSocket();
-	PlayAttackAnimation();
-	PlayAttackSound();
 
 	// 타이머를 설정하여 쿨타임 후 bCanAttack을 true로 변경
 	GetWorld()->GetTimerManager().SetTimer(AttackCooldownTimerHandle, this, &ADDBuildingBase::ResetCanAttack, AttackCoolTime, false);
@@ -452,11 +466,12 @@ void ADDBuildingBase::ModifyMeshAndAttackCollision() const
 
 	FBox CombinedBox(ForceInit); // 빈 경계로 초기화
 
-
+	int32 StaticNum = 0;
 
 	// 각 자식 컴포넌트에 대해 경계를 계산하고 합침
 	for (UMeshComponent* MeshComponent : MeshComponents)
 	{
+		StaticNum++;
 		if (!MeshComponent)
 		{
 			//UE_LOG(LogTemp, Warning, TEXT("MeshComponent is not valid."));
@@ -467,6 +482,10 @@ void ADDBuildingBase::ModifyMeshAndAttackCollision() const
 
 		if (UStaticMeshComponent* StaticMeshComponent = Cast<UStaticMeshComponent>(MeshComponent))
 		{
+			if (StaticNum != 3)
+			{
+				continue;
+			}
 			if (UStaticMesh* StaticMesh = StaticMeshComponent->GetStaticMesh())
 			{
 				ComponentBox = StaticMesh->GetBoundingBox();
@@ -510,15 +529,15 @@ void ADDBuildingBase::ModifyMeshAndAttackCollision() const
 }
 
 
-void ADDBuildingBase::SetMaterialToPreview(bool bCanPay)
+void ADDBuildingBase::SetBuildingToPreview(bool bCanPay)
 {
 	if (bCanPay)
 	{
-		DynamicMaterialInstance->SetVectorParameterValue("Param", FLinearColor(0, 0, 0.6f, 1));
+		DynamicMaterialInstance->SetVectorParameterValue("Param", FLinearColor(0, 0, 0.6f, 0.6f));
 	}
 	else
 	{
-		DynamicMaterialInstance->SetVectorParameterValue("Param", FLinearColor(0.6, 0, 0, 1));
+		DynamicMaterialInstance->SetVectorParameterValue("Param", FLinearColor(0.6, 0, 0, 0.6f));
 	}
 
 	for (auto& OriginalMaterial : OriginalMaterials)
@@ -528,9 +547,10 @@ void ADDBuildingBase::SetMaterialToPreview(bool bCanPay)
 			OriginalMaterial.Key->SetMaterial(MaterialIndex, DynamicMaterialInstance);
 		}
 	}
+	ActivateMatrixNiagara(true);
 }
 
-void ADDBuildingBase::SetMaterialToOriginal()
+void ADDBuildingBase::SetBuildingToOriginal()
 {
 	for (auto& OriginalMaterial : OriginalMaterials)
 	{
@@ -539,6 +559,12 @@ void ADDBuildingBase::SetMaterialToOriginal()
 			OriginalMaterial.Key->SetMaterial(MaterialIndex, OriginalMaterial.Value.Materials[MaterialIndex]);
 		}
 	}
+	ActivateMatrixNiagara(false);
+}
+
+void ADDBuildingBase::ActivateMatrixNiagara(bool IsPlay)
+{
+	MatrixNiagaraComponent->SetActive(IsPlay);
 }
 
 #pragma endregion UtilityFunctions

@@ -22,6 +22,8 @@ enum class EPlayerMode : uint8
 	Unknow UMETA(DisplayName = "Unknown")
 };
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnVisibilityAmmoTextChanged, bool, IsVisible);
+
 UCLASS()
 class PROJECTD_API ADDCharacterPlayer : public ADDCharacterBase, public ICameraFOVInterface, public IDDPlayerComponentsAnimInterface, public IAggroTargetInterface, public IDDCharacterWidgetInterface, public IDamageInterface
 {
@@ -29,6 +31,8 @@ class PROJECTD_API ADDCharacterPlayer : public ADDCharacterBase, public ICameraF
 	
 public:
 	ADDCharacterPlayer();
+	FOnVisibilityAmmoTextChanged OnVisibilityAmmoTextChanged;
+
 
 protected:
 	
@@ -37,6 +41,8 @@ protected:
 
 public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	
 	
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon, Meta = (AllowPrivateAccess = "true"))
@@ -98,6 +104,9 @@ protected:
 	TObjectPtr<class UInputAction> AttackAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UInputAction> ReloadAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UInputAction> EnterManagementModeAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
@@ -127,7 +136,7 @@ protected:
 //Mesh Section
 protected:
 
-	void CreateLeaderPoseSkeletalMesh(USkeletalMeshComponent* USkeletalMesh, const FString& Name, const FString& Path );
+	void CreateLeaderPoseSkeletalMesh(TObjectPtr<USkeletalMeshComponent>& USkeletalMesh, const FString& Name, const FString& Path );
 
 
 	UPROPERTY(VisibleAnywhere, Category = Anim)
@@ -144,13 +153,18 @@ public:
 
 	virtual class UDDWeaponSystemComponent* GetWeaponComp() override;
 
-protected:
+	UFUNCTION(BlueprintCallable)
 	void EquipMelee();
+	UFUNCTION(BlueprintCallable)
 	void EquipRange();
+
+protected:
 	void WeaponSubSkill();
 	void WeaponStartAiming();
 	void WeaponEndAiming();
 	void WeaponAttack();
+	void WeaponAttackEnd();
+	void WeaponReload();
 
 protected:
 
@@ -190,61 +204,71 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Build, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UDDBuildComponent> BuildSystem;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Build, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UNiagaraComponent> BuildHudNiagaraComponent;
+
 // Wave System
 public:
 	void WaveStart();
 
-//BuildWidget
+//Input Mode
 public:
-	void InitWidget();
 	void SetPlayerCanNotMoveMode();
 	void SetPlayerMoveOnlyMode();
 	void SetPlayerGameMode();
 
 
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, Meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<class UUserWidget> BuildWidgetClass;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, Meta = (AllowPrivateAccess = "true"))
-	UUserWidget* BuildWidget;
+//Spawn And Die
+protected:
+	UPROPERTY()
+	TObjectPtr<UAnimMontage> DieMontage;
+	FTimerHandle SpawnTimer;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, Meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<class UUserWidget> RMMachineGunWidgetClass;
+	bool IsDie = false;
+	void Spawn();
+	void Die();
+	void FindSpawnPoint();
+	UFUNCTION()
+	void OnDieMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, Meta = (AllowPrivateAccess = "true"))
-	UUserWidget* RMMachineGunWidget;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, Meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<class UUserWidget> UpMachineGunWidgetClass;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, Meta = (AllowPrivateAccess = "true"))
-	UUserWidget* UpMachineGunWidget;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, Meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<class UUserWidget> RMThornTrapWidgetClass;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, Meta = (AllowPrivateAccess = "true"))
-	UUserWidget* RMThornTrapWidget;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, Meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<class UUserWidget> UpThornTrapWidgetClass;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, Meta = (AllowPrivateAccess = "true"))
-	UUserWidget* UpThornTrapWidget;
+	FVector SpawnLocation;
 
 // Stat
 public:
-	void Die();
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Build, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UDDCharacterStatComponent> Stat;
 
+	float PlayerMaxHp = 10.f;
+
 // CharacterWidgetInterface
 public:
 	virtual void SetupCharacterWidget(class UDDUserWidget* InUserWidget);
+	virtual void SetupRifleAmmoText(class UDDUserWidget* InUserWidget);
 
+// DamageEffect
+public:
+
+	void PopulateMaterials(TObjectPtr<USkeletalMeshComponent> MeshComponent, TArray<TObjectPtr<UMaterialInterface>>& MaterialArray);
+
+	void SetMaterialForMesh(TObjectPtr<USkeletalMeshComponent> MeshComponent, TObjectPtr<UMaterialInterface> Material);
+
+	void RestoreMaterialsForMesh(TObjectPtr<USkeletalMeshComponent> MeshComponent, const TArray<TObjectPtr<UMaterialInterface>>& OriginalMaterials);
+
+	void DamageInterval();
+
+	virtual void ApplyHitMaterial();
+
+	virtual void RestoreOriginalMaterials();
+
+
+	FTimerHandle DamageTimer;
+	FTimerHandle RestoreOriginalMateirlTimer;
+
+	bool CanBeDamaged = true;
 // DamageInterface
 public:
 	virtual float ApplyDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser);

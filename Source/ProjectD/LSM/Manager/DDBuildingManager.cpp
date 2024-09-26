@@ -37,7 +37,7 @@ void UDDBuildingManager::Initialize()
 	}
 
 	SetBuildingSellCost();
-	//HandleBuildingPoolsOnLevelChange();
+	HandleBuildingPoolsOnLevelChange();
 }
 
 void UDDBuildingManager::SetupCommonReferences(UWorld* World)
@@ -119,6 +119,7 @@ ADDBuildingBase* UDDBuildingManager::SpawnBuilding(UWorld* World, const FName& R
 void UDDBuildingManager::DestroyBuilding(ADDBuildingBase& Building)
 {
 	BuildingPool[Building.GetRowName()].Buildings.Add(Building);
+	Building.SetBuildingToOriginal();
 	Building.SetActorHiddenInGame(true);
 	Building.SetActorEnableCollision(false);
 	Building.SetActorTickEnabled(false);
@@ -349,6 +350,31 @@ void UDDBuildingManager::HandleBuildingPoolsOnLevelChange()
 			}
 			UnloadBuildingAssets(RowName);
 		}
+	}
+}
+
+void UDDBuildingManager::AllClearPools()
+{
+	UWorld* World = GetWorld();
+	check(World);
+
+	for (auto& BuildingDataEntry : BuildingDataTable)
+	{
+		FDDBuildingBaseData* BuildingData = BuildingDataEntry.Value;
+		FName RowName = BuildingDataEntry.Key;
+		if (FBuildingList* BuildingList = BuildingPool.Find(RowName))
+		{
+			for (ADDBuildingBase* Building : BuildingList->Buildings)
+			{
+				if (Building)
+				{
+					Building->Destroy(); // �Ǵ� ������ ���� �޼��� ���
+				}
+			}
+			BuildingList->Buildings.Empty();
+			BuildingPool.Remove(RowName);
+		}
+		UnloadBuildingAssets(RowName);
 	}
 }
 

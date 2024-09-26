@@ -23,7 +23,7 @@ void UDDProjectileAttackStrategy::InitializeProjectile(FName& ProjectileName)
         return;
     }
 
-    if (ProjectileData && !ProjectileData->bIsLoaded)
+    if (ProjectileData)
     {
         // 비동기 로딩 함수 호출
         ProjectileManager->LoadProjectileAssets(ProjectileRowName);
@@ -32,7 +32,10 @@ void UDDProjectileAttackStrategy::InitializeProjectile(FName& ProjectileName)
 
 void UDDProjectileAttackStrategy::ConfigureProjectile()
 {
-    Projectile->ConfigureProjectile(Damage,DamageType, ProjectileSpeed, ProjectileMaxSpeed, ProjectileLifeTime, bIsExplosive, ExplosionRadius, MaxPenetrationCount);
+    if (Projectile)
+    {
+        Projectile->ConfigureProjectile(Damage, DamageType, ProjectileSpeed, ProjectileMaxSpeed, ProjectileLifeTime, bIsExplosive, ExplosionRadius, MaxPenetrationCount);
+    }
 }
 
 void UDDProjectileAttackStrategy::Attack(AActor* TargetEnemy, UStaticMeshComponent* FireStaticMesh)

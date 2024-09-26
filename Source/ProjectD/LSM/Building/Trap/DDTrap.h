@@ -5,13 +5,14 @@
 #include "CoreMinimal.h"
 #include "LSM/Building/DDBuildingBase.h"
 #include "LSM/Building/DDBuildingAttackInterface.h"
+#include "LSM/Building/Trap/DDTrapAttackEffectInterface.h"
 #include "DDTrap.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class PROJECTD_API ADDTrap : public ADDBuildingBase , public IDDBuildingAttackInterface
+class PROJECTD_API ADDTrap : public ADDBuildingBase , public IDDBuildingAttackInterface, public IDDTrapAttackEffectInterface
 {
 	GENERATED_BODY()
 public:
@@ -23,10 +24,14 @@ protected:
 public:
 	virtual void Attack() override;
 
+	virtual void StartAttackEffect() override;
+
 protected:
 	virtual void ModifyMeshAndAttackCollision() const override;
 
 	virtual void ResetCanAttack() override;
+
+	virtual void ExecuteAttackEffects() override;
 
 	virtual void OnBoxCollisionBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) override;
 };
