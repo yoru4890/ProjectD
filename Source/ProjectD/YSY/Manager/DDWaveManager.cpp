@@ -9,6 +9,8 @@
 #include "YSY/Game/DDGameInstance.h"
 #include "YSY/Game/DDDataManager.h"
 #include "Blueprint/UserWidget.h"
+#include "YSY/Game/DDPlayerState.h"
+
 
 UDDWaveManager::UDDWaveManager()
 {
@@ -175,7 +177,30 @@ void UDDWaveManager::StageEnd()
 {
 	UE_LOG(LogTemp, Warning, TEXT("StageEnd"));
 
+	int32 GettingLikePoint = RemainingLives / 5;
+	if (!GettingLikePoint)
+	{
+		GettingLikePoint = 1;
+	}
+
+	auto TempPlayerState = Cast<ADDPlayerState>(UGameplayStatics::GetPlayerState(GetWorld(), 0));
+	auto TempSaveGame = TempPlayerState->GetSaveGame();
+	if (TempSaveGame->GetStageCleared()[CurrentStage])
+	{
+		GettingLikePoint -= TempSaveGame->GetStageLikePoints()[CurrentStage];
+
+		if (GettingLikePoint > 0)
+		{
+			TempPlayerState->AddLikePoint(GettingLikePoint);
+		}
+	}
+	else
+	{
+		TempPlayerState->AddLikePoint(GettingLikePoint);
+	}
+	// TODO : YSY Connect GettingLikePoint
 	VictoryWidget->AddToViewport();
+
 }
 
 void UDDWaveManager::AddEnemyNumber()
