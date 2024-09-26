@@ -353,6 +353,31 @@ void UDDBuildingManager::HandleBuildingPoolsOnLevelChange()
 	}
 }
 
+void UDDBuildingManager::AllClearPools()
+{
+	UWorld* World = GetWorld();
+	check(World);
+
+	for (auto& BuildingDataEntry : BuildingDataTable)
+	{
+		FDDBuildingBaseData* BuildingData = BuildingDataEntry.Value;
+		FName RowName = BuildingDataEntry.Key;
+		if (FBuildingList* BuildingList = BuildingPool.Find(RowName))
+		{
+			for (ADDBuildingBase* Building : BuildingList->Buildings)
+			{
+				if (Building)
+				{
+					Building->Destroy(); // �Ǵ� ������ ���� �޼��� ���
+				}
+			}
+			BuildingList->Buildings.Empty();
+			BuildingPool.Remove(RowName);
+		}
+		UnloadBuildingAssets(RowName);
+	}
+}
+
 void UDDBuildingManager::LoadBuildingAssets(const FName& RowName)
 {
 	TArray<TSoftObjectPtr<UObject>> AssetsToLoad;

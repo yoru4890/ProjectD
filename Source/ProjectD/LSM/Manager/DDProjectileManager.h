@@ -34,7 +34,7 @@ public:
 	void GetSoftObjectPtrsInProjectile(const FName& RowName, TArray<TSoftObjectPtr<UObject>>& AssetsToLoad);
 
 	UFUNCTION(BlueprintCallable)
-	void HandleProjectilePoolsOnLevelChange();
+	void AllClearPools();
 
 
 	const TMap<FName, FDDProjectileData>& GetProjectileDataTable() const;

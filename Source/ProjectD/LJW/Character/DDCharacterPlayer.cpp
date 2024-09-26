@@ -597,7 +597,6 @@ void ADDCharacterPlayer::Spawn()
 {
 	// 캐릭터를 다시 활성화
 	SetActorHiddenInGame(false);
-	SetActorEnableCollision(true);
 
 	Stat->SetHp(PlayerMaxHp);
 	this->SetActorLocation(SpawnLocation);
@@ -651,7 +650,6 @@ void ADDCharacterPlayer::OnDieMontageEnded(UAnimMontage* Montage, bool bInterrup
 		
 		// 캐릭터를 비활성화 (보이지 않도록)
 		SetActorHiddenInGame(true);
-		SetActorEnableCollision(false);
 
 		Spawn();
 
