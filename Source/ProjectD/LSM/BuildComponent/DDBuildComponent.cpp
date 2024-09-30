@@ -182,6 +182,8 @@ void UDDBuildComponent::ShowUpgradeBuildingWidget()
 	{
 		if (UpgradeBuildingWidgetOption1Instance->IsInViewport() || UpgradeBuildingWidgetOption2Instance->IsInViewport())
 		{
+
+			UE_LOG(LogTemp,Warning,TEXT("ShowUpgradeBuildingWidget Error"))
 			return;
 		}
 		const FDDBuildingBaseData& BuildingData = *BuildingManager->GetBuildingData(ManagedBuilding->GetRowName());

@@ -20,7 +20,7 @@ struct FDDWeaponData : public FTableRowBase
 	GENERATED_BODY()
 
 public:
-	FDDWeaponData() {}
+	FDDWeaponData() : AttackType(EAttackType::Unknown), Price(0), UpgradeCost(0), UnlockLP(0), AttackCooltime(0.0f), AttackDamage(0.0f), AttackRange(0.0f) {}
 	
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)

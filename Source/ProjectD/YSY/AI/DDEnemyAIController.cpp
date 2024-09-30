@@ -40,7 +40,7 @@ void ADDEnemyAIController::OnPossess(APawn* InPawn)
 	Super::OnPossess(InPawn);
 }
 
-void ADDEnemyAIController::OnMoveCompleted(FAIRequestID RequestID, EPathFollowingResult::Type Result)
+void ADDEnemyAIController::OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result)
 {
 	Super::OnMoveCompleted(RequestID, Result);
 

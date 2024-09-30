@@ -37,7 +37,7 @@ void UDDBuildingManager::Initialize()
 	}
 
 	SetBuildingSellCost();
-	HandleBuildingPoolsOnLevelChange();
+	//HandleBuildingPoolsOnLevelChange();
 }
 
 void UDDBuildingManager::SetupCommonReferences(UWorld* World)

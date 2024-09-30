@@ -27,6 +27,8 @@ struct FDDTowerData : public FDDBuildingBaseData
 	GENERATED_BODY()
 	
 public:
+	FDDTowerData() : TowerType(ETowerType::Unknown), BarrelMeshOffset(FVector::ZeroVector), WaistMeshOffset(FVector::ZeroVector), TowerAttackRange(0.0f), bCanRecoil(false), MaxRecoilTime(0.0f), RecoilDistance(0.0f) {}
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<class ADDTowerBase> TowerClass; // 타워 클래스
 

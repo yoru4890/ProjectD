@@ -131,7 +131,7 @@ void UDDWeaponSystemComponent::PlayUnequipMontage()
 	if (CurrentWeapon->GetUnequipWeaponMontage())
 	{
 		PlayerAnimInstance->Montage_Play(CurrentWeapon->GetUnequipWeaponMontage());
-		ResetWeaponState();
+		ResetWeaponSound();
 	}
 }
 
@@ -184,7 +184,7 @@ void UDDWeaponSystemComponent::WeaponEndAiming()
 		return;
 	}
 
-	if (CurrentWeapon == Weapons[CurrentRangeWeapon] && CanRangeAiming())
+	if (CurrentWeapon == Weapons[CurrentRangeWeapon])
 	{
 		if (OnSetAimingDelegate.IsBound())
 		{
@@ -262,6 +262,14 @@ void UDDWeaponSystemComponent::ReloadWeapon()
 	}
 }
 
+void UDDWeaponSystemComponent::ResetWeaponSound()
+{
+	for (auto& Weapon : Weapons)
+	{
+		Weapon->ResetWeaponSound();
+	}
+}
+
 void UDDWeaponSystemComponent::ResetWeaponState()
 {
 	for (auto& Weapon : Weapons)
@@ -299,6 +307,7 @@ bool UDDWeaponSystemComponent::CanMeleeSubSkill()
 	
 }
 
+//TODO : 죽는 몽타주, 장전몽타주도 AttackMontage처럼 관리해야한다. (아마도)
 bool UDDWeaponSystemComponent::CanRangeAiming()
 {
 	//스킬 사용중 불가능

@@ -4,6 +4,7 @@
 #include "LSM/Building/Trap/DDTrap.h"
 #include "Components/BoxComponent.h"
 #include "Engine/DamageEvents.h"
+#include "LSM/Building/Trap/DDTrapData.h"
 #include "LSM/Building/AttackStrategies/DDBuildingAttackStrategyInterface.h"
 
 ADDTrap::ADDTrap()
@@ -26,7 +27,10 @@ void ADDTrap::Attack()
 		TSet<TObjectPtr<AActor>> Targets = EnemiesInRanged;
 		for (auto& Target : Targets)
 		{
-			AttackStrategy->Attack(Target,nullptr);
+			if (AttackStrategy)
+			{
+				AttackStrategy->Attack(Target, nullptr);
+			}
 		}
 	}
 }

@@ -33,6 +33,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	FORCEINLINE class UDDWaveManager* GetWaveManager() const { return WaveManager; }
 
+	UFUNCTION(BlueprintCallable)
 	FORCEINLINE class UDDProjectileManager* GetProjectileManager() const { return ProjectileManager; }
 
 	FORCEINLINE class UDDDataManager* GetDataManager() const { return DataManager; }
