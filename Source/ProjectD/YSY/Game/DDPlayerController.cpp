@@ -16,7 +16,7 @@
 
 ADDPlayerController::ADDPlayerController()
 {
-	static ConstructorHelpers::FClassFinder<UUserWidget> MainWidgetClassRef(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/0000/LSM/Widget/LSM_WBP_Main.LSM_WBP_Main_C'"));
+	static ConstructorHelpers::FClassFinder<UUserWidget> MainWidgetClassRef(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/0000/YSY/Widget/YSY_WBP_Main.YSY_WBP_Main_C'"));
 
 	if (MainWidgetClassRef.Class)
 	{

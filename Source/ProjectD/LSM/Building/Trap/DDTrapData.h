@@ -24,7 +24,7 @@ struct FDDTrapData : public FDDBuildingBaseData
 	GENERATED_BODY()
 
 public:
-	FDDTrapData() : TrapType(ETrapType::Unknown) {}
+	FDDTrapData() : TrapType(ETrapType::Unknown), MeshModifyVector(FVector::ZeroVector) {}
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<class ADDTrap> TrapClass; // Æ®·¦ Å¬·¡½º
