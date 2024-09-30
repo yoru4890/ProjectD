@@ -540,7 +540,9 @@ void ADDCharacterPlayer::PlaceBuilding()
 		{
 			return;
 		}
+
 		SetPlayerCanNotMoveMode();
+		UE_LOG(LogTemp, Warning, TEXT("Check Here"));
 		BuildSystem->ShowUpgradeBuildingWidget();
 	}
 }
@@ -567,10 +569,10 @@ void ADDCharacterPlayer::WaveStart()
 
 void ADDCharacterPlayer::SetPlayerCanNotMoveMode()
 {
-	FInputModeGameAndUI InputModeGameAndUIData;
+	FInputModeUIOnly InputModeUIOnly;
 	PlayerController->SetIgnoreMoveInput(true);
 	PlayerController->SetIgnoreLookInput(true);
-	PlayerController->SetInputMode(InputModeGameAndUIData);
+	PlayerController->SetInputMode(InputModeUIOnly);
 	PlayerController->SetShowMouseCursor(true);
 }
 

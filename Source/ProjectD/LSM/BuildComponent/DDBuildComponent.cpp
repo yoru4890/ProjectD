@@ -182,6 +182,7 @@ void UDDBuildComponent::ShowUpgradeBuildingWidget()
 	{
 		if (UpgradeBuildingWidgetOption1Instance->IsInViewport() || UpgradeBuildingWidgetOption2Instance->IsInViewport())
 		{
+
 			UE_LOG(LogTemp,Warning,TEXT("ShowUpgradeBuildingWidget Error"))
 			return;
 		}
