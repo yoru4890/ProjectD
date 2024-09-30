@@ -31,4 +31,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	ETrapType TrapType;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector MeshModifyVector;
 };

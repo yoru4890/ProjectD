@@ -58,6 +58,7 @@ public:
 	void WeaponAttack();
 	void ReloadWeapon();
 
+	void ResetWeaponSound();
 	void ResetWeaponState();
 
 	//조건 모음

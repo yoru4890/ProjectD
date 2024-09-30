@@ -237,6 +237,8 @@ protected:
 
 // Stat
 public:
+	UFUNCTION()
+	void ResetPlayerState();
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Build, Meta = (AllowPrivateAccess = "true"))
