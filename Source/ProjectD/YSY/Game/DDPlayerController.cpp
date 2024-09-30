@@ -16,7 +16,7 @@
 
 ADDPlayerController::ADDPlayerController()
 {
-	static ConstructorHelpers::FClassFinder<UUserWidget> MainWidgetClassRef(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/0000/LSM/Widget/LSM_WBP_Main.LSM_WBP_Main_C'"));
+	static ConstructorHelpers::FClassFinder<UUserWidget> MainWidgetClassRef(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/0000/YSY/Widget/YSY_WBP_Main.YSY_WBP_Main_C'"));
 
 	if (MainWidgetClassRef.Class)
 	{
@@ -30,14 +30,13 @@ void ADDPlayerController::ShowMainWidget()
 {
 	
 	auto PlayerWidgetInterface = Cast<IDDCharacterWidgetInterface>(GetPawn());
-	ADDCharacterPlayer* MyCharacter = Cast<ADDCharacterPlayer>(GetPawn());
 
 	ensure(PlayerWidgetInterface);
 	if (PlayerWidgetInterface)
 	{
 		auto TempMainWidget = Cast<UDDMainWidget>(MainWidget);
 		PlayerWidgetInterface->SetupCharacterWidget(TempMainWidget->GetHpBarWidget());
-		PlayerWidgetInterface->SetupRifleAmmoText(TempMainWidget);
+		PlayerWidgetInterface->SetupWeaponWidget(TempMainWidget);
 
 		auto TempPlayerState = Cast<ADDPlayerState>(UGameplayStatics::GetPlayerState(GetWorld(), 0));
 		if (!TempPlayerState->OnGoldChanged.IsBound())

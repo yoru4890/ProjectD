@@ -23,6 +23,8 @@ enum class EPlayerMode : uint8
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnVisibilityAmmoTextChanged, bool, IsVisible);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnVisibilityWeaponSlotChanged, int32, SlotIndex);
+
 
 UCLASS()
 class PROJECTD_API ADDCharacterPlayer : public ADDCharacterBase, public ICameraFOVInterface, public IDDPlayerComponentsAnimInterface, public IAggroTargetInterface, public IDDCharacterWidgetInterface, public IDamageInterface
@@ -32,6 +34,7 @@ class PROJECTD_API ADDCharacterPlayer : public ADDCharacterBase, public ICameraF
 public:
 	ADDCharacterPlayer();
 	FOnVisibilityAmmoTextChanged OnVisibilityAmmoTextChanged;
+	FOnVisibilityWeaponSlotChanged OnVisibilityWeaponSlotChanged;
 
 
 protected:
@@ -249,7 +252,9 @@ protected:
 // CharacterWidgetInterface
 public:
 	virtual void SetupCharacterWidget(class UDDUserWidget* InUserWidget);
-	virtual void SetupRifleAmmoText(class UDDUserWidget* InUserWidget);
+	virtual void SetupWeaponWidget(class UDDUserWidget* InUserWidget);
+	UPROPERTY()
+	class UDDMainWidget* MyMainWidget;
 
 // DamageEffect
 public:
