@@ -25,7 +25,7 @@ private:
 	TSubclassOf<class UUserWidget> LoadingWidgetClass;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UUserWidget> LoadingWidgetsss;
+	TObjectPtr<UUserWidget> LoadingWidget;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, Meta = (AllowPrivateAccess = "true"))
 	int32 CurrentStage;
