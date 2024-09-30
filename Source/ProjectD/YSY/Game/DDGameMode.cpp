@@ -7,6 +7,11 @@
 #include "GameFramework/GameStateBase.h"
 #include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
+#include "Blueprint/UserWidget.h"
+#include "YSY/Game/DDGameInstance.h"
+#include "LSM/Manager/DDBuildingManager.h"
+#include "YSY/Manager/DDWaveManager.h"
+#include "YSY/Game/DDPlayerController.h"
 
 ADDGameMode::ADDGameMode()
 {
@@ -38,4 +43,45 @@ ADDGameMode::ADDGameMode()
 		PlayerStateClass = PlayerStateClassRef.Class;
 	}
 
+	static ConstructorHelpers::FClassFinder<UUserWidget> LoadingWidgetClassRef(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/0000/YSY/LevelStreamingTest/Widget/YSY_WBP_MyLoading.YSY_WBP_MyLoading_C'"));
+
+	if (LoadingWidgetClassRef.Class)
+	{
+		LoadingWidgetClass = LoadingWidgetClassRef.Class;
+	}
+
+	LoadingWidget = CreateWidget(GetWorld(), LoadingWidgetClass);
+}
+
+void ADDGameMode::InitializePoolAsync(TFunction<void()> OnComplete)
+{
+	AsyncTask(ENamedThreads::AnyBackgroundThreadNormalTask, [this, OnComplete]()
+		{
+			auto TempGameInstance = Cast<UDDGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+
+			TempGameInstance->GetWaveManager()->InitStage(CurrentStage);
+			TempGameInstance->GetBuildingManager()->HandleBuildingPoolsOnLevelChange();
+
+			AsyncTask(ENamedThreads::GameThread, OnComplete);
+		});
+}
+
+void ADDGameMode::StageStart(const int32& NewCurrentStage)
+{
+	CurrentStage = NewCurrentStage;
+	UE_LOG(LogTemp, Warning, TEXT("123"));
+	InitializePoolAsync([this]()
+		{
+			if (LoadingWidget)
+			{
+				LoadingWidget->RemoveFromParent();
+			}
+			auto TempPlayerController = Cast<ADDPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+
+			TempPlayerController->ShowMainWidget();
+			FInputModeGameOnly InputModeGameOnly;
+			TempPlayerController->SetInputMode(InputModeGameOnly);
+			TempPlayerController->SetShowMouseCursor(false);
+			TempPlayerController->SetIgnoreMoveInput(false);
+		});
 }

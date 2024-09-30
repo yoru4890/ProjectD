@@ -9,6 +9,8 @@ struct FEffectData
 	GENERATED_BODY()
 
 public:
+	FEffectData() : SoundStartTime(0.0f) {}
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
 	TObjectPtr<UParticleSystem>  CascadeEffect;
 

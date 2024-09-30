@@ -363,9 +363,9 @@ void ADDEnemyBase::SplineMoveFinish()
 
 void ADDEnemyBase::ArrivalAtGoal()
 {
-	GetMesh()->SetVisibility(false, true);
+	/*GetMesh()->SetVisibility(false, true);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);*/
 	//EnemyAIController->StopAI();
 	OnDie.Broadcast(EnemyName, this);
 

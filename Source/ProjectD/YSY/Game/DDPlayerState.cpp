@@ -10,6 +10,7 @@ ADDPlayerState::ADDPlayerState()
 {
 	Gold = 10000;
 	LikePoint = 5;
+	CreateSaveFile("SaveFile");
 	UnLoadedRifleAmmo = 60;
 }
 
@@ -38,6 +39,11 @@ bool ADDPlayerState::SubtractGold(const int32 InGold)
 void ADDPlayerState::AddLikePoint(const int32 InLikePoint)
 {
 	LikePoint += InLikePoint;
+	if (!DDSaveGame)
+	{
+		CreateSaveFile("SaveFile");
+		UE_LOG(LogTemp, Warning, TEXT("Create Save File, Because of None SaveFile"));
+	}
 	DDSaveGame->SetCurrentLikePoint(LikePoint);
 	OnLikePointChanged.Broadcast(LikePoint);  // LikePoint가 변경될 때 델리게이트 호출
 }
@@ -47,7 +53,8 @@ bool ADDPlayerState::SubtractLikePoint(const int32 InLikePoint)
 	if (CheckLikePoint(InLikePoint))
 	{
 		LikePoint -= InLikePoint;
-		if (!DDSaveGame) {
+		if (!DDSaveGame) 
+		{
 			CreateSaveFile("SaveFile");
 			UE_LOG(LogTemp, Warning, TEXT("Create Save File, Because of None SaveFile"));
 		}
@@ -151,4 +158,14 @@ void ADDPlayerState::LoadGame(const FString& SlotName)
 void ADDPlayerState::UpdateBuildingLockState(const FName& BuildingName, const bool& bIsUnlocked)
 {
 	DDSaveGame->SetBuildingLockState(BuildingName, bIsUnlocked);
+}
+
+void ADDPlayerState::UpdateStageLikePoint(const int32& CurrentStage, const int32& InLikePoint)
+{
+	DDSaveGame->SetStageLikePoint(CurrentStage, InLikePoint);
+}
+
+void ADDPlayerState::UpdateStageCleared(const int32& CurrentStage, const bool& bIsCleared)
+{
+	DDSaveGame->SetStageCleared(CurrentStage, bIsCleared);
 }
