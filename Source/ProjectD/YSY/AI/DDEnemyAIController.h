@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AIController.h"
+#include "Navigation/PathFollowingComponent.h"
 #include "DDEnemyAIController.generated.h"
 
 DECLARE_DELEGATE(FMoveOnFinishedSignature);
@@ -22,8 +23,7 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void OnPossess(APawn* InPawn) override;
 
-	UFUNCTION()
-	virtual void OnMoveCompleted(FAIRequestID RequestID, EPathFollowingResult::Type Result) override;
+	virtual void OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result) override;
 
 
 public:

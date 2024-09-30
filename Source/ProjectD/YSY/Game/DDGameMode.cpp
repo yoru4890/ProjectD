@@ -74,7 +74,7 @@ void ADDGameMode::StageStart(const int32& NewCurrentStage)
 		{
 			if (LoadingWidget)
 			{
-				LoadingWidget->RemoveFromViewport();
+				LoadingWidget->RemoveFromParent();
 			}
 			auto TempPlayerController = Cast<ADDPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 
