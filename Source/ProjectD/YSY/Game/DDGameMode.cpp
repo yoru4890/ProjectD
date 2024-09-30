@@ -50,7 +50,7 @@ ADDGameMode::ADDGameMode()
 		LoadingWidgetClass = LoadingWidgetClassRef.Class;
 	}
 
-	LoadingWidget = CreateWidget(GetWorld(), LoadingWidgetClass);
+	LoadingWidgetsss = CreateWidget(GetWorld(), LoadingWidgetClass);
 }
 
 void ADDGameMode::InitializePoolAsync(TFunction<void()> OnComplete)
@@ -71,9 +71,9 @@ void ADDGameMode::StageStart(const int32& NewCurrentStage)
 	CurrentStage = NewCurrentStage;
 	InitializePoolAsync([this]()
 		{
-			if (LoadingWidget)
+			if (LoadingWidgetsss)
 			{
-				LoadingWidget->RemoveFromParent();
+				LoadingWidgetsss->RemoveFromParent();
 			}
 			auto TempPlayerController = Cast<ADDPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 
