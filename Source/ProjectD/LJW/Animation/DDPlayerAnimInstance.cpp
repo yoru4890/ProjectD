@@ -4,6 +4,7 @@
 #include "LJW/Animation/DDPlayerAnimInstance.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "KismetAnimationLibrary.h"
 
 UDDPlayerAnimInstance::UDDPlayerAnimInstance()
 {
@@ -33,7 +34,7 @@ void UDDPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	if (Movement)
 	{
 		Velocity = Movement->Velocity;
-		Direction = CalculateDirection(Velocity, Owner->GetActorRotation());
+		Direction = UKismetAnimationLibrary::CalculateDirection(Velocity, Owner->GetActorRotation());
 		GroundSpeed = Velocity.Size2D();
 		bIsIdle = GroundSpeed < MovingThreshold;
 		bIsFalling = Movement->IsFalling();

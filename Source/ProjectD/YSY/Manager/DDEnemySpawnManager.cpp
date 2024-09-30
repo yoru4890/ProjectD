@@ -120,6 +120,26 @@ void UDDEnemySpawnManager::ClearEnemyPool()
 		}
 	}
 
+	for (const auto& [EnemyName, EnemyArray] : ActiveObjects)
+	{
+		for (const auto& Enemy : EnemyArray)
+		{
+			auto Controller = Enemy->GetController();
+			Controller->Destroy();
+			Enemy->Destroy();
+		}
+	}
+
+	for (const auto& [EnemyName, EnemyArray] : InactiveObjects)
+	{
+		for (const auto& Enemy : EnemyArray)
+		{
+			auto Controller = Enemy->GetController();
+			Controller->Destroy();
+			Enemy->Destroy();
+		}
+	}
+
 	ActiveObjects.Empty();
 	InactiveObjects.Empty();
 }
