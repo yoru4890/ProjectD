@@ -26,6 +26,8 @@ struct FDDBuildingBaseData : public FTableRowBase
 	GENERATED_BODY()
 
 public:
+	FDDBuildingBaseData() : BuildingType(EBuildingType::Unknown), OccupiedCellWidth(0), bIsAnimated(false), BuildCost(0), SellCost(0), UnlockCost(0), AttackCoolTime(0.0f), Damage(0.0f), bIsUnlocked(false), bIsDot(false), DotDamageType(EDotDamageType::Unknown), DotDamage(0.0f), DotDuration(0.0f), DotInterval(0.0f), bIsDebuff(false), DebuffType(EDebuffType::Unknown), DebuffRate(0.0f), DebuffDuration(0.0f){}
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FText DisplayName; // 오브젝트의 이름
 

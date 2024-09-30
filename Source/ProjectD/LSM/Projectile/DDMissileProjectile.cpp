@@ -144,7 +144,10 @@ void ADDMissileProjectile::OnCollisionBeginOverlap(UPrimitiveComponent* Overlapp
 
     ProjectileMovementComponent->SetActive(false);
     StaticMeshComponent->SetVisibility(false);
-    FlyingAudioComponent->Stop();
+    if (FlyingAudioComponent)
+    {
+        FlyingAudioComponent->Stop();
+    }
 
     if (ExplosionNiagaraComponent)
     {

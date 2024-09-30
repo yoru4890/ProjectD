@@ -9,6 +9,7 @@
 #include "YSY/Game/DDGameInstance.h"
 #include "YSY/Game/DDDataManager.h"
 #include "Blueprint/UserWidget.h"
+#include "YSY/Game/DDPlayerState.h"
 
 UDDWaveManager::UDDWaveManager()
 {
@@ -110,6 +111,7 @@ void UDDWaveManager::InitStage(int32 StageNum)
 
 void UDDWaveManager::SetSplines()
 {
+	Splines.Empty();
 	TArray<AActor*> OutActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AAISplineRoute::StaticClass(), OutActors);
 
@@ -175,7 +177,34 @@ void UDDWaveManager::StageEnd()
 {
 	UE_LOG(LogTemp, Warning, TEXT("StageEnd"));
 
+	int32 GettingLikePoint = RemainingLives / 5;
+	if (!GettingLikePoint)
+	{
+		GettingLikePoint = 1;
+	}
+
+	auto TempPlayerState = Cast<ADDPlayerState>(UGameplayStatics::GetPlayerState(GetWorld(), 0));
+	auto TempSaveGame = TempPlayerState->GetSaveGame();
+	if (TempSaveGame->GetStageCleared()[CurrentStage])
+	{
+		GettingLikePoint -= TempSaveGame->GetStageLikePoints()[CurrentStage];
+
+		if (GettingLikePoint > 0)
+		{
+			TempPlayerState->AddLikePoint(GettingLikePoint);
+		}
+	}
+	else
+	{
+		TempPlayerState->AddLikePoint(GettingLikePoint);
+	}
+	// TODO : YSY Connect GettingLikePoint
+	auto TempPlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	TempPlayerController->StopMovement();
+	TempPlayerController->DisableInput(TempPlayerController);
+	TempPlayerController->SetIgnoreMoveInput(true);
 	VictoryWidget->AddToViewport();
+	//TempPlayerController->EnableInput(TempPlayerController);
 }
 
 void UDDWaveManager::AddEnemyNumber()

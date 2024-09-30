@@ -75,6 +75,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Save")
 	void UpdateBuildingLockState(const FName& BuildingName, const bool& bIsUnlocked);
 
+	UFUNCTION(BlueprintCallable, Category = "Save")
+	void UpdateStageLikePoint(const int32& CurrentStage, const int32& LikePoint);
+
+	UFUNCTION(BlueprintCallable, Category = "Save")
+	void UpdateStageCleared(const int32& CurrentStage, const bool& bIsCleared);
+
 private:
 	int32 Gold;
 	int32 LikePoint;

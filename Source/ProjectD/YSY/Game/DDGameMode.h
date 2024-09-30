@@ -16,6 +16,17 @@ class PROJECTD_API ADDGameMode : public AGameModeBase
 	
 public:
 	ADDGameMode();
-	//UFUNCTION(BlueprintCallable, Category = "UMG_Game")
-	//void ChangeMenuWidget(TSubclassOf<UUserWidget> NewWidgetClass);
+	
+	void InitializePoolAsync(TFunction<void()> OnComplete);
+	UFUNCTION(BlueprintCallable)
+	void StageStart(const int32& NewCurrentStage);
+private:
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, Meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class UUserWidget> LoadingWidgetClass;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UUserWidget> LoadingWidget;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, Meta = (AllowPrivateAccess = "true"))
+	int32 CurrentStage;
 };

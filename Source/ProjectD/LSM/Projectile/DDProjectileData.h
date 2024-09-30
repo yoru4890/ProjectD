@@ -14,6 +14,8 @@ struct FDDProjectileData : public FTableRowBase
 {
 	GENERATED_BODY()
 
+	FDDProjectileData() : PoolSize(0) {}
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "class")
 	TSubclassOf<class ADDProjectileBase> ProjectileClass;
 
