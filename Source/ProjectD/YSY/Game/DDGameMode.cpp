@@ -69,7 +69,6 @@ void ADDGameMode::InitializePoolAsync(TFunction<void()> OnComplete)
 void ADDGameMode::StageStart(const int32& NewCurrentStage)
 {
 	CurrentStage = NewCurrentStage;
-	UE_LOG(LogTemp, Warning, TEXT("123"));
 	InitializePoolAsync([this]()
 		{
 			if (LoadingWidget)
