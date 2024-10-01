@@ -96,9 +96,18 @@ void ADDWeaponRifle::Attack()
 
 }
 
-void ADDWeaponRifle::ResetWeaponState()
+void ADDWeaponRifle::ResetWeaponSound()
 {
 	IsPlayEmptySound = false;
+}
+
+void ADDWeaponRifle::ResetWeaponState()
+{
+	LoadedAmmo = 0;
+	UnLoadedAmmo = 0;
+	AddUnloadedRifleAmmo(InitialUnLoadedAmmo);
+	AddLoadedRifleAmmo();
+
 }
 
 void ADDWeaponRifle::FireEmptyGun()

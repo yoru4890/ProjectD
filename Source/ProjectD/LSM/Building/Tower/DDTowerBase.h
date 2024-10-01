@@ -37,7 +37,7 @@ private:
 	AActor* GetNearstEnemy();
 
 public:
-	virtual void InitFromDataTable(const FName& InRowName, const FDDBuildingBaseData& BuildingData);
+	virtual void InitFromDataTable(const FName& InRowName, const FDDBuildingBaseData& BuildingData) override;
 
 protected:
 	float TowerAttackRange;

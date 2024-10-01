@@ -17,7 +17,7 @@ void UDDFactoryManager::Initialize()
 	for (auto& Elem : TrapDataTable) {
 		if (Elem.Value.FactoryClass) {
 			NamesToFactories.Add(Elem.Key, Elem.Value.FactoryClass);
-			UE_LOG(LogTemp, Warning, TEXT("Factory is %s"), *Elem.Value.FactoryClass->GetDisplayNameText().ToString());
+			//UE_LOG(LogTemp, Warning, TEXT("Factory is %s"), *Elem.Value.FactoryClass->GetDisplayNameText().ToString());
 		}
 	}
 
@@ -26,7 +26,7 @@ void UDDFactoryManager::Initialize()
 		if (Elem.Value.FactoryClass)
 		{
 			NamesToFactories.Add(Elem.Key, Elem.Value.FactoryClass);
-			UE_LOG(LogTemp, Warning, TEXT("Factory is %s"), *Elem.Value.FactoryClass->GetDisplayNameText().ToString());
+			//UE_LOG(LogTemp, Warning, TEXT("Factory is %s"), *Elem.Value.FactoryClass->GetDisplayNameText().ToString());
 		}
 	}
 
@@ -35,7 +35,7 @@ void UDDFactoryManager::Initialize()
 		if (Elem.Value.FactoryClass)
 		{
 			NamesToFactories.Add(Elem.Key, Elem.Value.FactoryClass);
-			UE_LOG(LogTemp, Warning, TEXT("Factory is %s"), *Elem.Value.FactoryClass->GetDisplayNameText().ToString());
+			//UE_LOG(LogTemp, Warning, TEXT("Factory is %s"), *Elem.Value.FactoryClass->GetDisplayNameText().ToString());
 		}
 	}
 

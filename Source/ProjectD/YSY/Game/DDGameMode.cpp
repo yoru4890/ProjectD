@@ -69,12 +69,11 @@ void ADDGameMode::InitializePoolAsync(TFunction<void()> OnComplete)
 void ADDGameMode::StageStart(const int32& NewCurrentStage)
 {
 	CurrentStage = NewCurrentStage;
-	UE_LOG(LogTemp, Warning, TEXT("123"));
 	InitializePoolAsync([this]()
 		{
 			if (LoadingWidget)
 			{
-				LoadingWidget->RemoveFromViewport();
+				LoadingWidget->RemoveFromParent();
 			}
 			auto TempPlayerController = Cast<ADDPlayerController>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 

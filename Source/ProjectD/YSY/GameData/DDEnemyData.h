@@ -31,7 +31,7 @@ struct FDDEnemyData : public FTableRowBase
 	GENERATED_BODY()
 
 public:
-	FDDEnemyData() {}
+	FDDEnemyData() : EnemyType(EEnemyType::Unknown), EnemyAttackType(EEnemyAttackType::Unknown), ScaleSize(0.0f), CapsuleRadiusSize(0.0f), CapsuleHalfHeightSize(0.0f), MeshLocationZ(0.0f), MaxHP(0.0f), MovementSpeed(0.0f), AttackSpeed(0.0f), Damage(0.0f), AttackRange(0.0f), AggroRange(0.0f), HealthWidgetHeight(0.0f), GoldDropAmount(0), bIsElite(false), SoundStartTime(0.0f) {}
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
 	FName EnemyName;

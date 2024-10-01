@@ -22,7 +22,8 @@ public:
 public:
 
 	void InitData(const FName& RowName, const FDDWeaponData& WeaponData);
-	virtual void ResetWeaponState(){}
+	virtual void ResetWeaponSound() {}
+	virtual void ResetWeaponState() {}
 
 	void DisableWeapon();
 	void EnableWeapon();

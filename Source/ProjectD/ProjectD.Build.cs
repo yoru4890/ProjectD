@@ -10,7 +10,7 @@ public class ProjectD : ModuleRules
 
 		PublicIncludePaths.AddRange(new string[] { "ProjectD" });
 
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "UMG", "Json", "JsonUtilities", "Niagara", "GameplayTasks", "NavigationSystem", "AIModule" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "UMG", "Json", "JsonUtilities", "Niagara", "GameplayTasks", "NavigationSystem", "AIModule", "AnimGraphRuntime" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 

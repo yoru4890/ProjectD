@@ -10,7 +10,7 @@ struct FDDWaveData : public FTableRowBase
 	GENERATED_BODY()
 
 public:
-	FDDWaveData() {}
+	FDDWaveData() : Stage(0) {}
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Data)
 	int32 Stage;
