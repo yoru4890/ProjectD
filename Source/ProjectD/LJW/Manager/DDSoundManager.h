@@ -6,9 +6,8 @@
 #include "UObject/NoExportTypes.h"
 #include "DDSoundManager.generated.h"
 
-/**
- * 
- */
+
+
 UCLASS()
 class PROJECTD_API UDDSoundManager : public UObject
 {
