@@ -18,6 +18,7 @@ ADDWeaponCudgel::ADDWeaponCudgel()
 	CollisionCapsule->SetCollisionResponseToChannel(GTCHANNEL_ENEMY, ECollisionResponse::ECR_Overlap);
 	CollisionCapsule->SetRelativeLocation(FVector(0.0f, 0.0f, 50.0f));
 	CollisionCapsule->SetupAttachment(RootComponent);
+	//CollisionCapsule->AddToRoot();
 	//Begin Overlap
 	CollisionCapsule->OnComponentBeginOverlap.AddDynamic(this, &ADDWeaponCudgel::OnOverlapBegin);
 
