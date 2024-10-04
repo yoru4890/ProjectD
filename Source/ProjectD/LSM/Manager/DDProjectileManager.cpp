@@ -138,12 +138,12 @@ void UDDProjectileManager::AllClearPools()
 
 void UDDProjectileManager::LoadProjectileAssets(const FName& RowName)
 {
-	bool bIsAlreadyLoaded = GetProjectileData(RowName)->bIsLoaded;
-	if (bIsAlreadyLoaded)
-	{
-		OnProjectileAssetsLoaded(RowName);
-		return;
-	}
+	//bool bIsAlreadyLoaded = GetProjectileData(RowName)->bIsLoaded;
+	//if (bIsAlreadyLoaded)
+	//{
+	//	OnProjectileAssetsLoaded(RowName);
+	//	return;
+	//}
 	TArray<TSoftObjectPtr<UObject>> AssetsToLoad;
 
 	GetSoftObjectPtrsInProjectile(RowName, AssetsToLoad);
@@ -154,7 +154,6 @@ void UDDProjectileManager::LoadProjectileAssets(const FName& RowName)
 		{
 			OnProjectileAssetsLoaded(RowName);
 		}));
-
 }
 
 void UDDProjectileManager::OnProjectileAssetsLoaded(const FName& RowName)

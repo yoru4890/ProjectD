@@ -210,8 +210,35 @@ void ADDEnemyBase::InitializeEnemy(const FDDEnemyData& EnemyData)
 		EnemyData.AnimationBlueprint.LoadSynchronous();
 	}
 
-	UAnimBlueprint* AnimBP = EnemyData.AnimationBlueprint.Get();
-	GetMesh()->SetAnimInstanceClass(AnimBP->GeneratedClass);
+	// 유효성 검사
+	if (!EnemyData.AnimationBlueprint.IsValid())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Failed to load Animation Blueprint class - Check1"));
+	}
+
+	if (!EnemyData.AnimationBlueprint.Get())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Failed to retrieve Animation Blueprint class - Check2"));
+	}
+	else
+	{
+		// TSoftClassPtr<UAnimInstance>를 사용하여 애니메이션 인스턴스 클래스를 로드합니다.
+		TSubclassOf<UAnimInstance> AnimBPClass = EnemyData.AnimationBlueprint.Get();
+
+		if (AnimBPClass)
+		{
+			// 애니메이션 인스턴스 클래스를 메쉬에 설정합니다.
+			GetMesh()->SetAnimInstanceClass(AnimBPClass);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("AnimBPClass is null - Check3"));
+		}
+	}
+
+	// 원래 코드
+	//UAnimBlueprint* AnimBP = EnemyData.AnimationBlueprint.Get();
+	//GetMesh()->SetAnimInstanceClass(AnimBP->GeneratedClass);
 
 	if (!EnemyData.AttackMontage.IsValid())
 	{

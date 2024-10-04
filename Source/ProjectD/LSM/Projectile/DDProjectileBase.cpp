@@ -74,10 +74,17 @@ void ADDProjectileBase::ConfigureProjectile(float InDamageAmount, TSubclassOf<UD
 
 void ADDProjectileBase::SetAssetAndManager(const FDDProjectileData& LoadedAsset, UDDProjectileManager* InProjectileManager)
 {
+	if (!InProjectileManager)
+	{
+		UE_LOG(LogTemp, Error, TEXT("ProjectileManager is null in SetAssetAndManager!"));
+		return;
+	}
+
 	SetMeshs(LoadedAsset);
 	SetSound(LoadedAsset);
 	SetParticeEffects(LoadedAsset);
-	SetAttachAudioComponent();
+	//SetAttachAudioComponent();
+
 	ProjectileManager = InProjectileManager;
 }
 
@@ -94,29 +101,53 @@ void ADDProjectileBase::SetParticeEffects(const FDDProjectileData& LoadedAsset)
 {
 	if (LoadedAsset.ImpactEffect.IsValid())
 	{
-		ImpactEffect = LoadedAsset.ImpactEffect.Get();
+		UNiagaraSystem* ImpactEffectAsset = LoadedAsset.ImpactEffect.Get();
+		if (ImpactEffectAsset)
+		{
+			ImpactEffect = ImpactEffectAsset;
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("%s : Failed to load ImpactEffect from LoadedAsset"), *RowName.ToString());
+		}
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("%s : ImpactEffect not loaded"), RowName);
+		UE_LOG(LogTemp, Warning, TEXT("%s : ImpactEffect is not valid in LoadedAsset"), *RowName.ToString());
 	}
 
 	if (LoadedAsset.TrailEffect.IsValid())
 	{
-		TrailEffect = LoadedAsset.TrailEffect.Get();
+		UNiagaraSystem* TrailEffectAsset = LoadedAsset.TrailEffect.Get();
+		if (TrailEffectAsset)
+		{
+			TrailEffect = TrailEffectAsset;
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("%s : Failed to load TrailEffect from LoadedAsset"), *RowName.ToString());
+		}
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("%s : ImpactEffect not loaded"), RowName);
+		UE_LOG(LogTemp, Warning, TEXT("%s : TrailEffect is not valid in LoadedAsset"), *RowName.ToString());
 	}
 
 	if (LoadedAsset.ExplosionEffect.IsValid())
 	{
-		ExplosionEffect = LoadedAsset.ExplosionEffect.Get();
+		UNiagaraSystem* ExplosionEffectAsset = LoadedAsset.ExplosionEffect.Get();
+		if (ExplosionEffectAsset)
+		{
+			ExplosionEffect = ExplosionEffectAsset;
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("%s : Failed to load ExplosionEffect from LoadedAsset"), *RowName.ToString());
+		}
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("%s : ExplosionEffect not loaded"), RowName);
+		UE_LOG(LogTemp, Warning, TEXT("%s : ExplosionEffect is not valid in LoadedAsset"), *RowName.ToString());
 	}
 }
 
@@ -124,20 +155,36 @@ void ADDProjectileBase::SetSound(const FDDProjectileData& LoadedAsset)
 {
 	if (LoadedAsset.ImpactSound.IsValid())
 	{
-		ImpactSound = LoadedAsset.ImpactSound.Get();
+		USoundBase* ImpactSoundAsset = LoadedAsset.ImpactSound.Get();
+		if (ImpactSoundAsset)
+		{
+			ImpactSound = ImpactSoundAsset;
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("%s : Failed to load ImpactSound from LoadedAsset"), *RowName.ToString());
+		}
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("%s : ImpactSound not loaded"), RowName);
+		UE_LOG(LogTemp, Warning, TEXT("%s : ImpactSound is not valid in LoadedAsset"), *RowName.ToString());
 	}
 
 	if (LoadedAsset.FlyingSound.IsValid())
 	{
-		FlyingSound = LoadedAsset.FlyingSound.Get();
+		USoundBase* FlyingSoundAsset = LoadedAsset.FlyingSound.Get();
+		if (FlyingSoundAsset)
+		{
+			FlyingSound = FlyingSoundAsset;
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("%s : Failed to load FlyingSound from LoadedAsset"), *RowName.ToString());
+		}
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("%s : FlyingSound not loaded"), RowName);
+		UE_LOG(LogTemp, Warning, TEXT("%s : FlyingSound is not valid in LoadedAsset"), *RowName.ToString());
 	}
 
 
@@ -158,15 +205,22 @@ void ADDProjectileBase::SetAttachAudioComponent()
 
 void ADDProjectileBase::SetMeshs(const FDDProjectileData& LoadedAsset)
 {
-	if (LoadedAsset.StaticMesh.IsValid())
-	{
-		UStaticMesh* StaticMesh = LoadedAsset.StaticMesh.Get();
-		StaticMeshComponent->SetStaticMesh(StaticMesh);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("%s : StaticMesh not loaded"), RowName);
-	}
+    if (LoadedAsset.StaticMesh.IsValid())
+    {
+        UStaticMesh* StaticMesh = LoadedAsset.StaticMesh.Get();
+        if (StaticMesh)
+        {
+            StaticMeshComponent->SetStaticMesh(StaticMesh);
+        }
+        else
+        {
+            UE_LOG(LogTemp, Error, TEXT("Failed to load StaticMesh from LoadedAsset"));
+        }
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("StaticMesh is not valid in LoadedAsset"));
+    }
 }
 
 #pragma endregion SetupAndInitialization
@@ -312,8 +366,8 @@ void ADDProjectileBase::ReturnToPool()
 		return;
 	}
 
-	StopLifeTimeTimer();
 	ProjectileManager->DestroyProjectile(this);
+	StopLifeTimeTimer();
 }
 
 #pragma endregion Utility
