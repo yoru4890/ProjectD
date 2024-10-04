@@ -52,15 +52,17 @@ void UDDMainWidget::GetRifleAmmoFromText(int32& OutLoadedAmmo, int32& OutUnLoade
 
 void UDDMainWidget::SetLoadedRifleAmmoText(int32 CurrentLoadedAmmo)
 {
+	int32 LoadedAmmo;
 	int32 UnLoadedAmmo;
-	GetRifleAmmoFromText(UnLoadedAmmo, UnLoadedAmmo); // 기존 값을 불러옴
+	GetRifleAmmoFromText(LoadedAmmo, UnLoadedAmmo); // 기존 값을 불러옴
 	SetRifleAmmoText(CurrentLoadedAmmo, UnLoadedAmmo); // 새로운 값을 반영하여 텍스트 설정
 }
 
 void UDDMainWidget::SetUnLoadedRifleAmmoText(int32 CurrentUnLoadedAmmo)
 {
 	int32 LoadedAmmo;
-	GetRifleAmmoFromText(LoadedAmmo, LoadedAmmo); // 기존 값을 불러옴
+	int32 UnLoadedAmmo;
+	GetRifleAmmoFromText(LoadedAmmo, UnLoadedAmmo); // 기존 값을 불러옴
 	SetRifleAmmoText(LoadedAmmo, CurrentUnLoadedAmmo); // 새로운 값을 반영하여 텍스트 설정
 }
 

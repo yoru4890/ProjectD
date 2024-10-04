@@ -91,7 +91,7 @@ public:
 	TSoftObjectPtr<USkeletalMesh> SkeletalMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = Data)
-	TSoftClassPtr<UAnimBlueprint> AnimationBlueprint;
+	FString AnimationBlueprint;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, category = Data)
 	TSoftObjectPtr<UAnimMontage> AttackMontage;

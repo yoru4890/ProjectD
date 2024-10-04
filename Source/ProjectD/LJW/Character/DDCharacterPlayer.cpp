@@ -796,5 +796,10 @@ void ADDCharacterPlayer::ApplyDebuff(EDebuffType DebuffType, float Time, float D
 {
 }
 
+void ADDCharacterPlayer::GetAmmo()
+{
+	WeaponSystem->GetAmmo();
+}
+
 
 

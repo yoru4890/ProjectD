@@ -122,5 +122,6 @@ private:
 
 	uint32 bIsOnTimeline : 1;
 
-	
+public:
+	void GetAmmo();
 }; 

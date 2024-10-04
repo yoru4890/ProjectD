@@ -85,4 +85,7 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	class USoundBase* SoundTest;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DD", meta = (AllowPrivateAccess = "true"))
+	bool bIsStage;
 };

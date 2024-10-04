@@ -109,10 +109,10 @@ void UDDEnemySpawnManager::ClearEnemyPool()
 			AssetLoader.Unload(EnemyData->SkeletalMesh.ToSoftObjectPath());
 		}
 
-		if (EnemyData->AnimationBlueprint.IsValid())
+		/*if (EnemyData->AnimationBlueprint.IsValid())
 		{
 			AssetLoader.Unload(EnemyData->AnimationBlueprint.ToSoftObjectPath());
-		}
+		}*/
 
 		if (EnemyData->AttackMontage.IsValid())
 		{
