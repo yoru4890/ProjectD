@@ -397,6 +397,7 @@ void ADDCharacterPlayer::EquipMelee()
 	if (!(PlayerAnimInstance->IsAnyMontagePlaying()))
 	{
 		OnVisibilityAmmoTextChanged.Broadcast(false);
+		OnVisibilityWeaponSlotChanged.Broadcast(1);
 		WeaponSystem->EquipMeleeWeapon();
 		CurrentPlayerMode = EPlayerMode::CombatMode;
 		SetPlayerGameMode();
@@ -412,6 +413,7 @@ void ADDCharacterPlayer::EquipRange()
 	if (!(PlayerAnimInstance->IsAnyMontagePlaying()))
 	{
 		OnVisibilityAmmoTextChanged.Broadcast(true);
+		OnVisibilityWeaponSlotChanged.Broadcast(2);
 		WeaponSystem->EquipRangeWeapon();
 		CurrentPlayerMode = EPlayerMode::CombatMode;
 		SetPlayerGameMode();
@@ -500,6 +502,7 @@ void ADDCharacterPlayer::EnterManagementMode()
 		return;
 	}
 	BuildHudNiagaraComponent->SetActive(true);
+	OnVisibilityWeaponSlotChanged.Broadcast(3);
 	CurrentPlayerMode = EPlayerMode::ManagementMode;
 	BuildSystem->StartManageTrace();
 }
@@ -686,7 +689,7 @@ void ADDCharacterPlayer::SetupCharacterWidget(UDDUserWidget* InUserWidget)
 	}
 }
 
-void ADDCharacterPlayer::SetupRifleAmmoText(UDDUserWidget* InUserWidget)
+void ADDCharacterPlayer::SetupWeaponWidget(UDDUserWidget* InUserWidget)
 {
 	ADDWeaponRifle* WeaponRifle = Cast<ADDWeaponRifle>(WeaponSystem->GetCurrentRangeWeaponInstance());
 	if (WeaponRifle && InUserWidget)
@@ -694,11 +697,13 @@ void ADDCharacterPlayer::SetupRifleAmmoText(UDDUserWidget* InUserWidget)
 		UDDMainWidget* MainWidget = Cast<UDDMainWidget>(InUserWidget);
 		if (MainWidget)
 		{
+			MyMainWidget = MainWidget;
 			WeaponRifle->OnLoadedAmmoChanged.AddDynamic(MainWidget, &UDDMainWidget::SetLoadedRifleAmmoText);
 			WeaponRifle->OnUnLoadedAmmoChanged.AddDynamic(MainWidget, &UDDMainWidget::SetUnLoadedRifleAmmoText);
 			MainWidget->SetRifleAmmoText(WeaponRifle->GetLoadedAmmo(), WeaponRifle->GetUnloadedAmmo());
 			MainWidget->SetVisibilityAmmoText(false);
 			OnVisibilityAmmoTextChanged.AddDynamic(MainWidget, &UDDMainWidget::SetVisibilityAmmoText);
+			OnVisibilityWeaponSlotChanged.AddDynamic(MainWidget, &UDDMainWidget::SetWeaponSlotActive);
 		}
 	}
 }

@@ -6,16 +6,22 @@
 
 void UDDMainWidget::SetWaveText(int32 CurrentWave, int32 MaxWave)
 {
-	FString WaveString = FString::Printf(TEXT("Wave %d / %d"), CurrentWave, MaxWave);
+	FString WaveString = FString::Printf(TEXT("%d / %d"), CurrentWave, MaxWave);
 
 	WaveText->SetText(FText::FromString(WaveString));
 }
 
 void UDDMainWidget::SetGoldText(int32 CurrentGold)
 {
-	FString GoldString = FString::Printf(TEXT("Gold : %d"), CurrentGold);
+	// 숫자를 쉼표로 구분된 형식으로 변환
+	FText GoldFormattedText = FText::AsNumber(CurrentGold);
 
-	GoldText->SetText(FText::FromString(GoldString));
+	if (GoldText)
+	{
+		// 텍스트 위젯에 숫자 설정
+		GoldText->SetText(GoldFormattedText);
+	}
+
 }
 
 void UDDMainWidget::SetRifleAmmoText(int32 CurrentLoadedAmmo, int32 CurrentUnLoadedAmmo)
@@ -76,6 +82,47 @@ void UDDMainWidget::SetVisibilityAmmoText(bool IsVisible)
 	{
 		RifleAmmoText->SetVisibility(ESlateVisibility::Hidden);
 	}
+}
+
+void UDDMainWidget::SetWeaponSlotActive(int32 SlotIndex)
+{
+	FName FunctionName;
+
+	switch (SlotIndex)
+	{
+	case 1:
+		FunctionName = TEXT("Active1");
+		break;
+	case 2:
+		FunctionName = TEXT("Active2");
+		break;
+	case 3:
+		FunctionName = TEXT("Active3");
+		break;
+	default:
+		UE_LOG(LogTemp, Warning, TEXT("Invalid SlotIndex: %d"), SlotIndex);
+		return; // 잘못된 슬롯 인덱스이면 종료
+	}
+
+	// FindFunction을 사용하여 해당 함수가 있는지 확인
+	UFunction* Function = WeaponSlot->FindFunction(FunctionName);
+
+	if (Function)
+	{
+		// 필요한 파라미터가 있을 경우, 준비
+		struct FCustomParams
+		{
+			// 여기에 함수에 맞는 파라미터 정의
+		};
+
+		FCustomParams Params;  // 파라미터 초기화
+		WeaponSlot->ProcessEvent(Function, &Params);  // 함수 호출
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Function %s not found on Widget"), *FunctionName.ToString());
+	}
+
 }
 
 void UDDMainWidget::NativeConstruct()

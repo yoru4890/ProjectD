@@ -30,14 +30,13 @@ void ADDPlayerController::ShowMainWidget()
 {
 	
 	auto PlayerWidgetInterface = Cast<IDDCharacterWidgetInterface>(GetPawn());
-	ADDCharacterPlayer* MyCharacter = Cast<ADDCharacterPlayer>(GetPawn());
 
 	ensure(PlayerWidgetInterface);
 	if (PlayerWidgetInterface)
 	{
 		auto TempMainWidget = Cast<UDDMainWidget>(MainWidget);
 		PlayerWidgetInterface->SetupCharacterWidget(TempMainWidget->GetHpBarWidget());
-		PlayerWidgetInterface->SetupRifleAmmoText(TempMainWidget);
+		PlayerWidgetInterface->SetupWeaponWidget(TempMainWidget);
 
 		auto TempPlayerState = Cast<ADDPlayerState>(UGameplayStatics::GetPlayerState(GetWorld(), 0));
 		if (!TempPlayerState->OnGoldChanged.IsBound())
