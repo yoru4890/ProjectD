@@ -224,13 +224,16 @@ public:
 protected:
 
 //Spawn And Die
+public:
+	UFUNCTION(BlueprintCallable)
+	void Spawn();
+
 protected:
 	UPROPERTY()
 	TObjectPtr<UAnimMontage> DieMontage;
 	FTimerHandle SpawnTimer;
 
 	bool IsDie = false;
-	void Spawn();
 	void Die();
 	void FindSpawnPoint();
 	UFUNCTION()

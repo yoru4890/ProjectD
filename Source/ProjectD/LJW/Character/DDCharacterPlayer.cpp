@@ -600,8 +600,12 @@ void ADDCharacterPlayer::SetPlayerGameMode()
 
 void ADDCharacterPlayer::Spawn()
 {
+	FindSpawnPoint();
 	// 캐릭터를 다시 활성화
 	SetActorHiddenInGame(false);
+
+	WeaponAttackEnd();
+	WeaponEndAiming();
 
 	Stat->SetHp(PlayerMaxHp);
 	this->SetActorLocation(SpawnLocation);
@@ -626,22 +630,29 @@ void ADDCharacterPlayer::Die()
 		{
 			PlayerAnimInstance->OnMontageEnded.AddDynamic(this, &ADDCharacterPlayer::OnDieMontageEnded);
 		}
-		FindSpawnPoint();
 	}
 }
 
 void ADDCharacterPlayer::FindSpawnPoint()
 {
-	// Get all actors of class ATargetPoint with the tag "Spawn"
-	AActor* SpawnPoint = UGameplayStatics::GetActorOfClass(GetWorld(), ATargetPoint::StaticClass());
-	SpawnLocation = this->GetActorLocation() + FVector(0, 0, 300.f);
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ATargetPoint::StaticClass(), FoundActors);
 
-	if (SpawnPoint)
+	bool bSpawnPointFound = false;
+
+	for (AActor* Actor : FoundActors)
 	{
-		SpawnLocation = SpawnPoint->GetActorLocation();
+		if (Actor->ActorHasTag("Spawn"))
+		{
+			SpawnLocation = Actor->GetActorLocation();
+			bSpawnPointFound = true;
+			break; // 첫 번째로 찾은 스폰 포인트 사용
+		}
 	}
-	else
+
+	if (!bSpawnPointFound)
 	{
+		SpawnLocation = this->GetActorLocation() + FVector(0, 0, 300.f);
 		UE_LOG(LogTemp, Warning, TEXT("No spawn point found with tag 'Spawn'"));
 	}
 }
