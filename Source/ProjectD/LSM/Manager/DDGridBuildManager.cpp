@@ -125,7 +125,7 @@ const bool ADDGridBuildManager::CanPlaceBuildingAtLocation(const FVector& HitLoc
 				}
 				FVector PointLocation = GridCellMap[TempPoint].WorldLocation;
 				// 점이 평면 위에 있는지 확인
-				if (!IsPointOnSamePlane(PointLocation, StandardPoint, InNormalVector)) {
+				if (!bIsTower && !IsPointOnSamePlane(PointLocation, StandardPoint, InNormalVector)) {
 					return false;
 				}
 

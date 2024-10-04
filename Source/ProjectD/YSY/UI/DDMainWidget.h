@@ -35,6 +35,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetVisibilityAmmoText(bool IsVisible);
 
+	UFUNCTION(BlueprintCallable)
+	void SetWeaponSlotActive(int32 SlotIndex);
+
 
 protected:
     virtual void NativeConstruct() override;
@@ -55,4 +58,7 @@ protected:
 private:
     UPROPERTY(meta = (BindWidget))
     class UDDPlayerHPBarWidget* PlayerHealth;
+
+	UPROPERTY(meta = (BindWidget))
+	UUserWidget* WeaponSlot;
 };
