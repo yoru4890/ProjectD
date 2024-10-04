@@ -5,6 +5,9 @@
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
 #include "Engine/StreamableManager.h"
+#include "Sound/SoundBase.h"
+#include "Components/AudioComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "DDGameInstance.generated.h"
 
 /**
@@ -16,7 +19,10 @@ class PROJECTD_API UDDGameInstance : public UGameInstance
 	GENERATED_BODY()
 
 public:
+	UDDGameInstance();
+
 	virtual void Init() override;
+
 
 	FORCEINLINE class UDDAssetManager* GetAssetManager() const { return AssetManager; }
 
@@ -38,7 +44,14 @@ public:
 
 	FORCEINLINE class UDDDataManager* GetDataManager() const { return DataManager; }
 
+	UFUNCTION(BlueprintCallable)
+	FORCEINLINE class UDDSoundManager* GetSoundManager() const { return SoundManager; }
+
 	void InitializeManagerDelegates();
+
+	//Sound
+
+
 
 private:
 	UPROPERTY(VisibleAnywhere)
@@ -63,4 +76,13 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<class UDDDataManager> DataManager;
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<class UDDSoundManager> SoundManager;
+
+	UPROPERTY(VisibleAnywhere)
+	class UAudioComponent* AudioComp;
+
+	UPROPERTY(EditDefaultsOnly)
+	class USoundBase* SoundTest;
 };

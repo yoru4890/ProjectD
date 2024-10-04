@@ -9,6 +9,12 @@
 #include "YSY/Manager/DDWaveManager.h"
 #include "LSM/Manager/DDProjectileManager.h"
 #include "YSY/Game/DDDataManager.h"
+#include "LJW/Manager/DDSoundManager.h"
+
+UDDGameInstance::UDDGameInstance()
+{
+	
+}
 
 void UDDGameInstance::Init()
 {
@@ -18,18 +24,23 @@ void UDDGameInstance::Init()
 	BuildingManager = NewObject<UDDBuildingManager>(this);
 	ProjectileManager = NewObject<UDDProjectileManager>(this);
 	AssetManager = NewObject<UDDAssetManager>(this);
+	SoundManager = NewObject<UDDSoundManager>(this);
 
 	AssetManager->Initialize();
 	FactoryManager->Initialize();
 	ProjectileManager->Initialize();
 	BuildingManager->Initialize();
+
 	
 	EnemySpawnManager = NewObject<UDDEnemySpawnManager>(this);
 	WaveManager = NewObject<UDDWaveManager>(this);
 
 	WaveManager->Initialize();
 	InitializeManagerDelegates();
+
+	//Sound
 }
+
 
 void UDDGameInstance::InitializeManagerDelegates()
 {
@@ -38,4 +49,8 @@ void UDDGameInstance::InitializeManagerDelegates()
 
 	EnemySpawnManager->OnAddEnemySignature.BindUObject(WaveManager, &UDDWaveManager::AddEnemyNumber);
 	EnemySpawnManager->OnSubEnemySignature.BindUObject(WaveManager, &UDDWaveManager::SubEnemyNumber);
+
 }
+
+
+
