@@ -30,7 +30,7 @@ void UDDGameInstance::Init()
 	FactoryManager->Initialize();
 	ProjectileManager->Initialize();
 	BuildingManager->Initialize();
-	SoundManager->Initialize();
+
 	
 	EnemySpawnManager = NewObject<UDDEnemySpawnManager>(this);
 	WaveManager = NewObject<UDDWaveManager>(this);

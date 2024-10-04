@@ -74,5 +74,16 @@ void UDDSoundManager::StopBGM()
 	if (AudioComponent && AudioComponent->IsPlaying())
 	{
 		AudioComponent->Stop();
+		
 	}
+}
+
+void UDDSoundManager::FadeOutBGM()
+{
+	if (AudioComponent && AudioComponent->IsPlaying())
+	{
+		AudioComponent->FadeOut(3.0f, 0.0f);
+
+	}
+	
 }

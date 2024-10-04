@@ -24,6 +24,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "BGM")
 	void StopBGM();
+
+	UFUNCTION(BlueprintCallable, Category = "BGM")
+	void FadeOutBGM();
 	
 public:
 	
