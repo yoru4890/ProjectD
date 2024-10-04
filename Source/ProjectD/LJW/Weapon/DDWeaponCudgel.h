@@ -19,6 +19,7 @@ class PROJECTD_API ADDWeaponCudgel : public ADDWeaponBase
 public:
 	virtual void SubSkill() override;
 	virtual void Attack() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 private:
 	UFUNCTION()

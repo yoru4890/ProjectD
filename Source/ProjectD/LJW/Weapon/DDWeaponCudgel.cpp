@@ -18,7 +18,7 @@ ADDWeaponCudgel::ADDWeaponCudgel()
 	CollisionCapsule->SetCollisionResponseToChannel(GTCHANNEL_ENEMY, ECollisionResponse::ECR_Overlap);
 	CollisionCapsule->SetRelativeLocation(FVector(0.0f, 0.0f, 50.0f));
 	CollisionCapsule->SetupAttachment(RootComponent);
-	//CollisionCapsule->AddToRoot();
+	CollisionCapsule->AddToRoot();
 	//Begin Overlap
 	CollisionCapsule->OnComponentBeginOverlap.AddDynamic(this, &ADDWeaponCudgel::OnOverlapBegin);
 
@@ -37,6 +37,12 @@ void ADDWeaponCudgel::Attack()
 	Super::Attack();
 	//Cudgel Attack
 	UE_LOG(LogTemp, Warning, TEXT("Attack"));
+}
+
+void ADDWeaponCudgel::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	CollisionCapsule->RemoveFromRoot();
 }
 
 void ADDWeaponCudgel::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)

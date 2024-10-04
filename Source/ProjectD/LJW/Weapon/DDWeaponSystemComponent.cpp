@@ -12,7 +12,7 @@
 #include "LJW/Interface/CameraFOVInterface.h"
 #include "YSY/Game/DDGameInstance.h"
 #include "YSY/Game/DDPlayerState.h"
-
+#include "Math/UnrealMathUtility.h"
 
 
 // Sets default values for this component's properties
@@ -379,6 +379,12 @@ ADDWeaponBase* UDDWeaponSystemComponent::GetCurrentRangeWeaponInstance()
 	}
 	UE_LOG(LogTemp, Warning, TEXT("GetCurrentRangeWeaponInstance error"));
 	return nullptr;
+}
+
+void UDDWeaponSystemComponent::GetAmmo()
+{
+	int32 RandomInt = FMath::RandRange(0, 4);
+	Cast<ADDWeaponRifle>(GetCurrentRangeWeaponInstance())->AddUnloadedRifleAmmo(RandomInt);
 }
 
 
