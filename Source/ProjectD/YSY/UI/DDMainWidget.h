@@ -38,6 +38,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetWeaponSlotActive(int32 SlotIndex);
 
+	UFUNCTION(BlueprintCallable)
+	void SetWaveStartVisible(bool IsVisible);
 
 protected:
     virtual void NativeConstruct() override;
@@ -54,6 +56,9 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr<class UTextBlock> RemainingLivesText;
+
+	UPROPERTY()
+	TObjectPtr<class UTextBlock> WaveStartText;
 
 private:
     UPROPERTY(meta = (BindWidget))

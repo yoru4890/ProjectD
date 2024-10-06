@@ -289,10 +289,10 @@ void UDDBuildingManager::GetSoftObjectPtrsInBuilding(const FName& RowName, TArra
 	}
 
 	// Anim Blueprints
-	for (const TSoftObjectPtr<UAnimBlueprint>& AnimBlueprint : BuildingData->AnimBlueprints)
+	/*for (const TSoftObjectPtr<UAnimBlueprint>& AnimBlueprint : BuildingData->AnimBlueprints)
 	{
 		AssetsToLoad.Add(AnimBlueprint);
-	}
+	}*/
 
 	// Anim Montages
 	for (const TSoftObjectPtr<UAnimMontage>& Montage : BuildingData->AttackMontages)

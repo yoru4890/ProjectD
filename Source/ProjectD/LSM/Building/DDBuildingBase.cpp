@@ -285,13 +285,20 @@ void ADDBuildingBase::SetMeshs(const FDDBuildingBaseData& LoadedAsset)
 	{
 		if (SkeletalMeshComponents.IsValidIndex(index))
 		{
-			if (LoadedAsset.AnimBlueprints.IsValidIndex(index) && LoadedAsset.AnimBlueprints[index].IsValid())
+			//if (LoadedAsset.AnimBlueprints.IsValidIndex(index) && LoadedAsset.AnimBlueprints[index].IsValid())
+			//{
+			//	SkeletalMeshComponents[index]->SetAnimInstanceClass(LoadedAsset.AnimBlueprints[index]->GeneratedClass);
+			//}
+			//else
+			//{
+			//	//UE_LOG(LogTemp, Warning, TEXT("%s : AnimBlueprints not loaded"), RowName);
+			//}
+
+			UClass* AnimInstanceClass = StaticLoadClass(UAnimInstance::StaticClass(), nullptr, *LoadedAsset.AnimBlueprints[index]);
+
+			if (AnimInstanceClass)
 			{
-				SkeletalMeshComponents[index]->SetAnimInstanceClass(LoadedAsset.AnimBlueprints[index]->GeneratedClass);
-			}
-			else
-			{
-				//UE_LOG(LogTemp, Warning, TEXT("%s : AnimBlueprints not loaded"), RowName);
+				SkeletalMeshComponents[index]->SetAnimInstanceClass(AnimInstanceClass);
 			}
 		}
 	}

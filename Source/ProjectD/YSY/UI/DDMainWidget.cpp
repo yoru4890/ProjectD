@@ -127,6 +127,18 @@ void UDDMainWidget::SetWeaponSlotActive(int32 SlotIndex)
 
 }
 
+void UDDMainWidget::SetWaveStartVisible(bool IsVisible)
+{
+	if (IsVisible)
+	{
+		WaveStartText->SetVisibility(ESlateVisibility::Visible);
+	}
+	else
+	{
+		WaveStartText->SetVisibility(ESlateVisibility::Hidden);
+	}
+}
+
 void UDDMainWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
@@ -140,4 +152,5 @@ void UDDMainWidget::NativeConstruct()
 	GoldText = Cast<UTextBlock>(GetWidgetFromName(TEXT("GoldText")));
 	RemainingLivesText = Cast<UTextBlock>(GetWidgetFromName(TEXT("RemainingLivesText")));
 	RifleAmmoText = Cast<UTextBlock>(GetWidgetFromName(TEXT("RifleAmmoText")));
+	WaveStartText = Cast<UTextBlock>(GetWidgetFromName(TEXT("WaveStartKey")));
 }
