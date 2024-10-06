@@ -285,13 +285,24 @@ void ADDBuildingBase::SetMeshs(const FDDBuildingBaseData& LoadedAsset)
 	{
 		if (SkeletalMeshComponents.IsValidIndex(index))
 		{
-			if (LoadedAsset.AnimBlueprints.IsValidIndex(index) && LoadedAsset.AnimBlueprints[index].IsValid())
+			// AnimBlueprint의 경로에서 클래스를 동적으로 로드
+			if (LoadedAsset.AnimBlueprints.IsValidIndex(index) && !LoadedAsset.AnimBlueprints[index].IsNull())
 			{
-				SkeletalMeshComponents[index]->SetAnimInstanceClass(LoadedAsset.AnimBlueprints[index]->GeneratedClass);
+				FString AnimBlueprintPath = LoadedAsset.AnimBlueprints[index].ToSoftObjectPath().ToString() + TEXT("_C");
+				UClass* AnimInstanceClass = StaticLoadClass(UAnimInstance::StaticClass(), nullptr, *AnimBlueprintPath);
+
+				if (AnimInstanceClass)
+				{
+					SkeletalMeshComponents[index]->SetAnimInstanceClass(AnimInstanceClass);
+				}
+				else
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Failed to load AnimInstanceClass from %s"), *AnimBlueprintPath);
+				}
 			}
 			else
 			{
-				//UE_LOG(LogTemp, Warning, TEXT("%s : AnimBlueprints not loaded"), RowName);
+				UE_LOG(LogTemp, Warning, TEXT("AnimBlueprint is not valid at index %d"), index);
 			}
 		}
 	}
