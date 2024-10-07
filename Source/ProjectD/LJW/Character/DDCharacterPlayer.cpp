@@ -682,7 +682,7 @@ void ADDCharacterPlayer::SetupCharacterWidget(UDDUserWidget* InUserWidget)
 	if (HpBarWidget)
 	{
 		// TODO : YSY or LJW Remove MagicNumber. Need to StatComponent
-		//Stat->SetHp(10.0f);
+		Stat->SetHp(100.0f);
 		HpBarWidget->UpdateStat(Stat->GetCurrentHp());
 		HpBarWidget->UpdateHpBar(Stat->GetCurrentHp());
 		Stat->OnHpChanged.AddUObject(HpBarWidget, &UDDPlayerHPBarWidget::UpdateHpBar);

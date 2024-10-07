@@ -49,7 +49,7 @@ void UDDSoundManager::PlayBGM(USoundBase* PlayingBGM)
 {
 	if (AudioComponent == nullptr)
 	{
-		AudioComponent = UGameplayStatics::SpawnSound2D(GetWorld(), PlayingBGM, 1.0f, 1.0f, 0, nullptr, true, true);
+		AudioComponent = UGameplayStatics::SpawnSound2D(GetWorld(), PlayingBGM, 1.0f, 1.0f, 0, nullptr, true, false);
 		AudioComponent->bAutoActivate = false; //자동 재생 비활성화
 	}
 	else
@@ -63,9 +63,12 @@ void UDDSoundManager::PlayBGM(USoundBase* PlayingBGM)
 			}
 
 			//SoundCue 설정 및 재생
+			if (PlayingBGM->IsLooping())
+			{
+				UE_LOG(LogTemp, Warning, TEXT("IsLooping"));
+			}
 			AudioComponent->SetSound(PlayingBGM);
 			AudioComponent->Play();
-			UE_LOG(LogTemp, Warning, TEXT("DDSound3"));
 		}
 	}
 }

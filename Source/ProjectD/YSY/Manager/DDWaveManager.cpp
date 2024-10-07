@@ -30,6 +30,15 @@ UDDWaveManager::UDDWaveManager()
 	}
 
 	FailedWidget = CreateWidget(GetWorld(), FailedWidgetClass);
+
+	static ConstructorHelpers::FClassFinder<UUserWidget> WaveStartWidgetClassRef(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/0000/YSY/Widget/YSY_WBP_WaveStart.YSY_WBP_WaveStart_C'"));
+
+	if (WaveStartWidgetClassRef.Class)
+	{
+		WaveStartWidgetClass = WaveStartWidgetClassRef.Class;
+	}
+
+	WaveStartWidget = CreateWidget(GetWorld(), WaveStartWidgetClass);
 }
 
 void UDDWaveManager::Initialize()
@@ -107,6 +116,8 @@ void UDDWaveManager::InitStage(int32 StageNum)
 		PathGateMappings[TempGatePathMappings[i]].Add(i);
 	}
 
+	auto TempPlayerState = Cast<ADDPlayerState>(UGameplayStatics::GetPlayerState(GetWorld(), 0));
+	TempPlayerState->InitState();
 }
 
 void UDDWaveManager::SetSplines()
@@ -129,7 +140,7 @@ void UDDWaveManager::WaveStart()
 	}
 
 	bIsWaveInProgress = true;
-
+	WaveStartWidget->RemoveFromParent();
 	TotalSpawnEnemyCount = 0;
 
 	GetWorld()->GetTimerManager().SetTimer(WaveTimerHandle, [&]()
@@ -168,7 +179,7 @@ void UDDWaveManager::WaveEnd()
 		StageEnd();
 		return;
 	}
-
+	WaveStartWidget->AddToViewport();
 	OnWaveChangedSignature.Broadcast(CurrentWave, MaxWave);
 
 }
@@ -205,6 +216,7 @@ void UDDWaveManager::StageEnd()
 	TempPlayerController->SetIgnoreMoveInput(true);
 	VictoryWidget->AddToViewport();
 	//TempPlayerController->EnableInput(TempPlayerController);
+	TempPlayerState->SaveGame("SaveFile");
 }
 
 void UDDWaveManager::AddEnemyNumber()

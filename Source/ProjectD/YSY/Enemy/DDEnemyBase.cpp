@@ -88,11 +88,9 @@ void ADDEnemyBase::PostInitializeComponents()
 
 float ADDEnemyBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	if (DamageCauser && DamageCauser->IsA(ACharacter::StaticClass()))
-	{
-		ShowHpBarbyAttack();
-	}
 
+	ShowHpBarbyAttack();
+	
 	const UDamageType* DamageType = DamageEvent.DamageTypeClass.GetDefaultObject();
 
 	float ActualDamage = DamageAmount;
