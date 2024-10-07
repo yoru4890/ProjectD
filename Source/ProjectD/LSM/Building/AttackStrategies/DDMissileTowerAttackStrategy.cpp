@@ -30,7 +30,6 @@ void UDDMissileTowerAttackStrategy::Attack(AActor* TargetEnemy, UStaticMeshCompo
 		{
 			FVector FirePointLocation = FireStaticMesh->GetSocketLocation(SocketName);
 			FRotator FirePointDirection = FireStaticMesh->GetSocketRotation(SocketName);
-			FirePointDirection.Pitch = 85.f;
 			Projectile = ProjectileManager->SpawnProjectile(GetWorld(), ProjectileRowName, FirePointLocation, FirePointDirection, nullptr, nullptr);
 			ADDMissileProjectile*  MissileProjectile = Cast<ADDMissileProjectile>(Projectile);
 			if (MissileProjectile)
