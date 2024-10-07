@@ -10,6 +10,7 @@
 #include "YSY/Interface/AggroTargetInterface.h"
 #include "YSY/Interface/DDCharacterWidgetInterface.h"
 #include "YSY/Interface/DamageInterface.h"
+#include "YSY/Interface/AmmoInterface.h"
 #include "DDCharacterPlayer.generated.h"
 
 
@@ -27,7 +28,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnVisibilityWeaponSlotChanged, int3
 
 
 UCLASS()
-class PROJECTD_API ADDCharacterPlayer : public ADDCharacterBase, public ICameraFOVInterface, public IDDPlayerComponentsAnimInterface, public IAggroTargetInterface, public IDDCharacterWidgetInterface, public IDamageInterface
+class PROJECTD_API ADDCharacterPlayer : public ADDCharacterBase, public ICameraFOVInterface, public IDDPlayerComponentsAnimInterface, public IAggroTargetInterface, public IDDCharacterWidgetInterface, public IDamageInterface, public IAmmoInterface
 {
 	GENERATED_BODY()
 	
@@ -285,4 +286,8 @@ public:
 	virtual void ApplyDamageOverTime(EDotDamageType DamageType, float Time, float TimeInterval, float DamageAmount);
 	virtual void ApplyChainDamage(int DamageAmount, int NumberOfChain);
 	virtual void ApplyDebuff(EDebuffType DebuffType, float Time, float DebuffRate);
+
+// AmmoInterface
+public:
+	virtual void GetAmmo() override;
 };

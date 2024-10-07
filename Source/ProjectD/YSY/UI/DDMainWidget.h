@@ -38,7 +38,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetWeaponSlotActive(int32 SlotIndex);
 
-
 protected:
     virtual void NativeConstruct() override;
 
