@@ -39,6 +39,10 @@ public:
 	const int32& GetMaxWave() const noexcept { return MaxWave; }
 	UFUNCTION(BlueprintCallable)
 	void WaveStart();
+
+	UFUNCTION(BlueprintCallable)
+	void WaveForceEnd();
+
 	void SpawnEnd();
 	void WaveEnd();
 

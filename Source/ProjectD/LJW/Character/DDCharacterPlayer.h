@@ -244,14 +244,14 @@ protected:
 
 // Stat
 public:
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void ResetPlayerState();
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Build, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UDDCharacterStatComponent> Stat;
 
-	float PlayerMaxHp = 10.f;
+	float PlayerMaxHp = 100.f;
 
 // CharacterWidgetInterface
 public:

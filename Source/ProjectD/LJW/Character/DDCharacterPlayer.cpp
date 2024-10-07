@@ -683,6 +683,8 @@ void ADDCharacterPlayer::OnDieMontageEnded(UAnimMontage* Montage, bool bInterrup
 void ADDCharacterPlayer::ResetPlayerState()
 {
 	Stat->SetHp(PlayerMaxHp);
+	CurrentAggroNum = 0;
+	EquipMelee();
 	WeaponSystem->ResetWeaponState();
 }
 
@@ -693,7 +695,7 @@ void ADDCharacterPlayer::SetupCharacterWidget(UDDUserWidget* InUserWidget)
 	if (HpBarWidget)
 	{
 		// TODO : YSY or LJW Remove MagicNumber. Need to StatComponent
-		Stat->SetHp(100.0f);
+		//Stat->SetHp(100.0f);
 		HpBarWidget->UpdateStat(Stat->GetCurrentHp());
 		HpBarWidget->UpdateHpBar(Stat->GetCurrentHp());
 		Stat->OnHpChanged.AddUObject(HpBarWidget, &UDDPlayerHPBarWidget::UpdateHpBar);
@@ -709,12 +711,30 @@ void ADDCharacterPlayer::SetupWeaponWidget(UDDUserWidget* InUserWidget)
 		if (MainWidget)
 		{
 			MyMainWidget = MainWidget;
-			WeaponRifle->OnLoadedAmmoChanged.AddDynamic(MainWidget, &UDDMainWidget::SetLoadedRifleAmmoText);
-			WeaponRifle->OnUnLoadedAmmoChanged.AddDynamic(MainWidget, &UDDMainWidget::SetUnLoadedRifleAmmoText);
+			// WeaponRifle->OnLoadedAmmoChanged에 바인딩된 함수가 있는지 확인
+			if (!WeaponRifle->OnLoadedAmmoChanged.IsAlreadyBound(MainWidget, &UDDMainWidget::SetLoadedRifleAmmoText))
+			{
+				WeaponRifle->OnLoadedAmmoChanged.AddDynamic(MainWidget, &UDDMainWidget::SetLoadedRifleAmmoText);
+			}
+
+			// WeaponRifle->OnUnLoadedAmmoChanged에 바인딩된 함수가 있는지 확인
+			if (!WeaponRifle->OnUnLoadedAmmoChanged.IsAlreadyBound(MainWidget, &UDDMainWidget::SetUnLoadedRifleAmmoText))
+			{
+				WeaponRifle->OnUnLoadedAmmoChanged.AddDynamic(MainWidget, &UDDMainWidget::SetUnLoadedRifleAmmoText);
+			}
 			MainWidget->SetRifleAmmoText(WeaponRifle->GetLoadedAmmo(), WeaponRifle->GetUnloadedAmmo());
 			MainWidget->SetVisibilityAmmoText(false);
-			OnVisibilityAmmoTextChanged.AddDynamic(MainWidget, &UDDMainWidget::SetVisibilityAmmoText);
-			OnVisibilityWeaponSlotChanged.AddDynamic(MainWidget, &UDDMainWidget::SetWeaponSlotActive);
+			// OnVisibilityAmmoTextChanged에 바인딩된 함수가 있는지 확인
+			if (!OnVisibilityAmmoTextChanged.IsAlreadyBound(MainWidget, &UDDMainWidget::SetVisibilityAmmoText))
+			{
+				OnVisibilityAmmoTextChanged.AddDynamic(MainWidget, &UDDMainWidget::SetVisibilityAmmoText);
+			}
+
+			// OnVisibilityWeaponSlotChanged에 바인딩된 함수가 있는지 확인
+			if (!OnVisibilityWeaponSlotChanged.IsAlreadyBound(MainWidget, &UDDMainWidget::SetWeaponSlotActive))
+			{
+				OnVisibilityWeaponSlotChanged.AddDynamic(MainWidget, &UDDMainWidget::SetWeaponSlotActive);
+			}
 		}
 	}
 }

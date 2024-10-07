@@ -265,9 +265,12 @@ void ADDEnemyBase::SplineMove()
 	{
 		return;
 	}
-	FVector Destination = AIMoveRoute->GetSplinePointasWorldPosition(RouteIndex);
-	RouteIndex++;
-	EnemyAIController->MoveToLocation(Destination);
+	if (AIMoveRoute)
+	{
+		FVector Destination = AIMoveRoute->GetSplinePointasWorldPosition(RouteIndex);
+		RouteIndex++;
+		EnemyAIController->MoveToLocation(Destination);
+	}
 }
 
 void ADDEnemyBase::SetAIMoveFinishedDelegate(const FAISplineMoveOnFinishedSignature& InOnSplineMoveFinished)
