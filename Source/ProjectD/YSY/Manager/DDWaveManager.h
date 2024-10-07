@@ -92,4 +92,10 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, Meta = (AllowPrivateAccess = "true"))
 	UUserWidget* FailedWidget;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, Meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class UUserWidget> WaveStartWidgetClass;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Widget, Meta = (AllowPrivateAccess = "true"))
+	UUserWidget* WaveStartWidget;
 };

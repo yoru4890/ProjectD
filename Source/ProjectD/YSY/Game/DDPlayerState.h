@@ -81,6 +81,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Save")
 	void UpdateStageCleared(const int32& CurrentStage, const bool& bIsCleared);
 
+	void InitState();
+
 private:
 	int32 Gold;
 	int32 LikePoint;

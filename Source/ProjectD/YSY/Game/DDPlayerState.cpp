@@ -169,3 +169,8 @@ void ADDPlayerState::UpdateStageCleared(const int32& CurrentStage, const bool& b
 {
 	DDSaveGame->SetStageCleared(CurrentStage, bIsCleared);
 }
+
+void ADDPlayerState::InitState()
+{
+	Gold = 10000;
+}
