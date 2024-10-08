@@ -63,7 +63,7 @@ void UDDEnemyStatComponent::ApplyFast(FTimerHandle& TimerHandle, float Time, flo
 // Need to bind : FOnMovementSpeedChangeSignature OnMovementSpeedChange bind to OwnerActor
 void UDDEnemyStatComponent::UpdateMovementSpeed()
 {
-	MovementSpeedRate = (MovementSlowRate * MovementFastRate);
+	MovementSpeedRate = (1 - MovementSlowRate) * (MovementFastRate);
 	OnMovementSpeedChange.Broadcast(MovementSpeedRate);
 }
 
@@ -99,5 +99,5 @@ void UDDEnemyStatComponent::ApplyDamageReceiveDecrease(FTimerHandle& TimerHandle
 
 void UDDEnemyStatComponent::UpdateDamageReceive()
 {
-	DamageReceiveRate = (DamageReceiveDecreaseRate * DamageReceiveIncreaseRate);
+	DamageReceiveRate = (1+DamageReceiveIncreaseRate)*(DamageReceiveDecreaseRate);
 }

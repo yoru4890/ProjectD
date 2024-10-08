@@ -162,6 +162,12 @@ void UDDWaveManager::WaveStart()
 		}, 1.0f, true, 0.1f);
 }
 
+void UDDWaveManager::WaveForceEnd()
+{
+	GetWorld()->GetTimerManager().ClearTimer(WaveTimerHandle);
+	bIsWaveInProgress = false;
+}
+
 void UDDWaveManager::SpawnEnd()
 {
 	UE_LOG(LogTemp, Warning, TEXT("WaveSpawnEnd"));
