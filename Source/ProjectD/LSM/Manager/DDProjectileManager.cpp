@@ -85,6 +85,10 @@ ADDProjectileBase* UDDProjectileManager::CreateProjectileInstance(const FDDFacto
 void UDDProjectileManager::DestroyProjectile(ADDProjectileBase* Projectile)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Return to Pool Call"));
+	if (!Projectile || Projectile->GetRowName() == NAME_None )
+	{
+		return;
+	}
 	ProjectilePools[Projectile->GetRowName()].Projectiles.Add(Projectile);
 	Projectile->SetActorLocation(FVector(-1000,-1000,-1000));
 	Projectile->SetProjectileState(false);

@@ -47,6 +47,23 @@ void ADDProjectileBase::BeginPlay()
 	
 }
 
+void ADDProjectileBase::BeginDestroy()
+{
+	StopLifeTimeTimer();
+
+	Super::BeginDestroy();
+
+	// 액터가 파괴될 때 타이머를 안전하게 제거
+}
+
+void ADDProjectileBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	// 액터가 게임 플레이에서 종료될 때 타이머 제거
+	StopLifeTimeTimer();
+	Super::EndPlay(EndPlayReason);
+
+}
+
 void ADDProjectileBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -346,12 +363,22 @@ void ADDProjectileBase::OnLifeTimeExpired()
 	}
 	UE_LOG(LogTemp, Error, TEXT("Projectile is Destroyed because of LifeTime"));
 	// 프로젝타일 제거
+
+	if (!IsValid(this))
+	{
+		return;  // PSystem이 유효하지 않거나 이 액터가 이미 파괴된 경우 안전하게 종료
+	}
+
 	ReturnToPool();
 
 }
 
 void ADDProjectileBase::StopLifeTimeTimer()
 {
+	if (!GetWorld())
+	{
+		return;
+	}
 	// 타이머가 설정된 경우 타이머 종료
 	if (GetWorld()->GetTimerManager().IsTimerActive(LifeSpanTimerHandle))
 	{
@@ -361,12 +388,27 @@ void ADDProjectileBase::StopLifeTimeTimer()
 
 void ADDProjectileBase::ReturnToPool()
 {
-	if (!ProjectileManager || bIsInPool)
+	if (!ProjectileManager)
 	{
 		return;
 	}
 
-	ProjectileManager->DestroyProjectile(this);
+	if (bIsInPool)
+	{
+		return;
+	}
+
+	if (!IsValid(this))
+	{
+		return;  // PSystem이 유효하지 않거나 이 액터가 이미 파괴된 경우 안전하게 종료
+	}
+
+
+	// ProjectileManager가 유효한지 확인 후 DestroyProjectile 호출
+	if (ProjectileManager && !IsValid(this))
+	{
+		ProjectileManager->DestroyProjectile(this);
+	}
 	StopLifeTimeTimer();
 }
 

@@ -194,18 +194,33 @@ void ADDMissileProjectile::ApplyRadialDamage()
 
 void ADDMissileProjectile::OnTrailEffectFinished(UNiagaraComponent* PSystem)
 {
+    if (!IsValid(PSystem) || !IsValid(this))
+    {
+        return;  // PSystem이 유효하지 않거나 이 액터가 이미 파괴된 경우 안전하게 종료
+    }
+
     bTrailEffectFinished = true;
     HandleEffectCompletion();
 }
 
 void ADDMissileProjectile::OnExplosionEffectFinished(UNiagaraComponent* PSystem)
 {
+    if (!IsValid(PSystem) || !IsValid(this))
+    {
+        return;  // PSystem이 유효하지 않거나 이 액터가 이미 파괴된 경우 안전하게 종료
+    }
+
     bExplosionEffectFinished = true;
     HandleEffectCompletion();
 }
 
 void ADDMissileProjectile::HandleEffectCompletion()
 {
+    if (!IsValid(this))
+    {
+        return;  // PSystem이 유효하지 않거나 이 액터가 이미 파괴된 경우 안전하게 종료
+    }
+
     if (bTrailEffectFinished && bExplosionEffectFinished)
     {
         ReturnToPool();
