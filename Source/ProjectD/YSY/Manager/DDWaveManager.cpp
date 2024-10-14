@@ -68,6 +68,7 @@ void UDDWaveManager::InitStage(int32 StageNum)
 	RemainingLives = 20;
 	EnemyIndex = 0;
 	TotalSpawnEnemyCount = 0;
+	TotalEnemyCount = 0;
 	SetSplines();
 	OnSetupEnemyPoolSignature.ExecuteIfBound(StageNum);
 
@@ -141,6 +142,7 @@ void UDDWaveManager::WaveStart()
 
 	bIsWaveInProgress = true;
 	WaveStartWidget->RemoveFromParent();
+	TotalEnemyCount = 0;
 	TotalSpawnEnemyCount = 0;
 
 	GetWorld()->GetTimerManager().SetTimer(WaveTimerHandle, [&]()
