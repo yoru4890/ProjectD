@@ -40,7 +40,7 @@ void UDDEnemyStatComponent::ApplySlow(FTimerHandle& TimerHandle, float Time, flo
 
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this]()
 		{
-			MovementSlowRate = 1.0f;
+			MovementSlowRate = 0.f;
 			UpdateMovementSpeed();
 			UE_LOG(LogTemp, Warning, TEXT("SlowEnd"));
 		}
@@ -76,7 +76,7 @@ void UDDEnemyStatComponent::ApplyDamageReceiveIncrease(FTimerHandle& TimerHandle
 
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this]()
 		{
-			DamageReceiveIncreaseRate = 1.0f;
+			DamageReceiveIncreaseRate = 0.f;
 			UpdateDamageReceive();
 			UE_LOG(LogTemp, Warning, TEXT("DamageReceiveIncreaseEnd"));
 		}
