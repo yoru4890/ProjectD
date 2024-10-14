@@ -147,6 +147,16 @@ void ADDEnemyBase::BeginPlay()
 	OnSetVisibleHpBarDelegate.ExecuteIfBound(false);
 }
 
+void ADDEnemyBase::BeginDestroy()
+{
+	Super::BeginDestroy();
+
+	if (GetWorld())
+	{
+		GetWorld()->GetTimerManager().ClearTimer(HpBarTH);
+	}
+}
+
 void ADDEnemyBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -690,7 +700,10 @@ void ADDEnemyBase::ShowHpBarbyAttack()
 
 	GetWorld()->GetTimerManager().SetTimer(HpBarTH, [this]()
 		{
-			SetVisibleHpBar(false);
+			if (this && IsValid(this))
+			{
+				SetVisibleHpBar(false);
+			}
 		}, 0.1f, false, 4.0f);
 }
 
